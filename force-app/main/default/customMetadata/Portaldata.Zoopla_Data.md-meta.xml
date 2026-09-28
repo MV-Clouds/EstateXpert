@@ -3,7 +3,7 @@
     <label>Zoopla Data</label>
     <protected>false</protected>
     <values>
-        <field>Portal_Record__c</field>
+        <field>MVEX__Portal_Record__c</field>
         <value xsi:type="xsd:string">[
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
@@ -20,7 +20,7 @@
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
     &quot;Listing_Field_API_Name__c&quot;: null,
-    &quot;Portal_Field_Description__c&quot;: &quot;A description of the estate agent&apos;s administration fees.&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;A description of the estate agent's administration fees.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;£10 per person.&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
     &quot;Required__c&quot;: false,
@@ -41,7 +41,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Bedrooms__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: null,
     &quot;Portal_Field_Description__c&quot;: &quot;The number of vacant bedrooms being offered in shared accommodation. Note that if supplying this attribute, shared_accommodation must be present and true, although the relationship is asymmetric&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;2&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
@@ -52,7 +52,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;Date&quot;,
     &quot;Data_Type__c&quot;: &quot;Datetime&quot;,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Available_From__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: null,
     &quot;Portal_Field_Description__c&quot;: &quot;The earliest date that a property can be moved into by the new owner/tenant.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;2010-01-31; 2010-01-31T12:00:00&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
@@ -74,7 +74,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Bathrooms__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Bathrooms__c&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;The number of bathrooms (or shower rooms) within the property.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;1; 3&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
@@ -151,12 +151,12 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Property_Category__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Property_Category__c&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;Whether the property is commercial or residential.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;commercial, residential&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
     &quot;Required__c&quot;: true,
-    &quot;Value_Mapping__c&quot;: &quot;Residential =&gt; residential,Commercial =&gt; commercial&quot;,
+    &quot;Value_Mapping__c&quot;: &quot;Residential => residential,Commercial => commercial&quot;,
     &quot;Name&quot;: &quot;category&quot;
   },
   {
@@ -218,7 +218,7 @@
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
     &quot;Listing_Field_API_Name__c&quot;: null,
-    &quot;Portal_Field_Description__c&quot;: &quot;a list of notable materials involved in the building&apos;s construction&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;a list of notable materials involved in the building's construction&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;brick, concrete, thatched roof&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
     &quot;Required__c&quot;: false,
@@ -294,7 +294,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Description__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Description__c&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;The main text for the description.&quot;,
     &quot;Portal_Field_Example__c&quot;: null,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
@@ -305,7 +305,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Address__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: null,
     &quot;Portal_Field_Description__c&quot;: &quot;The address string to be displayed on the website. Please note that the display of this string is subject to our data validation and presentation rules and that this attribute is likely to be deprecated in future versions of this API.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;Barker Road, Sutton Coldfield, Birmingham&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
@@ -405,7 +405,7 @@
     &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
     &quot;Data_Type__c&quot;: null,
     &quot;Listing_Field_API_Name__c&quot;: null,
-    &quot;Portal_Field_Description__c&quot;: &quot;Whether ownership of the property also grants the owner the right to fish in waters that cross the property&apos;s borders.&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;Whether ownership of the property also grants the owner the right to fish in waters that cross the property's borders.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;true&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
     &quot;Required__c&quot;: false,
@@ -415,7 +415,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Floor__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: null,
     &quot;Portal_Field_Description__c&quot;: &quot;The total number of floors that the property occupies.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;2&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
@@ -428,7 +428,7 @@
     &quot;Data_Type__c&quot;: null,
     &quot;Listing_Field_API_Name__c&quot;: null,
     &quot;Portal_Field_Description__c&quot;: &quot;Which floors the property occupies in a multi-storey building.&quot;,
-    &quot;Portal_Field_Example__c&quot;: &quot;[ground, 1], penthouse, &lt;integers greater than zero&gt;, ground, basement&quot;,
+    &quot;Portal_Field_Example__c&quot;: &quot;[ground, 1], penthouse, <integers greater than zero>, ground, basement&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
     &quot;Required__c&quot;: false,
     &quot;Value_Mapping__c&quot;: null,
@@ -569,12 +569,12 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Status__c&quot;,
-    &quot;Portal_Field_Description__c&quot;: &quot;An indication as to where the listing is in its life cycle, from initial availability, through offers being made, to its legal conclusion.For rent: available -&gt; under_offer -&gt; let_agreed -&gt; let.For sale: available -&gt; under_offer -&gt; sold_subject_to_contract -&gt; sold.&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Status__c&quot;,
+    &quot;Portal_Field_Description__c&quot;: &quot;An indication as to where the listing is in its life cycle, from initial availability, through offers being made, to its legal conclusion.For rent: available -> under_offer -> let_agreed -> let.For sale: available -> under_offer -> sold_subject_to_contract -> sold.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;available, under_offer, sold_subject_to_contract, sold, let_agreed, let,&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
     &quot;Required__c&quot;: true,
-    &quot;Value_Mapping__c&quot;: &quot;Off-Market =&gt; available,Pending =&gt; under_offer,Active =&gt; available,Under Contract =&gt; under_offer,Withdrawn =&gt; available,Sold =&gt; sold_subject_to_contract,Rented =&gt; let_agreed,Expired =&gt; available&quot;,
+    &quot;Value_Mapping__c&quot;: &quot;Off-Market => available,Pending => under_offer,Active => available,Under Contract => under_offer,Withdrawn => available,Sold => sold_subject_to_contract,Rented => let_agreed,Expired => available&quot;,
     &quot;Name&quot;: &quot;life_cycle_status&quot;
   },
   {
@@ -591,7 +591,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Broker_s_Listing_ID__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Broker_s_Listing_ID__c&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;Your unique identifier for the listing. This should be unique across your entire system, not just for its associated branch (i.e. this is the PRIMARY KEY). If your identifiers are based on those submitted by the agent themselves then you may wish to concatenate, with an unambiguous separator, your branch reference and their listing reference to ensure uniqueness (e.g. branch_id|agent_listing_id).&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;5678; dfhd-kjdf-1&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
@@ -679,7 +679,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Country_Code__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Listing_Address__CountryCode__s&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;The ISO 3166-2 (preferred) or ISO 3166-1 alpha-2 country code. Listings for properties in Guernsey, Jersey and the Isle of Man should use the GB country code.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;GB-BIR; US&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
@@ -756,7 +756,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Zip_Postal_Code__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Listing_Address__PostalCode__s&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;The postal area code issued by the primary postal service in the country. For example, for the UK, this would be Royal Mails postcode; for the US, the United States Postal Services ZIP code.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;B19 4JY; 94112&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
@@ -767,7 +767,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;House_Office_No__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Name&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;The public designation of the property.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;15; 14A; Flat B, 41; The Wildings&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
@@ -778,7 +778,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Street__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Listing_Address__Street__s&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;The name of the road on which the property is principally adjacent.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;Barker Road; Chestnut Street&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
@@ -789,7 +789,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;City__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Listing_Address__City__s&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;The nearest large urban area to the property. This is usually included in the propertys postal address and sometimes referred to as post town.Note that this does not imply that the property resides within the boundaries of this urban area (for example, it might be in an outlying village - which would be referenced via the locality).&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;Birmingham; San Francisco&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
@@ -921,7 +921,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;Currency&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Listing_Price__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Listing_Price__c&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;The non-subsidised price of the listing.Note that the price should be quoted in its natural currency (i.e. the currency the vendor/landlord has specified), which is usually the official currency of the country that the property resides in. To be clear: this value should not be the result of a currency conversion.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;100000.00; 250&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
@@ -943,34 +943,34 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Rent_Frequency__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Rent_Frequency__c&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;The frequency with which rent is required to be paid.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;per_person_per_week,per_week,per_month,per_quarter,per_year&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
     &quot;Required__c&quot;: true,
-    &quot;Value_Mapping__c&quot;: &quot;Monthly =&gt; per_month,Weekly =&gt; per_week,Quarterly =&gt; per_quarter,Yearly =&gt; per_year&quot;,
+    &quot;Value_Mapping__c&quot;: &quot;Monthly => per_month,Weekly => per_week,Quarterly => per_quarter,Yearly => per_year&quot;,
     &quot;Name&quot;: &quot;pricing.rent_frequency&quot;
   },
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Listing_Type__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Listing_Type__c&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;The type of financial transaction for this listing.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;rent,sale&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
     &quot;Required__c&quot;: true,
-    &quot;Value_Mapping__c&quot;: &quot;Sale =&gt; sale,Rent =&gt; rent&quot;,
+    &quot;Value_Mapping__c&quot;: &quot;Sale => sale,Rent => rent&quot;,
     &quot;Name&quot;: &quot;pricing.transaction_type&quot;
   },
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Property_Type__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Property_Type__c&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;The broad architectural type of the property. Please note that a particular property_type is only valid within certain contexts.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;barn_conversion,block_of_flats,bungalow,business_park,chalet,chateau,cottage,country_house,detached,detached_bungalow,end_terrace,equestrian,farm,farmhouse,finca,flat,hotel,houseboat,industrial,land,leisure,light_industrial,link_detached,lodge,longere,maisonette,mews,office,park_home,parking,pub_bar,restaurant,retail,riad,semi_detached,semi_detached_bungalow,studio,terraced,terraced_bungalow,town_house,villa,warehouse&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
     &quot;Required__c&quot;: true,
-    &quot;Value_Mapping__c&quot;: &quot;Apartment =&gt; flat,Townhouse =&gt; town_house,Villa =&gt; villa,Duplex =&gt; maisonette,Penthouse =&gt; flat,Land =&gt; land,Commercial =&gt; retail,Commercial Lease =&gt; office,Commercial Sale =&gt; retail&quot;,
+    &quot;Value_Mapping__c&quot;: &quot;Apartment => flat,Townhouse => town_house,Villa => villa,Duplex => maisonette,Penthouse => flat,Land => land,Commercial => retail,Commercial Lease => office,Commercial Sale => retail&quot;,
     &quot;Name&quot;: &quot;property_type&quot;
   },
   {
@@ -1372,7 +1372,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;Boolean&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: &quot;Share_Accommodation__c&quot;,
+    &quot;Listing_Field_API_Name__c&quot;: null,
     &quot;Portal_Field_Description__c&quot;: &quot;Whether the listing is for shared accommodation (i.e. the listing is for a room, or rooms, within an existing house/flatshare). If this attribute is true, we recommend also supplying the available_bedrooms attribute.&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;true&quot;,
     &quot;Portal_Name__c&quot;: &quot;Zoopla&quot;,
@@ -1515,7 +1515,7 @@
 ]</value>
     </values>
     <values>
-        <field>Portal_Value__c</field>
+        <field>MVEX__Portal_Value__c</field>
         <value xsi:type="xsd:string">Zoopla</value>
     </values>
 </CustomMetadata>

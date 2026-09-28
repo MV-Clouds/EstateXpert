@@ -8,6 +8,7 @@ public class InstagramPostScheduler implements Schedulable {
     public String caption { get; set; }
     public List<String> awsObjectKeys { get; set; }
     public List<String> awsObjectKeysToPreserve { get; set; }
+    public static final String INSTAGRAM_ENDPOINT = System.label.InstagramEndPoint;
     
     public class MediaResponse {
         public String id { get; set; }
@@ -36,7 +37,7 @@ public class InstagramPostScheduler implements Schedulable {
     public static void publishPost(String userId, String creationId, String accessToken, List<String> awsObjectKeys, List<String> awsObjectKeysToPreserve) {
         Http http = new Http();
         HttpRequest publishReq = new HttpRequest();
-        publishReq.setEndpoint('https://graph.instagram.com/v21.0/' + userId + '/media_publish');
+        publishReq.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media_publish');
         publishReq.setMethod('POST');
         publishReq.setHeader('Content-Type', 'application/json');
 

@@ -653,7 +653,7 @@ public with sharing class IntegrationPopupController {
         Http http = new Http();
         HttpRequest req = new HttpRequest();
         req.setMethod('POST');
-        req.setEndpoint('https://oauth2.googleapis.com/token');
+        req.setEndpoint(GMAILENDPOINT + 'token');
         req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
         req.setBody(requestBody);
         req.setTimeout(20000);

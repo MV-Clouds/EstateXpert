@@ -24,8 +24,10 @@ public with sharing class SiteAndBookingController {
             String escapedListingId = String.escapeSingleQuotes(listingId);
             Map<String, Object> result = new Map<String, Object>();
     
-            List<MVEX__Listing__c> listing = [SELECT Id, Name, MVEX__Address__c, MVEX__Listing_Type__c, MVEX__Lot_Size__c, MVEX__Property_Type__c, MVEX__Property_Category__c, MVEX__Bedrooms__c, MVEX__Bathrooms__c, MVEX__Description__c,
-                                        MVEX__Listing_Price__c, MVEX__Property__c, CurrencyIsoCode, MVEX__Listing_Address__c FROM MVEX__Listing__c WHERE Id = :escapedListingId WITH USER_MODE LIMIT 1];
+            List<MVEX__Listing__c> listing = [SELECT Id, Name, MVEX__Address__c, MVEX__Listing_Type__c, MVEX__Lot_Size__c, MVEX__Property_Type__c, 
+                                                MVEX__Property_Category__c, MVEX__Bedrooms__c, MVEX__Bathrooms__c, MVEX__Description__c, MVEX__Listing_Price__c, 
+                                                MVEX__Property__c, CurrencyIsoCode, MVEX__Listing_Address__c FROM MVEX__Listing__c WHERE Id = :escapedListingId 
+                                                WITH USER_MODE LIMIT 1];
     
             List<MVEX__Property_File__c> propertyFiles = new List<MVEX__Property_File__c>();
             Set<Id> contactIds = new Set<Id>();
@@ -37,12 +39,8 @@ public with sharing class SiteAndBookingController {
             }
 
             // Also retrieve Inquiries connected via the Listing Inquiry junction object
-            List<MVEX__Listing_Inquiry__c> junctionInquiries = [
-                SELECT MVEX__Inquiry__r.MVEX__Contact__c 
-                FROM MVEX__Listing_Inquiry__c 
-                WHERE MVEX__Listing__c = :escapedListingId 
-                WITH USER_MODE
-            ];
+            List<MVEX__Listing_Inquiry__c> junctionInquiries = [SELECT MVEX__Inquiry__r.MVEX__Contact__c FROM MVEX__Listing_Inquiry__c 
+                                                                WHERE MVEX__Listing__c = :escapedListingId WITH USER_MODE];
             for (MVEX__Listing_Inquiry__c junction : junctionInquiries) {
                 if (junction.MVEX__Inquiry__r != null && junction.MVEX__Inquiry__r.MVEX__Contact__c != null) {
                     contactIds.add(junction.MVEX__Inquiry__r.MVEX__Contact__c);
@@ -59,14 +57,9 @@ public with sharing class SiteAndBookingController {
             // Fetch the most recent Showing Event per Buyer
             Map<Id, Event> contactToEvent = new Map<Id, Event>();
             if (!contactIds.isEmpty()) {
-                List<Event> showingEvents = [
-                    SELECT Id, MVEX__Buyer__c, MVEX__Status__c, MVEX__Scheduled_Date__c, MVEX__Reschedule_Date__c, MVEX__Communication_Method__c
-                    FROM Event
-                    WHERE MVEX__Buyer__c IN :contactIds
-                      AND MVEX__Listing__c = :escapedListingId
-                      AND RecordTypeId = :showingRecordTypeId
-                    ORDER BY CreatedDate DESC
-                ];
+                List<Event> showingEvents = [SELECT Id, MVEX__Buyer__c, MVEX__Status__c, MVEX__Scheduled_Date__c, MVEX__Reschedule_Date__c, MVEX__Communication_Method__c
+                                                FROM Event WHERE MVEX__Buyer__c IN :contactIds AND MVEX__Listing__c = :escapedListingId AND RecordTypeId = :showingRecordTypeId
+                                                ORDER BY CreatedDate DESC];
                 for (Event ev : showingEvents) {
                     // Keep only the most recent event per buyer
                     if (!contactToEvent.containsKey(ev.MVEX__Buyer__c)) {
@@ -161,13 +154,9 @@ public with sharing class SiteAndBookingController {
         try {
             // Fetch existing showing Events for these contacts and listing
             Map<Id, Event> existingShowingsMap = new Map<Id, Event>();
-            List<Event> existingShowings = [
-                SELECT Id, MVEX__Buyer__c, MVEX__Listing__c, MVEX__Status__c, MVEX__Scheduled_Date__c, MVEX__Showing_Duration__c
-                FROM Event
-                WHERE MVEX__Buyer__c IN :contactIds
-                  AND MVEX__Listing__c = :listingId
-                  AND RecordTypeId = :showingRecordTypeId
-            ];
+            List<Event> existingShowings = [SELECT Id, MVEX__Buyer__c, MVEX__Listing__c, MVEX__Status__c, MVEX__Scheduled_Date__c, MVEX__Showing_Duration__c
+                                            FROM Event WHERE MVEX__Buyer__c IN :contactIds AND MVEX__Listing__c = :listingId AND RecordTypeId = :showingRecordTypeId
+                                            WITH USER_MODE];
             for (Event s : existingShowings) {
                 existingShowingsMap.put(s.MVEX__Buyer__c, s);
             }
@@ -285,79 +274,14 @@ public with sharing class SiteAndBookingController {
     }
 
     @AuraEnabled
-    public static Map<String, Object> sendWhatsappMessage(String jsonData, String chatId, String showingId, String status) {
-        Map<String, Object> resultMap = new Map<String, Object>{};
-        MVEX__Chat__c chat = new MVEX__Chat__c(Id = chatId);
-        try {
-            HttpRequest httpReq = new HttpRequest();
-            resultMap.put('errorMessage', null);
-
-            if (wbConfig == null) {
-                chat.MVEX__Message_Status__c = 'Failed';
-                update as user chat;
-                resultMap.put('errorMessage', 'CUSTOM_SETTING_ERROR');
-                resultMap.put('chat', chat);
-                return resultMap;
-            }
-
-            String accessToken = (wbConfig.MVEX__Access_Token_1__c != null ? wbConfig.MVEX__Access_Token_1__c : '') + (wbConfig.MVEX__Access_Token_2__c != null ? wbConfig.MVEX__Access_Token_2__c : '');
-            String endpoint = wbConfig.MVEX__whatsapp_endpoint__c + '/' + wbConfig.MVEX__APIVersion__c + '/' + wbConfig.MVEX__Whatsapp_Phone_Number_Id__c + '/messages';
-            httpReq.setEndpoint(endpoint);
-            httpReq.setMethod('POST');
-            httpReq.setHeader('Content-Type', 'application/json');
-            httpReq.setHeader('Authorization', 'Bearer ' + accessToken);
-            httpReq.setBody(jsonData);
-            Http http = new Http();
-            HttpResponse response = http.send(httpReq);
-            Integer statusCode = response.getStatusCode();
-            System.debug('status Code: ' + statusCode);
-            if (response != null && statusCode == 200) {
-                String responseBody = response.getBody();
-                Map<String, Object> jsonMap = (Map<String, Object>)JSON.deserializeUntyped(responseBody);
-                List<Object> messages = (List<Object>)jsonMap.get('messages');
-                Map<String, Object> firstMessage = (Map<String, Object>)messages[0];
-                String whatsAppMessageID = (String) firstMessage.get('id');
-                System.debug('WhatsAppMessageId__c: ' + whatsAppMessageID);
-                System.debug('chatId: ' + chatId);
-                System.debug('showingId: ' + showingId);
-                // Update the chat record
-                chat.MVEX__WhatsAppMessageId__c = whatsAppMessageID;
-                chat.MVEX__Message_Status__c = 'Sent';
-                if (String.isNotBlank(showingId)) {
-                    Event showingToUpdate = new Event(Id = showingId);
-                    showingToUpdate.MVEX__Chat__c = chat.Id;
-                    showingToUpdate.MVEX__Status__c = status == 'Wait' ? 'Waiting For Confirmation' : status;
-                    update showingToUpdate;
-                }
-            } else {
-                chat.MVEX__Message_Status__c = 'Failed';
-                ErrorHandler.insertErrordata(null, 'SiteAndBookingController', 'sendWhatsappMessage', response.getStatusCode() + response.getBody() + ' and error at line 317');
-            }
-
-            resultMap.put('chat', chat);
-        } catch (Exception e) {
-            chat.MVEX__Message_Status__c = 'Failed';
-            ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'sendWhatsappMessage', e.getMessage());
-            resultMap.put('errorMessage', e.getMessage());
-            resultMap.put('chat', chat);
-        }
-        System.debug('chat: ' + chat);
-        update as user chat;
-        return resultMap;
-    }
-
-    @AuraEnabled
     public static List<Map<String, Object>> getShowingsFromToday() {
         try {
             Datetime todayStart = Datetime.newInstance(Date.today(), Time.newInstance(0, 0, 0, 0));
 
-            List<Event> showings = [
-                SELECT Id, MVEX__Status__c, MVEX__Scheduled_Date__c, MVEX__Reschedule_Date__c, MVEX__Buyer__r.Name, MVEX__Listing__r.Name
-                FROM Event
-                WHERE (MVEX__Scheduled_Date__c >= :todayStart OR MVEX__Reschedule_Date__c >= :todayStart)
-                  AND MVEX__Status__c IN ('Waiting For Confirmation', 'Scheduled', 'Rescheduled')
-                  AND RecordTypeId = :showingRecordTypeId
-            ];
+            List<Event> showings = [SELECT Id, MVEX__Status__c, MVEX__Scheduled_Date__c, MVEX__Reschedule_Date__c, MVEX__Buyer__r.Name, MVEX__Listing__r.Name
+                                    FROM Event WHERE (MVEX__Scheduled_Date__c >= :todayStart OR MVEX__Reschedule_Date__c >= :todayStart)
+                                    AND MVEX__Status__c IN ('Waiting For Confirmation', 'Scheduled', 'Rescheduled')AND RecordTypeId = :showingRecordTypeId
+                                    AND Subject != 'Showing Preview' WITH USER_MODE];
 
             List<Map<String, Object>> formattedShowings = new List<Map<String, Object>>();
             for (Event showing : showings) {
@@ -380,8 +304,9 @@ public with sharing class SiteAndBookingController {
 
     @AuraEnabled(cacheable=false)
     public static Map<String,String> previewEmailTemplate(Id showingId, Boolean isReschedule, Id contactId, Id listingId, Datetime scheduleDateTime) {
+        Savepoint sp;
         try {
-            Savepoint sp = Database.setSavepoint();
+            sp = Database.setSavepoint();
             Event showing;
 
             // 1. Create DateTime from passed in scheduleDateTime
@@ -389,12 +314,12 @@ public with sharing class SiteAndBookingController {
 
             // 2. Check if showing exists; if not, create a temporary one
             if (String.isNotBlank(showingId)) {
-                List<Event> existingShowings = [SELECT Id, MVEX__Buyer__c, MVEX__Buyer__r.Email, MVEX__Listing__c FROM Event WHERE Id = :showingId LIMIT 1];
+                List<Event> existingShowings = [SELECT Id, MVEX__Buyer__c, MVEX__Buyer__r.Email, MVEX__Listing__c FROM Event WHERE Id = :showingId WITH USER_MODE LIMIT 1];
                 if (!existingShowings.isEmpty()) {
                     showing = existingShowings[0];
                     if (isReschedule && scheduledDateTime != null) {
                         showing.MVEX__Reschedule_Date__c = scheduledDateTime;
-                        update showing;
+                        update as user showing;
                     }
                 }
             } else if (contactId != null && listingId != null) {
@@ -409,15 +334,18 @@ public with sharing class SiteAndBookingController {
                     MVEX__Showing_Duration__c = 60,
                     EndDateTime = scheduledDateTime.addMinutes(60)
                 );
-                insert showing;
+                insert as user showing;
             }
 
             if (showing == null || showing.Id == null) {
+                if (sp != null) {
+                    Database.rollback(sp);
+                }
                 return null;
             }
 
             // 3. Refresh to get related data
-            showing = [SELECT Id, MVEX__Buyer__c, MVEX__Buyer__r.Email, MVEX__Listing__c FROM Event WHERE Id = :showing.Id LIMIT 1];
+            showing = [SELECT Id, MVEX__Buyer__c, MVEX__Buyer__r.Email, MVEX__Listing__c FROM Event WHERE Id = :showing.Id WITH USER_MODE LIMIT 1];
 
             // 4. Pick the correct EmailTemplate
             String templateName = isReschedule ? 'RescheduleConfirmationEmail_New' : 'Showing_Confirmation_New';
@@ -440,6 +368,9 @@ public with sharing class SiteAndBookingController {
             };
         }
         catch (Exception e) {
+            if (sp != null) {
+                Database.rollback(sp);
+            }
             ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'previewEmailTemplate', e.getMessage());
             return null;
         }
@@ -455,7 +386,7 @@ public with sharing class SiteAndBookingController {
                 Id = showingId,
                 MVEX__Status__c = status
             );
-            update showing;
+            update as user showing;
             return true;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'updateShowingStatus', e.getMessage());

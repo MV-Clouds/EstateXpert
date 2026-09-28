@@ -436,9 +436,9 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                     this[NavigationMixin.Navigate]({
                         type: 'standard__webPage',
                         attributes: {
-                            url: Google_Oauth_URL + 'client_id=' + fieldsData.MVEX__Client_ID__c +
-                                 '&redirect_uri=' + fieldsData.MVEX__Redirect_URI__c +
-                                 '&response_type=code&access_type=offline&prompt=consent&scope=' + Gmail_Send_Scope
+                            url: Google_Oauth_URL + 'client_id=' + clientId +
+                                 '&redirect_uri=' + redirectUri +
+                                 '&response_type=code&access_type=offline&prompt=consent&scope=' + Gmail_Send_Scope + '%20' + GMAIL_SENDING_ENDPOINT + 'auth/userinfo.email'
                         }
                     });
                 })

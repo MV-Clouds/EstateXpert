@@ -1,6 +1,5 @@
 <template>
     <template if:false={isDirectAccess}>
-        <c-custom-timeout ontimeoutmethod={handleTimeout}></c-custom-timeout>
         <template if:true={isLoading}>
             <c-spinner-component></c-spinner-component>
         </template>

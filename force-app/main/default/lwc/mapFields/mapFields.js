@@ -25,7 +25,6 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     @track isDirectAccess = false;
     @track hasChanges = false;
     @track originalDropDownPairs = [];
-    customTimeout;
 
     /**
     * Method Name: dropDownPairsWithIndex
@@ -144,10 +143,6 @@ export default class MapFields extends NavigationMixin(LightningElement) {
                 container.scrollTop = container.scrollHeight;
             }
             this.isScroll = false;
-        }
-
-        if (!this.customTimeout) {
-            this.customTimeout = this.template.querySelector('c-custom-timeout');
         }
     }
 
@@ -621,38 +616,20 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     handleDefaults() {
         try {
             this.isLoading = true;
-            const timeoutCmp = this.customTimeout || this.template.querySelector('c-custom-timeout');
-            if (timeoutCmp) {
-                timeoutCmp.setCustomTimeoutMethod(() => {
-                    try {
-                        this.buildDefaultMappings();
-                        this.checkForChanges();
-                        this.showToast('Info', 'Default field mappings have been loaded', 'info');
-                    } catch (error) {
-                        errorDebugger('MapFields', 'handleDefaults', error, 'warn', 'Error in handleDefaults');
-                    } finally {
-                        this.isLoading = false;
-                    }
-                }, 300);
-            } else {
-                this.buildDefaultMappings();
-                this.checkForChanges();
-                this.showToast('Info', 'Default field mappings have been loaded', 'info');
-                this.isLoading = false;
-            }
+            setTimeout(() => {
+                try {
+                    this.buildDefaultMappings();
+                    this.checkForChanges();
+                    this.showToast('Info', 'Default field mappings have been loaded', 'info');
+                } catch (error) {
+                    errorDebugger('MapFields', 'handleDefaults', error, 'warn', 'Error in handleDefaults');
+                } finally {
+                    this.isLoading = false;
+                }
+            }, 300);
         } catch (error) {
             this.isLoading = false;
             errorDebugger('MapFields', 'handleDefaults', error, 'warn', 'Error in handleDefaults');
-        }
-    }
-
-    handleTimeout(event) {
-        try {
-            if (event?.detail?.function) {
-                event?.detail?.function();
-            }
-        } catch (error) {
-            errorDebugger('MapFields', 'handleTimeout', error, 'warn', 'Error in handleTimeout');
         }
     }
 

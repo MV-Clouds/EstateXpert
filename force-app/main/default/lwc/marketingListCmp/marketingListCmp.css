@@ -1381,11 +1381,6 @@ input[type=checkbox]::before {
     padding: 10px;
 }
 
-/* Ensure the preview component matches the container width */
-c-template-preview {
-    width: 100%;
-}
-
 .popUpBody {
     flex-grow: 1;
     margin-bottom: 0.5rem;
@@ -1599,11 +1594,6 @@ c-template-preview {
     align-items: center;
     justify-content: center;
     width: 100%;
-}
-
-.preview-box c-template-preview {
-    width: 100%;
-    max-width: 330px;
 }
 
 .preview-placeholder {

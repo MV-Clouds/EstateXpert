@@ -1070,11 +1070,6 @@ span {
     width: 100%;
 }
 
-.preview-box c-template-preview {
-    width: 100%;
-    max-width: 330px;
-}
-
 .preview-placeholder {
     flex: 1;
     display: flex;

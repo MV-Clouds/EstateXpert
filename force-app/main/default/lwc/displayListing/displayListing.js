@@ -16,21 +16,11 @@ import getRecordName from '@salesforce/apex/PropertySearchController.getRecordNa
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
 import FORM_FACTOR from '@salesforce/client/formFactor';
-import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
-import getListingAndTemplates from '@salesforce/apex/TemplateBuilderController.getListingAndTemplates';
-import sendListingEmailWithPDF from '@salesforce/apex/TemplateBuilderController.sendListingEmailWithPDF';
-const CONTACT_ID_FIELD = 'MVEX__Inquiry__c.MVEX__Contact__c';
-const CONTACT_NAME_FIELD = 'MVEX__Inquiry__c.MVEX__Contact__r.Name';
-const CONTACT_EMAIL_FIELD = 'MVEX__Inquiry__c.MVEX__Contact__r.Email';
-const MAX_EMAIL_SUBJECT_LEN = 3000;
-const MAX_EMAIL_BODY_LEN = 32000;
 
 
 export default class DisplayListing extends NavigationMixin(LightningElement) {
     @api recordId;
     @api objectApiName;
-    @wire(getRecord, { recordId: '$recordId', fields: '$inquiryFields' })
-    wiredInquiryRecord;
     @track mapMarkers = [];
     @track totalRecords = 0;
     @track properties = [];
@@ -51,21 +41,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track inquiryRecord = {};
     @track totalListing = [];
     @track conditiontype = 'related';
-    @track selectedMappingId = null;
-    @track emailSelectedListingId = '';
-    @track isEmailModalOpen = false;
-    @track emailAvailableTemplates = [];
-    @track emailSelectedTemplateId = null;
-    @track emailSelectedTemplateName = '';
-    @track emailTemplateDropdownOpen = false;
-    @track emailTemplateSearch = '';
-    @track emailSubject = '';
-    @track emailBody = '';
-    @track emailRecipientId = '';
-    @track emailRecipientName = '';
-    @track emailRecipientEmail = '';
-    @track emailIsSending = false;
-    @track emailVfPageSrc = null;
     @track isShowModal = false;
     @track selectedConditionType = 'Related List';
     @track mappings = [];
@@ -123,12 +98,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         { label: 'No Filter', value: 'none' },
     ];
 
-    get inquiryFields() {
-        if (this.objectName === 'MVEX__Inquiry__c') {
-            return [CONTACT_ID_FIELD, CONTACT_NAME_FIELD, CONTACT_EMAIL_FIELD];
-        }
-        return [];
-    }
 
     get isMobileOrTablet() {
         return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
@@ -421,9 +390,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         });
     }
 
-    get isInquiryObject() {
-        return this.objectName === 'MVEX__Inquiry__c';
-    }
 
     /**
    * Method Name : objectName
@@ -2147,9 +2113,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     */
     disconnectedCallback() {
         window?.globalThis?.removeEventListener('click', this.handleClickOutside);
-        if (typeof window !== 'undefined') {
-            window.removeEventListener('message', this.emailVfMessageHandler);
-        }
     }
 
     openConfigureSettings() {
@@ -2308,358 +2271,4 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             errorDebugger('displaylisting', 'updateSortIcons', error, 'warn', 'Error in updateSortIcons');
         }
     }
-
-    // ══════════════════════════════════════════════════════════════════════════
-    // SEND LISTINGS VIA EMAIL — methods
-    // ══════════════════════════════════════════════════════════════════════════
-
-    /** Derived: filtered template list based on search text */
-    get emailFilteredTemplates() {
-        const q = (this.emailTemplateSearch || '').toLowerCase();
-        return (this.emailAvailableTemplates || []).filter(t =>
-            !q || t.label.toLowerCase().includes(q)
-        );
-    }
-
-    get emailAttachmentChips() {
-        if (!this.emailSelectedListingId) return [];
-        const listing = this.totalListing.find(l => l.id === this.emailSelectedListingId);
-        const name = listing ? (listing.name || this.emailSelectedListingId) : this.emailSelectedListingId;
-        return [{ id: this.emailSelectedListingId, label: name + '.pdf' }];
-    }
-
-    /**
-    * Method Name: handleRowEmailClick
-    * @description: Handles row email icon button click to email a single listing PDF.
-    */
-    handleRowEmailClick(event) {
-        event.stopPropagation();
-        const listingId = event.currentTarget.dataset.id;
-        if (!listingId) return;
-        this.emailSelectedListingId = listingId;
-        this.openEmailModal();
-    }
-
-    /**
-    * Method Name: openEmailModal
-    * @description: Open the email compose modal.
-    *               Fetches PDF templates + pre-fills contact from inquiry.
-    * Date: 17/07/2026
-    */
-    openEmailModal() {
-        if (!this.emailSelectedListingId) {
-            this.showToast('Warning', 'Please select a listing.', 'warning');
-            return;
-        }
-
-        this.isEmailModalOpen = true;
-        this.emailIsSending = false;
-        this.emailSelectedTemplateId = null;
-        this.emailSelectedTemplateName = '';
-        this.emailTemplateSearch = '';
-        this.emailTemplateDropdownOpen = false;
-        this.emailRecipientId = '';
-        this.emailRecipientName = '';
-        this.emailRecipientEmail = '';
-        this.emailVfPageSrc = null;
-
-        // Use the selected listing for template fetch / subject
-        const listingId = this.emailSelectedListingId;
-        const listing = this.totalListing.find(l => l.id === listingId);
-        const listingName = listing ? listing.name : 'Listing';
-
-        let defaultSubject = `Listing Documents – ${listingName}`;
-        if (defaultSubject.length > MAX_EMAIL_SUBJECT_LEN) {
-            defaultSubject = defaultSubject.slice(0, MAX_EMAIL_SUBJECT_LEN);
-        }
-        this.emailSubject = defaultSubject;
-        this.emailBody = `Hi,\n\nPlease find attached the listing document(s) for your reference.\n\nKind regards`;
-
-        // Fetch all PDF templates (listing-object scoped)
-        getListingAndTemplates({ recordId: listingId })
-            .then(result => {
-                if (result && result.templates && result.templates.length > 0) {
-                    this.emailAvailableTemplates = result.templates.map(t => ({
-                        value: t.Id,
-                        label: t.MVEX__Template_Name__c || t.Template_Name__c || t.Id
-                    })).sort((a, b) => a.label.localeCompare(b.label));
-                } else {
-                    this.emailAvailableTemplates = [];
-                }
-            })
-            .catch(err => {
-                errorDebugger('DisplayListing', 'openEmailModal/getListingAndTemplates', err, 'warn', 'Error fetching templates');
-                this.emailAvailableTemplates = [];
-            });
-
-        // Pre-fill recipient from inquiry contact lookup
-        if (this.recordId && this.objectName === 'MVEX__Inquiry__c' && this.wiredInquiryRecord && this.wiredInquiryRecord.data) {
-            const contactId = getFieldValue(this.wiredInquiryRecord.data, CONTACT_ID_FIELD);
-            const contactName = getFieldValue(this.wiredInquiryRecord.data, CONTACT_NAME_FIELD);
-            const contactEmail = getFieldValue(this.wiredInquiryRecord.data, CONTACT_EMAIL_FIELD);
-
-            if (contactEmail) {
-                this.emailRecipientId = contactId || '';
-                this.emailRecipientName = contactName || '';
-                this.emailRecipientEmail = contactEmail || '';
-                
-                // Safely handle null, undefined, or blank names
-                const nameStr = contactName ? String(contactName).trim() : '';
-                const firstName = nameStr ? nameStr.split(' ')[0] : '';
-                const greeting = firstName ? `Hi ${firstName}` : 'Hi';
-                
-                this.emailBody = `${greeting},\n\nPlease find attached the listing document(s) for your reference.\n\nKind regards`;
-            }
-        }
-
-        // Register VF message listener
-        if (typeof window !== 'undefined') {
-            window.removeEventListener('message', this.emailVfMessageHandler);
-            window.addEventListener('message', this.emailVfMessageHandler);
-        }
-    }
-
-    /**
-    * Method Name: closeEmailModal
-    * @description: Close the email compose modal and reset all state.
-    * Date: 17/07/2026
-    */
-    closeEmailModal() {
-        this.isEmailModalOpen = false;
-        this.emailIsSending = false;
-        this.emailVfPageSrc = null;
-        this.emailSelectedListingId = '';
-        if (typeof window !== 'undefined') {
-            window.removeEventListener('message', this.emailVfMessageHandler);
-        }
-    }
-
-    // ── Template picker ───────────────────────────────────────────────────────
-
-    toggleEmailTemplateDropdown(event) {
-        event.stopPropagation();
-        this.emailTemplateDropdownOpen = !this.emailTemplateDropdownOpen;
-        if (this.emailTemplateDropdownOpen) {
-            this.emailTemplateSearch = '';
-        }
-    }
-
-    preventTemplateDropdownClose(event) {
-        event.stopPropagation();
-    }
-
-    stopPickerPropagation(event) {
-        if (event) event.stopPropagation();
-    }
-
-    closeEmailTemplateDropdown() {
-        this.emailTemplateDropdownOpen = false;
-    }
-
-    handleEmailTemplateSearch(event) {
-        this.emailTemplateSearch = event.target.value;
-    }
-
-    handleEmailTemplateSelect(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        const val = event.currentTarget.dataset.value;
-        const tpl = this.emailAvailableTemplates.find(t => t.value === val);
-        if (tpl) {
-            this.emailSelectedTemplateId = tpl.value;
-            this.emailSelectedTemplateName = tpl.label;
-            this.emailTemplateSearch = '';
-        }
-        this.emailTemplateDropdownOpen = false;
-    }
-
-    // ── Email compose fields ──────────────────────────────────────────────────
-
-    get maxEmailSubjectLen() {
-        return MAX_EMAIL_SUBJECT_LEN;
-    }
-
-    get emailSubjectCharsLeft() {
-        return MAX_EMAIL_SUBJECT_LEN - (this.emailSubject ? this.emailSubject.length : 0);
-    }
-
-    get emailSubjectCounterClass() {
-        return this.emailSubjectCharsLeft <= 100 ? 'char-counter char-counter--warn' : 'char-counter';
-    }
-
-    get maxEmailBodyLen() {
-        return MAX_EMAIL_BODY_LEN;
-    }
-
-    get emailBodyCharsLeft() {
-        return MAX_EMAIL_BODY_LEN - (this.emailBody ? this.emailBody.length : 0);
-    }
-
-    get emailBodyCounterClass() {
-        return this.emailBodyCharsLeft <= 200 ? 'char-counter char-counter--warn' : 'char-counter';
-    }
-
-    handleEmailSubjectChange(event) {
-        let val = event.target.value || '';
-        if (val.length > MAX_EMAIL_SUBJECT_LEN) {
-            val = val.slice(0, MAX_EMAIL_SUBJECT_LEN);
-            event.target.value = val;
-        }
-        this.emailSubject = val;
-    }
-
-    handleEmailBodyChange(event) {
-        let val = event.target.value || '';
-        if (val.length > MAX_EMAIL_BODY_LEN) {
-            val = val.slice(0, MAX_EMAIL_BODY_LEN);
-            event.target.value = val;
-        }
-        this.emailBody = val;
-    }
-
-    // ── Send flow (PDF generation) ───────────────────────────────────────────
-
-    /**
-    * Method Name: sendListingsEmail
-    * @description: Validates and starts the send flow.
-    *               Generates PDF via VF iframe, then calls Apex.
-    * Date: 17/07/2026
-    */
-    sendListingsEmail() {
-        if (!this.emailSelectedTemplateId) {
-            this.showToast('Error', 'Please select a PDF Template.', 'error');
-            return;
-        }
-        if (!this.emailRecipientEmail) {
-            this.showToast('Error', 'No recipient contact email found in To field.', 'error');
-            return;
-        }
-        if (!this.emailSubject?.trim()) {
-            this.showToast('Error', 'Please enter a Subject.', 'error');
-            return;
-        }
-        if (this.emailSubject.length > MAX_EMAIL_SUBJECT_LEN) {
-            this.showToast('Error', `Subject must not exceed ${MAX_EMAIL_SUBJECT_LEN.toLocaleString()} characters.`, 'error');
-            return;
-        }
-        if (!this.emailBody?.trim()) {
-            this.showToast('Error', 'Please enter a Message.', 'error');
-            return;
-        }
-        if (this.emailBody.length > MAX_EMAIL_BODY_LEN) {
-            this.showToast('Error', `Message must not exceed ${MAX_EMAIL_BODY_LEN.toLocaleString()} characters.`, 'error');
-            return;
-        }
-
-        this.emailIsSending = true;
-
-        // Verify that the selected template is still available before starting PDF generation
-        getListingAndTemplates({ recordId: this.emailSelectedListingId })
-            .then(result => {
-                const templates = (result && result.templates) ? result.templates : [];
-                const tplExists = templates.some(t => t.Id === this.emailSelectedTemplateId);
-
-                if (!tplExists) {
-                    this.emailIsSending = false;
-                    this.emailAvailableTemplates = templates.map(t => ({
-                        value: t.Id,
-                        label: t.MVEX__Template_Name__c || t.Template_Name__c || t.Id
-                    })).sort((a, b) => a.label.localeCompare(b.label));
-                    this.emailSelectedTemplateId = null;
-                    this.emailSelectedTemplateName = '';
-                    this.showToast('Error', 'Selected template is not available. Please select another template.', 'error');
-                    return;
-                }
-
-                this.emailStartPdfGeneration();
-            })
-            .catch(err => {
-                errorDebugger('DisplayListing', 'sendListingsEmail/getListingAndTemplates', err, 'warn', 'Error verifying template availability');
-                this.emailStartPdfGeneration();
-            });
-    }
-
-    /**
-    * Method Name: emailStartPdfGeneration
-    * @description: Triggers VF page for the selected listing.
-    */
-    emailStartPdfGeneration() {
-        const listingId = this.emailSelectedListingId;
-        const listing = this.totalListing.find(l => l.id === listingId);
-        const listingName = listing ? (listing.name || listingId) : listingId;
-        const fileName = listingName + '.pdf';
-
-        const paraData = JSON.stringify({
-            templateId: this.emailSelectedTemplateId,
-            recordId: listingId,
-            selectedExtension: '.pdf',
-            selectedChannels: 'Files', // Use Files channel to automatically trigger ContentVersion upload in VF
-            fileName
-        });
-
-        this.emailVfPageSrc = null;
-        setTimeout(() => {
-            this.emailVfPageSrc = '/apex/MVEX__DocGeneratePage?paraData=' + encodeURIComponent(paraData);
-        }, 50);
-    }
-
-    /**
-    * Method Name: emailVfMessageHandler
-    * @description: Message handler bound on window — receives Files upload response containing ContentVersion ID from VF page.
-    */
-    emailVfMessageHandler = (message) => {
-        try {
-            if (!message.data || message.data.messageFrom !== 'docGenerate') return;
-            const { completedChannel, status, error, cvId } = message.data;
-
-            // Only respond to Files channel
-            if (completedChannel !== 'Files') return;
-
-            if (!status || !cvId) {
-                this.emailIsSending = false;
-                let errorMsg = error?.message || 'Failed to generate and save PDF file.';
-                const errLower = errorMsg.toLowerCase();
-                if (errLower.includes('template') || errLower.includes('not found') || errLower.includes('deleted') || errLower.includes('does not exist')) {
-                    errorMsg = 'Selected template is not available. Please select another template.';
-                    this.emailSelectedTemplateId = null;
-                    this.emailSelectedTemplateName = '';
-                }
-                this.showToast('Error', errorMsg, 'error');
-                return;
-            }
-
-            this.emailVfPageSrc = null;
-            this.emailDispatchPdf(cvId);
-
-        } catch (err) {
-            errorDebugger('DisplayListing', 'emailVfMessageHandler', err, 'warn', 'Error in VF message handler');
-            this.emailIsSending = false;
-        }
-    }
-
-    emailDispatchPdf(cvId) {
-        sendListingEmailWithPDF({
-            contactId: this.emailRecipientId || null,
-            subject: this.emailSubject,
-            body: this.emailBody,
-            contentVersionId: cvId
-        })
-            .then(result => {
-                this.emailIsSending = false;
-                if (result && result.status === 'success') {
-                    this.showToast('Success', 'Email sent successfully!', 'success');
-                    this.closeEmailModal();
-                    this.emailSelectedListingId = '';
-                } else {
-                    const msg = result?.message || 'An error occurred while sending the email.';
-                    this.showToast('Error', msg, 'error');
-                }
-            })
-            .catch(err => {
-                this.emailIsSending = false;
-                const msg = err?.body?.message || 'An error occurred while sending the email.';
-                this.showToast('Error', msg, 'error');
-            });
-    }
-
 }

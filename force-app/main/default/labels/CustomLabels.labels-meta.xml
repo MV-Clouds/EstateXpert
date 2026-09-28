@@ -1,24 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
     <labels>
-        <fullName>CLAR_Users</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>CLAR Users</shortDescription>
-        <value>{
-  &quot;isProfile&quot;: true,
-  &quot;isRole&quot;: false,
-  &quot;Profiles&quot;: [
-    &quot;System Administrator&quot;
-  ],
-  &quot;Roles&quot;: [
-    &quot;Sales Manager&quot;,
-    &quot;Support Lead&quot;,
-    &quot;Marketing Head&quot;
-  ]
-}</value>
-    </labels>
-    <labels>
         <fullName>EmailMessageEmailService</fullName>
         <language>en_US</language>
         <protected>true</protected>

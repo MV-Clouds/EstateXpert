@@ -3,7 +3,7 @@
     <label>Property Finder</label>
     <protected>false</protected>
     <values>
-        <field>Portal_Record__c</field>
+        <field>MVEX__Portal_Record__c</field>
         <value xsi:type="xsd:string">[
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
@@ -52,7 +52,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
     &quot;Data_Type__c&quot;: &quot;String&quot;,
-    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Bathrooms__c&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;none\&quot; \&quot;1\&quot; \&quot;2\&quot; \&quot;3\&quot; \&quot;4\&quot; \&quot;5\&quot; \&quot;6\&quot; \&quot;7\&quot; \&quot;8\&quot; \&quot;9\&quot; \&quot;10\&quot; \&quot;11\&quot; \&quot;12\&quot; \&quot;13\&quot; \&quot;14\&quot; \&quot;15\&quot; \&quot;16\&quot; \&quot;17\&quot; \&quot;18\&quot; \&quot;19\&quot; \&quot;20\&quot;&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;none&quot;,
     &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
@@ -63,7 +63,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
     &quot;Data_Type__c&quot;: &quot;String&quot;,
-    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Bedrooms__c&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;studio\&quot; \&quot;1\&quot; \&quot;2\&quot; \&quot;3\&quot; \&quot;4\&quot; \&quot;5\&quot; \&quot;6\&quot; \&quot;7\&quot; \&quot;8\&quot; \&quot;9\&quot; \&quot;10\&quot; \&quot;11\&quot; \&quot;12\&quot; \&quot;13\&quot; \&quot;14\&quot; \&quot;15\&quot; \&quot;16\&quot; \&quot;17\&quot; \&quot;18\&quot; \&quot;19\&quot; \&quot;20\&quot;&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;studio&quot;,
     &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
@@ -74,7 +74,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Property_Category__c&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;residential\&quot; \&quot;commercial\&quot;&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;residential&quot;,
     &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
@@ -151,7 +151,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Description__c&quot;,
     &quot;Portal_Field_Description__c&quot;: null,
     &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
     &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
@@ -327,7 +327,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;Currency&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Rental_Price__c&quot;,
     &quot;Portal_Field_Description__c&quot;: null,
     &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
     &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
@@ -338,7 +338,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;Currency&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Listing_Price__c&quot;,
     &quot;Portal_Field_Description__c&quot;: null,
     &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
     &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
@@ -547,7 +547,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;Integer&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Lot_Size__c&quot;,
     &quot;Portal_Field_Description__c&quot;: null,
     &quot;Portal_Field_Example__c&quot;: &quot;0&quot;,
     &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
@@ -591,7 +591,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;Name&quot;,
     &quot;Portal_Field_Description__c&quot;: null,
     &quot;Portal_Field_Example__c&quot;: &quot;string&quot;,
     &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
@@ -602,7 +602,7 @@
   {
     &quot;Allowed_Field_Datatype__c&quot;: &quot;String&quot;,
     &quot;Data_Type__c&quot;: null,
-    &quot;Listing_Field_API_Name__c&quot;: null,
+    &quot;Listing_Field_API_Name__c&quot;: &quot;MVEX__Property_Type__c&quot;,
     &quot;Portal_Field_Description__c&quot;: &quot;Enum: \&quot;compound\&quot; \&quot;whole-building\&quot; \&quot;factory\&quot; \&quot;land\&quot; \&quot;rest-house\&quot; \&quot;apartment\&quot; \&quot;shop\&quot; \&quot;warehouse\&quot; \&quot;chalet\&quot; \&quot;office-space\&quot; \&quot;full-floor\&quot; \&quot;villa\&quot; \&quot;farm\&quot; \&quot;show-room\&quot; \&quot;bulk-sale-unit\&quot; \&quot;restaurant\&quot; \&quot;roof\&quot; \&quot;half-floor\&quot; \&quot;twin-house\&quot; \&quot;cabin\&quot; \&quot;bulk-rent-unit\&quot; \&quot;ivilla\&quot; \&quot;co-working-space\&quot; \&quot;hotel-apartment\&quot; \&quot;retail\&quot; \&quot;duplex\&quot; \&quot;townhouse\&quot; \&quot;staff-accommodation\&quot; \&quot;medical-facility\&quot; \&quot;palace\&quot; \&quot;penthouse\&quot; \&quot;clinic\&quot; \&quot;cafeteria\&quot; \&quot;bungalow\&quot; \&quot;labor-camp\&quot; \&quot;business-center\&quot;&quot;,
     &quot;Portal_Field_Example__c&quot;: &quot;compound&quot;,
     &quot;Portal_Name__c&quot;: &quot;Propertyfinder&quot;,
@@ -635,7 +635,7 @@
 ]</value>
     </values>
     <values>
-        <field>Portal_Value__c</field>
+        <field>MVEX__Portal_Value__c</field>
         <value xsi:type="xsd:string">Propertyfinder</value>
     </values>
 </CustomMetadata>

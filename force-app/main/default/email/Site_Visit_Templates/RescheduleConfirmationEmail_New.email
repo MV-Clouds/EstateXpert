@@ -24,7 +24,7 @@
                         <h2>Showing Rescheduled</h2>
                     </div>
                     <div class="content">
-                        <p>Dear &nbsp;<apex:outputText value="{!recipient.Name}" escape="true"/>,</p>
+                        <p>Dear &nbsp;<apex:outputText value="{!recipient.FirstName}" escape="true"/>,</p>
                         <p>This email is to confirm that your showing for <strong><apex:outputText value="{!relatedTo.MVEX__Listing__r.Name}" escape="true"/></strong> has been successfully rescheduled.</p>
                         
                         <p>Please review your updated appointment details below:</p>

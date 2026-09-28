@@ -5,19 +5,13 @@ import EvoCalendarZip from '@salesforce/resourceUrl/evoCalender';
 import emptyState from '@salesforce/resourceUrl/emptyState';
 import getPropertyAndContactData from '@salesforce/apex/SiteAndBookingController.getPropertyAndContactData';
 import sendEmailsAndCreateShowings from '@salesforce/apex/SiteAndBookingController.sendEmailsAndCreateShowings';
-import createShowings from '@salesforce/apex/SiteAndBookingController.createShowings';
-import sendWhatsappMessage from '@salesforce/apex/SiteAndBookingController.sendWhatsappMessage';
 import getShowingsFromToday from '@salesforce/apex/SiteAndBookingController.getShowingsFromToday';
 import markShowingAsCompleted from '@salesforce/apex/SiteAndBookingController.markShowingAsCompleted';
 import updateShowingStatus from '@salesforce/apex/SiteAndBookingController.updateShowingStatus';
 import updateShowing from '@salesforce/apex/SiteAndBookingController.updateShowing';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getTemplatesByObject from '@salesforce/apex/BroadcastMessageController.getTemplatesByObject';
-// import getTemplateData from '@salesforce/apex/ChatWindowController.getTemplateData';
-// import createChat from '@salesforce/apex/ChatWindowController.createChat';
 import previewEmailTemplate from '@salesforce/apex/SiteAndBookingController.previewEmailTemplate';
-// import hasBusinessAccountId from '@salesforce/apex/PropertySearchController.hasBusinessAccountId';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 import TIME_ZONE from '@salesforce/i18n/timeZone';
 
@@ -47,7 +41,6 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     @track currentContact = {};
     @track currentShowingId = null;
     @track currentContactId = null;
-    @track mobileNumber = null;
 
     @track selectedAction = 'Schedule'; // New state driver
     @track selectedDate = '';
@@ -55,14 +48,8 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     @track selectedDateTime = '';
     @track selectedDuration = '1 Hour';
     @track selectedCommunicationMethod = 'Email';
-    @track selectedTemplate = '';
-    @track hasBusinessAccountConfigured = false;
     @track sortField = 'Name';
     @track sortOrder = 'asc';
-
-    @track templateOptions = [];
-    @track templateMap = new Map();
-    @track selectedObject = 'Event';
 
     // Preview State
     @track previewEmailHtml = '';
@@ -73,19 +60,6 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     scheduleCalendarInitialized = false;
     manageCalendarInitialized = false;
     scriptsLoaded = false;
-
-    // Template/Send State
-    @track templateData;
-    @track isTextHeader;
-    @track isImageHeader;
-    @track isVideoHeader;
-    @track isDocHeader;
-    @track headerBody;
-    @track templateBody;
-    @track footerBody;
-    @track buttonList = [];
-    @track headerParams = [];
-    @track bodyParams = [];
 
     get isMobileOrTablet() {
         return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
@@ -104,21 +78,9 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         ];
     }
 
-    get communicationMethodOptions() {
-        const options = [];
-        if (this.hasBusinessAccountConfigured) {
-            options.push({ label: 'WhatsApp', value: 'WhatsApp' });
-        }
-        options.push({ label: 'Email', value: 'Email' });
-        return options;
-    }
 
     get isContactDataAvailable() {
         return this.contacts && this.contacts.length > 0;
-    }
-
-    get isWhatsAppSelected() {
-        return this.selectedCommunicationMethod === 'WhatsApp';
     }
 
     // Options for the new action-driving combobox
@@ -186,7 +148,6 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     connectedCallback() {
         this.isLoading = true;
-        this.checkBusinessAccountConfig();
         loadScript(this, JQUERY_PATH)
             .then(() => {
                 if (!window.jQuery) { throw new Error('jQuery failed to load'); }
@@ -211,29 +172,6 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             });
     }
 
-    /**
-    * Method Name : checkBusinessAccountConfig
-    * @description : method to check if business account ID is configured in custom metadata
-    * Date: 03/02/2026
-    * Created By: Karan Singh
-    */
-    async checkBusinessAccountConfig() {
-        try {
-            const result = false;
-            this.hasBusinessAccountConfigured = result;
-            // Update default communication method based on configuration
-            if (!result) {
-                this.selectedCommunicationMethod = 'Email';
-            } else {
-                this.selectedCommunicationMethod = 'WhatsApp';
-            }
-        } catch (error) {
-            console.error('Error checking business account configuration:', error);
-            this.hasBusinessAccountConfigured = false;
-            this.selectedCommunicationMethod = 'Email';
-        }
-    }
-
     renderedCallback() {
         if (this.scriptsLoaded) {
             // Initialize "View Schedule" modal calendar
@@ -252,7 +190,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         }
 
         // Render Email Preview Safely
-        if (this.previewEmailHtml && !this.isWhatsAppSelected && this.showManageModal) {
+        if (this.previewEmailHtml && this.showManageModal) {
             const container = this.template.querySelector('.email-preview');
             if (container && container.innerHTML !== this.previewEmailHtml) {
                 container.innerHTML = this.previewEmailHtml;
@@ -306,17 +244,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             });
     }
 
-    loadAllTemplates() {
-        getTemplatesByObject()
-            .then(result => {
-                this.templateMap = new Map(Object.entries(result));
-                this.updateTemplateOptions();
-            })
-            .catch(error => {
-                this.showToast('Error', 'Failed to load templates: ' + error.body?.message, 'error');
-                console.error('Error loadAllTemplates:', error);
-            });
-    }
+
 
     loadAllShowings() {
         this.isLoading = true;
@@ -526,13 +454,9 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     openManageModal(event) {
         try {
             this.loadAllShowings();
-            if (!this.templateMap || this.templateMap.size === 0) {
-                this.loadAllTemplates();
-            }
             this.currentContact = JSON.parse(event.currentTarget.dataset.contact);
             this.currentShowingId = this.currentContact.ShowingId;
             this.currentContactId = this.currentContact.Id;
-            this.mobileNumber = this.currentContact.MobilePhone;
 
             // Set initial action
             const status = this.currentContact.ShowingStatus || 'Not Scheduled';
@@ -546,37 +470,23 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                 this.selectedAction = status;
             }
 
-            // Set initial date/time
-            const scheduleDate = this.currentContact.ScheduleDate ? new Date(this.currentContact.ScheduleDate) : (this.currentContact.RescheduleDate ? new Date(this.currentContact.RescheduleDate) : new Date());
-            // Extract date/time parts in the user's Salesforce profile timezone
+            // Always forward 30 minutes (half hour) from current time when opening the pop-up
+            const forwardDate = new Date(Date.now() + 30 * 60 * 1000);
             const userTZ = this.userTimeZone;
             const dtFormatter = new Intl.DateTimeFormat('en-CA', {
                 year: 'numeric', month: '2-digit', day: '2-digit',
-                hour: '2-digit', minute: '2-digit', hour12: false,
+                hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
                 timeZone: userTZ
             });
-            const parts = dtFormatter.formatToParts(scheduleDate).reduce((acc, p) => { acc[p.type] = p.value; return acc; }, {});
+            const parts = dtFormatter.formatToParts(forwardDate).reduce((acc, p) => { acc[p.type] = p.value; return acc; }, {});
             this.selectedDate = `${parts.year}-${parts.month}-${parts.day}`;
             this.selectedTime = `${parts.hour}:${parts.minute}`; // HH:mm in browser local time
 
-            // Set communication method based on configuration and existing data
-            const savedMethod = this.currentContact.CommunicationMethod;
-            if (savedMethod === 'WhatsApp' && this.hasBusinessAccountConfigured) {
-                this.selectedCommunicationMethod = 'WhatsApp';
-            } else if (savedMethod === 'Email') {
-                this.selectedCommunicationMethod = 'Email';
-            } else {
-                // Default based on configuration
-                this.selectedCommunicationMethod = this.hasBusinessAccountConfigured ? 'WhatsApp' : 'Email';
-            }
-
-            this.selectedTemplate = '';
+            this.selectedCommunicationMethod = 'Email';
             this.previewEmailHtml = '';
             this.previewEmailSubject = '';
 
-            if (this.selectedCommunicationMethod === 'Email') {
-                this.loadEmailPreview();
-            }
+            this.loadEmailPreview();
 
             this.showManageModal = true;
         } catch (e) {
@@ -598,12 +508,10 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         this.currentContact = {};
         this.currentShowingId = null;
         this.currentContactId = null;
-        this.mobileNumber = null;
         this.selectedAction = 'Schedule';
         this.selectedDate = '';
         this.selectedTime = '';
         this.selectedDateTime = '';
-        this.selectedTemplate = '';
         this.previewEmailHtml = '';
     }
 
@@ -611,7 +519,6 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     handleActionChange(event) {
         this.selectedAction = event.target.value;
-        this.selectedTemplate = '';
         this.previewEmailHtml = '';
 
         // Reset calendar initialization state if date/time inputs are shown/hidden
@@ -623,7 +530,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             this.manageCalendarInitialized = false;
         }
 
-        if (this.selectedCommunicationMethod === 'Email' && this.showCommunicationInputs) {
+        if (this.showCommunicationInputs) {
             this.loadEmailPreview();
         }
     }
@@ -653,27 +560,6 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         this.selectedDuration = event.detail.value;
     }
 
-    handleCommunicationMethodChange(event) {
-        this.selectedCommunicationMethod = event.target.value;
-        this.selectedTemplate = '';
-        this.previewEmailHtml = '';
-        this.previewEmailSubject = '';
-        if (this.selectedCommunicationMethod === 'Email' && this.showCommunicationInputs) {
-            this.loadEmailPreview();
-        }
-    }
-
-    handleTemplateChange(event) {
-        this.selectedTemplate = event.target.value;
-        this.handleRefreshClick();
-    }
-
-    handleRefreshClick() {
-        // const childComponent = this.template.querySelector('c-template-preview');
-        // if (childComponent && this.selectedTemplate) {
-        //     childComponent.refreshComponent(this.selectedTemplate);
-        // }
-    }
 
     handleRefreshData() {
         this.isLoading = true;
@@ -750,10 +636,6 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             }
         }
 
-        if (this.showCommunicationInputs && this.isWhatsAppSelected && !this.selectedTemplate) {
-            this.showToast('Error', 'Please select a WhatsApp template.', 'error');
-            return false;
-        }
         return true;
     }
 
@@ -789,31 +671,18 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     executeSchedule() {
         console.log('selected date time: ', this.selectedDateTime);
-        if (this.isWhatsAppSelected) {
-            createShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, durationValue: this.selectedDuration, communicationMethod: this.selectedCommunicationMethod })
-                .then((result) => {
-                    this.currentShowingId = result?.showingIds[0];
-                    this.fetchTemplateData(this.selectedTemplate, () => this.handleSend('Waiting For Confirmation'));
-                })
-                .catch(error => this.handleApexError(error, 'Error creating showing.'));
-        } else {
-            sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, durationValue: this.selectedDuration, communicationMethod: this.selectedCommunicationMethod, isReschedule: false })
-                .then(() => this.handleApexSuccess('Email sent and showing scheduled successfully.'))
-                .catch(error => this.handleApexError(error, 'Error sending email and creating showing.'));
-        }
+        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, durationValue: this.selectedDuration, communicationMethod: this.selectedCommunicationMethod, isReschedule: false })
+            .then(() => this.handleApexSuccess('Email sent and showing scheduled successfully.'))
+            .catch(error => this.handleApexError(error, 'Error sending email and creating showing.'));
     }
 
     executeReschedule() {
         updateShowing({ rescheduleDateTime: this.selectedDateTime, durationValue: this.selectedDuration, showingId: this.currentShowingId, communicationMethod: this.selectedCommunicationMethod })
             .then(result => {
                 if (result) {
-                    if (this.isWhatsAppSelected) {
-                        this.fetchTemplateData(this.selectedTemplate, () => this.handleSend('Rescheduled'));
-                    } else {
-                        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, durationValue: this.selectedDuration, isReschedule: true })
-                            .then(() => this.handleApexSuccess('Email sent and showing rescheduled successfully.'))
-                            .catch(error => this.handleApexError(error, 'Error sending reschedule email.'));
-                    }
+                    sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, durationValue: this.selectedDuration, isReschedule: true })
+                        .then(() => this.handleApexSuccess('Email sent and showing rescheduled successfully.'))
+                        .catch(error => this.handleApexError(error, 'Error sending reschedule email.'));
                 } else {
                     throw new Error('Failed to update showing.');
                 }
@@ -825,13 +694,9 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         updateShowingStatus({ showingId: this.currentShowingId, status: 'Scheduled' })
             .then(result => {
                 if (result) {
-                    if (this.isWhatsAppSelected) {
-                        this.fetchTemplateData(this.selectedTemplate, () => this.handleSend('Scheduled'));
-                    } else {
-                        sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: null, isReschedule: false })
-                            .then(() => this.handleApexSuccess('Confirmation email sent successfully.'))
-                            .catch(error => this.handleApexError(error, 'Error sending confirmation email.'));
-                    }
+                    sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: null, isReschedule: false })
+                        .then(() => this.handleApexSuccess('Confirmation email sent successfully.'))
+                        .catch(error => this.handleApexError(error, 'Error sending confirmation email.'));
                 } else {
                     throw new Error('Failed to update showing status.');
                 }
@@ -923,7 +788,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         if (!showingId) return;
         this[NavigationMixin.Navigate]({
             type: 'standard__recordPage',
-            attributes: { recordId: showingId, objectApiName: 'MVEX__Showing__c', actionName: 'view' }
+            attributes: { recordId: showingId, objectApiName: 'Event', actionName: 'view' }
         });
     }
 
@@ -957,207 +822,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         );
     }
 
-    updateTemplateOptions() {
-        if (!this.selectedObject || this.templateMap.size === 0) {
-            this.templateOptions = [];
-            return;
-        }
-        let combinedTemplates = [];
-        if (this.templateMap.has(this.selectedObject)) {
-            combinedTemplates = [...this.templateMap.get(this.selectedObject)];
-        }
-        if (this.templateMap.has('Generic')) {
-            combinedTemplates = [...combinedTemplates, ...this.templateMap.get('Generic')];
-        }
-        this.templateOptions = combinedTemplates.map(template => ({
-            label: template.MVEX__Template_Name__c,
-            value: template.Id
-        }));
-    }
 
-    // --- WHATSAPP SEND LOGIC (Unchanged) ---
-
-    fetchTemplateData(templateId, callback) {
-        if (!templateId) {
-            this.showToast('Error', 'No template ID provided.', 'error');
-            this.isLoading = false;
-            return;
-        }
-        this.isLoading = true;
-        // getTemplateData({ templateId: templateId, contactId: this.currentShowingId, objectApiName: this.selectedObject })
-        //     .then((templateData) => {
-        //         if (!templateData) {
-        //             this.isLoading = false;
-        //             this.showToast('Error', 'Selected template not found.', 'error');
-        //             return;
-        //         }
-
-        //         this.templateData = templateData.template;
-        //         this.isTextHeader = this.templateData?.MVEX__Header_Type__c === 'Text';
-        //         this.isImageHeader = this.templateData?.MVEX__Header_Type__c === 'Image';
-        //         this.isVideoHeader = this.templateData?.MVEX__Header_Type__c === 'Video';
-        //         this.isDocHeader = this.templateData?.MVEX__Header_Type__c === 'Document';
-        //         const parser = new DOMParser();
-        //         const doc = parser.parseFromString(this.templateData?.MVEX__WBHeader_Body__c || '', 'text/html');
-        //         this.headerBody = doc.documentElement.textContent || '';
-        //         this.templateBody = this.templateData?.MVEX__WBTemplate_Body__c;
-        //         if (this.templateData?.MVEX__Template_Category__c === 'Authentication') {
-        //             // Generate once so preview and payload always show the same code
-        //             if (!this.generatedAuthCode) {
-        //                 this.generatedAuthCode = String(Math.floor(Math.random() * 900000) + 100000);
-        //             }
-        //             this.templateBody = this.generatedAuthCode + ' ' + this.templateBody;
-        //         }
-        //         this.footerBody = this.templateData?.MVEX__WBFooter_Body__c || '';
-        //         if (this.isImageHeader || this.isVideoHeader || this.isDocHeader) {
-        //             const parser1 = new DOMParser();
-        //             const doc1 = parser1.parseFromString(this.headerBody, 'text/html');
-        //             this.headerBody = doc1.documentElement.textContent || '';
-        //         }
-        //         const buttonBody = this.templateData.MVEX__WBButton_Body__c ? JSON.parse(this.templateData.MVEX__WBButton_Body__c) : [];
-        //         this.buttonList = buttonBody.map((buttonLabel, index) => ({
-        //             id: index,
-        //             btntext: buttonLabel.text.trim(),
-        //             btnType: buttonLabel.type,
-        //             iconName: this.getIconName(buttonLabel.type)
-        //         }));
-
-        //         this.headerParams = templateData.headerParams || [];
-        //         this.bodyParams = templateData.bodyParams || [];
-        //         this.isLoading = false;
-        //         if (callback) callback();
-        //     })
-        //     .catch(error => {
-        //         this.isLoading = false;
-        //         this.showToast('Error', 'Failed to fetch template data: ' + error.body?.message, 'error');
-        //         console.error('Error fetchTemplateData:', error);
-        //     });
-    }
-
-    getIconName(btntype) {
-        switch (btntype) {
-            case 'QUICK_REPLY':  return 'utility:reply';
-            case 'PHONE_NUMBER': return 'utility:call';
-            case 'URL':          return 'utility:new_window';
-            case 'COPY_CODE':
-            case 'COUPON_CODE':
-            case 'OTP':          return 'utility:copy';
-            case 'Flow':         return 'utility:file';
-            default:             return 'utility:question';
-        }
-    }
-
-    handleSend(status) {
-        this.isLoading = true;
-        try {
-            createChat({
-                chatData: {
-                    message: '',
-                    templateId: this.selectedTemplate,
-                    messageType: 'template',
-                    recordId: this.currentShowingId,
-                    replyToChatId: null,
-                    phoneNumber: this.mobileNumber
-                }
-            })
-                .then(chat => {
-                    if (chat) {
-                        const buttonValue = this.templateData.MVEX__WBButton_Body__c ? JSON.parse(this.templateData.MVEX__WBButton_Body__c) : '';
-                        const templatePayload = this.createJSONBody(this.mobileNumber, 'template', {
-                            templateName: this.templateData?.MVEX__Template_Name__c,
-                            languageCode: this.templateData?.MVEX__Language__c,
-                            headerImageURL: this.templateData?.MVEX__WBHeader_Body__c,
-                            headerType: this.templateData?.MVEX__Header_Type__c,
-                            headerParameters: this.headerParams,
-                            bodyParameters: this.bodyParams || '',
-                            buttonLabel: this.templateData?.MVEX__Button_Label__c || '',
-                            buttonType: this.templateData?.MVEX__Button_Type__c || '',
-                            buttonValue: buttonValue
-                        });
-                        sendWhatsappMessage({
-                            jsonData: templatePayload,
-                            chatId: chat.Id,
-                            showingId: this.currentShowingId,
-                            status: status
-                        })
-                            .then(result => {
-                                this.dispatchEvent(new CustomEvent('message', { detail: result }));
-                                this.handleApexSuccess('WhatsApp message sent successfully.');
-                            })
-                            .catch(error => this.handleApexError(error, 'Error sending WhatsApp message.'));
-                    } else {
-                        this.isLoading = false;
-                        this.showToast('Error', 'Error creating chat record.', 'error');
-                    }
-                })
-                .catch(error => this.handleApexError(error, 'Error creating chat.'));
-        } catch (error) {
-            this.handleApexError(error, 'Unexpected error while sending message.');
-        }
-    }
-
-    createJSONBody(to, type, data) {
-        try {
-            // Reuse the same code that was shown in the pre-send preview
-            const randomCodeStr = this.generatedAuthCode || String(Math.floor(Math.random() * 900000) + 100000);
-            let payload = {
-                messaging_product: "whatsapp",
-                to: to,
-                type: type,
-                template: { name: data.templateName, language: { code: data.languageCode } }
-            };
-            let components = [];
-            if (data.headerParameters && data.headerParameters.length > 0) {
-                let headerParams = data.headerParameters.map((param) => ({ type: "text", text: param }));
-                components.push({ type: "header", parameters: headerParams });
-            }
-            if (data.headerType === 'Image' && data.headerImageURL) {
-                components.push({ type: "header", parameters: [{ type: "image", image: { link: data.headerImageURL } }] });
-            } else if (data.headerType === 'Document' && data.headerImageURL) {
-                components.push({ type: "header", parameters: [{ type: "document", document: { link: data.headerImageURL } }] });
-            } else if (data.headerType === 'Video' && data.headerImageURL) {
-                components.push({ type: "header", parameters: [{ type: "video", video: { link: data.headerImageURL } }] });
-            }
-            if (data.bodyParameters && data.bodyParameters.length > 0) {
-                let bodyParams = data.bodyParameters.map((param) => ({ type: "text", text: param }));
-                components.push({ type: "body", parameters: bodyParams });
-            } else if (this.templateData.MVEX__Template_Category__c == 'Authentication') {
-                // Reuse the same code shown in the preview
-                const authCode = this.generatedAuthCode || String(Math.floor(Math.random() * 900000) + 100000);
-                components.push({ type: "body", parameters: [{ type: "text", text: authCode }] });
-            }
-            if (data.buttonValue && data.buttonValue.length > 0) {
-                data.buttonValue.map((button, index) => {
-                    switch (button.type.toUpperCase()) {
-                        case "PHONE_NUMBER":
-                            components.push({ type: "button", sub_type: "voice_call", index: index, parameters: [{ type: "text", text: button.phone_number }] });
-                            break;
-                        case "URL": break;
-                        case "QUICK_REPLY": break;
-                        case "FLOW":
-                            components.push({ type: "button", sub_type: "flow", index: index, parameters: [{ type: "payload", payload: "PAYLOAD" }] });
-                            break;
-                        case 'COPY_CODE':
-                        case "COUPON_CODE":
-                            components.push({ type: "button", sub_type: "copy_code", index: index, parameters: [{ type: 'coupon_code', coupon_code: button.example }] });
-                            break;
-                        case "OTP":
-                            if (button.otp_type && button.otp_type.toUpperCase() === "COPY_CODE") {
-                                components.push({ type: "button", sub_type: "url", index: index, parameters: [{ type: 'text', text: randomCodeStr }] });
-                            } else { console.warn(`OTP button at index ${index} missing otp_code parameter.`); return null; }
-                            break;
-                        default: console.warn(`Unknown button type: ${button.type}`); return null;
-                    }
-                }).filter((button) => button !== null);
-            }
-            if (components.length > 0) {
-                payload.template.components = components;
-            }
-            return JSON.stringify(payload);
-        } catch (e) {
-            console.error('Error in function createJSONBody:::', e.message);
-        }
-    }
 
     openShowingInNewTab(event) {
         const showingId = event.currentTarget.dataset.showingId;

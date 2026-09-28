@@ -17,26 +17,18 @@ global without sharing class GoogleLeadsWebhook {
                 return;
             }
 
-            // Retrieve saved Google key from GoogleLeadConfig__c
+            // Retrieve saved Google key from MVEX__GoogleLeadConfig__c
             String savedGoogleKey;
-            List<GoogleLeadConfig__c> configs = [
-                SELECT Google_Lead_Form_Secret__c 
-                FROM GoogleLeadConfig__c
-                LIMIT 1
-            ];
+            List<MVEX__GoogleLeadConfig__c> configs = [SELECT MVEX__Google_Lead_Form_Secret__c FROM MVEX__GoogleLeadConfig__c LIMIT 1];
             if (!configs.isEmpty()) {
-                savedGoogleKey = configs[0].Google_Lead_Form_Secret__c;
+                savedGoogleKey = configs[0].MVEX__Google_Lead_Form_Secret__c;
             }
 
-            // Retrieve field mappings from GoogleLeadFieldMapping__mdt
+            // Retrieve field mappings from MVEX__GoogleLeadFieldMapping__mdt
             String fieldMappingsJson;
-            List<GoogleLeadFieldMapping__mdt> fieldMappingsRecords = [
-                SELECT Field_Mappings__c 
-                FROM GoogleLeadFieldMapping__mdt 
-                LIMIT 1
-            ];
+            List<MVEX__GoogleLeadFieldMapping__mdt> fieldMappingsRecords = [SELECT MVEX__Field_Mappings__c FROM MVEX__GoogleLeadFieldMapping__mdt LIMIT 1];
             if (!fieldMappingsRecords.isEmpty()) {
-                fieldMappingsJson = fieldMappingsRecords[0].Field_Mappings__c;
+                fieldMappingsJson = fieldMappingsRecords[0].MVEX__Field_Mappings__c;
             }
 
             // Validate Google key

@@ -983,73 +983,104 @@
     line-height: 1.5;
     max-width: 400px;
 }
-/* Inactive Listing UI */
-.inactive-listing-container {
-    min-height: 100vh;
+
+/* Empty State / No Property Found UI */
+.exp-no-data-container {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
-    padding: 2rem;
-    border-radius: 12px;
-}
-
-.inactive-content {
-    background: #ffffff;
-    padding: 3rem;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     text-align: center;
-    max-width: 500px;
-    animation: fadeInUp 0.5s ease-out;
+    min-height: 80vh;
+    padding: 3rem 1.5rem;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-.inactive-icon {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 1.5rem;
-    animation: bounce 2s infinite;
+.exp-no-data-container img {
+    width: 220px;
+    height: auto;
+    filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.08));
 }
 
-.inactive-title {
-    font-size: 1.8rem;
-    color: #1a1a1a;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-.inactive-message {
-    font-size: 1.1rem;
-    color: #555555;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-}
-
-.back-btn {
-    background: #0176D3;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 30px;
-    font-size: 1rem;
+.exp-no-data-message {
+    color: #0176D3;
+    font-size: 20px;
     font-weight: 600;
+    margin-top: 1.5rem;
+    text-align: center;
+    letter-spacing: 0.3px;
+    font-family: 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.exp-no-sub-data-message {
+    font-size: 15px;
+    color: #706e6b;
+    font-weight: 400;
+    margin-top: 0.5rem;
+    text-align: center;
+    max-width: 520px;
+    line-height: 1.5;
+    letter-spacing: 0.2px;
+    font-family: 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Toast Notification UI */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 9999;
+    max-width: 400px;
+    animation: toastFadeIn 0.3s ease-in-out;
+}
+
+.toast-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.toast-error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.toast-info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 1rem;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(1, 118, 211, 0.3);
+    color: inherit;
+    line-height: 1;
 }
 
-.back-btn:hover {
-    background: #015ba3;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(1, 118, 211, 0.4);
-}
-
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
+@keyframes toastFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+@media (max-width: 768px) {
+    .toast {
+        top: 10px;
+        right: 10px;
+        max-width: 90%;
+    }
 }
+
+

@@ -3,15 +3,11 @@
     <label>MappingString</label>
     <protected>false</protected>
     <values>
-        <field>Automatic_Sync__c</field>
-        <value xsi:type="xsd:boolean">false</value>
-    </values>
-    <values>
         <field>BlockedFields__c</field>
         <value xsi:type="xsd:string">currencyisocode;recordtypeid;ownerid</value>
     </values>
     <values>
         <field>Mapping_String__c</field>
-        <value xsi:type="xsd:string">MVEX__Rental_Price__c:MVEX__Sale_Price__c;MVEX__Agent__c:MVEX__Master_Property__c;MVEX__Address__c:MVEX__Address__c;MVEX__Account__c:MVEX__Account__c;MVEX__Bathrooms__c:MVEX__Bathrooms__c;MVEX__Application_Fee__c:MVEX__Service_Charge__c</value>
+        <value xsi:type="xsd:string">MVEX__Address__c:MVEX__Address__c;MVEX__Bathrooms__c:MVEX__Bathrooms__c;MVEX__Bedrooms__c:MVEX__Bedrooms__c;MVEX__City__c:MVEX__City__c;MVEX__Commercial_Amenities__c:MVEX__Commercial_Amenities__c;MVEX__Community__c:MVEX__Community__c;MVEX__Completion_Date__c:MVEX__Completion_Date__c;MVEX__Completion_Status__c:MVEX__Completion_Status__c;MVEX__Country__c:MVEX__Country__c;MVEX__Country_Code__c:MVEX__Country_Code__c;MVEX__Description__c:MVEX__Description__c;MVEX__Floor__c:MVEX__Floor__c;MVEX__Furnished__c:MVEX__Furnished__c;MVEX__Latitude__c:MVEX__Latitude__c;MVEX__Longitude__c:MVEX__Longitude__c;MVEX__Lot_Size__c:MVEX__Lot_Size__c;MVEX__Number_of_Cheques__c:MVEX__Number_of_Cheques__c;MVEX__Parking_Spaces__c:MVEX__Parking_Spaces__c;MVEX__Private_Amenities__c:MVEX__Private_Amenities__c;MVEX__Property_Sub_Type__c:MVEX__Property_Sub_Type__c;MVEX__Property_Type__c:MVEX__Property_Type__c;MVEX__Sale_Price__c:MVEX__Sale_Price__c;MVEX__Service_Charge__c:MVEX__Service_Charge__c;MVEX__State__c:MVEX__State__c;MVEX__Street__c:MVEX__Street__c;MVEX__Subcommunity__c:MVEX__Subcommunity__c;Name:Name;MVEX__Units__c:MVEX__Units__c;MVEX__Year_Built__c:MVEX__Year_Built__c;MVEX__Zip_Postal_Code__c:MVEX__Zip_Postal_Code__c</value>
     </values>
 </CustomMetadata>

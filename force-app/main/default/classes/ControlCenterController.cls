@@ -49,34 +49,8 @@ public with sharing class ControlCenterController {
                 }
                 result.objectFields.add(fw);
             }
-
-            String clarUsers = System.Label.CLAR_Users;
-            Map<String, Object> clarUsersMap = (Map<String, Object>)JSON.deserializeUntyped(clarUsers);
-
-            Boolean isProfile = clarUsersMap.containsKey('isProfile') ? (Boolean)clarUsersMap.get('isProfile') : false;
-            Boolean isRole = clarUsersMap.containsKey('isRole') ? (Boolean)clarUsersMap.get('isRole') : false;
-            List<Object> profileNames = clarUsersMap.containsKey('Profiles') ? (List<Object>)clarUsersMap.get('Profiles') : new List<Object>();
-            List<Object> roleNames = clarUsersMap.containsKey('Roles') ? (List<Object>)clarUsersMap.get('Roles') : new List<Object>();
-
-            // Convert List<Object> to List<String>
-            List<String> profiles = new List<String>();
-            for (Object p : profileNames) {
-                profiles.add((String)p);
-            }
-            List<String> roles = new List<String>();
-            for (Object r : roleNames) {
-                roles.add((String)r);
-            }
-
-            String userQuery = 'SELECT Id, Name FROM User WHERE IsActive = true';
-            if (isProfile && !profiles.isEmpty()) {
-                userQuery += ' AND Profile.Name IN :profiles';
-            }
-            if (isRole && !roles.isEmpty()) {
-                userQuery += ' AND UserRole.Name IN :roles';
-            }
-            userQuery += ' WITH USER_MODE ORDER BY Name';
-
+            
+            String userQuery = 'SELECT Id, Name FROM User WHERE IsActive = true WITH USER_MODE ORDER BY Name';
             result.users = Database.query(userQuery);
 
             // Get rules

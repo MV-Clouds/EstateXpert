@@ -17,7 +17,6 @@ public class ListingTriggerHandlerTest {
     static void testAfterInsert_AutomaticSyncOn() {
         // Mocking Metadata: Sync ON
         ListingTriggerHandler.mockMetadata = new MVEX__Mapping_Metadata__mdt(
-            MVEX__Automatic_Sync__c = true,
             MVEX__BlockedFields__c = 'CreatedDate;LastModifiedDate',
             MVEX__Mapping_String__c = 'Name:Name;MVEX__Address__c:MVEX__Address__c'
         );
@@ -68,7 +67,6 @@ public class ListingTriggerHandlerTest {
     static void testAfterInsert_AutomaticSyncOff() {
         // Mocking Metadata: Sync OFF
         ListingTriggerHandler.mockMetadata = new MVEX__Mapping_Metadata__mdt(
-            MVEX__Automatic_Sync__c = false,
             MVEX__BlockedFields__c = 'CreatedDate',
             MVEX__Mapping_String__c = 'Name:Name;MVEX__Address__c:MVEX__Address__c;MVEX__Bedrooms__c:MVEX__Bedrooms__c'
         );
@@ -117,7 +115,6 @@ public class ListingTriggerHandlerTest {
     @isTest
     static void testAfterUpdateDeleteUndelete() {
         ListingTriggerHandler.mockMetadata = new MVEX__Mapping_Metadata__mdt(
-            MVEX__Automatic_Sync__c = false,
             MVEX__BlockedFields__c = 'CreatedDate',
             MVEX__Mapping_String__c = 'Name:Name'
         );

@@ -16,7 +16,8 @@ public with sharing class CreatePortalListingMappingRecords {
     */
     public static String createPortalRecords(String portalName) {
         try {
-            MVEX__Portaldata__mdt portalMetaData = [SELECT MasterLabel, MVEX__Portal_Record__c, MVEX__Portal_Value__c FROM MVEX__Portaldata__mdt WHERE MVEX__Portal_Value__c = :portalName WITH USER_MODE LIMIT 1];
+            MVEX__Portaldata__mdt portalMetaData = [SELECT MasterLabel, MVEX__Portal_Record__c, MVEX__Portal_Value__c FROM MVEX__Portaldata__mdt WHERE 
+                                                        MVEX__Portal_Value__c = :portalName WITH USER_MODE LIMIT 1];
 
             Object jsonObject = JSON.deserializeUntyped(portalMetaData.MVEX__Portal_Record__c);
             if (jsonObject instanceof List<Object>) {
@@ -42,10 +43,10 @@ public with sharing class CreatePortalListingMappingRecords {
 
                     MVEX__Portal_Listing_Mapping__c newRecord = new MVEX__Portal_Listing_Mapping__c();
                     
-                    if (recordData.containsKey('MVEX__Allowed_Field_Datatype__c')) {
+                    if (recordData.containsKey('Allowed_Field_Datatype__c')) {
                         newRecord.MVEX__Allowed_Field_Datatype__c = (String) recordData.get('Allowed_Field_Datatype__c');
                     }
-                    if (recordData.containsKey('MVEX__Data_Type__c')) {
+                    if (recordData.containsKey('Data_Type__c')) {
                         newRecord.MVEX__Data_Type__c = (String) recordData.get('Data_Type__c');
                     }
                     if (recordData.containsKey('Listing_Field_API_Name__c')) {

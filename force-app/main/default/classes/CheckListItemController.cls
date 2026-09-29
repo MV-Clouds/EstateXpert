@@ -42,7 +42,9 @@ public with sharing class CheckListItemController {
         result.fields = new List<FieldWrapper>();
         result.checklist = new List<MVEX__Checklist__c>();
         try {
-            result.checklist = [SELECT Id, Name, MVEX__Field_Name__c, MVEX__Object_Name__c, MVEX__Operator__c, MVEX__Sequence__c, MVEX__Value__c, MVEX__Description__c, MVEX__Data_Type__c FROM MVEX__Checklist__c WHERE MVEX__Object_Name__c = :objectName WITH USER_MODE ORDER BY MVEX__Sequence__c NULLS LAST, Name];
+            result.checklist = [SELECT Id, Name, MVEX__Field_Name__c, MVEX__Object_Name__c, MVEX__Operator__c, MVEX__Sequence__c, MVEX__Value__c, MVEX__Description__c, 
+                                    MVEX__Data_Type__c FROM MVEX__Checklist__c WHERE MVEX__Object_Name__c = :objectName WITH USER_MODE ORDER BY MVEX__Sequence__c 
+                                    NULLS LAST, Name LIMIT 50000];
             
             // Get the object's label
             Schema.DescribeSObjectResult describeSObjectResult = Schema.getGlobalDescribe().get(objectName).getDescribe();
@@ -146,11 +148,12 @@ public with sharing class CheckListItemController {
                 checklistDataToShow.isEditable = true;
             }
 
-            List<MVEX__Checklist__c> checkList = [SELECT Id, Name, MVEX__Field_Name__c, MVEX__Object_Name__c, MVEX__Operator__c, MVEX__Sequence__c, MVEX__Value__c, MVEX__Description__c, MVEX__Data_Type__c
-                                            FROM MVEX__Checklist__c WHERE MVEX__Object_Name__c = :objectName WITH USER_MODE ORDER BY MVEX__Sequence__c NULLS LAST, Name];
+            List<MVEX__Checklist__c> checkList = [SELECT Id, Name, MVEX__Field_Name__c, MVEX__Object_Name__c, MVEX__Operator__c, MVEX__Sequence__c, MVEX__Value__c, 
+                                                    MVEX__Description__c, MVEX__Data_Type__c FROM MVEX__Checklist__c WHERE MVEX__Object_Name__c = :objectName 
+                                                    WITH USER_MODE ORDER BY MVEX__Sequence__c NULLS LAST, Name LIMIT 50000];
 
             List<MVEX__Checklist_Item__c> checklistItem = [SELECT Id, MVEX__Checklist__c, MVEX__Is_Checked__c, MVEX__Record_Id__c FROM MVEX__Checklist_Item__c 
-                                                        WHERE MVEX__Record_Id__c = :recordId WITH USER_MODE];
+                                                            WHERE MVEX__Record_Id__c = :recordId WITH USER_MODE LIMIT 50000];
 
             Schema.SObjectType sObjectType = Schema.getGlobalDescribe().get(objectName);
             if (sObjectType == null) {
@@ -177,7 +180,7 @@ public with sharing class CheckListItemController {
                 wrapper.objectName = item.MVEX__Object_Name__c;
                 wrapper.operator = item.MVEX__Operator__c;
                 wrapper.value = item.MVEX__Value__c;
-                 wrapper.type = item.MVEX__Data_Type__c;
+                wrapper.type = item.MVEX__Data_Type__c;
                 wrapper.completed = false;
                 wrapper.showDropdown = false;
                 wrapper.isDescription = item.MVEX__Description__c != null && item.MVEX__Description__c != '' ? true : false;
@@ -377,7 +380,6 @@ public with sharing class CheckListItemController {
 
     public static boolean changeDateTimeFormat(MVEX__Checklist__c item, Object fieldValue) {
         try {
-            // Strip the 'Z' from the datetime string if present
             String dateTimeString = item.MVEX__Value__c.replace('Z', '');
             Datetime parsedDatetime = Datetime.valueOfGmt(dateTimeString.replace('T', ' '));
             if (fieldValue instanceof Datetime) {

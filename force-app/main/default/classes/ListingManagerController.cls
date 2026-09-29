@@ -303,7 +303,7 @@ public with sharing class ListingManagerController {
     public static String getStaticFields(String objectApiName, String featureName) {
         try {
             MVEX__Configuration_Settings__c config = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c
-                                                        WHERE MVEX__Feature_Name__c = :featureName LIMIT 1];
+                                                        WHERE MVEX__Feature_Name__c = :featureName WITH USER_MODE LIMIT 1];
 
             return config.MVEX__Fields_Data__c;
 
@@ -324,7 +324,7 @@ public with sharing class ListingManagerController {
             MVEX__Configuration_Settings__c config;
 
             List<MVEX__Configuration_Settings__c> existingConfigs = [SELECT Id FROM MVEX__Configuration_Settings__c
-                                                                        WHERE MVEX__Feature_Name__c = :featureName LIMIT 1];
+                                                                        WHERE MVEX__Feature_Name__c = :featureName WITH USER_MODE LIMIT 1];
 
             if (!existingConfigs.isEmpty()) {
                 config = existingConfigs[0];

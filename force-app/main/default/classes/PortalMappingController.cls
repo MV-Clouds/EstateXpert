@@ -110,7 +110,9 @@ public with sharing class PortalMappingController {
 
             List<MVEX__Portal_Listing_Mapping__c> portalListingMap ;
 
-            portalListingMap = [SELECT Id, Name, MVEX__Listing_Field_API_Name__c, MVEX__Portal_Field_Description__c, MVEX__Portal_Field_Example__c, MVEX__Required__c, MVEX__Allowed_Field_Datatype__c FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c =: portalName WITH USER_MODE ORDER BY MVEX__Required__c DESC, Name ASC];
+            portalListingMap = [SELECT Id, Name, MVEX__Listing_Field_API_Name__c, MVEX__Portal_Field_Description__c, MVEX__Portal_Field_Example__c, MVEX__Required__c, 
+                                    MVEX__Allowed_Field_Datatype__c FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c =: portalName WITH USER_MODE 
+                                    ORDER BY MVEX__Required__c DESC, Name ASC LIMIT 50000];
 
             String blockFields = getBlockedFields(portalName);
 
@@ -382,7 +384,9 @@ public with sharing class PortalMappingController {
             String escapePortalName = String.escapeSingleQuotes(portalName);
 
             PropertyPortalWrapper wrapper = (PropertyPortalWrapper)JSON.deserialize(portalWrapper, PropertyPortalWrapper.class);
-            List<MVEX__Portal_Listing_Mapping__c> portalListingMaps = [SELECT Id, MVEX__Listing_Field_API_Name__c, Name FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c =: escapePortalName AND MVEX__Listing_Field_API_Name__c != null WITH USER_MODE];
+            List<MVEX__Portal_Listing_Mapping__c> portalListingMaps = [SELECT Id, MVEX__Listing_Field_API_Name__c, Name FROM MVEX__Portal_Listing_Mapping__c 
+                                                                        WHERE MVEX__Portal_Name__c =: escapePortalName AND MVEX__Listing_Field_API_Name__c != null 
+                                                                        WITH USER_MODE LIMIT 50000];
             Map<String, String> jsonBodyMap = new Map<String, String>();
             String jsonBody = '';
             if(!portalListingMaps.isEmpty()) {
@@ -391,7 +395,7 @@ public with sharing class PortalMappingController {
                 }
                 jsonBody = JSON.serialize(jsonBodyMap);
             } else {
-                // jsonBody = CreatePortalListingMappingRecords.createPortalRecords(portalName);
+                jsonBody = CreatePortalListingMappingRecords.createPortalRecords(portalName);
             }
 
             String portalId;
@@ -666,7 +670,8 @@ public with sharing class PortalMappingController {
         try {
             Set<Id> listingIds = new Set<Id>();
 
-            List<MVEX__PortalListing__c> portalListings = [SELECT Id, MVEX__Listing__c, MVEX__Portal__c FROM MVEX__PortalListing__c WHERE MVEX__Portal__c =: portalId AND MVEX__SystemIsActive__c = True WITH USER_MODE];
+            List<MVEX__PortalListing__c> portalListings = [SELECT Id, MVEX__Listing__c, MVEX__Portal__c FROM MVEX__PortalListing__c WHERE MVEX__Portal__c =: portalId 
+                                                            AND MVEX__SystemIsActive__c = True WITH USER_MODE];
 
             if (portalListings.isEmpty()) {
                 response.status = 'Failed';
@@ -681,7 +686,7 @@ public with sharing class PortalMappingController {
             }
 
             List<MVEX__Listing__c> properties = [SELECT Id, Name, MVEX__Broker_s_Listing_ID__c, MVEX__Listing_Type__c FROM MVEX__Listing__c 
-                                            WHERE Id IN :listingIds WITH USER_MODE ORDER BY Name ASC];
+                                            WHERE Id IN :listingIds WITH USER_MODE ORDER BY Name ASC LIMIT 50000];
             
             // Prepare response
             List<Map<String, Object>> resultData = new List<Map<String, Object>>();

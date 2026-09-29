@@ -1,7 +1,6 @@
 public with sharing class GeminiChatService {
     @AuraEnabled
     public static String sendFeedbackEmail(String subject, String description, String[] images) {
-        // Unchanged from original code
         try {
             String[] toAddresses = Label.supportEmail.split(',');
             String userName = UserInfo.getName();

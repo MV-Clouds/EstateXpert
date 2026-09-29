@@ -144,10 +144,9 @@ public with sharing class CreateOfferFromListingController {
                 offer.MVEX__Status__c = 'Countered';
             } else if (sourceObjectType == 'Listing') {
                 offer.MVEX__First_Offer_Id__c = String.valueOf(offerId);
-                
-                // Get Active Offer RecordType
-                RecordType activeOfferRT = [SELECT Id FROM RecordType WHERE SObjectType = 'MVEX__Offer__c' AND DeveloperName = 'Active' LIMIT 1];
-                
+
+                RecordType activeOfferRT = [SELECT Id FROM RecordType WHERE SObjectType = 'MVEX__Offer__c' AND DeveloperName = 'Active' WITH USER_MODE LIMIT 1];
+
                 if (activeOfferRT != null) {
                     offer.RecordTypeId = activeOfferRT.Id;
                 }

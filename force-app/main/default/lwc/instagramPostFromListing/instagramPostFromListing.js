@@ -810,7 +810,6 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
                     })
                     .promise()
                     .then(response => {
-                        console.log("AWS Upload Response:", response);
                         resolve({
                             key: response.Key,
                             Location: response.Location

@@ -285,13 +285,10 @@ public with sharing class ListingManagerController {
                 baseQuery += ' WHERE ' + filterConditions;
             }
             baseQuery += ' ORDER BY CreatedDate DESC';
-            System.debug('baseQuery: ' + baseQuery);
             
             List<MVEX__Listing__c> listings = Database.query(baseQuery, AccessLevel.USER_MODE);
-            System.debug('Listings retrieved: ' + listings.size());
             return listings;
         } catch (Exception e) {
-            System.debug('Error in getFilteredListings: ' + e.getMessage() + ' at line ' + e.getLineNumber());
             ErrorHandler.insertErrorData(e, 'ListingManagerController', 'getFilteredListings', e.getMessage());
             return new List<MVEX__Listing__c>();
         }

@@ -113,8 +113,6 @@ export default class CheckListStatus extends LightningElement {
             getCheckList({ objectName: this.objectName, recordId: this.recordId })
                 .then(result => {
                     this.checklistItems = JSON.parse(JSON.stringify(result?.checklistData));
-                    console.log('CheckListStatus checklistData:', JSON.stringify(this.checklistItems));
-
                     this.originChecklistItems = JSON.parse(JSON.stringify(result?.checklistData));
                     this.checklistEditable = result.isEditable;
                     this.updateChecklistItems();

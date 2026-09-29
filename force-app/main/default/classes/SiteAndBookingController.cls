@@ -117,7 +117,6 @@ public with sharing class SiteAndBookingController {
             }
             EmailTemplate template = templateList[0];
 
-            System.debug('scheduleDateTime: ' + scheduleDateTime);
             // Create or update showings
             Map<String, Object> showingResult = createShowings(contactIds, listingId, scheduleDateTime, durationValue, communicationMethod);
             List<Id> showingIds = (List<Id>)showingResult.get('showingIds');

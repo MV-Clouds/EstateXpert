@@ -107,8 +107,6 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
 
         getLeadAssignmentInitData({ objectName: 'Contact' })
             .then(data => {
-                console.log('Initialization data received:', data);
-
                 this.fieldOptions = data.objectFields
                     .filter(field => !['ID', 'ADDRESS'].includes(field.dataType))
                     .map(field => ({

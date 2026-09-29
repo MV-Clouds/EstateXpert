@@ -81,13 +81,7 @@ export default class RecordConfigBodyCmp extends LightningElement {
     }
 
     connectedCallback() {
-        loadStyle(this, MulishFontCss)
-            .then(() => {
-                console.log('External Css Loaded');
-            })
-            .catch(error => {
-                console.log('Error loading external css', error);
-            });
+        loadStyle(this, MulishFontCss);
 
         if (this.selectedTabObject) {
             this.fetchMetadata();

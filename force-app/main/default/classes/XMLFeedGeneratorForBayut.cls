@@ -175,7 +175,6 @@ public with sharing class XMLFeedGeneratorForBayut {
 
             xmlstring = '<?xml version="1.0" encoding="UTF-8"?><Properties>' + String.join(propertyXmlBlocks, '') + '</Properties>';
         } catch (Exception e) {
-            System.debug(LoggingLevel.ERROR, 'XMLFeedGenerator Exception: ' + e.getMessage() + ' at line ' + e.getLineNumber());
             String errorMessage = manuallyEscapeXml(e.getMessage());
             if (String.isBlank(errorMessage)) {
                 errorMessage = 'An unknown error occurred.';
@@ -201,7 +200,6 @@ public with sharing class XMLFeedGeneratorForBayut {
             }
             return fieldApiNameToLabelMap;
         } catch (Exception e) {
-            System.debug(LoggingLevel.ERROR, 'getFieldNames Exception: ' + e.getMessage());
             return new Map<String, Map<String, String>>();
         }
     }

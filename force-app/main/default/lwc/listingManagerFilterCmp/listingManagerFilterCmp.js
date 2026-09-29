@@ -113,8 +113,6 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 this.setPicklistValue();
                 this.updateFilterIndices();
                 this.applyFilters();
-                console.log('this.filterFields', JSON.stringify(this.filterFields));
-
                 setTimeout(() => {
                     this.isLoading = false;
                     this.dispatchEvent(new CustomEvent('loading', { detail: false }));
@@ -311,7 +309,6 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 }
             });
             this.updateFilterIndices();
-            console.log('this.filterFields', JSON.stringify(this.filterFields));
         } catch (error) {
             errorDebugger('ListingManagerFilterCmp', 'handleValueSelected', error, 'warn', 'Error in handleValueSelected');
         }
@@ -432,7 +429,6 @@ export default class ListingManagerFilterCmp extends LightningElement {
 
                     if (condition) {
                         queryFilters[index + 1] = condition; // Store at 1-based index (filterFields[0] -> index 1)
-                        console.log(`Filter ${index + 1}: ${condition}`); // Debug each filter condition
                     }
                 }
             });
@@ -441,12 +437,10 @@ export default class ListingManagerFilterCmp extends LightningElement {
             if (this.isCustomLogicEnabled && this.customLogicExpression && !this.customLogicError) {
                 // Use custom logic expression only if filterConditions is true
                 finalQuery = this.customLogicExpression;
-                console.log('Custom Logic Expression:', finalQuery); // Debug custom logic
                 for (let i = 1; i <= this.filterFields.length; i++) {
                     if (queryFilters[i]) {
                         finalQuery = finalQuery.replace(new RegExp(`\\b${i}\\b`, 'g'), queryFilters[i]);
                     } else {
-                        console.warn(`No condition found for filter index ${i} in custom logic. Replacing with TRUE.`);
                         finalQuery = finalQuery.replace(new RegExp(`\\b${i}\\b`, 'g'), 'TRUE');
                     }
                 }
@@ -456,7 +450,6 @@ export default class ListingManagerFilterCmp extends LightningElement {
             } else {
                 // Combine all filters with AND when filterConditions is false or custom logic is disabled
                 finalQuery = queryFilters.filter(Boolean).join(' AND ');
-                console.log('Using AND logic for filters:', finalQuery); // Debug AND logic
             }
 
             if (hasOfferFilters) {
@@ -477,7 +470,6 @@ export default class ListingManagerFilterCmp extends LightningElement {
                         offerConditions = offerFilters.filter(Boolean);
                     }
                     offerQuery = `Id IN (SELECT MVEX__Listing__c FROM MVEX__Offer__c WHERE ${offerConditions.join(' AND ')})`;
-                    console.log('Offer Query:', offerQuery); // Debug offer query
                 }
 
                 const allFilters = [
@@ -1883,7 +1875,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 this.applyFilters();
             }
         } catch (error) {
-            console.log('Error in handleApplyCustomLogic:', error.stack);
+            console.error('Error in handleApplyCustomLogic:', error.stack);
             errorDebugger('ListingManagerFilterCmp', 'handleApplyCustomLogic', error, 'warn', 'Error in handleApplyCustomLogic');
             this.dispatchEvent(
                 new ShowToastEvent({
@@ -1945,7 +1937,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 }
             }
         } catch (error) {
-            console.log('Error in handleCustomLogicToggle:', error.stack);
+            console.error('Error in handleCustomLogicToggle:', error.stack);
             errorDebugger('ListingManagerFilterCmp', 'handleCustomLogicToggle', error, 'warn', 'Error in handleCustomLogicToggle');
         }
     }
@@ -1953,10 +1945,8 @@ export default class ListingManagerFilterCmp extends LightningElement {
     handleCustomLogicChange(event) {
         try {
             this.customLogicExpression = event.target.value;
-            // this.validateCustomLogic();
-            // No validation or filtering here; wait for Apply button click
         } catch (error) {
-            console.log('Error in handleCustomLogicChange:', error.stack);
+            console.error('Error in handleCustomLogicChange:', error.stack);
             errorDebugger('ListingManagerFilterCmp', 'handleCustomLogicChange', error, 'warn', 'Error in handleCustomLogicChange');
         }
     }
@@ -2088,7 +2078,6 @@ export default class ListingManagerFilterCmp extends LightningElement {
 
             this.customLogicError = null;
         } catch (error) {
-            console.log('Error in validateCustomLogic:', error.stack);
             errorDebugger('ListingManagerFilterCmp', 'validateCustomLogic', error, 'warn', 'Error in validateCustomLogic');
             this.customLogicError = 'Error validating custom logic expression.';
         }

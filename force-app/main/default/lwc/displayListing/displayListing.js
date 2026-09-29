@@ -1186,7 +1186,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             } else if (this.conditiontype === 'linked') {
                 this.selectedConditionType = 'Linked Listings';
                 this.pagedFilteredListingData = [...this.totalListing];
-                console.log(this.pagedFilteredListingData.length);
 
                 // Show a message if no linked listings found
                 if (this.pagedFilteredListingData.length === 0) {
@@ -1627,9 +1626,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                     totalPages: 0
                 })
                     .then(result => {
-                        if (result === 'Success') {
-                            console.log('Configuration saved successfully');
-                        } else {
+                        if (result !== 'Success') {
                             this.showToast('Error', 'Failed to save configuration: ' + result, 'error');
                         }
                     })
@@ -1705,9 +1702,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             else if (this.conditiontype === 'related') {
                 this.isLoading = true;
                 const filterType = 'related';
-
-                console.log('fetching related listings');
-
 
                 getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
                     .then(result => {

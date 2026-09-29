@@ -47,7 +47,7 @@ public class InstagramMediaPublisher implements Schedulable {
                 String endpoint = 'https://' + awsBucketName + '.s3.amazonaws.com/';
 
                 List<String> keysToDelete = new List<String>();
-                System.debug('keysToDelete->'+keysToDelete);
+
                 if (awsObjectKeys != null) {
                     for(String objectKey : awsObjectKeys) {
                         if(awsObjectKeysToPreserve == null || !awsObjectKeysToPreserve.contains(objectKey)){

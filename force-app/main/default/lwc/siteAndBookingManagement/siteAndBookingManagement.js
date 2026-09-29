@@ -670,7 +670,6 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     }
 
     executeSchedule() {
-        console.log('selected date time: ', this.selectedDateTime);
         sendEmailsAndCreateShowings({ contactIds: [this.currentContactId], listingId: this.recordId, scheduleDateTime: this.selectedDateTime, durationValue: this.selectedDuration, communicationMethod: this.selectedCommunicationMethod, isReschedule: false })
             .then(() => this.handleApexSuccess('Email sent and showing scheduled successfully.'))
             .catch(error => this.handleApexError(error, 'Error sending email and creating showing.'));
@@ -749,8 +748,6 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         this.isLoading = true;
         this.previewEmailHtml = ''; // Clear previous
         const isReschedule = (this.selectedAction === 'Reschedule');
-
-        console.log('loadEmailPreview', this.currentShowingId, this.currentContactId, this.recordId, this.selectedDate, this.selectedTime);
         const dateTimeIso = (this.selectedDate && this.selectedTime) 
             ? this.localDateTimeToUtcISO(this.selectedDate, this.selectedTime) 
             : null;

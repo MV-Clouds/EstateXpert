@@ -334,12 +334,12 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
                 })
                 .catch(error => {
                     this.isSpinner = false;
-                    console.log('Error in selectedPortalAction:', error);
+                    console.error('Error in selectedPortalAction:', error);
                     this.showToast('Error', 'Failed to update record', 'error');
                 });
         } catch (error) {
             this.isSpinner = false;
-            console.log('Error in selectedPortalAction:', error);
+            console.error('Error in selectedPortalAction:', error);
         }
     }
 

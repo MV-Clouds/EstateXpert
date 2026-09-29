@@ -245,7 +245,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         } catch (e) {
-            console.log('Error in goToControlCenter:', e);
+            console.error('Error in goToControlCenter:', e.stack);
         }
     }
 

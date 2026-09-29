@@ -1329,7 +1329,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
             }
 
         } catch (error) {
-            console.log('Error in updateSortIcons --> ' + error);
+            console.error('Error in updateSortIcons --> ' + error);
         }
     }
 

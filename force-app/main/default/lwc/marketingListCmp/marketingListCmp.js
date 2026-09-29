@@ -207,7 +207,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
             return pages;
         } catch (error) {
-            console.log('Error pageNumbers->' + error);
+            console.error('Error pageNumbers->' + error);
             return null;
         }
     }
@@ -337,13 +337,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     connectedCallback() {
         this.screenWidth = window?.globalThis?.innerWidth;
         window?.globalThis?.addEventListener('resize', this.handleResize);
-        loadStyle(this, designcss)
-            .then(() => {
-                console.log('Styles loaded successfully');
-            })
-            .catch(error => {
-                console.error('Error loading styles', error);
-            });
+        loadStyle(this, designcss);
         this.handleSubscribeRefresh();
         this.getContactDataMethod();
     }
@@ -361,7 +355,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     handleSubscribeRefresh() {
         const messageCallback = (response) => {
-            console.log('RefreshEvent received in marketingListCmp:', response);
             const payload = response?.data?.payload;
             const featureName = payload?.MVEX__Feature_Name__c || payload?.Feature_Name__c;
             
@@ -500,7 +493,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 this.isSortApplied = true;
             }
         } catch (error) {
-            console.log('Error renderedCallback->' + error);
+            console.error('Error renderedCallback->' + error);
         }
     }
 
@@ -554,7 +547,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     this.spinnerShow = false;
                     this.showToast('Error', error.body?.message || 'An unknown error occurred', 'error');
                 }
-                console.log('error in getContactData -> ' + JSON.stringify(error, null, 2));
+                console.error('error in getContactData -> ' + JSON.stringify(error, null, 2));
                 throw error;
             })
             .finally(() => {
@@ -669,7 +662,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 this.spinnerShow = false;
             }
         } catch (error) {
-            console.log('Error processContacts->' + error);
+            console.error('Error processContacts->' + error);
         }
     }
 
@@ -746,7 +739,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
             this.shownProcessedContactData = this.processedContactData.slice(startIndex, endIndex);
         } catch (error) {
-            console.log('Error updateShownData->' + error);
+            console.error('Error updateShownData->' + error);
         }
     }
 
@@ -901,7 +894,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 this.updateSelectedProperties();
             }
         } catch (error) {
-            console.log('Error -> handleFilteredListings' + error);
+            console.error('Error -> handleFilteredListings' + error);
         }
     }
 
@@ -924,7 +917,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             this.selectedContactList = this.processedContactData.filter(item => item.isChecked == true);
             this.isContactSelected = this.selectedContactList.length <= 0;
         } catch (error) {
-            console.log('Error handleContactSelect->' + error);
+            console.error('Error handleContactSelect->' + error);
         }
     }
 
@@ -960,7 +953,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 });
             }
         } catch (error) {
-            console.log('Error redirectToRecord->' + error);
+            console.error('Error redirectToRecord->' + error);
         }
     }
 
@@ -996,7 +989,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             })
             this.updateSelectedProperties();
         } catch (e) {
-            console.log('Error checkCoxValueChange ->' + e);
+            console.error('Error checkCoxValueChange ->' + e);
         }
     }
 
@@ -1034,7 +1027,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             this.updateShownData();
             this.updateSelectedProperties();
         } catch (error) {
-            console.log('Error selectAllCheckbox->' + error);
+            console.error('Error selectAllCheckbox->' + error);
         }
     }
 
@@ -1058,7 +1051,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 }
             });
         } catch (error) {
-            console.log('Error in goTOContactPage --> ' + error);
+            console.error('Error in goTOContactPage --> ' + error);
         }
     }
 
@@ -1114,7 +1107,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             this.updateSortIcons();
             this.updateShownData();
         } catch (error) {
-            console.log('Error sortClick->' + error);
+            console.error('Error sortClick->' + error);
         }
     }
 
@@ -1175,7 +1168,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 return this.sortOrder === 'asc' ? compare : -compare;
             });
         } catch (error) {
-            console.log('Error sortData->' + error);
+            console.error('Error sortData->' + error);
         }
 
     }
@@ -1229,7 +1222,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             }
 
         } catch (error) {
-            console.log('Error in updateSortIcons --> ' + error);
+            console.error('Error in updateSortIcons --> ' + error);
         }
     }
 
@@ -1246,7 +1239,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 tableDiv.scrollTop = 0;
             }
         } catch (error) {
-            console.log('Error scrollToTop->' + error);
+            console.error('Error scrollToTop->' + error);
         }
     }
 
@@ -1361,7 +1354,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 },
             });
         } catch (error) {
-            console.log('error--> ', error);
+            console.error('error in backToControlCenter --> ', error);
         }
     }
 

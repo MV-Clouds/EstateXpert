@@ -106,8 +106,6 @@ public without sharing class InstagramController {
             Http http = new Http();
             HttpResponse res = http.send(req);
 
-            System.debug('Long Lived Token Response: ' + res.getBody());
-    
             if (res.getStatusCode() == 200) {
                 Map<String, Object> responseBody = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
                 String longTermAccessToken = (String) responseBody.get('access_token');

@@ -139,8 +139,7 @@ export default class MarketingListFilterCmp extends LightningElement {
                 }
                 this.updateFilterIndices();
                 this.applyFilters();
-                console.log('this.filterFields',JSON.stringify(this.filterFields));
-                
+
                  setTimeout(() => {
                     this.isLoading = false;
                     this.dispatchEvent(new CustomEvent('loading', { detail: false }));
@@ -361,7 +360,6 @@ export default class MarketingListFilterCmp extends LightningElement {
                 }
             });
             this.updateFilterIndices();
-            console.log('this.filterFields',JSON.stringify(this.filterFields));
         }catch(error){
             errorDebugger('MarketingListFilterCmp', 'handleValueSelected', error, 'warn', 'Error in handleValueSelected');
         }
@@ -380,7 +378,6 @@ export default class MarketingListFilterCmp extends LightningElement {
     applyFilters(isSilent = false) {
         const silent = typeof isSilent === 'boolean' ? isSilent : false;
         try {
-            console.time('MethodTime');
             let contactFilters = [];
             let inquiryFilters = [];
             let filterData = {
@@ -532,7 +529,6 @@ export default class MarketingListFilterCmp extends LightningElement {
                         );
                     }
                 });
-            console.timeEnd('MethodTime');
         } catch (error) {
             errorDebugger('MarketingListFilterCmp', 'applyFilters', error, 'error', 'Error in applyFilters');
             if (!silent) {
@@ -892,8 +888,6 @@ export default class MarketingListFilterCmp extends LightningElement {
                                 // Loop through each input and call the blur method
                                 inputs.forEach(input => input.blur());
                                 this.handleBlur1(event);
-                            } else {
-                               console.log('Value already exists in selectedOptions');
                             }
                         }
                     } else if (this.filterFields[index].searchTerm && this.filterFields[index].searchTerm.trim() !== '') {
@@ -902,7 +896,7 @@ export default class MarketingListFilterCmp extends LightningElement {
                 }
             }
         }catch(e){
-            console.log('Error handleSearchChange1 ->'+e);
+            console.error('Error handleSearchChange1 ->'+e);
         }
     }
 
@@ -918,7 +912,7 @@ export default class MarketingListFilterCmp extends LightningElement {
             this.filterFields[index].isFocused = true;
             this.filterFields[index].picklistValue = this.filterFields[index].unchangePicklistValue;   
         }catch(error){
-            console.log('Error handleFocus1->'+error);
+            console.error('Error handleFocus1->'+error);
         }
     }
 
@@ -934,7 +928,7 @@ export default class MarketingListFilterCmp extends LightningElement {
             const index = event.currentTarget.dataset.id;
             this.filterFields[index].isFocused = false;
         }catch(error){
-            console.log('Error handleBlur1->'+error);
+            console.error('Error handleBlur1->'+error);
         }
     }
 
@@ -989,12 +983,11 @@ export default class MarketingListFilterCmp extends LightningElement {
                     this.filterFields[index].isFocused = false;
                 
                 } else {
-                    console.log('Value already exists in selectedOptions');
                     this.filterFields[index].isFocused = false;
                 }
             }
         }catch(e){
-        console.log('Error selectOption1 ->'+e);
+        console.error('Error selectOption1 ->'+e);
         }
     }
     
@@ -1046,7 +1039,7 @@ export default class MarketingListFilterCmp extends LightningElement {
                 this.updateFilterIndices();
             }
         }catch(error){
-            console.log('Error removeOption1->'+error);
+            console.error('Error removeOption1->'+error);
         }
     }
     
@@ -1080,7 +1073,7 @@ export default class MarketingListFilterCmp extends LightningElement {
 
             this.updateFilterIndices();
         }catch(error){
-            console.log('Error removeOptionString->'+error);
+            console.error('Error removeOptionString->'+error);
         }
     }
 
@@ -1103,7 +1096,7 @@ export default class MarketingListFilterCmp extends LightningElement {
                 }
             }
         }catch(error){
-            console.log('Error handleSearchChangeString->'+error);
+            console.error('Error handleSearchChangeString->'+error);
         }
     }
 
@@ -1131,15 +1124,12 @@ export default class MarketingListFilterCmp extends LightningElement {
                 if (!isValueAlreadySelected) {
                     field.selectedOptions = [...field.selectedOptions, {"label": value, "value": value}];
                     this.filterFields[index].searchTerm = '';
-                    // Only apply filters if a new valid string was actually added
                     this.applyFilters();
-                } else {
-                   console.log('Value already exists in selectedOptions');
                 }
             }
             
         }catch(e){
-            console.log('Error addTheString ->'+e);
+            console.error('Error addTheString ->'+e);
         }
     }
 
@@ -1177,7 +1167,7 @@ export default class MarketingListFilterCmp extends LightningElement {
                 }
             }, 300);
         } catch (error) {
-            console.log('Error handleMinValueChange ->', error);
+            console.error('Error handleMinValueChange ->', error);
         }
     }
 
@@ -1211,7 +1201,7 @@ export default class MarketingListFilterCmp extends LightningElement {
                 }
             }, 300);
         } catch (error) {
-            console.log('Error handleMaxValueChange ->', error);
+            console.error('Error handleMaxValueChange ->', error);
         }
     }
 
@@ -1245,7 +1235,7 @@ export default class MarketingListFilterCmp extends LightningElement {
                 }
             }, 300);
         } catch (error) {
-            console.log('Error incrementMinValue ->', error);
+            console.error('Error incrementMinValue ->', error);
         }
     }
 
@@ -1281,7 +1271,7 @@ export default class MarketingListFilterCmp extends LightningElement {
                 }
             }, 300);
         } catch (error) {
-            console.log('Error decrementMinValue ->', error);
+            console.error('Error decrementMinValue ->', error);
         }
     }
 
@@ -1315,7 +1305,7 @@ export default class MarketingListFilterCmp extends LightningElement {
                 }
             }, 300);
         } catch (error) {
-            console.log('Error incrementMaxValue ->', error);
+            console.error('Error incrementMaxValue ->', error);
         }
     }
 
@@ -1351,7 +1341,7 @@ export default class MarketingListFilterCmp extends LightningElement {
                 }
             }, 300);
         } catch (error) {
-            console.log('Error decrementMaxValue ->', error);
+            console.error('Error decrementMaxValue ->', error);
         }
     }
 
@@ -1367,7 +1357,7 @@ export default class MarketingListFilterCmp extends LightningElement {
             this.filterFields[index].fieldChecked = !this.filterFields[index].fieldChecked;
             this.applyFilters();
         }catch(error){
-            console.log('Error checkboxFieldChange->'+error);
+            console.error('Error checkboxFieldChange->'+error);
         }
     }
 
@@ -1394,7 +1384,7 @@ export default class MarketingListFilterCmp extends LightningElement {
                 console.warn(`Min date should be less than or equal to max date for field ${this.filterFields[index].apiName}`);
             }
         }catch(error){
-            console.log('Error handleMinDate->'+error);
+            console.error('Error handleMinDate->'+error);
         }
     }
     
@@ -1421,7 +1411,7 @@ export default class MarketingListFilterCmp extends LightningElement {
                 console.warn(`Max date should be greater than or equal to min date for field ${this.filterFields[index].apiName}`);
             }
         }catch(error){
-            console.log('Error handleMaxDate->'+error);
+            console.error('Error handleMaxDate->'+error);
         }
     }
 
@@ -1452,7 +1442,7 @@ export default class MarketingListFilterCmp extends LightningElement {
             this.applyFilters();
             this.updateFilterIndices();
         }catch(error){
-            console.log('Error clearSearch->'+error);
+            console.error('Error clearSearch->'+error);
         }
     }
 
@@ -1513,7 +1503,7 @@ export default class MarketingListFilterCmp extends LightningElement {
             this.handleValueSelected(this.selectedField);
             this.resetAddFilterModal();
         }catch(error){
-            console.log('Error handleSave->'+error);
+            console.error('Error handleSave->'+error);
         }
     }
     
@@ -1528,7 +1518,7 @@ export default class MarketingListFilterCmp extends LightningElement {
             const field = event.detail;
             this.isAddButtonDisabled = (field.length === 0 && field.operation == null);  
         }catch(error){
-            console.log('Error handleFieldChange ->'+error);
+            console.error('Error handleFieldChange ->'+error);
         }
     }
 
@@ -2004,7 +1994,6 @@ export default class MarketingListFilterCmp extends LightningElement {
                 this.applyFilters();
             }
         } catch (error) {
-            console.log('Error in handleCustomLogicToggle:', error.stack);
             errorDebugger('MarketingListFilterCmp', 'handleCustomLogicToggle', error, 'warn', 'Error in handleCustomLogicToggle');
         }
     }
@@ -2130,7 +2119,6 @@ export default class MarketingListFilterCmp extends LightningElement {
 
             this.customLogicError = null;
         } catch (error) {
-            console.log('Error in validateCustomLogic:', error.stack);
             errorDebugger('ListingManagerFilterCmp', 'validateCustomLogic', error, 'warn', 'Error in validateCustomLogic');
             this.customLogicError = 'Error validating custom logic expression.';
         }

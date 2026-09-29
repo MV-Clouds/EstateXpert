@@ -55,9 +55,7 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
     @track portalStatusToAssign;
     
     // Error popup variables
-    @track parsedErrors = [];
-    @track errorFirstHeader = 'Message';
-    @track errorSecondHeader = 'Path';
+    @track jsonbody = '';
     @track errorPopupType = '';
     @track portalname = '';
 
@@ -135,16 +133,13 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
                         if (response.data.payload.MVEX__Body__c) {
                             let errorBody = response.data.payload.MVEX__Body__c;
                             try {
-                                this.parsedErrors = JSON.parse(errorBody);
-                                this.errorFirstHeader = "Message";
-                                this.errorSecondHeader = "Path";
+                                JSON.parse(errorBody);
+                                this.jsonbody = errorBody;
                             } catch (e) {
-                                this.parsedErrors = [{ id: 1, message: errorBody, path: "-" }];
-                                this.errorFirstHeader = "Message";
-                                this.errorSecondHeader = "Path";
+                                this.jsonbody = JSON.stringify([{ id: 1, message: errorBody, path: "-" }]);
                             }
                         } else {
-                            this.parsedErrors = [{ id: 1, message: "Unknown error occurred", path: "-" }];
+                            this.jsonbody = JSON.stringify([{ id: 1, message: "Unknown error occurred", path: "-" }]);
                         }
                         this.portalname = "Zoopla";
                         this.errorPopupType = "Branch";

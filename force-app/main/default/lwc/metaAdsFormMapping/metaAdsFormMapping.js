@@ -627,6 +627,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                 this.fullMappingJson = {};
                 this.availablePages = [];
                 this.buildTableData();
+                this.dispatchEvent(new CustomEvent('mvexdeactivated'));
             } else {
                 this.showToast('Error', result?.message || 'Failed to deactivate integration.', 'error');
             }

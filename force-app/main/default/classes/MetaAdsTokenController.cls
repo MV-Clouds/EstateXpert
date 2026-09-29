@@ -147,6 +147,7 @@ public without sharing class MetaAdsTokenController {
      * @return Map containing success flag and account info
      */
     @RemoteAction
+    @AuraEnabled
     public static Map<String, Object> checkConnectionStatus() {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {

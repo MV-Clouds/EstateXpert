@@ -3,6 +3,7 @@ import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
 import FORM_FACTOR from "@salesforce/client/formFactor";
+import checkConnectionStatus from '@salesforce/apex/MetaAdsTokenController.checkConnectionStatus';
 
 export default class EstateXpertControlCenter extends NavigationMixin(LightningElement) {
     currentView = 'controlCenter';
@@ -34,6 +35,8 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             const target = currentPageReference.state.c__openComponent;
             if (target === 'storageIntegration') {
                 this.generalIntegrationMethod();
+            } else if (target === 'metaAdsMapping') {
+                this.metaAdsMethod();
             }
         }
     }
@@ -121,13 +124,12 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     }
 
     /**
-     * Method Name: isLeadCaptureCmpComponent
-     * @description: Checks if LeadCaptureCmp component is selected
+     * Method Name: isMetaAdsMappingComponent
+     * @description: Checks if MetaAdsFormMapping component is selected
      * Date: 23/09/2026
-     * Created By: Vyom Soni
      */
-    get isLeadCaptureCmpComponent() {
-        return this.selectedComponent === 'leadCaptureCmp';
+    get isMetaAdsMappingComponent() {
+        return this.selectedComponent === 'metaAdsMapping';
     }
 
     /**
@@ -326,17 +328,55 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     }
 
     /**
-     * Method Name: leadCaptureMethod
-     * @description: Used to open leadCaptureCmp component.
-     * Date: 09/09/2024
-     * Created By: Karan Singh
+     * Method Name: metaAdsMethod
+     * @description: Used to handle Meta Ads card click. Checks connection and redirects appropriately.
      */
-    leadCaptureMethod() {
-        this.openComponent(
-            'leadCaptureCmp', 
-            'Lead Capture',
-            'The "Lead Capture" integrates with Meta Ads and Google Ads to automatically capture leads from your advertising accounts directly into Salesforce. Configure custom field mapping to ensure lead data flows seamlessly into your CRM for immediate follow-up.'
-        );
+    async metaAdsMethod(event) {
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
+        
+        try {
+            const result = await checkConnectionStatus();
+            if (result && result.success) {
+                // If connected, open mapping component
+                this.openComponent(
+                    'metaAdsMapping', 
+                    'Meta Ads Mapping',
+                    'Configure form field mapping for Meta Ads to automatically capture leads.'
+                );
+            } else {
+                // If not connected, navigate to SDK page
+                this[NavigationMixin.Navigate]({
+                    type: "standard__webPage",
+                    attributes: {
+                        url: '/apex/metaAdsSDK'
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Error checking Meta Ads connection:', error);
+            // Fallback to SDK page
+            this[NavigationMixin.Navigate]({
+                type: "standard__webPage",
+                attributes: {
+                    url: '/apex/metaAdsSDK'
+                }
+            });
+        }
+    }
+
+    /**
+     * Method Name: handleMetaAdsDeactivated
+     * @description: Triggered when user deactivates Meta Ads from the mapping component
+     */
+    handleMetaAdsDeactivated() {
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: '/apex/metaAdsSDK'
+            }
+        });
     }
 
     /**

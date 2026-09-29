@@ -659,7 +659,11 @@
             }
 
             function backToControlCenter() {
-                window.top.location.href = '/lightning/n/MVEX__Control_Center';
+                var basePath = '/lightning/n/Control_Center';
+                if (window.location.pathname.indexOf('MVEX__') !== -1) {
+                    basePath = '/lightning/n/MVEX__Control_Center';
+                }
+                window.top.location.href = basePath;
             }
 
             function launchMetaAdsSignup() {
@@ -757,17 +761,14 @@
             }
 
             function renderResults(data) {
-                var setupForm = document.getElementById('setup-form-div');
-                if (setupForm) setupForm.style.display = 'none';
-
-                var container = document.getElementById('results-container');
-
-                // 1. Account Info
-                var pageDisplay = document.getElementById('page-display');
-                pageDisplay.innerHTML = '<div style="font-weight:600;font-size:16px;color:#0f172a;">' + (data.account_name || 'System User Account') + '</div>'
-                    + '<div style="font-size:14px;color:#64748b;margin-top:2px;">Client App ID: ' + (data.client_app_id || 'N/A') + '</div>';
-
-                container.style.display = 'block';
+                // Determine if we should use the namespace (based on the current path or just hardcoding the most likely path)
+                // For safety in unmanaged dev orgs, we use Control_Center without namespace if it fails, but let's try just the standard URL format.
+                // We'll use the same base path as backToControlCenter but add the parameter.
+                var basePath = '/lightning/n/Control_Center';
+                if (window.location.pathname.indexOf('MVEX__') !== -1) {
+                    basePath = '/lightning/n/MVEX__Control_Center';
+                }
+                window.top.location.href = basePath + '?c__openComponent=metaAdsMapping';
             }
         </script>
     </body>

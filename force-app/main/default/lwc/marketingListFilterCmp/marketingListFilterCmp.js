@@ -3,6 +3,7 @@ import getStaticFields from '@salesforce/apex/ListingManagerFilterController.get
 import saveStaticFields from '@salesforce/apex/ListingManagerFilterController.saveStaticFields';
 import getPicklistValues from '@salesforce/apex/MarketingListFilterController.getPicklistValues';
 import getFilteredContacts from '@salesforce/apex/MarketingListFilterController.getFilteredContacts';
+import getContactFields from '@salesforce/apex/MarketingListFilterController.getContactFields';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
@@ -23,6 +24,21 @@ export default class MarketingListFilterCmp extends LightningElement {
     @track screenWidth = 0;
     @track modalValue = false;
     @track parentField = null; 
+
+    // Add Filter Modal properties
+    @track fieldOptions = [];
+    @track selectedFields = [];
+    @track selectedField = [];
+    @track breadcrumbs = [];
+    @track selectedValues = [];
+    @track showCombobox = true;
+    @track searchTerm1 = '';
+    @track isFocused1 = false;
+    @track valueIsField = false;
+    @track notCheckboxValue = false;
+    @track contactFields = [];
+    @track options1 = [];
+    @track isDisabled = true; 
 
     @track isCustomLogicEnabled = false;
     @track customLogicExpression = '';
@@ -285,10 +301,11 @@ export default class MarketingListFilterCmp extends LightningElement {
     * Date: 25/06/2024
     * Created By: Vyom Soni
     */
-      handleValueSelected(event) {
+      handleValueSelected(eventOrFields) {
         try{
-            // Get the value from the event detail and store it in a property
-            this.valueFromChild = event.detail;
+            // Get the value from the event detail or direct fields
+            const rawFields = (eventOrFields && eventOrFields.detail) ? eventOrFields.detail : (eventOrFields || this.selectedField);
+            this.valueFromChild = Array.isArray(rawFields) ? rawFields : [rawFields];
             this.valueFromChild = this.valueFromChild.map(field => {
                 return {
                     label: field.label,
@@ -1473,6 +1490,7 @@ export default class MarketingListFilterCmp extends LightningElement {
     */
     handleClose() {
         this.addModal = false;
+        this.resetAddFilterModal();
         if(this.screenWidth <= 900){
             this.modalValue = false;
             this.handleAddButtonChange();
@@ -1481,7 +1499,7 @@ export default class MarketingListFilterCmp extends LightningElement {
 
     /**
     * Method Name: handleSave
-    * @description: call the handleButtonClick method from child component.
+    * @description: add the selected field to filter fields.
     * Date: 25/06/2024
     * Created By: Vyom Soni
     */
@@ -1492,12 +1510,8 @@ export default class MarketingListFilterCmp extends LightningElement {
                 this.modalValue = false;
                 this.handleAddButtonChange();
             }
-            const childComponent = this.template.querySelector('c-marketing-list-filter-add-cmp');
-
-            if (childComponent) {
-                // Call the method on the child component
-                childComponent.handleButtonClick();
-            }
+            this.handleValueSelected(this.selectedField);
+            this.resetAddFilterModal();
         }catch(error){
             console.log('Error handleSave->'+error);
         }
@@ -1525,11 +1539,393 @@ export default class MarketingListFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */
     openModal(){
+        this.resetAddFilterModal();
         this.addModal = true;
         if(this.screenWidth <= 900){
             this.modalValue = true;
             this.handleAddButtonChange();
         }
+    }
+
+    /**
+     * Method Name: resetAddFilterModal
+     * @description: Reset add filter modal state and fetch Contact fields.
+     */
+    resetAddFilterModal() {
+        this.selectedFields = [];
+        this.selectedField = [];
+        this.breadcrumbs = [];
+        this.selectedValues = [];
+        this.showCombobox = true;
+        this.searchTerm1 = '';
+        this.isFocused1 = false;
+        this.valueIsField = false;
+        this.notCheckboxValue = false;
+        this.options1 = [];
+        this.handleAddButtonDisable();
+        this.fetchObjectFields('Contact');
+    }
+
+    /**
+     * Method Name: fetchObjectFields
+     * @description: fetch the fields values.
+     * @param: objectApiName- object api name.
+     */
+    fetchObjectFields(objectApiName) {
+        this.isDisabled = true;
+        getContactFields({ objectApiName })
+            .then(fields => {
+                let filteredFields = fields ? fields.filter(field => field.fieldAPIName !== 'OwnerId') : [];
+                if (this.breadcrumbs.length > 0) {
+                    filteredFields = filteredFields.filter(field => field.fieldType !== 'REFERENCE');
+                }
+                if (fields) {
+                    this.fieldOptions = filteredFields.map(field => {
+                        return {
+                            label: field.fieldName,
+                            value: field.fieldAPIName,
+                            type: field.fieldType,
+                            referenceObjectName: field.referenceFields || [],
+                            objectApiName: field.referenceObjectName || '',
+                            picklistValues: field.picklistValues || []
+                        };
+                    });
+                    const offerField = [{ "value": "MVEX__Inquiry__c", "label": "Inquiry", "type": "REFERENCE", "objectApiName": "MVEX__Inquiry__c" }];
+                    this.fieldOptions = this.fieldOptions.concat(offerField);
+                    this.options1 = this.fieldOptions;
+                    this.isDisabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching object fields:', error);
+            });
+    }
+
+    /**
+     * Method Name: fetchObjectFieldsWithoutReference
+     * @description: fetch fields when reference field was clicked.
+     * @param: objectApiName- object api name.
+     */
+    fetchObjectFieldsWithoutReference(objectApiName) {
+        this.isDisabled = true;
+        getContactFields({ objectApiName })
+            .then(fields => {
+                let filteredFields = fields || [];
+                if (this.breadcrumbs.length > 0) {
+                    filteredFields = filteredFields.filter(field => field.fieldType !== 'REFERENCE');
+                }
+                if (fields) {
+                    this.fieldOptions = filteredFields.map(field => {
+                        return {
+                            label: field.fieldName,
+                            value: field.fieldAPIName,
+                            type: field.fieldType,
+                            referenceObjectName: field.referenceFields || [],
+                            objectApiName: field.referenceObjectName || '',
+                            picklistValues: field.picklistValues || []
+                        };
+                    });
+                    this.options1 = this.fieldOptions;
+                    this.isDisabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching object fields:', error);
+            });
+    }
+
+    /**
+     * Method Name: currentFieldOptions
+     * @description: getter for the set the current selectedfield operator options.
+     */
+    get currentFieldOptions() {
+        if (!this.selectedField || this.selectedField.length === 0) return [];
+
+        const fieldType = this.selectedField[0].type;
+        let options = [];
+
+        switch (fieldType) {
+            case 'PICKLIST':
+            case 'MULTIPICKLIST':
+                options = [
+                    { label: 'Includes', value: 'includes' },
+                    { label: 'Equals', value: 'equals' }
+                ];
+                break;
+            case 'BOOLEAN':
+                options = [
+                    { label: 'True/False', value: 'boolean' }
+                ];
+                break;
+            case 'DOUBLE':
+            case 'CURRENCY':
+                options = [
+                    { label: 'Range', value: 'range' },
+                    { label: 'Minimum', value: 'minimum' },
+                    { label: 'Maximum', value: 'maximum' }
+                ];
+                break;
+            case 'STRING':
+            case 'TEXTAREA':
+            case 'EMAIL':
+                options = [
+                    { label: 'Equals', value: 'equals' },
+                    { label: 'Contains', value: 'contains' },
+                    { label: 'Starts With', value: 'startswith' }
+                ];
+                break;
+            case 'DATE':
+            case 'DATETIME':
+                options = [
+                    { label: 'Date Range', value: 'daterange' },
+                    { label: 'Date Minimum', value: 'dateminimum' },
+                    { label: 'Date Maximum', value: 'datemaximum' }
+                ];
+                break;
+            case 'ID':
+                options = [
+                    { label: 'Equals', value: 'equals' }
+                ];
+                break;
+            case 'PHONE':
+            case 'URL':
+                options = [
+                    { label: 'Equals', value: 'equals' },
+                    { label: 'Contains', value: 'contains' }
+                ];
+                break;
+            default:
+                options = [];
+        }
+        return options;
+    }
+
+    /**
+     * Method Name: changeFields
+     * @description: handle the fields select of non-reference field.
+     */
+    changeFields(event) {
+        this.handleFieldSelect(event);
+        this.showCombobox = false;
+        this.valueIsField = true;
+        this.selectedField = [this.selectedFields.length > 0 ? this.selectedFields[this.selectedFields.length - 1] : null];
+        this.handleAddButtonDisable();
+    }
+
+    /**
+     * Method Name: handleFieldSelect
+     * @description: add the selected field into selectedFields.
+     */
+    handleFieldSelect(event) {
+        try {
+            const selectedValue = event.currentTarget.dataset.id;
+            const selectedField = this.fieldOptions.find(option => option.value === selectedValue);
+
+            if (selectedValue && selectedField && !this.selectedValues.includes(selectedValue)) {
+                this.selectedFields.push({
+                    label: selectedField.label,
+                    objectApiName: selectedField.objectApiName,
+                    value: selectedField.value,
+                    apiName: selectedField.value,
+                    type: selectedField.type,
+                    picklistValues: selectedField.picklistValues,
+                    prevApiName: this.selectedValues.length > 0 ? this.selectedValues[this.selectedValues.length - 1] : ''
+                });
+                this.selectedValues.push(selectedValue);
+                this.updateBreadcrumbs();
+            }
+            this.searchTerm1 = '';
+            this.isFocused1 = false;
+        } catch (error) {
+            console.error('Error -> handleFieldSelect' + error);
+        }
+    }
+
+    /**
+     * Method Name: changeTheCheckboxValue
+     * @description: handle the fields select of reference field.
+     */
+    changeTheCheckboxValue(event) {
+        try {
+            this.selectedField = [];
+            this.valueIsField = false;
+            const selectedValue = event.currentTarget.dataset.id;
+            const selectedField = this.fieldOptions.find(option => option.value === selectedValue);
+            if (selectedField != null) {
+                this.handleFieldSelect(event);
+                this.fetchObjectFieldsWithoutReference(selectedField.objectApiName);
+            }
+        } catch (error) {
+            console.error('Error -> changeTheCheckboxValue' + error);
+        }
+    }
+
+    /**
+     * Method Name: findFieldRecursively
+     * @description: check field hierarchy.
+     */
+    findFieldRecursively(fields, selectedValue) {
+        try {
+            for (let i = 0; i < fields.length; i++) {
+                const field = fields[i];
+                if (field.apiName === selectedValue || field.value === selectedValue) {
+                    return field;
+                }
+                if (field.type === 'REFERENCE' && field.referenceFields && field.referenceFields.length > 0) {
+                    const foundField = this.findFieldRecursively(field.referenceFields, selectedValue);
+                    if (foundField) {
+                        return foundField;
+                    }
+                }
+            }
+            return null;
+        } catch (error) {
+            console.error('Error -> findFieldRecursively' + error);
+        }
+    }
+
+    /**
+     * Method Name: updateBreadcrumbs
+     * @description: handle the combobox options when the bread crumbs is clicked.
+     */
+    updateBreadcrumbs() {
+        try {
+            this.valueIsField = false;
+            this.breadcrumbs = this.selectedFields.map(selectedValue => {
+                return { label: selectedValue.label, value: selectedValue.value, apiName: selectedValue.value };
+            });
+        } catch (error) {
+            console.error('Error updateBreadcrumbs' + error);
+        }
+    }
+
+    /**
+     * Method Name: handleBreadcrumbClick
+     * @description: handle the combobox options when the bread crumbs is clicked.
+     */
+    handleBreadcrumbClick(event) {
+        try {
+            const clickedIndex = parseInt(event.currentTarget.dataset.index, 10);
+            this.selectedFields = this.selectedFields.slice(0, clickedIndex);
+            this.selectedValues = this.selectedValues.slice(0, clickedIndex);
+            this.selectedField = [];
+            this.handleAddButtonDisable();
+
+            if (this.selectedValues.length > 0) {
+                let lastSelectedField = this.selectedFields[this.selectedFields.length - 1].objectApiName;
+                if (lastSelectedField == null) {
+                    lastSelectedField = 'Contact';
+                } else {
+                    this.fetchObjectFieldsWithoutReference(lastSelectedField);
+                }
+            } else {
+                this.fetchObjectFields('Contact');
+            }
+
+            this.showCombobox = true;
+            this.updateBreadcrumbs();
+        } catch (error) {
+            console.error('Error handleBreadcrumbClick' + error);
+        }
+    }
+
+    /**
+     * Method Name: handleModalFieldSearchChange
+     * @description: handle search text change in add filter modal combobox.
+     */
+    handleModalFieldSearchChange(event) {
+        this.searchTerm1 = event.target.value;
+    }
+
+    /**
+     * Method Name: handleModalFieldFocus
+     * @description: handle focus event in add filter modal combobox.
+     */
+    handleModalFieldFocus() {
+        this.isFocused1 = true;
+    }
+
+    /**
+     * Method Name: handleModalFieldBlur
+     * @description: handle blur event in add filter modal combobox.
+     */
+    handleModalFieldBlur() {
+        this.isFocused1 = false;
+    }
+
+    /**
+     * Method Name: showOptions1
+     * @description: Hide / Unhide options of the combobox.
+     */
+    get showOptions1() {
+        return this.isFocused1 || this.searchTerm1 !== '';
+    }
+
+    /**
+     * Method Name: filteredOptions1
+     * @description: this getter makes the field list to show in the UI.
+     */
+    get filteredOptions1() {
+        try {
+            if (this.searchTerm1 === '' && !this.isFocused1) {
+                return [];
+            }
+            return this.options1.filter(option =>
+                option.label.toLowerCase().includes(this.searchTerm1.toLowerCase())
+            ).map(option => ({
+                ...option,
+                showRightIcon: this.isLookupField(option.type)
+            }));
+        } catch (error) {
+            console.error('Error filteredOptions1' + error);
+            return [];
+        }
+    }
+
+    /**
+     * Method Name: isLookupField
+     * @description: check field is lookup or reference.
+     */
+    isLookupField(fieldType) {
+        return fieldType === 'REFERENCE' || fieldType === 'Lookup';
+    }
+
+    /**
+     * Method Name: computedDropdownClass
+     * @description: return dynamic class for the add modal combobox.
+     */
+    get computedDropdownClass() {
+        return `slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click ${this.isFocused1 ? 'slds-is-open' : ''}`;
+    }
+
+    /**
+     * Method Name: handleNotCheckboxChange
+     * @description: handle the not checkbox change.
+     */
+    handleNotCheckboxChange(event) {
+        this.notCheckboxValue = event.target.checked;
+        if (this.selectedField && this.selectedField.length > 0) {
+            this.selectedField[0].isNot = event.target.checked;
+        }
+    }
+
+    /**
+     * Method Name: operationSelect
+     * @description: handle the operation combobox change.
+     */
+    operationSelect(event) {
+        if (this.selectedField && this.selectedField.length > 0) {
+            this.selectedField[0].operation = event.target.value;
+        }
+        this.handleAddButtonDisable();
+    }
+
+    /**
+     * Method Name: handleAddButtonDisable
+     * @description: set add button disable when selectedField or operation is empty.
+     */
+    handleAddButtonDisable() {
+        this.isAddButtonDisabled = !(this.selectedField && this.selectedField.length > 0 && this.selectedField[0] && this.selectedField[0].operation);
     }
 
     handleAddButtonChange(){

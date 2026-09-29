@@ -761,14 +761,15 @@
             }
 
             function renderResults(data) {
-                // Determine if we should use the namespace (based on the current path or just hardcoding the most likely path)
-                // For safety in unmanaged dev orgs, we use Control_Center without namespace if it fails, but let's try just the standard URL format.
-                // We'll use the same base path as backToControlCenter but add the parameter.
                 var basePath = '/lightning/n/Control_Center';
-                if (window.location.pathname.indexOf('MVEX__') !== -1) {
-                    basePath = '/lightning/n/MVEX__Control_Center';
-                }
-                window.top.location.href = basePath + '?c__openComponent=metaAdsMapping';
+                basePath = '/lightning/n/MVEX__Control_Center';
+
+                // Show loading spinner while Metadata API deploys
+                setLoading(true, 'Saving configuration... Please wait');
+
+                setTimeout(function () {
+                    window.top.location.href = basePath + '?c__openComponent=metaAdsMapping';
+                }, 3500);
             }
         </script>
     </body>

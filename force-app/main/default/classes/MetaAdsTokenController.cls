@@ -8,11 +8,11 @@ public without sharing class MetaAdsTokenController {
 
     // ─── Configuration from Custom Metadata ──────
     /**
-     * @description Gets the Integration App Config metadata for Meta Ads.
-     * @return Integration_App_Config__mdt instance
+     * @description Gets the OAuth Configuration metadata for Meta Ads.
+     * @return OAuth_Configuration__mdt instance
      */
-    public static Integration_App_Config__mdt getConfig() {
-        return Integration_App_Config__mdt.getInstance('Meta_Ads');
+    public static OAuth_Configuration__mdt getConfig() {
+        return OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
     }
 
     /**
@@ -25,20 +25,20 @@ public without sharing class MetaAdsTokenController {
      */
     public Boolean isConnected { 
         get { 
-            Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
-            return tokenConfig != null && String.isNotBlank(tokenConfig.System_User_Token_1__c); 
+            OAuth_Configuration__mdt config = getConfig();
+            return config != null && String.isNotBlank(config.Access_Token__c); 
         } 
     }
 
     // Properties exposed to Visualforce Page
     /** @description Meta App ID */
-    public String metaAppId    { get { return getConfig()?.App_ID__c; } }
+    public String metaAppId    { get { return getConfig()?.Client_Id__c; } }
     /** @description Meta Config ID */
     public String metaConfigId { get { return getConfig()?.Config_Id__c; } }
     /** @description Graph API Version */
     public String apiVersion   { get { return getConfig()?.API_Version__c; } }
     /** @description Graph API Base URL */
-    public String apiEndpoint  { get { return getConfig()?.Base_Url__c; } }
+    public String apiEndpoint  { get { return getConfig()?.Authorization_Endpoint__c; } }
 
     /**
      * @description Exchanges the authCode from the SDK for a System User Token,
@@ -58,10 +58,10 @@ public without sharing class MetaAdsTokenController {
                 return resultMap;
             }
 
-            Integration_App_Config__mdt config = getConfig();
+            OAuth_Configuration__mdt config = getConfig();
             if (config == null) {
                 resultMap.put('success', false);
-                resultMap.put('message', 'Integration configuration for Meta Ads is missing.');
+                resultMap.put('message', 'OAuth configuration for Meta Ads is missing.');
                 return resultMap;
             }
 
@@ -87,11 +87,11 @@ public without sharing class MetaAdsTokenController {
         }
     }
 
-    private static String fetchTokenFromMeta(String authCode, Integration_App_Config__mdt config) {
-        String appId = config.App_ID__c;
-        String appSecret = config.App_Secret__c;
+    private static String fetchTokenFromMeta(String authCode, OAuth_Configuration__mdt config) {
+        String appId = config.Client_Id__c;
+        String appSecret = config.Client_Secret__c;
         String apiVer = config.API_Version__c;
-        String baseUrl = config.Base_Url__c;
+        String baseUrl = config.Authorization_Endpoint__c;
 
         String tokenUrl = baseUrl + '/' + apiVer + '/oauth/access_token'
             + '?client_id='     + EncodingUtil.urlEncode(appId, 'UTF-8')
@@ -121,25 +121,28 @@ public without sharing class MetaAdsTokenController {
     }
 
     private static void saveTokenSettings(String systemUserToken, String clientAppId) {
-        Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
-        if (tokenConfig == null) {
-            tokenConfig = new Meta_Token_Config__c();
-            tokenConfig.SetupOwnerId = UserInfo.getOrganizationId();
+        Metadata.CustomMetadata customMetadata = new Metadata.CustomMetadata();
+        customMetadata.fullName = 'OAuth_Configuration__mdt.Meta_Ads_Config';
+        customMetadata.label = 'Meta Ads Config';
+
+        Metadata.CustomMetadataValue tokenField = new Metadata.CustomMetadataValue();
+        tokenField.field = 'Access_Token__c';
+        tokenField.value = systemUserToken;
+        customMetadata.values.add(tokenField);
+        
+        if (clientAppId != null) {
+            Metadata.CustomMetadataValue appField = new Metadata.CustomMetadataValue();
+            appField.field = 'Client_App_Id__c';
+            appField.value = clientAppId;
+            customMetadata.values.add(appField);
         }
         
-        tokenConfig.Client_App_Id__c = clientAppId;
+        Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
+        mdContainer.addMetadata(customMetadata);
         
-        if (String.isNotBlank(systemUserToken)) {
-            if (systemUserToken.length() <= 255) {
-                tokenConfig.System_User_Token_1__c = systemUserToken;
-                tokenConfig.System_User_Token_2__c = null;
-            } else {
-                tokenConfig.System_User_Token_1__c = systemUserToken.substring(0, 255);
-                tokenConfig.System_User_Token_2__c = systemUserToken.substring(255);
-            }
+        if (!Test.isRunningTest()) {
+            Id jobId = Metadata.Operations.enqueueDeployment(mdContainer, null);
         }
-        
-        upsert as user tokenConfig;
     }
 
     /**
@@ -151,14 +154,14 @@ public without sharing class MetaAdsTokenController {
     public static Map<String, Object> checkConnectionStatus() {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
-            if (tokenConfig == null || String.isBlank(tokenConfig.System_User_Token_1__c)) {
+            OAuth_Configuration__mdt config = getConfig();
+            if (config == null || String.isBlank(config.Access_Token__c)) {
                 resultMap.put('success', false);
                 resultMap.put('message', 'Not connected.');
                 return resultMap;
             }
 
-            String clientAppId = tokenConfig.Client_App_Id__c;
+            String clientAppId = config.Client_App_Id__c;
 
             resultMap.put('account_name', 'System User Account');
             resultMap.put('client_app_id', clientAppId);
@@ -180,9 +183,9 @@ public without sharing class MetaAdsTokenController {
     public static Map<String, Object> deactivateConnection() {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
-            if (tokenConfig != null && tokenConfig.Id != null) {
-                delete as user tokenConfig;
+            OAuth_Configuration__mdt config = getConfig();
+            if (config != null && String.isNotBlank(config.Access_Token__c)) {
+                saveTokenSettings(null, null); // Clear the token via Metadata API
             }
             resultMap.put('success', true);
         } catch (Exception e) {

@@ -1,9 +1,9 @@
 import { LightningElement, track, api } from 'lwc';
-import getStaticFields from '@salesforce/apex/ListingManagerFilterController.getStaticFields';
-import saveStaticFields from '@salesforce/apex/ListingManagerFilterController.saveStaticFields';
-import getPicklistValues from '@salesforce/apex/ListingManagerFilterController.getPicklistValues';
-import getFilteredListings from '@salesforce/apex/ListingManagerFilterController.getFilteredListings';
-import getListingFields from '@salesforce/apex/ListingManagerFilterController.getListingFields';
+import getStaticFields from '@salesforce/apex/ListingManagerController.getStaticFields';
+import saveStaticFields from '@salesforce/apex/ListingManagerController.saveStaticFields';
+import getPicklistValues from '@salesforce/apex/ListingManagerController.getPicklistValues';
+import getFilteredListings from '@salesforce/apex/ListingManagerController.getFilteredListings';
+import getListingFields from '@salesforce/apex/ListingManagerController.getObjectFields';
 import Icons from '@salesforce/resourceUrl/listingManagerIcons';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';

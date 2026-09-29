@@ -1,9 +1,9 @@
 import { LightningElement, track, api } from 'lwc';
-import getStaticFields from '@salesforce/apex/ListingManagerFilterController.getStaticFields';
-import saveStaticFields from '@salesforce/apex/ListingManagerFilterController.saveStaticFields';
-import getPicklistValues from '@salesforce/apex/MarketingListFilterController.getPicklistValues';
-import getFilteredContacts from '@salesforce/apex/MarketingListFilterController.getFilteredContacts';
-import getContactFields from '@salesforce/apex/MarketingListFilterController.getContactFields';
+import getStaticFields from '@salesforce/apex/ListingManagerController.getStaticFields';
+import saveStaticFields from '@salesforce/apex/ListingManagerController.saveStaticFields';
+import getPicklistValues from '@salesforce/apex/ListingManagerController.getPicklistValues';
+import getFilteredContacts from '@salesforce/apex/MarketingListCmpController.getFilteredContacts';
+import getListingFields from '@salesforce/apex/ListingManagerController.getObjectFields';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
@@ -1573,7 +1573,7 @@ export default class MarketingListFilterCmp extends LightningElement {
      */
     fetchObjectFields(objectApiName) {
         this.isDisabled = true;
-        getContactFields({ objectApiName })
+        getListingFields({ objectApiName })
             .then(fields => {
                 let filteredFields = fields ? fields.filter(field => field.fieldAPIName !== 'OwnerId') : [];
                 if (this.breadcrumbs.length > 0) {
@@ -1608,7 +1608,7 @@ export default class MarketingListFilterCmp extends LightningElement {
      */
     fetchObjectFieldsWithoutReference(objectApiName) {
         this.isDisabled = true;
-        getContactFields({ objectApiName })
+        getListingFields({ objectApiName })
             .then(fields => {
                 let filteredFields = fields || [];
                 if (this.breadcrumbs.length > 0) {

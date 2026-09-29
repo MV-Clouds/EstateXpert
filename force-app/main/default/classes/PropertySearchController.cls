@@ -482,20 +482,4 @@ public with sharing class PropertySearchController {
             return new List<Map<String, String>>();
         }
     }
-
-    /**
-     * @description       : This method checks if Business Account ID is configured in custom metadata
-     * @last modified on  : 03-02-2026
-     **/
-    @AuraEnabled
-    public static Boolean hasBusinessAccountId() {
-        try {
-            MVEX__WhatsAppConfig__c config = MVEX__WhatsAppConfig__c.getOrgDefaults();
-            return config != null && String.isNotBlank(config.MVEX__Whatsapp_Business_Account_Id__c);
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PropertySearchController', 'hasBusinessAccountId', 'Error while checking business account ID.');
-            return false;
-        }
-    }
-
 }

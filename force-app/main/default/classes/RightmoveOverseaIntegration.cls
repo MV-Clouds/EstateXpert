@@ -18,7 +18,8 @@ public with sharing class RightmoveOverseaIntegration {
             String escapedListingId = String.escapeSingleQuotes(listingId);
             String escapedPortalId = String.escapeSingleQuotes(portalId);
 
-            List<MVEX__Portal__c> portalRightmove = [SELECT Id, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c WHERE Id =: escapedPortalId AND MVEX__Is_Active__c = true WITH USER_MODE LIMIT 1];
+            List<MVEX__Portal__c> portalRightmove = [SELECT Id, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c 
+                                                        WHERE Id =: escapedPortalId AND MVEX__Is_Active__c = true WITH USER_MODE LIMIT 1];
 
             if (portalRightmove.isEmpty()) {
                 updatePortalListingRecord(listingId, portalId, 'Portal configuration is missing.', 'Exception');
@@ -53,7 +54,9 @@ public with sharing class RightmoveOverseaIntegration {
                 SObject listingRecord = records[0];
                 String propertyId = (String) listingRecord.get('MVEX__Property__c');
 
-                List<MVEX__Property_File__c> media = [SELECT Id, MVEX__BaseUrl__c, MVEX__ExternalLink__c, MVEX__Tags__c, LastModifiedDate FROM MVEX__Property_File__c WHERE MVEX__Property__c = :propertyId AND MVEX__IsOnPortalFeed__c = true WITH USER_MODE Order BY MVEX__Sort_on_Portal_Feed__c ASC NULLS LAST, Name ASC];
+                List<MVEX__Property_File__c> media = [SELECT Id, MVEX__BaseUrl__c, MVEX__ExternalLink__c, MVEX__Tags__c, LastModifiedDate FROM MVEX__Property_File__c 
+                                                        WHERE MVEX__Property__c = :propertyId AND MVEX__IsOnPortalFeed__c = true WITH USER_MODE 
+                                                        Order BY MVEX__Sort_on_Portal_Feed__c ASC NULLS LAST, Name ASC];
 
                 for (String key : jsonMap.keySet()) {
                     String label = (String) jsonMap.get(key);

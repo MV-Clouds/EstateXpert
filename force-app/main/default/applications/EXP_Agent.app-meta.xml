@@ -145,7 +145,6 @@
     <tabs>Inquiry__c</tabs>
     <tabs>Offer__c</tabs>
     <tabs>Closing__c</tabs>
-    <tabs>Payment_Schedule__c</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>EXP_Agent_UtilityBar</utilityBar>
 </CustomApplication>

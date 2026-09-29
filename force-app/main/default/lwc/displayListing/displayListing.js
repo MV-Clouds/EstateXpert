@@ -3,7 +3,6 @@ import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import getRecords from '@salesforce/apex/PropertySearchController.getRecords';
 import NoImageFound from '@salesforce/resourceUrl/blankImage';
 import propertyIcons from '@salesforce/resourceUrl/PropertyIcons';
-import location_icon from '@salesforce/resourceUrl/location_icon';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -30,7 +29,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track pageSize = 9;
     @track bathroom_icon = propertyIcons + '/PropertyIcons/Bathroom.png';
     @track bedroom_icon = propertyIcons + '/PropertyIcons/Bedroom.png';
-    @track location_icon = location_icon;
     @track filteredListingData = [];
     @track pagedFilteredListingData = [];
     @track propertyMediaUrls = [];

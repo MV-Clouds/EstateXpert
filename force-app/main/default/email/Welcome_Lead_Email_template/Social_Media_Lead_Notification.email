@@ -1,0 +1,63 @@
+<messaging:emailTemplate subject="New Social Media Lead Received - {!recipient.Name}" 
+    renderUsingSystemContextWithoutSharing="true"
+    recipientType="Contact" 
+    relatedToType="User">
+
+    <messaging:htmlEmailBody >
+        <html>
+            <head>
+                <style type="text/css">
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f7f9; }
+                    .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 8px; overflow: hidden; }
+                    .header { background-color: #0070d2; color: #ffffff; padding: 25px; text-align: center; }
+                    .header h1 { margin: 0; font-size: 22px; font-weight: 300; }
+                    .content { padding: 30px; color: #3e3e3c; line-height: 1.6; }
+                    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; background-color: #ebf5ff; color: #0070d2; font-weight: bold; font-size: 12px; margin-bottom: 15px; }
+                    .data-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                    .data-table td { padding: 12px 0; border-bottom: 1px solid #f2f2f2; font-size: 14px; }
+                    .label { color: #706e6b; font-weight: bold; width: 35%; }
+                    .footer { background-color: #f3f2f2; padding: 20px; text-align: center; color: #706e6b; font-size: 12px; }
+                    .button { display: inline-block; padding: 12px 25px; background-color: #0070d2; color: #ffffff !important; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 20px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>New Lead Captured</h1>
+                    </div>
+                    <div class="content">
+                        <div class="badge">Social Media Intake</div>
+                        <p>Hello {!relatedTo.FirstName},</p> <p>A new lead has been registered through Meta Ads. Please review the details below:</p>
+                        
+                        <table class="data-table">
+                            <tr>
+                                <td class="label">Full Name</td>
+                                <td>{!BLANKVALUE(recipient.FirstName, '')} {!BLANKVALUE(recipient.LastName, '-')}</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Platform</td>
+                                <td><strong>{!BLANKVALUE(recipient.LeadSource, '-')}</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="label">Email Address</td>
+                                <td>{!BLANKVALUE(recipient.Email, '-')}</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Capture Date</td>
+                                <td>
+                                    <apex:outputText value="{0, date, MMMM d, yyyy}" rendered="{!NOT(ISNULL(recipient.CreatedDate))}">
+                                        <apex:param value="{!recipient.CreatedDate}" />
+                                    </apex:outputText>
+                                    <apex:outputText value="-" rendered="{!ISNULL(recipient.CreatedDate)}" />
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="footer">
+                        This is an automated notification from the Lead Management System.<br/>
+                    </div>
+                </div>
+            </body>
+        </html>
+    </messaging:htmlEmailBody>
+</messaging:emailTemplate>

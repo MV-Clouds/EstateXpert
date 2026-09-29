@@ -1,27 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
     <labels>
-        <fullName>EmailMessageEmailService</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>EmailMessageEmailService</shortDescription>
-        <value>replyemailservice@2399seg7dczkd2wdrur97lyz9f5kxoq6rsi3uyqam30un540ms.dm-9p5p6uac.ind136.apex.salesforce.com</value>
-    </labels>
-    <labels>
-        <fullName>EstateXpert_Endpoint</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>EstateXpert Endpoint</shortDescription>
-        <value>https://estatexpert-dev-ed.develop.my.salesforce-sites.com/services/apexrest/MVEX/messages</value>
-    </labels>
-    <labels>
-        <fullName>GeminiApiKey</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>GeminiApiKey</shortDescription>
-        <value>AIzaSyAzzNG5wlULwCiH2cXBsEDcFpRnlA6xNZI</value>
-    </labels>
-    <labels>
         <fullName>GmailServiceLabel</fullName>
         <language>en_US</language>
         <protected>true</protected>

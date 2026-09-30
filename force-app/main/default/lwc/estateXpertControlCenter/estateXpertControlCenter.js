@@ -121,16 +121,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     }
 
     /**
-     * Method Name: isLeadCaptureCmpComponent
-     * @description: Checks if LeadCaptureCmp component is selected
-     * Date: 23/09/2026
-     * Created By: Vyom Soni
-     */
-    get isLeadCaptureCmpComponent() {
-        return this.selectedComponent === 'leadCaptureCmp';
-    }
-
-    /**
      * Method Name: isPortalMappingComponent
      * @description: Checks if PortalMapping component is selected
      * Date: 23/09/2026
@@ -148,16 +138,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      */
     get isPortalMappingLandingPageComponent() {
         return this.selectedComponent === 'portalMappingLandingPage';
-    }
-
-    /**
-     * Method Name: isGoogleLeadFieldMappingComponent
-     * @description: Checks if GoogleLeadFieldMapping component is selected
-     * Date: 23/09/2026
-     * Created By: Vyom Soni
-     */
-    get isGoogleLeadFieldMappingComponent() {
-        return this.selectedComponent === 'googleLeadFieldMapping';
     }
 
     /**
@@ -256,25 +236,16 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Created By: Karan Singh
      */
     goToParentComponent() {
-        // Go back to parent component (one level up)
         if (this.parentComponentTitle === 'Portal Integration') {
             this.selectedComponent = 'portalMapping';
             this.selectedComponentTitle = 'Portal Integration';
             this.selectedComponentDescription = 'Connect and manage your portal integrations';
             this.parentComponentTitle = '';
-            // Clear portal state
             this.portalId = null;
             this.portalGen = null;
             this.portalName = null;
             this.portalIconUrl = null;
             this.portalStatus = null;
-        } else if (this.parentComponentTitle === 'Lead Capture') {
-            this.selectedComponent = 'leadCaptureCmp';
-            this.selectedComponentTitle = 'Lead Capture';
-            this.selectedComponentDescription = 'The "Lead Capture" integrates with Meta Ads and Google Ads to automatically capture leads from your advertising accounts directly into Salesforce. Configure custom field mapping to ensure lead data flows seamlessly into your CRM for immediate follow-up.';
-            this.parentComponentTitle = '';
-            // Clear lead capture state
-            this.integrationType = null;
         }
     }
 
@@ -323,46 +294,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             'Integration Hub',
             'The "Integration Hub" modal simplifies storage, email, instagram integration by providing seamless connectivity with various third-party services, enhancing overall functionality and user experience. Connect your favorite tools and platforms in one centralized location.'
         );
-    }
-
-    /**
-     * Method Name: leadCaptureMethod
-     * @description: Used to open leadCaptureCmp component.
-     * Date: 09/09/2024
-     * Created By: Karan Singh
-     */
-    leadCaptureMethod() {
-        this.openComponent(
-            'leadCaptureCmp', 
-            'Lead Capture',
-            'The "Lead Capture" integrates with Meta Ads and Google Ads to automatically capture leads from your advertising accounts directly into Salesforce. Configure custom field mapping to ensure lead data flows seamlessly into your CRM for immediate follow-up.'
-        );
-    }
-
-    /**
-     * Method Name: handleLeadCaptureNavigation
-     * @description: Handles navigation from leadCaptureCmp to googleLeadFieldMapping
-     * Date: 17/02/2026
-     * Created By: Karan Singh
-     */
-    handleLeadCaptureNavigation(event) {
-        const { integrationType } = event.detail;
-        
-        // Store integration type
-        this.integrationType = integrationType;
-        
-        // Set parent component for breadcrumb
-        this.parentComponentTitle = 'Lead Capture';
-        
-        // Set description for sidebar based on integration type
-        const integrationLabel = integrationType === 'Meta' ? 'Meta Ads' : 'Google Ads';
-        const description = `Map ${integrationLabel} form fields to Salesforce Contact fields. This ensures seamless data integration from ${integrationLabel} leads into Salesforce, reducing manual data entry and errors. Configure field mappings to automatically sync lead information.`;
-        
-        // Navigate to field mapping page
-        this.selectedComponent = 'googleLeadFieldMapping';
-        this.selectedComponentTitle = `Map ${integrationLabel} Fields`;
-        this.selectedComponentDescription = description;
-        this.currentView = 'childComponent';
     }
 
     /**

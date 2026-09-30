@@ -33,9 +33,9 @@ public with sharing class PortalSyndicationController {
                 if (portalName == 'Zoopla') {
                     ZooplaIntegrationController.getListingRecordForSync(listingId, portalId);
                 } else if (portalName == 'Rightmove') {
-                    RightmoveIntegrationController.getListingRecordForSync(listingId, portalId);
+                    RightmoveIntegrationController.getListingRecordForSync(listingId, portalId, false);
                 } else if (portalName == 'Rightmove Overseas') {
-                    RightmoveOverseaIntegration.getListingRecordForSync(listingId, portalId);
+                    RightmoveIntegrationController.getListingRecordForSync(listingId, portalId, true);
                 } else if (portalName == 'Propertyfinder') {
                     PropertyFinderIntegration.getListingRecordForSync(listingId, portalId, 'create');
                 }

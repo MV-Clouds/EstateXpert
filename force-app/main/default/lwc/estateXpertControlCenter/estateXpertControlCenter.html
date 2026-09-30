@@ -154,10 +154,6 @@
                             <template if:true={isStorageIntegrationComponent}>
                                 <c-storage-integration></c-storage-integration>
                             </template>
-                            <template if:true={isLeadCaptureCmpComponent}>
-                                <c-lead-capture-cmp
-                                    onleadcapturenavigate={handleLeadCaptureNavigation}></c-lead-capture-cmp>
-                            </template>
                             <template if:true={isPortalMappingComponent}>
                                 <c-portal-mapping-component
                                     onportalnavigate={handlePortalNavigation}></c-portal-mapping-component>
@@ -167,10 +163,6 @@
                                     portal-name={portalName} portal-icon-url={portalIconUrl}
                                     portal-status={portalStatus} is-x-m-l-for-p-f={isXMLForPF}>
                                 </c-portal-mapping-landing-page>
-                            </template>
-                            <template if:true={isGoogleLeadFieldMappingComponent}>
-                                <c-google-lead-field-mapping integration-type={integrationType}>
-                                </c-google-lead-field-mapping>
                             </template>
                         </div>
                     </template>

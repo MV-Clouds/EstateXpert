@@ -41,15 +41,7 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>GeminiChatService</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
         <apexClass>GmailIntegrationControllerV1</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>GoogleLeadFieldMappingController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -185,23 +177,11 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>RecordManagersCmpController</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>RecordManagersCmpControllerTest</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
         <apexClass>RightmoveIntegrationController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>RightmoveJSONController</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>RightmoveOverseaIntegration</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
@@ -230,23 +210,11 @@
     </classAccesses>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
-        <name>Form_Fields__mdt</name>
-    </customMetadataTypeAccesses>
-    <customMetadataTypeAccesses>
-        <enabled>true</enabled>
-        <name>GoogleLeadFieldMapping__mdt</name>
-    </customMetadataTypeAccesses>
-    <customMetadataTypeAccesses>
-        <enabled>true</enabled>
         <name>ListingManagerFilterConfig__mdt</name>
     </customMetadataTypeAccesses>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
         <name>MarketingListFilterConfig__mdt</name>
-    </customMetadataTypeAccesses>
-    <customMetadataTypeAccesses>
-        <enabled>true</enabled>
-        <name>MetaLeadFieldMapping__mdt</name>
     </customMetadataTypeAccesses>
     <customMetadataTypeAccesses>
         <enabled>true</enabled>
@@ -294,19 +262,11 @@
     </customSettingAccesses>
     <customSettingAccesses>
         <enabled>true</enabled>
-        <name>GoogleLeadConfig__c</name>
-    </customSettingAccesses>
-    <customSettingAccesses>
-        <enabled>true</enabled>
         <name>IG_Configuration__c</name>
     </customSettingAccesses>
     <customSettingAccesses>
         <enabled>true</enabled>
         <name>Lead_Notification__c</name>
-    </customSettingAccesses>
-    <customSettingAccesses>
-        <enabled>true</enabled>
-        <name>MetaLeadConfig__c</name>
     </customSettingAccesses>
     <fieldPermissions>
         <editable>true</editable>

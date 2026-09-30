@@ -1,4 +1,4 @@
-public without sharing class InstagramController {
+public with sharing class InstagramController {
 
     public Boolean isRecordCreated { get; set; }
     public Boolean hasError { get; set; }
@@ -6,7 +6,6 @@ public without sharing class InstagramController {
     public String longLivedToken { get; set; }
     public String instagramUserId { get; set; }
     public static final String instagramEndpoint = System.label.InstagramEndPoint;
-    @TestVisible public static List<MVEX__recordManagerConfig__mdt> mockMetadata = null;
     
     public InstagramController() {
         isRecordCreated = false;
@@ -30,15 +29,14 @@ public without sharing class InstagramController {
             String clientId = '';
             String clientSecret = '';
             String redirectUrl = '';
+            String tokenUrl = '';
 
-            List<MVEX__recordManagerConfig__mdt> mdtList = mockMetadata != null ? mockMetadata : [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where DeveloperName = 'Instagram_Integration'  LIMIT 1];
-            if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
-                String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
-                if(parts.size() >= 3) {
-                    clientId = parts[0];
-                    clientSecret = parts[1];
-                    redirectUrl = parts[2];
-                }
+            List<OAuth_Configuration__mdt> mdtList = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Instagram_OAuth' WITH USER_MODE LIMIT 1];
+            if(!mdtList.isEmpty()) {
+                clientId = mdtList[0].Client_Id__c;
+                clientSecret = mdtList[0].Client_Secret__c;
+                redirectUrl = mdtList[0].Redirect_URI__c;
+                tokenUrl = mdtList[0].Token_Endpoint__c;
             }
 
             if(String.isBlank(clientId) || String.isBlank(clientSecret) || String.isBlank(redirectUrl)){
@@ -46,8 +44,7 @@ public without sharing class InstagramController {
                 errorMessage = 'Instagram Credentials configuration missing in Custom Metadata.';
                 return null;
             }
-    
-          String tokenUrl = 'https://api.instagram.com/oauth/access_token';
+
             String body = 'client_id=' + EncodingUtil.urlEncode(clientId, 'UTF-8') +
                           '&client_secret=' + EncodingUtil.urlEncode(clientSecret, 'UTF-8') +
                           '&grant_type=authorization_code' +

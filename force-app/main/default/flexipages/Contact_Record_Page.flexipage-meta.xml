@@ -444,16 +444,6 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentName>metaLeadViewer</componentName>
-                <identifier>MVEX_metaLeadViewer</identifier>
-            </componentInstance>
-        </itemInstances>
-        <name>Facet-c2e6a1c9-4b02-42e6-91c5-c2901bb9ccfc</name>
-        <type>Facet</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <componentInstance>
                 <componentInstanceProperties>
                     <name>active</name>
                     <value>false</value>

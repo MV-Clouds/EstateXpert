@@ -1,7 +1,7 @@
 import { LightningElement, track } from 'lwc';
-import getObjectFields from '@salesforce/apex/MapFieldCmp.getObjectFields';
-import saveMappings from '@salesforce/apex/MapFieldCmp.saveMappings';
-import getMetadata from '@salesforce/apex/MapFieldCmp.getMetadata';
+import getObjectFields from '@salesforce/apex/ControlCenterController.getObjectFields';
+import saveMappings from '@salesforce/apex/ControlCenterController.saveMappings';
+import getMetadata from '@salesforce/apex/ControlCenterController.getMetadata';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';

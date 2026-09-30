@@ -91,6 +91,13 @@
                                                                         <td>{form.mappedCount}</td>
                                                                         <td style="text-align: center;">
                                                                             <div style="display: flex; gap: 8px; justify-content: center;">
+                                                                                <div class="action-icon-container" data-id={form.formId} onclick={openFailedLeadsModal} title="Failed Leads">
+                                                                                    <svg class="action-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                                        <circle cx="12" cy="12" r="10"></circle>
+                                                                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                                                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                                                                    </svg>
+                                                                                </div>
                                                                                 <div class="action-icon-container" data-id={form.id} onclick={handleEditRow} title="Edit Mapping">
                                                                                     <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -284,4 +291,73 @@
         </template>
     </div>
     <c-message-popup onconfirmation={handleConfirmation}></c-message-popup>
+
+    <!-- ─── Failed Leads Modal ──────────────────────────────── -->
+    <template if:true={isFailedLeadsModalOpen}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-02" class="slds-modal slds-fade-in-open slds-modal_small section_css">
+            <div class="slds-modal__container">
+
+                <div class="slds-modal__close close-icon-css" onclick={closeFailedLeadsModal}>
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937" />
+                    </svg>
+                </div>
+
+                <div class="slds-modal__header blue-header">
+                    <h1 id="modal-heading-02" class="slds-modal__title slds-hyphenate" tabindex="-1">Failed Webhook Leads</h1>
+                </div>
+
+                <div class="slds-modal__content modalbody" id="modal-content-id-2">
+                    <div class="content_body" style="position: relative; min-height: 200px;">
+                        
+                        <!-- Spinner Overlay -->
+                        <template if:true={isRetrying}>
+                            <c-spinner-component></c-spinner-component>
+                        </template>
+
+                        <template if:true={failedLeads.length}>
+                            <div class="table-content">
+                                <table class="slds-table" style="width: 100%;">
+                                    <thead>
+                                        <tr class="table_tr_cls">
+                                            <th style="padding: 10px;">Error ID</th>
+                                            <th style="padding: 10px;">Received At</th>
+                                            <th style="width: 100px; text-align: center; padding: 10px;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={failedLeads} for:item="lead">
+                                            <tr key={lead.Id}>
+                                                <td style="padding: 10px;">{lead.Name}</td>
+                                                <td style="padding: 10px;">{lead.Date}</td>
+                                                <td style="text-align: center; padding: 10px;">
+                                                    <button class="blue-btn-css" data-id={lead.Id} onclick={retryLead} style="padding: 4px 12px; height: auto;">Retry</button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                        <template if:false={failedLeads.length}>
+                            <div class="wizard-disabled-box" style="margin-top: 40px; text-align: center;">
+                                No failed leads found for this form.
+                            </div>
+                        </template>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="footerbtns">
+                        <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeFailedLeadsModal}>
+                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
+                            </svg>
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
 </template>

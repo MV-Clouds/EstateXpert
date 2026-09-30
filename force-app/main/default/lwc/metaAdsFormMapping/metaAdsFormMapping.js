@@ -6,7 +6,8 @@ import getSalesforceLeadFields from '@salesforce/apex/MetaAdsFormMappingControll
 import getExistingMappings from '@salesforce/apex/MetaAdsFormMappingController.getExistingMappings';
 import saveMappingApex from '@salesforce/apex/MetaAdsFormMappingController.saveMapping';
 import deactivateConnection from '@salesforce/apex/MetaAdsTokenController.deactivateConnection';
-
+import getFailedLeads from '@salesforce/apex/MetaAdsFormMappingController.getFailedLeads';
+import retryFailedLead from '@salesforce/apex/MetaAdsFormMappingController.retryFailedLead';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 
@@ -30,6 +31,11 @@ export default class MetaAdsFormMapping extends LightningElement {
 
     pendingAction = null;
     pendingRow = null;
+
+    @track isFailedLeadsModalOpen = false;
+    @track failedLeads = [];
+    @track isRetrying = false;
+    selectedFailedLeadsFormId = '';
 
     // Overall JSON state — { pageId: { pageName, forms: { formId: { formName, mappings: {} } } } }
     fullMappingJson = {};
@@ -615,6 +621,54 @@ export default class MetaAdsFormMapping extends LightningElement {
             variant: variant,
         });
         this.dispatchEvent(evt);
+    }
+
+    // --- Failed Leads Actions ---
+    async openFailedLeadsModal(event) {
+        this.selectedFailedLeadsFormId = event.currentTarget.dataset.id;
+        this.isFailedLeadsModalOpen = true;
+        await this.loadFailedLeads();
+    }
+
+    closeFailedLeadsModal() {
+        this.isFailedLeadsModalOpen = false;
+        this.selectedFailedLeadsFormId = '';
+    }
+
+    async loadFailedLeads() {
+        this.isRetrying = true;
+        try {
+            const results = await getFailedLeads({ formId: this.selectedFailedLeadsFormId });
+            this.failedLeads = results.map(r => {
+                return {
+                    Id: r.Id,
+                    Name: r.Name,
+                    Date: new Date(r.CreatedDate).toLocaleString()
+                };
+            });
+        } catch (error) {
+            this.showToast('Error', 'Failed to load error records', 'error');
+        } finally {
+            this.isRetrying = false;
+        }
+    }
+
+    async retryLead(event) {
+        const errorId = event.target.dataset.id;
+        this.isRetrying = true;
+        try {
+            const result = await retryFailedLead({ errorRecordId: errorId });
+            if (result === 'Success') {
+                this.showToast('Success', 'Lead successfully inserted!', 'success');
+                await this.loadFailedLeads();
+            } else {
+                this.showToast('Retry Failed', result, 'error');
+            }
+        } catch (error) {
+            this.showToast('Retry Error', error.body ? error.body.message : error.message, 'error');
+        } finally {
+            this.isRetrying = false;
+        }
     }
 }
 

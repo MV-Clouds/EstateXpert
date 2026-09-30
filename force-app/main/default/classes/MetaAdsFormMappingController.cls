@@ -265,4 +265,48 @@ public with sharing class MetaAdsFormMappingController {
         
         return null; // Success
     }
+
+    @AuraEnabled
+    public static List<MVEX__Error_Handling__c> getFailedLeads(String formId) {
+        List<MVEX__Error_Handling__c> allLeads = [SELECT Id, Name, CreatedDate, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE MVEX__Source_of_Error__c = 'MetaFailedLeads' ORDER BY CreatedDate DESC LIMIT 500];
+        List<MVEX__Error_Handling__c> filtered = new List<MVEX__Error_Handling__c>();
+        for (MVEX__Error_Handling__c err : allLeads) {
+            if (String.isNotBlank(err.MVEX__Error_Body__c)) {
+                try {
+                    Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(err.MVEX__Error_Body__c);
+                    if (payload.get('formId') == formId) {
+                        filtered.add(err);
+                    }
+                } catch(Exception e) {
+                    // Ignore parsing errors for individual records
+                }
+            }
+        }
+        return filtered;
+    }
+
+    @AuraEnabled
+    public static String retryFailedLead(String errorRecordId) {
+        try {
+            MVEX__Error_Handling__c err = [SELECT Id, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE Id = :errorRecordId LIMIT 1];
+            if (err == null || String.isBlank(err.MVEX__Error_Body__c)) {
+                return 'Error record not found or body is empty.';
+            }
+            
+            Map<String, Object> retryPayload = (Map<String, Object>) JSON.deserializeUntyped(err.MVEX__Error_Body__c);
+            String lId = (String) retryPayload.get('leadId');
+            String pId = (String) retryPayload.get('pageId');
+            String fId = (String) retryPayload.get('formId');
+            String fName = (String) retryPayload.get('formName');
+            Map<String, Object> lData = (Map<String, Object>) retryPayload.get('leadData');
+            
+            String result = MetaLeadWebhook.createSalesforceContact(lData, fName, pId, fId, lId);
+            if (result == 'Success') {
+                delete err;
+            }
+            return result;
+        } catch (Exception e) {
+            return 'Retry Error: ' + e.getMessage();
+        }
+    }
 }

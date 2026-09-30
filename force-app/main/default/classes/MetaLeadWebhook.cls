@@ -101,7 +101,7 @@ global without sharing class MetaLeadWebhook {
 
             Map<String, Object> leadData = fetchLeadData(leadId, pageAccessToken, apiVersion, baseUrl);
             String formName              = fetchFormName(formId, pageAccessToken, apiVersion, baseUrl);
-            createSalesforceContact(leadData, formName);
+            createSalesforceContact(leadData, formName, pageId, formId, leadId);
 
         } catch (Exception e) {
             System.debug('MetaLeadWebhook.handlePost Error: ' + e.getMessage() + ' | Line: ' + e.getLineNumber());
@@ -148,18 +148,15 @@ global without sharing class MetaLeadWebhook {
     }
     
 
-    private static String createSalesforceContact(Map<String, Object> leadData, String formName) {
-        if (leadData.containsKey('id') || String.isNotBlank(leadId)) {
+    public static String createSalesforceContact(Map<String, Object> leadData, String formName, String pId, String fId, String lId) {
+        if (leadData.containsKey('id') || String.isNotBlank(lId)) {
             Contact newContact = new Contact();
 
             // --- 2. Handle Platform ---
             String platform = leadData.containsKey('platform') ? (String) leadData.get('platform') : 'facebook';
             newContact.LeadSource = (platform == 'ig') ? 'Instagram' : 'Facebook';
             
-            // --- 3. Store IDs and Form Name ---
-            newContact.MVEX__MetaLeadId__c = leadId;
-            newContact.MVEX__MetaPageId__c = pageId;
-            newContact.MVEX__MetaFormId__c = formId;
+            // --- 3. Store Form Name ---
             newContact.MVEX__Meta_Form_Name__c = formName; // Store the fetched name
             newContact.MVEX__Contact_Type__c = 'Buyer';
 
@@ -177,12 +174,12 @@ global without sharing class MetaLeadWebhook {
                 if (!settings.isEmpty() && String.isNotBlank(settings[0].MVEX__Fields_Data__c)) {
                     Map<String, Object> rootJson = (Map<String, Object>) JSON.deserializeUntyped(settings[0].MVEX__Fields_Data__c);
                     
-                    if (rootJson.containsKey(pageId)) {
-                        Map<String, Object> pageObj = (Map<String, Object>) rootJson.get(pageId);
+                    if (rootJson.containsKey(pId)) {
+                        Map<String, Object> pageObj = (Map<String, Object>) rootJson.get(pId);
                         if (pageObj.containsKey('forms')) {
                             Map<String, Object> formsObj = (Map<String, Object>) pageObj.get('forms');
-                            if (formsObj.containsKey(formId)) {
-                                Map<String, Object> formObj = (Map<String, Object>) formsObj.get(formId);
+                            if (formsObj.containsKey(fId)) {
+                                Map<String, Object> formObj = (Map<String, Object>) formsObj.get(fId);
                                 if (formObj.containsKey('mappings')) {
                                     Map<String, Object> mappingsObj = (Map<String, Object>) formObj.get('mappings');
                                     for (String metaField : mappingsObj.keySet()) {
@@ -292,9 +289,9 @@ global without sharing class MetaLeadWebhook {
             
             // --- 6. Insert ---
             Map<String, Object> retryPayload = new Map<String, Object>();
-            retryPayload.put('leadId', leadId);
-            retryPayload.put('pageId', pageId);
-            retryPayload.put('formId', formId);
+            retryPayload.put('leadId', lId);
+            retryPayload.put('pageId', pId);
+            retryPayload.put('formId', fId);
             retryPayload.put('formName', formName);
             retryPayload.put('leadData', leadData);
             
@@ -317,38 +314,5 @@ global without sharing class MetaLeadWebhook {
             }
         }
         return 'Invalid Lead Data';
-    }
-
-    @AuraEnabled
-    public static List<MVEX__Error_Handling__c> getFailedLeads() {
-        return [SELECT Id, Name, CreatedDate, MVEX__Source_of_Error__c 
-                FROM MVEX__Error_Handling__c 
-                WHERE MVEX__Source_of_Error__c = 'MetaFailedLeads' 
-                ORDER BY CreatedDate DESC LIMIT 50];
-    }
-
-    @AuraEnabled
-    public static String retryFailedLead(String errorRecordId) {
-        try {
-            MVEX__Error_Handling__c err = [SELECT Id, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE Id = :errorRecordId LIMIT 1];
-            if (err == null || String.isBlank(err.MVEX__Error_Body__c)) {
-                return 'Error record not found or body is empty.';
-            }
-            
-            Map<String, Object> retryPayload = (Map<String, Object>) JSON.deserializeUntyped(err.MVEX__Error_Body__c);
-            leadId = (String) retryPayload.get('leadId');
-            pageId = (String) retryPayload.get('pageId');
-            formId = (String) retryPayload.get('formId');
-            String fName = (String) retryPayload.get('formName');
-            Map<String, Object> lData = (Map<String, Object>) retryPayload.get('leadData');
-            
-            String result = createSalesforceContact(lData, fName);
-            if (result == 'Success') {
-                delete err;
-            }
-            return result;
-        } catch (Exception e) {
-            return 'Retry Error: ' + e.getMessage();
-        }
     }
 }

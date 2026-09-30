@@ -302,7 +302,7 @@ public with sharing class MetaAdsFormMappingController {
             String fName = (String) retryPayload.get('formName');
             Map<String, Object> lData = (Map<String, Object>) retryPayload.get('leadData');
             
-            String result = MetaLeadWebhook.createSalesforceContact(lData, fName, pId, fId, lId);
+            String result = MetaLeadWebhook.createSalesforceContact(lData, fName, pId, fId, lId, true);
             if (result == 'Success') {
                 delete err;
             }

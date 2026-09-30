@@ -381,6 +381,7 @@
                             <c-spinner-component></c-spinner-component>
                         </template>
 
+                        <template if:true={isFailedWizardStep1}>
                         <template if:true={failedLeads.length}>
                             <div class="table-content">
                                 <table class="slds-table" style="width: 100%;">
@@ -397,7 +398,7 @@
                                                 <td style="padding: 10px;">{lead.Name}</td>
                                                 <td style="padding: 10px;">{lead.Date}</td>
                                                 <td style="text-align: center; padding: 10px;">
-                                                    <button class="blue-btn-css" data-id={lead.Id} onclick={retryLead} style="padding: 4px 12px; height: auto;">Retry</button>
+                                                    <button class="blue-btn-css" data-id={lead.Id} onclick={reviewFailedLead} style="padding: 4px 12px; height: auto;">Review Mapping</button>
                                                 </td>
                                             </tr>
                                         </template>
@@ -410,16 +411,139 @@
                                 No failed leads found for this form.
                             </div>
                         </template>
+                        </template>
+
+                        <!-- Step 2: Mapping Form -->
+                        <template if:true={isFailedWizardStep2}>
+                            <div class="wizard-section">
+                                <div class="mapping-header-row">
+                                    <div class="mapping-header-col">Salesforce Contact Field</div>
+                                    <div class="mapping-header-icon"></div>
+                                    <div class="mapping-header-col">Meta Form Field / Custom Value</div>
+                                    <div class="mapping-header-col" style="flex: 1; padding: 0 10px; font-size: 12px; font-weight: 700; color: #4b5563; text-transform: uppercase;">Lead Data</div>
+                                </div>
+                                <template for:each={currentFormFields} for:item="field">
+                                    <div key={field.key} class={field.rowClass}>
+                                        <div class="mapping-col">
+                                            <template if:true={field.required}>
+                                                <span class="required-badge">Required</span>
+                                            </template>
+                                            <div class="meta-field-pill">{field.label}</div>
+                                        </div>
+                                        <div class="mapping-icon">&#10145;</div>
+                                        <div class="mapping-col">
+                                            <lightning-combobox
+                                                data-key={field.key}
+                                                value={field.sourceType}
+                                                options={field.sourceOptions}
+                                                onchange={handleSourceTypeChange}
+                                                placeholder="-- Do Not Map --"
+                                                variant="label-hidden"
+                                                class="custom-combobox">
+                                            </lightning-combobox>
+                                            
+                                            <template if:true={field.isMetaField}>
+                                                <lightning-combobox
+                                                    data-key={field.key}
+                                                    value={field.metaField}
+                                                    options={field.metaOptions}
+                                                    onchange={handleMetaFieldChange}
+                                                    placeholder="-- Select Meta Form Field --"
+                                                    variant="label-hidden"
+                                                    class="custom-combobox mapping-secondary-input">
+                                                </lightning-combobox>
+                                            </template>
+
+                                            <template if:true={field.isCustomValue}>
+                                                <template if:true={field.isReferenceField}>
+                                                    <lightning-record-picker 
+                                                        data-key={field.key} 
+                                                        label={field.label} 
+                                                        placeholder="Search and select record" 
+                                                        object-api-name={field.referenceTo} 
+                                                        value={field.customValue} 
+                                                        onchange={handleReferenceChange} 
+                                                        class="mapping-secondary-input">
+                                                    </lightning-record-picker>
+                                                </template>
+                                                <template if:false={field.isReferenceField}>
+                                                    <lightning-input 
+                                                        data-key={field.key} 
+                                                        type="text" 
+                                                        value={field.customValue} 
+                                                        onchange={handleCustomValueChange} 
+                                                        placeholder="Enter custom value" 
+                                                        variant="label-hidden" 
+                                                        class="mapping-secondary-input">
+                                                    </lightning-input>
+                                                </template>
+                                            </template>
+
+                                            <template if:true={field.showRequiredError}>
+                                                <div class="wizard-hint-error">This required field must be mapped.</div>
+                                            </template>
+                                        </div>
+                                        
+                                        <div class="mapping-col" style="flex: 1; padding-left: 10px; align-self: flex-start; margin-top: 2px;">
+                                            <template if:true={field.failedLeadValue}>
+                                                <div style="background: #f3f4f6; padding: 6px 12px; border-radius: 4px; font-size: 13px; color: #374151; word-break: break-all;">
+                                                    {field.failedLeadValue}
+                                                </div>
+                                            </template>
+                                            <template if:false={field.failedLeadValue}>
+                                                <div style="font-size: 13px; color: #9ca3af; font-style: italic; padding: 6px 12px;">No data provided</div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div class="add-field-section">
+                                    <template if:false={showAddField}>
+                                        <button type="button" class="add-field-btn" onclick={handleShowAddField}>
+                                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                                                <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                            </svg>
+                                            Add Field
+                                        </button>
+                                    </template>
+                                    <template if:true={showAddField}>
+                                        <div class="add-field-row">
+                                            <lightning-combobox
+                                                name="addField"
+                                                label=""
+                                                value={selectedAdditionalField}
+                                                options={additionalFieldOptions}
+                                                onchange={handleAddFieldChange}
+                                                placeholder="Select field to add..."
+                                                variant="label-hidden"
+                                                class="custom-combobox add-field-combobox">
+                                            </lightning-combobox>
+                                            <button type="button" class="blue-btn-css add-field-save-btn" onclick={handleAddField}>Add</button>
+                                            <button type="button" class="cancel_btn_css add-field-cancel-btn" onclick={handleCancelAddField}>Cancel</button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                     
                     <!-- Footer -->
                     <div class="footerbtns">
-                        <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeFailedLeadsModal}>
-                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
-                            </svg>
-                            Close
-                        </button>
+                        <template if:true={isFailedWizardStep1}>
+                            <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeFailedLeadsModal}>
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
+                                </svg>
+                                Close
+                            </button>
+                        </template>
+                        <template if:true={isFailedWizardStep2}>
+                            <button class="cancel_btn_css" aria-label="Back" onclick={backToFailedLeadsList}>
+                                Back
+                            </button>
+                            <button class="blue-btn-css" aria-label="Save and Retry" onclick={saveAndRetryFailedLead}>
+                                Save & Retry
+                            </button>
+                        </template>
                     </div>
                 </div>
             </div>

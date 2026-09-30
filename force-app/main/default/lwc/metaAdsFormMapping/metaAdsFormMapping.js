@@ -46,9 +46,15 @@ export default class MetaAdsFormMapping extends LightningElement {
     pendingRow = null;
 
     @track isFailedLeadsModalOpen = false;
+    @track failedWizardStep = 1;
+    @track activeFailedLeadId = null;
+    failedLeadDataMap = {};
     @track failedLeads = [];
     @track isRetrying = false;
     selectedFailedLeadsFormId = '';
+    
+    get isFailedWizardStep1() { return this.failedWizardStep === 1; }
+    get isFailedWizardStep2() { return this.failedWizardStep === 2; }
 
     // Overall JSON state — { pageId: { pageName, forms: { formId: { formName, mappings: {} } } } }
     fullMappingJson = {};
@@ -476,8 +482,13 @@ export default class MetaAdsFormMapping extends LightningElement {
         this.currentFormFields = this.currentFormFields.map(f => {
             if (f.key === sfKey) {
                 let isMapped = (f.sourceType === SOURCE_META && metaField) || (f.sourceType === SOURCE_CUSTOM && f.customValue?.trim());
+                let leadVal = f.failedLeadValue;
+                if (this.failedWizardStep === 2 && this.failedLeadDataMap) {
+                    leadVal = this.failedLeadDataMap[metaField] || '';
+                }
                 return Object.assign({}, f, {
                     metaField: metaField,
+                    failedLeadValue: leadVal,
                     showRequiredError: f.required && !isMapped,
                     rowClass: (f.required && !isMapped)
                         ? 'mapping-row mapping-row--required mapping-row--error'
@@ -846,6 +857,9 @@ export default class MetaAdsFormMapping extends LightningElement {
     // --- Failed Leads Actions ---
     async openFailedLeadsModal(event) {
         this.selectedFailedLeadsFormId = event.currentTarget.dataset.id;
+        this.failedWizardStep = 1;
+        this.activeFailedLeadId = null;
+        this.failedLeadDataMap = {};
         this.isFailedLeadsModalOpen = true;
         await this.loadFailedLeads();
     }
@@ -853,6 +867,9 @@ export default class MetaAdsFormMapping extends LightningElement {
     closeFailedLeadsModal() {
         this.isFailedLeadsModalOpen = false;
         this.selectedFailedLeadsFormId = '';
+        this.failedWizardStep = 1;
+        this.activeFailedLeadId = null;
+        this.failedLeadDataMap = {};
     }
 
     async loadFailedLeads() {
@@ -863,7 +880,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                 return {
                     Id: r.Id,
                     Name: r.Name,
-                    Date: new Date(r.CreatedDate).toLocaleString()
+                    Date: new Date(r.CreatedDate).toLocaleString(),
+                    Body: r.MVEX__Error_Body__c
                 };
             });
         } catch (error) {
@@ -873,19 +891,138 @@ export default class MetaAdsFormMapping extends LightningElement {
         }
     }
 
-    async retryLead(event) {
-        const errorId = event.target.dataset.id;
+    async reviewFailedLead(event) {
+        const leadId = event.currentTarget.dataset.id;
+        const failedLead = this.failedLeads.find(l => l.Id === leadId);
+        if (!failedLead) return;
+
+        this.activeFailedLeadId = leadId;
+        this.failedWizardStep = 2;
+        
+        let payload = {};
+        try {
+            payload = JSON.parse(failedLead.Body);
+        } catch (e) {
+            console.error('Failed to parse error body', e);
+        }
+
+        this.failedLeadDataMap = {};
+        if (payload.leadData && payload.leadData.field_data) {
+            payload.leadData.field_data.forEach(field => {
+                if (field.name && field.values && field.values.length > 0) {
+                    this.failedLeadDataMap[field.name] = field.values[0];
+                }
+            });
+        }
+
+        let pageId = payload.pageId;
+        if (!pageId) {
+            for (let page of this.tableData) {
+                if (page.forms && page.forms.some(f => f.id === this.selectedFailedLeadsFormId)) {
+                    pageId = page.id;
+                    break;
+                }
+            }
+        }
+        
+        this.selectedPageId = pageId;
+        this.selectedFormId = this.selectedFailedLeadsFormId;
+
+        if (!this.availableForms || !this.availableForms.some(f => String(f.id) === String(this.selectedFormId))) {
+            try {
+                this.isRetrying = true;
+                const formsRes = await getLeadForms({ pageId: this.selectedPageId });
+                if (formsRes && formsRes.success && formsRes.forms) {
+                    this.availableForms = formsRes.forms;
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.isRetrying = false;
+            }
+        }
+
+        this.handleFormSelection({ detail: { value: this.selectedFormId } });
+        
+        this.currentFormFields = this.currentFormFields.map(f => {
+            let leadValue = '';
+            if (f.sourceType === SOURCE_META && f.metaField) {
+                leadValue = this.failedLeadDataMap[f.metaField] || '';
+            }
+            return {
+                ...f,
+                failedLeadValue: leadValue
+            };
+        });
+    }
+
+    backToFailedLeadsList() {
+        this.failedWizardStep = 1;
+        this.activeFailedLeadId = null;
+        this.failedLeadDataMap = {};
+    }
+
+    async saveAndRetryFailedLead() {
+        const unmappedRequired = [];
+        this.currentFormFields.forEach(f => {
+            const isMapped = (f.sourceType === SOURCE_META && f.metaField) || (f.sourceType === SOURCE_CUSTOM && f.customValue?.trim());
+            if (f.required && !isMapped) {
+                unmappedRequired.push(f.label);
+            }
+        });
+        
+        if (unmappedRequired.length > 0) {
+            const names = unmappedRequired.join(', ');
+            this.showToast('Validation Error', `The following required Salesforce fields must be mapped before saving: ${names}`, 'error');
+            return;
+        }
+
+        let formMapping = {};
+        this.currentFormFields.forEach(f => {
+            if (f.sourceType === SOURCE_META && f.metaField) {
+                formMapping[f.key] = { sourceType: SOURCE_META, metaField: f.metaField };
+            } else if (f.sourceType === SOURCE_CUSTOM && f.customValue?.trim()) {
+                formMapping[f.key] = { sourceType: SOURCE_CUSTOM, customValue: f.customValue.trim() };
+            }
+        });
+
+        let pageName = this.availablePages.find(p => String(p.id) === String(this.selectedPageId))?.name || 'Page ID: ' + this.selectedPageId;
+        let formName = this.availableForms.find(f => String(f.id) === String(this.selectedFormId))?.name || 'Form ID: ' + this.selectedFormId;
+
+        if (this.fullMappingJson[this.selectedPageId] && this.fullMappingJson[this.selectedPageId].forms === undefined) {
+             let oldForms = this.fullMappingJson[this.selectedPageId];
+             let migratedForms = {};
+             for (let oldFId in oldForms) {
+                 migratedForms[oldFId] = { formName: 'Form ID: ' + oldFId, mappings: oldForms[oldFId] };
+             }
+             this.fullMappingJson[this.selectedPageId] = { pageName: pageName, forms: migratedForms };
+        } else if (!this.fullMappingJson[this.selectedPageId]) {
+            this.fullMappingJson[this.selectedPageId] = { pageName: pageName, forms: {} };
+        }
+        
+        this.fullMappingJson[this.selectedPageId].forms[this.selectedFormId] = { formName: formName, mappings: formMapping };
+
         this.isRetrying = true;
         try {
-            const result = await retryFailedLead({ errorRecordId: errorId });
-            if (result === 'Success') {
-                this.showToast('Success', 'Lead successfully inserted!', 'success');
-                await this.loadFailedLeads();
+            const jsonStr = JSON.stringify(this.fullMappingJson);
+            const result = await saveMappingApex({ mappingJson: jsonStr, pageId: this.selectedPageId });
+            
+            if (result && result.success) {
+                this.buildTableData(); 
+                
+                const retryRes = await retryFailedLead({ errorRecordId: this.activeFailedLeadId });
+                if (retryRes === 'Success') {
+                    this.showToast('Success', 'Mapping saved and Lead successfully inserted!', 'success');
+                    this.failedWizardStep = 1;
+                    await this.loadFailedLeads();
+                } else {
+                    this.showToast('Retry Failed', retryRes, 'error');
+                }
             } else {
-                this.showToast('Retry Failed', result, 'error');
+                this.showToast('Error', result.message || 'Error saving mapping.', 'error');
             }
         } catch (error) {
-            this.showToast('Retry Error', error.body ? error.body.message : error.message, 'error');
+            this.showToast('Error', error.body ? error.body.message : error.message, 'error');
         } finally {
             this.isRetrying = false;
         }

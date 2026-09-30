@@ -149,6 +149,14 @@ global without sharing class MetaLeadWebhook {
     
 
     public static String createSalesforceContact(Map<String, Object> leadData, String formName, String pId, String fId, String lId) {
+        return createSalesforceContact(leadData, formName, pId, fId, lId, false, null);
+    }
+
+    public static String createSalesforceContact(Map<String, Object> leadData, String formName, String pId, String fId, String lId, Boolean isRetry) {
+        return createSalesforceContact(leadData, formName, pId, fId, lId, isRetry, null);
+    }
+
+    public static String createSalesforceContact(Map<String, Object> leadData, String formName, String pId, String fId, String lId, Boolean isRetry, String mappingJsonOverride) {
         if (leadData.containsKey('id') || String.isNotBlank(lId)) {
             Contact newContact = new Contact();
 
@@ -171,9 +179,18 @@ global without sharing class MetaLeadWebhook {
             Map<String, List<String>> metaToSfFields = new Map<String, List<String>>();
             Map<String, String> sfToCustomValue = new Map<String, String>();
             try {
-                List<MVEX__Configuration_Settings__c> settings = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Meta Ads Mappings' LIMIT 1];
-                if (!settings.isEmpty() && String.isNotBlank(settings[0].MVEX__Fields_Data__c)) {
-                    Map<String, Object> rootJson = (Map<String, Object>) JSON.deserializeUntyped(settings[0].MVEX__Fields_Data__c);
+                String mappingJsonData = '';
+                if (String.isNotBlank(mappingJsonOverride)) {
+                    mappingJsonData = mappingJsonOverride;
+                } else {
+                    List<MVEX__Configuration_Settings__c> settings = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Meta Ads Mappings' LIMIT 1];
+                    if (!settings.isEmpty()) {
+                        mappingJsonData = settings[0].MVEX__Fields_Data__c;
+                    }
+                }
+                
+                if (String.isNotBlank(mappingJsonData)) {
+                    Map<String, Object> rootJson = (Map<String, Object>) JSON.deserializeUntyped(mappingJsonData);
                     
                     if (rootJson.containsKey(pId)) {
                         Map<String, Object> pageObj = (Map<String, Object>) rootJson.get(pId);
@@ -290,10 +307,12 @@ global without sharing class MetaLeadWebhook {
             try {
                 Database.SaveResult sr = Database.insert(newContact, false);
                 if (!sr.isSuccess()) {
-                    MVEX__Error_Handling__c errRec = new MVEX__Error_Handling__c();
-                    errRec.MVEX__Error_Body__c = JSON.serializePretty(retryPayload);
-                    errRec.MVEX__Source_of_Error__c = 'MetaFailedLeads';
-                    insert errRec;
+                    if (!isRetry) {
+                        MVEX__Error_Handling__c errRec = new MVEX__Error_Handling__c();
+                        errRec.MVEX__Error_Body__c = JSON.serializePretty(retryPayload);
+                        errRec.MVEX__Source_of_Error__c = 'MetaFailedLeads';
+                        insert errRec;
+                    }
                     return sr.getErrors()[0].getMessage();
                 }
                 return 'Success';

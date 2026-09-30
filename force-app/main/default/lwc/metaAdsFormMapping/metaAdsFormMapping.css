@@ -372,7 +372,6 @@
 .mapping-icon {
     color: #9ca3af;
     font-size: 18px;
-    margin-top: 20px;
 }
 
 .custom-select {
@@ -494,6 +493,32 @@
     color: #6b7280;
 }
 
+.mapping-header-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    padding: 0 12px;
+}
+
+.mapping-header-col {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4a4a4a;
+    font-family: 'Mulish';
+}
+
+.mapping-header-icon {
+    width: 18px;
+    flex-shrink: 0;
+}
+
+.mapping-secondary-input {
+    margin-top: 8px;
+}
+
 .meta-field-pill {
     padding: 8px 12px;
     background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%);
@@ -510,7 +535,7 @@
     border: 1px solid #fbbf24;
     border-radius: 8px;
     padding: 8px;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .mapping-row--error {
@@ -522,7 +547,7 @@
 .required-badge {
     display: inline-flex;
     align-items: center;
-    margin-left: 6px;
+    margin: 6px;
     padding: 2px 8px;
     background: #dc2626;
     color: #fff;
@@ -532,4 +557,68 @@
     letter-spacing: 0.4px;
     text-transform: uppercase;
     vertical-align: middle;
+}
+
+.add-field-section {
+    margin-top: 14px;
+    padding: 4px 0 12px 0;
+}
+
+.add-field-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 14px;
+    background: #ffffff;
+    color: #0176D3;
+    border: 1px dashed #0176D3;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.add-field-btn:hover {
+    background: #f3f8fd;
+    border-color: #014486;
+    color: #014486;
+}
+
+.add-field-box {
+    padding: 14px;
+    background: #ffffff;
+    border: 1px solid #d8dde6;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.add-field-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 10px;
+}
+
+.add-field-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-field-combobox {
+    flex: 1;
+}
+
+@media only screen and (max-width: 600px) {
+    .add-field-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .add-field-controls button {
+        width: 100%;
+    }
 }

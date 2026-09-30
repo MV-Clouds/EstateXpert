@@ -228,35 +228,88 @@
                                         Map Fields
                                     </div>
                                     <template if:true={currentFormFields.length}>
+                                        <div class="mapping-header-row">
+                                            <div class="mapping-header-col">Salesforce Contact Field</div>
+                                            <div class="mapping-header-icon"></div>
+                                            <div class="mapping-header-col">Meta Form Field / Custom Value</div>
+                                        </div>
                                         <template for:each={currentFormFields} for:item="field">
                                             <div key={field.key} class={field.rowClass}>
                                                 <div class="mapping-col">
-                                                    <div class="filter_label_css">
-                                                        Salesforce Contact Field
-                                                        <template if:true={field.required}>
-                                                            <span class="required-badge">Required</span>
-                                                        </template>
-                                                    </div>
+                                                    <template if:true={field.required}>
+                                                        <span class="required-badge">Required</span>
+                                                    </template>
                                                     <div class="meta-field-pill">{field.label}</div>
                                                 </div>
                                                 <div class="mapping-icon">&#10145;</div>
                                                 <div class="mapping-col">
-                                                    <div class="filter_label_css">Meta Form Field</div>
                                                     <lightning-combobox
                                                         data-key={field.key}
-                                                        value={field.value}
-                                                        options={field.options}
-                                                        onchange={handleMappingChange}
+                                                        value={field.sourceType}
+                                                        options={field.sourceOptions}
+                                                        onchange={handleSourceTypeChange}
                                                         placeholder="-- Do Not Map --"
                                                         variant="label-hidden"
                                                         class="custom-combobox">
                                                     </lightning-combobox>
+                                                    
+                                                    <template if:true={field.isMetaField}>
+                                                        <lightning-combobox
+                                                            data-key={field.key}
+                                                            value={field.metaField}
+                                                            options={field.metaOptions}
+                                                            onchange={handleMetaFieldChange}
+                                                            placeholder="-- Select Meta Form Field --"
+                                                            variant="label-hidden"
+                                                            class="custom-combobox mapping-secondary-input">
+                                                        </lightning-combobox>
+                                                    </template>
+
+                                                    <template if:true={field.isCustomValue}>
+                                                        <lightning-input 
+                                                            data-key={field.key} 
+                                                            type="text" 
+                                                            value={field.customValue} 
+                                                            onchange={handleCustomValueChange} 
+                                                            placeholder="Enter custom value" 
+                                                            variant="label-hidden" 
+                                                            class="mapping-secondary-input">
+                                                        </lightning-input>
+                                                    </template>
+
                                                     <template if:true={field.showRequiredError}>
                                                         <div class="wizard-hint-error">This required field must be mapped.</div>
                                                     </template>
                                                 </div>
                                             </div>
                                         </template>
+                                        <div class="add-field-section">
+                                            <template if:false={showAddField}>
+                                                <button type="button" class="add-field-btn" onclick={handleShowAddField}>
+                                                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                                                        <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    </svg>
+                                                    Add Field
+                                                </button>
+                                            </template>
+                                            <template if:true={showAddField}>
+                                                <div class="add-field-box">
+                                                    <div class="add-field-title">Add Salesforce Lead Field</div>
+                                                    <div class="add-field-controls">
+                                                        <lightning-combobox value={selectedAdditionalField} options={additionalFieldOptions} onchange={handleAdditionalFieldChange} placeholder="-- Select Salesforce Field --" variant="label-hidden" class="custom-combobox add-field-combobox"></lightning-combobox>
+                                                        <button type="button" class="save_btn_css" onclick={handleAddField} disabled={isAddFieldDisabled}>
+                                                            Add
+                                                        </button>
+                                                        <button type="button" class="cancel_btn_css" onclick={handleCancelAddField}>
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                    <template if:false={hasAdditionalFieldOptions}>
+                                                        <div class="wizard-hint-muted">All available Salesforce fields have already been added.</div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
                                     </template>
                                     <template if:false={currentFormFields.length}>
                                         <div class="wizard-disabled-box">

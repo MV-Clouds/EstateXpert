@@ -241,6 +241,19 @@ global without sharing class MetaLeadWebhook {
                     }
                 }
             }
+            
+            // Apply custom value mappings
+            for (String metaField : currentFormMapping.keySet()) {
+                if (metaField.startsWith('"') && metaField.endsWith('"')) {
+                    String sfField = currentFormMapping.get(metaField);
+                    String customValue = metaField.substring(1, metaField.length() - 1);
+                    try {
+                        newContact.put(sfField, customValue);
+                    } catch (Exception e) {
+                        System.debug('Failed to map custom value ' + customValue + ' to ' + sfField);
+                    }
+                }
+            }
 
             // Append unmapped data to Description if any
             if (String.isNotBlank(unmappedData)) {

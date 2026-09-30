@@ -11,6 +11,16 @@ import retryFailedLead from '@salesforce/apex/MetaAdsFormMappingController.retry
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 
+const SOURCE_META = 'Meta Form Field';
+const SOURCE_CUSTOM = 'Custom Value';
+
+const DEFAULT_SALESFORCE_FIELDS = [
+    'FirstName',
+    'LastName',
+    'Email',
+    'Phone'
+];
+
 export default class MetaAdsFormMapping extends LightningElement {
     
     @track isLoading = true;
@@ -28,6 +38,9 @@ export default class MetaAdsFormMapping extends LightningElement {
     @track selectedFormId = '';
     @track currentFormFields = [];   // [{ key, label, value, options }]
     @track formsLoaded = false;      // true once forms have been fetched for selected page
+    @track availableSalesforceFields = [];
+    @track showAddField = false;
+    @track selectedAdditionalField = '';
 
     pendingAction = null;
     pendingRow = null;
@@ -225,6 +238,9 @@ export default class MetaAdsFormMapping extends LightningElement {
         this.selectedFormId    = '';
         this.availableForms    = [];
         this.currentFormFields = [];
+        this.availableSalesforceFields = [];
+        this.showAddField = false;
+        this.selectedAdditionalField = '';
         this.formsLoaded       = false;
         this.isModalOpen       = true;
     }
@@ -288,7 +304,18 @@ export default class MetaAdsFormMapping extends LightningElement {
                 invertedMappings[existingMappings[mKey]] = mKey;
             }
 
-            this.currentFormFields = this.salesforceLeadFields.map(sf => {
+            const savedFieldKeys = Object.keys(invertedMappings);
+
+            const fieldsToDisplay = this.salesforceLeadFields.filter(sf => {
+                const key = sf.value;
+                const required = sf.required === 'true';
+                const isDefault = DEFAULT_SALESFORCE_FIELDS.includes(key);
+                const isAlreadyMapped = savedFieldKeys.includes(key);
+
+                return (required || isDefault || isAlreadyMapped);
+            });
+
+            this.currentFormFields = fieldsToDisplay.map(sf => {
                 let key = sf.value;
                 let sfType = sf.type ? sf.type.toUpperCase() : 'STRING';
                 
@@ -297,24 +324,53 @@ export default class MetaAdsFormMapping extends LightningElement {
 
                 let required = sf.required === 'true';
 
-                if (!currentValue && required) {
-                    currentValue = this.autoMatchMetaField(key, options);
+                let isCustom = currentValue && currentValue.startsWith('"') && currentValue.endsWith('"');
+                let customVal = isCustom ? currentValue.slice(1, -1) : '';
+                let metaVal = isCustom ? '' : currentValue;
+                let sourceType = '';
+                
+                if (metaVal) sourceType = SOURCE_META;
+                else if (customVal) sourceType = SOURCE_CUSTOM;
+
+                if (!sourceType && required) {
+                    metaVal = this.autoMatchMetaField(key, options);
+                    if (metaVal) sourceType = SOURCE_META;
                 }
 
                 return {
                     key: key,
                     label: sf.label.split(' (')[0],
-                    value: currentValue,
-                    options: options,
+                    sourceType: sourceType,
+                    sourceOptions: [
+                        { label: SOURCE_META, value: SOURCE_META },
+                        { label: SOURCE_CUSTOM, value: SOURCE_CUSTOM }
+                    ],
+                    isMetaField: sourceType === SOURCE_META,
+                    metaField: metaVal,
+                    metaOptions: options,
+                    isCustomValue: sourceType === SOURCE_CUSTOM,
+                    customValue: customVal,
                     required: required,
-                    showRequiredError: required && !currentValue,
-                    rowClass: required && !currentValue
+                    showRequiredError: required && !sourceType,
+                    rowClass: required && !sourceType
                         ? 'mapping-row mapping-row--required mapping-row--error'
                         : (required ? 'mapping-row mapping-row--required' : 'mapping-row')
                 };
             });
+
+            this.availableSalesforceFields = this.salesforceLeadFields.map(sf => {
+                return {
+                    label: sf.label.split(' (')[0],
+                    value: sf.value,
+                    type: sf.type
+                };
+            });
+
+            this.selectedAdditionalField = '';
+            this.showAddField = false;
         } else {
             this.currentFormFields = [];
+            this.availableSalesforceFields = [];
         }
     }
 
@@ -376,16 +432,19 @@ export default class MetaAdsFormMapping extends LightningElement {
         return options;
     }
 
-    handleMappingChange(event) {
+    handleSourceTypeChange(event) {
         const sfKey = event.target.dataset.key;
-        const metaField = event.detail.value;
+        const type = event.detail.value;
 
         this.currentFormFields = this.currentFormFields.map(f => {
             if (f.key === sfKey) {
+                let isMapped = (type === SOURCE_META && f.metaField) || (type === SOURCE_CUSTOM && f.customValue?.trim());
                 return Object.assign({}, f, {
-                    value: metaField,
-                    showRequiredError: f.required && !metaField,
-                    rowClass: (f.required && !metaField)
+                    sourceType: type,
+                    isMetaField: type === SOURCE_META,
+                    isCustomValue: type === SOURCE_CUSTOM,
+                    showRequiredError: f.required && !isMapped,
+                    rowClass: (f.required && !isMapped)
                         ? 'mapping-row mapping-row--required mapping-row--error'
                         : (f.required ? 'mapping-row mapping-row--required' : 'mapping-row')
                 });
@@ -394,11 +453,127 @@ export default class MetaAdsFormMapping extends LightningElement {
         });
     }
 
+    handleMetaFieldChange(event) {
+        const sfKey = event.target.dataset.key;
+        const metaField = event.detail.value;
+
+        this.currentFormFields = this.currentFormFields.map(f => {
+            if (f.key === sfKey) {
+                let isMapped = (f.sourceType === SOURCE_META && metaField) || (f.sourceType === SOURCE_CUSTOM && f.customValue?.trim());
+                return Object.assign({}, f, {
+                    metaField: metaField,
+                    showRequiredError: f.required && !isMapped,
+                    rowClass: (f.required && !isMapped)
+                        ? 'mapping-row mapping-row--required mapping-row--error'
+                        : (f.required ? 'mapping-row mapping-row--required' : 'mapping-row')
+                });
+            }
+            return f;
+        });
+    }
+
+    handleCustomValueChange(event) {
+        const sfKey = event.target.dataset.key;
+        const customValue = event.target.value;
+
+        this.currentFormFields = this.currentFormFields.map(f => {
+            if (f.key === sfKey) {
+                let isMapped = (f.sourceType === SOURCE_META && f.metaField) || (f.sourceType === SOURCE_CUSTOM && customValue?.trim());
+                return Object.assign({}, f, {
+                    customValue: customValue,
+                    showRequiredError: f.required && !isMapped,
+                    rowClass: (f.required && !isMapped)
+                        ? 'mapping-row mapping-row--required mapping-row--error'
+                        : (f.required ? 'mapping-row mapping-row--required' : 'mapping-row')
+                });
+            }
+            return f;
+        });
+    }
+
+    // Add Field Logic
+    get additionalFieldOptions() {
+        return this.availableSalesforceFields
+            .filter(field => !this.currentFormFields.some(current => current.key === field.value))
+            .map(field => ({
+                label: field.label,
+                value: field.value
+            }));
+    }
+
+    get hasAdditionalFieldOptions() {
+        return this.additionalFieldOptions.length > 0;
+    }
+
+    get isAddFieldDisabled() {
+        return !this.selectedAdditionalField;
+    }
+
+    handleAdditionalFieldChange(event) {
+        this.selectedAdditionalField = event.detail.value;
+    }
+
+    handleShowAddField() {
+        this.showAddField = true;
+    }
+
+    handleCancelAddField() {
+        this.selectedAdditionalField = '';
+        this.showAddField = false;
+    }
+
+    handleAddField() {
+        const fieldKey = this.selectedAdditionalField;
+
+        if (!fieldKey) {
+            return;
+        }
+
+        const salesforceField = this.availableSalesforceFields.find(field => field.value === fieldKey);
+
+        if (!salesforceField) {
+            return;
+        }
+
+        const form = this.availableForms.find(f => String(f.id) === String(this.selectedFormId));
+        let sfType = salesforceField.type ? salesforceField.type.toUpperCase() : 'STRING';
+        let options = form && form.questions ? this.getFilteredMetaFieldOptions(form.questions, sfType) : [];
+
+        const newField = {
+            key: salesforceField.value,
+            label: salesforceField.label,
+            required: false,
+            sourceType: '',
+            googleField: '',
+            customValue: '',
+            metaField: '',
+            metaOptions: options,
+            sourceOptions: [
+                { label: SOURCE_META, value: SOURCE_META },
+                { label: SOURCE_CUSTOM, value: SOURCE_CUSTOM }
+            ],
+            isMetaField: false,
+            isCustomValue: false,
+            showRequiredError: false,
+            rowClass: 'mapping-row'
+        };
+
+        this.currentFormFields = [...this.currentFormFields, newField];
+        this.selectedAdditionalField = '';
+        this.showAddField = false;
+    }
+
     async saveMapping() {
-        const unmappedRequired = this.currentFormFields.filter(f => f.required && !f.value);
+        const unmappedRequired = [];
+        this.currentFormFields.forEach(f => {
+            const isMapped = (f.sourceType === SOURCE_META && f.metaField) || (f.sourceType === SOURCE_CUSTOM && f.customValue?.trim());
+            if (f.required && !isMapped) {
+                unmappedRequired.push(f.label);
+            }
+        });
         
         if (unmappedRequired.length > 0) {
-            const names = unmappedRequired.map(f => f.label).join(', ');
+            const names = unmappedRequired.join(', ');
             this.showToast('Validation Error',
                 `The following required Salesforce fields must be mapped before saving: ${names}`,
                 'error');
@@ -407,8 +582,10 @@ export default class MetaAdsFormMapping extends LightningElement {
 
         let formMapping = {};
         this.currentFormFields.forEach(f => {
-            if (f.value) {
-                formMapping[f.value] = f.key;
+            if (f.sourceType === SOURCE_META && f.metaField) {
+                formMapping[f.metaField] = f.key;
+            } else if (f.sourceType === SOURCE_CUSTOM && f.customValue) {
+                formMapping[`"${f.customValue}"`] = f.key;
             }
         });
 

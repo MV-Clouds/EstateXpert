@@ -70,32 +70,6 @@ public with sharing class IntegrationPopupController {
     
                 upsert as user instagramSettings;
 
-            } else if (integrationType == 'Google') {
-                MVEX__GoogleLeadConfig__c googleSettings = MVEX__GoogleLeadConfig__c.getOrgDefaults();
-                if (googleSettings == null) {
-                    googleSettings = new MVEX__GoogleLeadConfig__c();
-                    googleSettings.SetupOwnerId = UserInfo.getOrganizationId();
-                }
-    
-                for (String apiName : stringFieldMap.keySet()) {
-                    googleSettings.put(apiName, stringFieldMap.get(apiName));
-                }
-    
-                upsert as user googleSettings;
-
-            } else if (integrationType == 'Meta') {
-                MVEX__MetaLeadConfig__c metaSettings = MVEX__MetaLeadConfig__c.getOrgDefaults();
-                if (metaSettings == null) {
-                    metaSettings = new MVEX__MetaLeadConfig__c();
-                    metaSettings.SetupOwnerId = UserInfo.getOrganizationId();
-                }
-    
-                for (String apiName : stringFieldMap.keySet()) {
-                    metaSettings.put(apiName, stringFieldMap.get(apiName));
-                }
-    
-                upsert as user metaSettings;
-
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'saveSettings', 'Error while saving settings.');
@@ -253,39 +227,6 @@ public with sharing class IntegrationPopupController {
     }
 
     /**
-    * Method Name : get
-    * @return List<GoogleAdsDataWrapper> : Wrapper class to store social media data.
-    * @description : Method to get social media data.
-    */
-    @AuraEnabled
-    public static List<FieldWrapperData> getGoogleData() {
-        List<FieldWrapperData> wrapperList = new List<FieldWrapperData>();
-
-        try {
-            MVEX__GoogleLeadConfig__c googleAdsCredential = MVEX__GoogleLeadConfig__c.getOrgDefaults();
-            MVEX__MetaLeadConfig__c metaPageCredential = MVEX__MetaLeadConfig__c.getOrgDefaults();
-
-            FieldWrapperData googleAdsWrapper = new FieldWrapperData();
-            googleAdsWrapper.integrationName = 'GoogleAds';
-            googleAdsWrapper.isValid = googleAdsCredential.MVEX__Google_lead_Form_Secret__c != null && googleAdsCredential.MVEX__Google_Ads_Endpoint__c != null;
-            googleAdsWrapper.integrationData = googleAdsCredential;
-            wrapperList.add(googleAdsWrapper);
-
-            FieldWrapperData metaWrapper = new FieldWrapperData();
-            metaWrapper.integrationName = 'Meta';
-            metaWrapper.isValid = metaPageCredential.MVEX__ACCESS_TOKEN__c != null && metaPageCredential.MVEX__APP_SECRET__c != null;
-            metaWrapper.integrationData = metaPageCredential;
-            wrapperList.add(metaWrapper);
-
-            return wrapperList;
-
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'getSocialMediaData', 'Error while getting social media data.');
-            return null;
-        }
-    }
-
-    /**
     * Class Name : FieldWrapperData
     * @description : Wrapper class to store integration data.
     */
@@ -423,30 +364,6 @@ public with sharing class IntegrationPopupController {
     }
 
     /**
-    * Method Name : revokeGoogleAccess
-    * @param recordId : String to stored the record id.
-    * @return String : Status of revoke access.
-    * @description : Method to revoke google access.
-    */
-    @AuraEnabled
-    public static string revokeGoogleAccess(String recordId,String integrationType){
-        try {
-            if(integrationType == 'Google'){
-                delete as user new MVEX__GoogleLeadConfig__c(Id = recordId);
-                return 'success';
-            } else if(integrationType == 'Meta'){
-                delete as user new MVEX__MetaLeadConfig__c(Id = recordId);
-                return 'success';
-            } else {
-                return 'No integrationType match found';
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'revokeGoogleAccess', 'Error while revoking whatsapp access.');
-            return e.getMessage();
-        }
-    }
-
-    /**
     * Class Name : FieldWrapper
     * @description : Wrapper class for storing field details
     */
@@ -466,33 +383,27 @@ public with sharing class IntegrationPopupController {
         FieldWrapper result = new FieldWrapper();
         try {
             if (integrationType == 'Gmail') {
-                MVEX__GmailConfig__c settings = MVEX__GmailConfig__c.getOrgDefaults();
+                MVEX__GmailConfig__c gmailSettings = MVEX__GmailConfig__c.getOrgDefaults();
 
-                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where MVEX__Integration_Type__c = :integrationType LIMIT 1];
+                List<OAuth_Configuration__mdt> gmailOAuth = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Gmail_OAuth' WITH USER_MODE LIMIT 1];
                 
-                if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
-                    String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
-                    if(parts.size() >= 3) {
-                        settings.MVEX__Client_ID__c = parts[0];
-                        settings.MVEX__Client_Secret__c = parts[1];
-                        settings.MVEX__Redirect_URI__c = parts[2];
-                    }
+                if(!gmailOAuth.isEmpty()) {
+                    gmailSettings.MVEX__Client_ID__c = gmailOAuth[0].Client_Id__c;
+                    gmailSettings.MVEX__Client_Secret__c = gmailOAuth[0].Client_Secret__c;
+                    gmailSettings.MVEX__Redirect_URI__c = gmailOAuth[0].Redirect_URI__c;
                 }
                 
-                result.objectData = settings;
-                result.siteUrl = settings.MVEX__Redirect_URI__c;
+                result.objectData = gmailSettings;
+                result.siteUrl = gmailSettings.MVEX__Redirect_URI__c;
             } else if (integrationType == 'Instagram') {
                 MVEX__IG_Configuration__c instaSettings = MVEX__IG_Configuration__c.getOrgDefaults();
 
-                List<MVEX__recordManagerConfig__mdt> mdtList = [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where MVEX__Integration_Type__c = :integrationType LIMIT 1];
+                List<OAuth_Configuration__mdt> instaOAuth = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Instagram_OAuth' WITH USER_MODE LIMIT 1];
                 
-                if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
-                    String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
-                    if(parts.size() >= 3) {
-                        instaSettings.MVEX__ClientId__c = parts[0];
-                        instaSettings.MVEX__ClientSecret__c = parts[1];
-                        instaSettings.MVEX__Redirect_URI__c = parts[2];
-                    }
+                if(!instaOAuth.isEmpty()) {
+                    instaSettings.MVEX__ClientId__c = instaOAuth[0].Client_Id__c;
+                    instaSettings.MVEX__ClientSecret__c = instaOAuth[0].Client_Secret__c;
+                    instaSettings.MVEX__Redirect_URI__c = instaOAuth[0].Redirect_URI__c;
                 }
 
                 result.objectData = instaSettings;
@@ -623,21 +534,15 @@ public with sharing class IntegrationPopupController {
         }
 
         // Fetch Client ID and Client Secret from Custom Metadata
-        String metaClientId     = clientId != null ? clientId.trim() : '';
+        String metaClientId = clientId != null ? clientId.trim() : '';
         String metaClientSecret = '';
 
-        List<MVEX__recordManagerConfig__mdt> mdtList = [
-            SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt
-            WHERE MVEX__Integration_Type__c = 'Gmail' LIMIT 1
-        ];
-        if (!mdtList.isEmpty() && String.isNotBlank(mdtList[0].MVEX__FieldsData__c)) {
-            String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
-            if (parts.size() >= 2) {
-                if (String.isBlank(metaClientId) && String.isNotBlank(parts[0])) {
-                    metaClientId = parts[0].trim();
-                }
-                metaClientSecret = parts[1].trim();
+        List<OAuth_Configuration__mdt> gmailOAuth = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Gmail_OAuth' WITH USER_MODE LIMIT 1];
+        if (!gmailOAuth.isEmpty()) {
+            if (String.isBlank(metaClientId) && String.isNotBlank(gmailOAuth[0].Client_Id__c)) {
+                metaClientId = gmailOAuth[0].Client_Id__c.trim();
             }
+            metaClientSecret = gmailOAuth[0].Client_Secret__c.trim();
         }
 
         if (String.isBlank(metaClientId) || String.isBlank(metaClientSecret)) {

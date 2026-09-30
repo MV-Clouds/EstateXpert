@@ -305,7 +305,10 @@ global without sharing class MetaLeadWebhook {
             retryPayload.put('leadData', leadData);
             
             try {
-                Database.SaveResult sr = Database.insert(newContact, false);
+                Database.DMLOptions dml = new Database.DMLOptions();
+                dml.DuplicateRuleHeader.allowSave = true;
+                dml.DuplicateRuleHeader.runAsCurrentUser = true;
+                Database.SaveResult sr = Database.insert(newContact, dml);
                 if (!sr.isSuccess()) {
                     if (!isRetry) {
                         MVEX__Error_Handling__c errRec = new MVEX__Error_Handling__c();

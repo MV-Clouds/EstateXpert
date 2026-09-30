@@ -288,7 +288,7 @@ public with sharing class MetaAdsFormMappingController {
     }
 
     @AuraEnabled
-    public static String retryFailedLead(String errorRecordId) {
+    public static String retryFailedLead(String errorRecordId, String mappingJsonOverride) {
         try {
             MVEX__Error_Handling__c err = [SELECT Id, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE Id = :errorRecordId LIMIT 1];
             if (err == null || String.isBlank(err.MVEX__Error_Body__c)) {
@@ -302,7 +302,7 @@ public with sharing class MetaAdsFormMappingController {
             String fName = (String) retryPayload.get('formName');
             Map<String, Object> lData = (Map<String, Object>) retryPayload.get('leadData');
             
-            String result = MetaLeadWebhook.createSalesforceContact(lData, fName, pId, fId, lId, true);
+            String result = MetaLeadWebhook.createSalesforceContact(lData, fName, pId, fId, lId, true, mappingJsonOverride);
             if (result == 'Success') {
                 delete err;
             }
@@ -310,5 +310,14 @@ public with sharing class MetaAdsFormMappingController {
         } catch (Exception e) {
             return 'Retry Error: ' + e.getMessage();
         }
+    }
+
+    @AuraEnabled
+    public static Map<String, String> retryMultipleFailedLeads(List<String> errorRecordIds) {
+        Map<String, String> results = new Map<String, String>();
+        for (String recordId : errorRecordIds) {
+            results.put(recordId, retryFailedLead(recordId, null));
+        }
+        return results;
     }
 }

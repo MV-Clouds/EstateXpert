@@ -8,6 +8,7 @@ import saveMappingApex from '@salesforce/apex/MetaAdsFormMappingController.saveM
 import deactivateConnection from '@salesforce/apex/MetaAdsTokenController.deactivateConnection';
 import getFailedLeads from '@salesforce/apex/MetaAdsFormMappingController.getFailedLeads';
 import retryFailedLead from '@salesforce/apex/MetaAdsFormMappingController.retryFailedLead';
+import retryMultipleFailedLeads from '@salesforce/apex/MetaAdsFormMappingController.retryMultipleFailedLeads';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 
@@ -55,6 +56,14 @@ export default class MetaAdsFormMapping extends LightningElement {
     
     get isFailedWizardStep1() { return this.failedWizardStep === 1; }
     get isFailedWizardStep2() { return this.failedWizardStep === 2; }
+
+    get isAllFailedLeadsSelected() {
+        return this.failedLeads.length > 0 && this.failedLeads.every(l => l.selected);
+    }
+
+    get hasSelectedFailedLeads() {
+        return this.failedLeads.some(l => l.selected);
+    }
 
     // Overall JSON state — { pageId: { pageName, forms: { formId: { formName, mappings: {} } } } }
     fullMappingJson = {};
@@ -881,11 +890,54 @@ export default class MetaAdsFormMapping extends LightningElement {
                     Id: r.Id,
                     Name: r.Name,
                     Date: new Date(r.CreatedDate).toLocaleString(),
-                    Body: r.MVEX__Error_Body__c
+                    Body: r.MVEX__Error_Body__c,
+                    selected: false
                 };
             });
         } catch (error) {
             this.showToast('Error', 'Failed to load error records', 'error');
+        } finally {
+            this.isRetrying = false;
+        }
+    }
+
+    handleSelectAllFailedLeads(event) {
+        const isChecked = event.target.checked;
+        this.failedLeads = this.failedLeads.map(l => ({ ...l, selected: isChecked }));
+    }
+
+    handleFailedLeadSelection(event) {
+        const leadId = event.target.dataset.id;
+        const isChecked = event.target.checked;
+        this.failedLeads = this.failedLeads.map(l => {
+            if (l.Id === leadId) {
+                return { ...l, selected: isChecked };
+            }
+            return l;
+        });
+    }
+
+    async retrySelectedFailedLeads() {
+        const selectedIds = this.failedLeads.filter(l => l.selected).map(l => l.Id);
+        if (selectedIds.length === 0) return;
+
+        this.isRetrying = true;
+        try {
+            const results = await retryMultipleFailedLeads({ errorRecordIds: selectedIds });
+            let successCount = 0;
+            let errorCount = 0;
+            for (let id in results) {
+                if (results[id] === 'Success') successCount++;
+                else errorCount++;
+            }
+            if (errorCount === 0) {
+                this.showToast('Success', `Successfully retried ${successCount} leads.`, 'success');
+            } else {
+                this.showToast('Retry Completed', `${successCount} successes, ${errorCount} failures. Please check error logs for details.`, 'warning');
+            }
+            await this.loadFailedLeads();
+        } catch (error) {
+            this.showToast('Error', error.body ? error.body.message : error.message, 'error');
         } finally {
             this.isRetrying = false;
         }
@@ -989,37 +1041,32 @@ export default class MetaAdsFormMapping extends LightningElement {
         let pageName = this.availablePages.find(p => String(p.id) === String(this.selectedPageId))?.name || 'Page ID: ' + this.selectedPageId;
         let formName = this.availableForms.find(f => String(f.id) === String(this.selectedFormId))?.name || 'Form ID: ' + this.selectedFormId;
 
-        if (this.fullMappingJson[this.selectedPageId] && this.fullMappingJson[this.selectedPageId].forms === undefined) {
-             let oldForms = this.fullMappingJson[this.selectedPageId];
+        let tempMappingJson = JSON.parse(JSON.stringify(this.fullMappingJson));
+
+        if (tempMappingJson[this.selectedPageId] && tempMappingJson[this.selectedPageId].forms === undefined) {
+             let oldForms = tempMappingJson[this.selectedPageId];
              let migratedForms = {};
              for (let oldFId in oldForms) {
                  migratedForms[oldFId] = { formName: 'Form ID: ' + oldFId, mappings: oldForms[oldFId] };
              }
-             this.fullMappingJson[this.selectedPageId] = { pageName: pageName, forms: migratedForms };
-        } else if (!this.fullMappingJson[this.selectedPageId]) {
-            this.fullMappingJson[this.selectedPageId] = { pageName: pageName, forms: {} };
+             tempMappingJson[this.selectedPageId] = { pageName: pageName, forms: migratedForms };
+        } else if (!tempMappingJson[this.selectedPageId]) {
+            tempMappingJson[this.selectedPageId] = { pageName: pageName, forms: {} };
         }
         
-        this.fullMappingJson[this.selectedPageId].forms[this.selectedFormId] = { formName: formName, mappings: formMapping };
+        tempMappingJson[this.selectedPageId].forms[this.selectedFormId] = { formName: formName, mappings: formMapping };
 
         this.isRetrying = true;
         try {
-            const jsonStr = JSON.stringify(this.fullMappingJson);
-            const result = await saveMappingApex({ mappingJson: jsonStr, pageId: this.selectedPageId });
+            const jsonStr = JSON.stringify(tempMappingJson);
             
-            if (result && result.success) {
-                this.buildTableData(); 
-                
-                const retryRes = await retryFailedLead({ errorRecordId: this.activeFailedLeadId });
-                if (retryRes === 'Success') {
-                    this.showToast('Success', 'Mapping saved and Lead successfully inserted!', 'success');
-                    this.failedWizardStep = 1;
-                    await this.loadFailedLeads();
-                } else {
-                    this.showToast('Retry Failed', retryRes, 'error');
-                }
+            const retryRes = await retryFailedLead({ errorRecordId: this.activeFailedLeadId, mappingJsonOverride: jsonStr });
+            if (retryRes === 'Success') {
+                this.showToast('Success', 'Lead successfully inserted!', 'success');
+                this.failedWizardStep = 1;
+                await this.loadFailedLeads();
             } else {
-                this.showToast('Error', result.message || 'Error saving mapping.', 'error');
+                this.showToast('Retry Failed', retryRes, 'error');
             }
         } catch (error) {
             this.showToast('Error', error.body ? error.body.message : error.message, 'error');

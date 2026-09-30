@@ -3,7 +3,6 @@ import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import getRecords from '@salesforce/apex/PropertySearchController.getRecords';
 import NoImageFound from '@salesforce/resourceUrl/blankImage';
 import propertyIcons from '@salesforce/resourceUrl/PropertyIcons';
-import location_icon from '@salesforce/resourceUrl/location_icon';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -30,7 +29,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track pageSize = 9;
     @track bathroom_icon = propertyIcons + '/PropertyIcons/Bathroom.png';
     @track bedroom_icon = propertyIcons + '/PropertyIcons/Bedroom.png';
-    @track location_icon = location_icon;
     @track filteredListingData = [];
     @track pagedFilteredListingData = [];
     @track propertyMediaUrls = [];
@@ -1186,7 +1184,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             } else if (this.conditiontype === 'linked') {
                 this.selectedConditionType = 'Linked Listings';
                 this.pagedFilteredListingData = [...this.totalListing];
-                console.log(this.pagedFilteredListingData.length);
 
                 // Show a message if no linked listings found
                 if (this.pagedFilteredListingData.length === 0) {
@@ -1627,9 +1624,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                     totalPages: 0
                 })
                     .then(result => {
-                        if (result === 'Success') {
-                            console.log('Configuration saved successfully');
-                        } else {
+                        if (result !== 'Success') {
                             this.showToast('Error', 'Failed to save configuration: ' + result, 'error');
                         }
                     })
@@ -1705,9 +1700,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             else if (this.conditiontype === 'related') {
                 this.isLoading = true;
                 const filterType = 'related';
-
-                console.log('fetching related listings');
-
 
                 getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
                     .then(result => {

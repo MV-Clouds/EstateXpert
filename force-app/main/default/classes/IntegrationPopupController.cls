@@ -426,7 +426,7 @@ public with sharing class IntegrationPopupController {
     * Method Name : revokeGoogleAccess
     * @param recordId : String to stored the record id.
     * @return String : Status of revoke access.
-    * @description : Method to revoke whatsapp access.
+    * @description : Method to revoke google access.
     */
     @AuraEnabled
     public static string revokeGoogleAccess(String recordId,String integrationType){
@@ -441,7 +441,7 @@ public with sharing class IntegrationPopupController {
                 return 'No integrationType match found';
             }
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'revokeWhatsappAccess', 'Error while revoking whatsapp access.');
+            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'revokeGoogleAccess', 'Error while revoking whatsapp access.');
             return e.getMessage();
         }
     }

@@ -47,13 +47,7 @@ public with sharing class ShowOffersDetailController {
         
         try {
             // First, get the record to find the first offer ID
-            MVEX__Offer__c currentOffer = [
-                SELECT Id, MVEX__First_Offer_Id__c 
-                FROM MVEX__Offer__c 
-                WHERE Id = :recordId 
-                WITH USER_MODE
-                LIMIT 1
-            ];
+            MVEX__Offer__c currentOffer = [SELECT Id, MVEX__First_Offer_Id__c FROM MVEX__Offer__c WHERE Id = :recordId WITH USER_MODE LIMIT 1];
             
             Id firstOfferId = currentOffer.MVEX__First_Offer_Id__c;
             
@@ -64,26 +58,12 @@ public with sharing class ShowOffersDetailController {
             }
             
             // Get all offers related to this first offer
-            Map<Id, MVEX__Offer__c> offerMap = new Map<Id, MVEX__Offer__c>([
-                SELECT Id, 
-                       Name,
-                       MVEX__Offer_Date__c,
-                       MVEX__Offer_Amount__c,
-                       MVEX__Offer_made_by__c,
-                       MVEX__Buyer_Contact__c,
-                       MVEX__Buyer_Contact__r.Name,
-                       MVEX__Seller_Contact__c,
-                       MVEX__Seller_Contact__r.Name,
-                       MVEX__Status__c,
-                       MVEX__Offer_Expiration_Date__c,
-                       MVEX__Description__c,
-                       MVEX__Counter_Offer_for__c,
-                       MVEX__First_Offer_Id__c
-                FROM MVEX__Offer__c 
-                WHERE MVEX__First_Offer_Id__c = :firstOfferId
-                WITH USER_MODE
-                ORDER BY MVEX__Offer_Date__c DESC
-            ]);
+            Map<Id, MVEX__Offer__c> offerMap = new Map<Id, MVEX__Offer__c>([SELECT Id, Name, MVEX__Offer_Date__c, MVEX__Offer_Amount__c, MVEX__Offer_made_by__c,
+                                                                                MVEX__Buyer_Contact__c, MVEX__Buyer_Contact__r.Name, MVEX__Seller_Contact__c,
+                                                                                MVEX__Seller_Contact__r.Name, MVEX__Status__c, MVEX__Offer_Expiration_Date__c,
+                                                                                MVEX__Description__c, MVEX__Counter_Offer_for__c, MVEX__First_Offer_Id__c
+                                                                                FROM MVEX__Offer__c  WHERE MVEX__First_Offer_Id__c = :firstOfferId
+                                                                                WITH USER_MODE ORDER BY MVEX__Offer_Date__c DESC]);
             
             // Build the timeline by following the counter offer chain
             List<OfferWrapper> timeline = new List<OfferWrapper>();

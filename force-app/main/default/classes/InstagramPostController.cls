@@ -271,7 +271,7 @@ public with sharing class InstagramPostController {
             String userName = UserInfo.getName();
             String errorEmailId = System.Label.ErrorNotificationEmail;
     
-            List<EmailTemplate> emailTemplates = [SELECT Id, HtmlValue, Subject FROM EmailTemplate WHERE DeveloperName = 'Instagram_Error_Template' WITH SECURITY_ENFORCED LIMIT 1];
+            List<EmailTemplate> emailTemplates = [SELECT Id, HtmlValue, Subject FROM EmailTemplate WHERE DeveloperName = 'Instagram_Error_Template' WITH USER_MODE LIMIT 1];
             
             EmailTemplate emailTemplate = emailTemplates[0];
         

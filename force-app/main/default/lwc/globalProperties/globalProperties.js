@@ -19,15 +19,13 @@ export function errorDebugger(componentName, methodName, error, debugMode, addit
 
     if (debugMode?.toLowerCase() === 'error') {
         console.error('Error from EXP Component : ', errorInfo);
-    }
-    else if (debugMode?.toLowerCase() === 'warn') {
+    } else if (debugMode?.toLowerCase() === 'warn') {
         console.warn('Warning from EXP Component : ', errorInfo);
-    }
-    else {
+    } else {
         console.log('Message from EXP Component : ', errorInfo);
     }
 }
 
 export default class GlobalProperties extends LightningElement {
-// Default not in use
+    // Default not in use
 }

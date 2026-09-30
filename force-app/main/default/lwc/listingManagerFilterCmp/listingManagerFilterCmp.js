@@ -1,8 +1,10 @@
 import { LightningElement, track, api } from 'lwc';
-import getStaticFields from '@salesforce/apex/ListingManagerFilterController.getStaticFields';
-import saveStaticFields from '@salesforce/apex/ListingManagerFilterController.saveStaticFields';
-import getPicklistValues from '@salesforce/apex/ListingManagerFilterController.getPicklistValues';
-import getFilteredListings from '@salesforce/apex/ListingManagerFilterController.getFilteredListings';
+import getStaticFields from '@salesforce/apex/ListingManagerController.getStaticFields';
+import saveStaticFields from '@salesforce/apex/ListingManagerController.saveStaticFields';
+import getPicklistValues from '@salesforce/apex/ListingManagerController.getPicklistValues';
+import getFilteredListings from '@salesforce/apex/ListingManagerController.getFilteredListings';
+import getListingFields from '@salesforce/apex/ListingManagerController.getObjectFields';
+import Icons from '@salesforce/resourceUrl/listingManagerIcons';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
@@ -23,6 +25,22 @@ export default class ListingManagerFilterCmp extends LightningElement {
     @track screenWidth = 0;
     @track modalValue = false;
     @track parentField = null;
+
+    // Add Filter Modal properties
+    @track fieldOptions = [];
+    @track options1 = [];
+    @track selectedFields = [];
+    @track selectedField = [];
+    @track breadcrumbs = [];
+    @track selectedValues = [];
+    @track showCombobox = true;
+    @track chevRight = Icons + '/chevRight.png';
+    @track searchTerm1 = '';
+    @track selectedOptions1 = [];
+    @track isFocused1 = false;
+    @track valueIsField = false;
+    @track notCheckboxValue = false;
+    @track isDisabled = true;
 
     @track isCustomLogicEnabled = false;
     @track customLogicExpression = '';
@@ -95,8 +113,6 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 this.setPicklistValue();
                 this.updateFilterIndices();
                 this.applyFilters();
-                console.log('this.filterFields', JSON.stringify(this.filterFields));
-
                 setTimeout(() => {
                     this.isLoading = false;
                     this.dispatchEvent(new CustomEvent('loading', { detail: false }));
@@ -230,9 +246,10 @@ export default class ListingManagerFilterCmp extends LightningElement {
     * Date: 07/06/2024
     * Created By: Vyom Soni
     */
-    handleValueSelected(event) {
+    handleValueSelected(eventOrFields) {
         try {
-            this.valueFromChild = event.detail;
+            const rawFields = (eventOrFields && eventOrFields.detail) ? eventOrFields.detail : (eventOrFields || this.selectedField);
+            this.valueFromChild = Array.isArray(rawFields) ? rawFields : [rawFields];
             this.valueFromChild = this.valueFromChild.map(field => {
                 return {
                     label: field.label,
@@ -292,7 +309,6 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 }
             });
             this.updateFilterIndices();
-            console.log('this.filterFields', JSON.stringify(this.filterFields));
         } catch (error) {
             errorDebugger('ListingManagerFilterCmp', 'handleValueSelected', error, 'warn', 'Error in handleValueSelected');
         }
@@ -413,7 +429,6 @@ export default class ListingManagerFilterCmp extends LightningElement {
 
                     if (condition) {
                         queryFilters[index + 1] = condition; // Store at 1-based index (filterFields[0] -> index 1)
-                        console.log(`Filter ${index + 1}: ${condition}`); // Debug each filter condition
                     }
                 }
             });
@@ -422,12 +437,10 @@ export default class ListingManagerFilterCmp extends LightningElement {
             if (this.isCustomLogicEnabled && this.customLogicExpression && !this.customLogicError) {
                 // Use custom logic expression only if filterConditions is true
                 finalQuery = this.customLogicExpression;
-                console.log('Custom Logic Expression:', finalQuery); // Debug custom logic
                 for (let i = 1; i <= this.filterFields.length; i++) {
                     if (queryFilters[i]) {
                         finalQuery = finalQuery.replace(new RegExp(`\\b${i}\\b`, 'g'), queryFilters[i]);
                     } else {
-                        console.warn(`No condition found for filter index ${i} in custom logic. Replacing with TRUE.`);
                         finalQuery = finalQuery.replace(new RegExp(`\\b${i}\\b`, 'g'), 'TRUE');
                     }
                 }
@@ -437,7 +450,6 @@ export default class ListingManagerFilterCmp extends LightningElement {
             } else {
                 // Combine all filters with AND when filterConditions is false or custom logic is disabled
                 finalQuery = queryFilters.filter(Boolean).join(' AND ');
-                console.log('Using AND logic for filters:', finalQuery); // Debug AND logic
             }
 
             if (hasOfferFilters) {
@@ -458,7 +470,6 @@ export default class ListingManagerFilterCmp extends LightningElement {
                         offerConditions = offerFilters.filter(Boolean);
                     }
                     offerQuery = `Id IN (SELECT MVEX__Listing__c FROM MVEX__Offer__c WHERE ${offerConditions.join(' AND ')})`;
-                    console.log('Offer Query:', offerQuery); // Debug offer query
                 }
 
                 const allFilters = [
@@ -1387,6 +1398,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     */
     handleClose() {
         this.addModal = false;
+        this.resetAddFilterModal();
         if (this.screenWidth <= 900) {
             this.modalValue = false;
             this.handleAddButtonChange();
@@ -1395,7 +1407,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
 
     /**
     * Method Name: handleSave
-    * @description: handle the sae evnet in modal.
+    * @description: handle the save event in modal and add selected field.
     * Date: 14/06/2024
     * Created By: Vyom Soni
     */
@@ -1406,11 +1418,8 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 this.modalValue = false;
                 this.handleAddButtonChange();
             }
-            const childComponent = this.template.querySelector('c-listing-manager-filter-add-cmp');
-
-            if (childComponent) {
-                childComponent.handleButtonClick();
-            }
+            this.handleValueSelected(this.selectedField);
+            this.resetAddFilterModal();
         } catch (error) {
             errorDebugger('ListingManagerFilterCmp', 'handleSave', error, 'warn', 'Error in handleSave');
         }
@@ -1438,11 +1447,404 @@ export default class ListingManagerFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */
     openModal() {
+        this.resetAddFilterModal();
         this.addModal = true;
         if (this.screenWidth <= 900) {
             this.modalValue = true;
             this.handleAddButtonChange();
         }
+    }
+
+    /**
+     * Method Name: resetAddFilterModal
+     * @description: Reset add filter modal state and fetch Listing fields.
+     */
+    resetAddFilterModal() {
+        this.selectedFields = [];
+        this.selectedField = [];
+        this.breadcrumbs = [];
+        this.selectedValues = [];
+        this.showCombobox = true;
+        this.searchTerm1 = '';
+        this.isFocused1 = false;
+        this.valueIsField = false;
+        this.notCheckboxValue = false;
+        this.selectedOptions1 = [];
+        this.options1 = [];
+        this.handleAddButtonDisable();
+        this.fetchObjectFields('MVEX__Listing__c');
+    }
+
+    /**
+     * Method Name: fetchObjectFields
+     * @description: fetch the fields values.
+     * @param: objectApiName- object api name.
+     */
+    fetchObjectFields(objectApiName) {
+        this.isDisabled = true;
+        getListingFields({ objectApiName })
+            .then(fields => {
+                let filteredFields = fields ? fields.filter(field => field.fieldAPIName !== 'OwnerId') : [];
+                if (this.breadcrumbs.length > 0) {
+                    filteredFields = filteredFields.filter(field => field.fieldType !== 'REFERENCE');
+                }
+                if (fields) {
+                    this.fieldOptions = filteredFields.map(field => {
+                        return {
+                            label: field.fieldName,
+                            value: field.fieldAPIName,
+                            type: field.fieldType,
+                            referenceObjectName: field.referenceFields || [],
+                            objectApiName: field.referenceObjectName || '',
+                            picklistValues: field.picklistValues || []
+                        };
+                    });
+                    const offerField = [{ "value": "MVEX__Offer__c", "label": "Offer", "type": "REFERENCE", "objectApiName": "MVEX__Offer__c" }];
+                    this.fieldOptions = this.fieldOptions.concat(offerField);
+                    this.options1 = this.fieldOptions;
+                    this.isDisabled = false;
+                }
+            })
+            .catch(error => {
+                errorDebugger('ListingManagerFilterCmp', 'fetchObjectFields', error, 'warn', 'Error in fetchObjectFields');
+            });
+    }
+
+    /**
+     * Method Name: fetchObjectFieldsWithoutReference
+     * @description: fetch fields when reference field was clicked.
+     * @param: objectApiName- object api name.
+     */
+    fetchObjectFieldsWithoutReference(objectApiName) {
+        this.isDisabled = true;
+        getListingFields({ objectApiName })
+            .then(fields => {
+                let filteredFields = fields || [];
+                if (this.breadcrumbs.length > 0) {
+                    filteredFields = filteredFields.filter(field => field.fieldType !== 'REFERENCE');
+                }
+                if (fields) {
+                    this.fieldOptions = filteredFields.map(field => {
+                        return {
+                            label: field.fieldName,
+                            value: field.fieldAPIName,
+                            type: field.fieldType,
+                            referenceObjectName: field.referenceFields || [],
+                            objectApiName: field.referenceObjectName || '',
+                            picklistValues: field.picklistValues || []
+                        };
+                    });
+                    this.options1 = this.fieldOptions;
+                    this.isDisabled = false;
+                }
+            })
+            .catch(error => {
+                errorDebugger('ListingManagerFilterCmp', 'fetchObjectFieldsWithoutReference', error, 'warn', 'Error in fetchObjectFieldsWithoutReference');
+            });
+    }
+
+    /**
+     * Method Name: currentFieldOptions
+     * @description: getter for the set the current selectedfield operator options.
+     */
+    get currentFieldOptions() {
+        try {
+            if (!this.selectedField || this.selectedField.length === 0) return [];
+
+            const fieldType = this.selectedField[0].type;
+            let options = [];
+
+            switch (fieldType) {
+                case 'MULTIPICKLIST':
+                case 'PICKLIST':
+                    options = [
+                        { label: 'Includes', value: 'includes' },
+                        { label: 'Equals', value: 'equals' }
+                    ];
+                    break;
+                case 'BOOLEAN':
+                    options = [
+                        { label: 'True/False', value: 'boolean' }
+                    ];
+                    break;
+                case 'DOUBLE':
+                case 'CURRENCY':
+                    options = [
+                        { label: 'Range', value: 'range' },
+                        { label: 'Minimum', value: 'minimum' },
+                        { label: 'Maximum', value: 'maximum' }
+                    ];
+                    break;
+                case 'STRING':
+                case 'TEXTAREA':
+                case 'EMAIL':
+                    options = [
+                        { label: 'Equals', value: 'equals' },
+                        { label: 'Contains', value: 'contains' },
+                        { label: 'Starts With', value: 'startswith' }
+                    ];
+                    break;
+                case 'DATE':
+                case 'DATETIME':
+                    options = [
+                        { label: 'Date Range', value: 'daterange' },
+                        { label: 'Date Minimum', value: 'dateminimum' },
+                        { label: 'Date Maximum', value: 'datemaximum' }
+                    ];
+                    break;
+                case 'ID':
+                    options = [
+                        { label: 'Equals', value: 'equals' }
+                    ];
+                    break;
+                case 'PHONE':
+                case 'URL':
+                    options = [
+                        { label: 'Equals', value: 'equals' },
+                        { label: 'Contains', value: 'contains' }
+                    ];
+                    break;
+                default:
+                    options = [];
+            }
+            return options;
+        } catch (error) {
+            errorDebugger('ListingManagerFilterCmp', 'currentFieldOptions', error, 'warn', 'Error in currentFieldOptions');
+            return [];
+        }
+    }
+
+    /**
+     * Method Name: computedDropdownClass
+     * @description: return dynamic class for the combobox.
+     */
+    get computedDropdownClass() {
+        return `slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click ${this.isFocused1 ? 'slds-is-open' : ''}`;
+    }
+
+    /**
+     * Method Name: showOptions1
+     * @description: Hide / Unhide options of the combobox.
+     */
+    get showOptions1() {
+        return this.isFocused1 || this.searchTerm1 !== '';
+    }
+
+    /**
+     * Method Name: filteredOptions1
+     * @description: this getter made the field list to show in the UI.
+     */
+    get filteredOptions1() {
+        try {
+            if (this.searchTerm1 === '' && !this.isFocused1) {
+                return [];
+            }
+            return this.options1.filter(option =>
+                option.label.toLowerCase().includes(this.searchTerm1.toLowerCase()) &&
+                !this.selectedOptions1.some(selectedOption => selectedOption.value === option.value)
+            ).map(option => ({
+                ...option,
+                showRightIcon: this.isLookupField(option.type)
+            }));
+        } catch (error) {
+            errorDebugger('ListingManagerFilterCmp', 'filteredOptions1', error, 'warn', 'Error in filteredOptions1');
+            return [];
+        }
+    }
+
+    /**
+     * Method Name: changeFields
+     * @description: handle the fields select of non-reference field.
+     */
+    changeFields(event) {
+        try {
+            this.handleFieldSelect(event);
+            this.showCombobox = false;
+            this.valueIsField = true;
+            this.selectedField = [this.selectedFields.length > 0 ? this.selectedFields[this.selectedFields.length - 1] : null];
+            this.handleAddButtonDisable();
+        } catch (error) {
+            errorDebugger('ListingManagerFilterCmp', 'changeFields', error, 'warn', 'Error in changeFields');
+        }
+    }
+
+    /**
+     * Method Name: handleFieldSelect
+     * @description: add the selected field into selectedFields.
+     */
+    handleFieldSelect(event) {
+        try {
+            const selectedValue = event.currentTarget.dataset.id;
+            const selectedField = this.fieldOptions.find(option => option.value === selectedValue);
+            if (selectedValue && selectedField && !this.selectedValues.includes(selectedValue)) {
+                this.selectedFields.push({
+                    label: selectedField.label,
+                    objectApiName: selectedField.objectApiName,
+                    value: selectedField.value,
+                    apiName: selectedField.value,
+                    type: selectedField.type,
+                    picklistValues: selectedField.picklistValues,
+                    prevApiName: this.selectedValues.length > 0 ? this.selectedValues[this.selectedValues.length - 1] : '',
+                    isNot: false
+                });
+                this.selectedValues.push(selectedValue);
+                this.updateBreadcrumbs();
+            }
+            this.searchTerm1 = '';
+            this.isFocused1 = false;
+        } catch (error) {
+            errorDebugger('ListingManagerFilterCmp', 'handleFieldSelect', error, 'warn', 'Error in handleFieldSelect');
+        }
+    }
+
+    /**
+     * Method Name: changeTheCheckboxValue
+     * @description: handle the fields select of reference field.
+     */
+    changeTheCheckboxValue(event) {
+        try {
+            this.selectedField = [];
+            this.valueIsField = false;
+            const selectedValue = event.currentTarget.dataset.id;
+            const selectedField = this.fieldOptions.find(option => option.value === selectedValue);
+            if (selectedField != null) {
+                this.handleFieldSelect(event);
+                this.fetchObjectFieldsWithoutReference(selectedField.objectApiName);
+            }
+        } catch (error) {
+            errorDebugger('ListingManagerFilterCmp', 'changeTheCheckboxValue', error, 'warn', 'Error in changeTheCheckboxValue');
+        }
+    }
+
+    /**
+     * Method Name: findFieldRecursively
+     * @description: check field hierarchy.
+     */
+    findFieldRecursively(fields, selectedValue) {
+        try {
+            for (let i = 0; i < fields.length; i++) {
+                if (fields[i].apiName === selectedValue || fields[i].value === selectedValue) {
+                    return fields[i];
+                }
+                if (fields[i].type === 'REFERENCE' && fields[i].referenceFields && fields[i].referenceFields.length > 0) {
+                    const foundField = this.findFieldRecursively(fields[i].referenceFields, selectedValue);
+                    if (foundField) {
+                        return foundField;
+                    }
+                }
+            }
+            return null;
+        } catch (error) {
+            errorDebugger('ListingManagerFilterCmp', 'findFieldRecursively', error, 'warn', 'Error in findFieldRecursively');
+            return null;
+        }
+    }
+
+    /**
+     * Method Name: updateBreadcrumbs
+     * @description: handle the combobox options when the bread crumbs is clicked.
+     */
+    updateBreadcrumbs() {
+        try {
+            this.valueIsField = false;
+            this.breadcrumbs = this.selectedFields.map(selectedValue => {
+                return { label: selectedValue.label, value: selectedValue.value, apiName: selectedValue.value };
+            });
+        } catch (error) {
+            errorDebugger('ListingManagerFilterCmp', 'updateBreadcrumbs', error, 'warn', 'Error in updateBreadcrumbs');
+        }
+    }
+
+    /**
+     * Method Name: handleBreadcrumbClick
+     * @description: handle the combobox options when the bread crumbs is clicked.
+     */
+    handleBreadcrumbClick(event) {
+        try {
+            const clickedIndex = parseInt(event.currentTarget.dataset.index, 10);
+            this.selectedFields = this.selectedFields.slice(0, clickedIndex);
+            this.selectedValues = this.selectedValues.slice(0, clickedIndex);
+            this.selectedField = [];
+            this.handleAddButtonDisable();
+
+            if (this.selectedValues.length > 0) {
+                let lastSelectedField = this.selectedFields[this.selectedFields.length - 1].objectApiName;
+                if (lastSelectedField == null) {
+                    lastSelectedField = 'MVEX__Listing__c';
+                } else {
+                    this.fetchObjectFieldsWithoutReference(lastSelectedField);
+                }
+            } else {
+                this.fetchObjectFields('MVEX__Listing__c');
+            }
+
+            this.showCombobox = true;
+            this.updateBreadcrumbs();
+        } catch (error) {
+            errorDebugger('ListingManagerFilterCmp', 'handleBreadcrumbClick', error, 'warn', 'Error in handleBreadcrumbClick');
+        }
+    }
+
+    /**
+     * Method Name: handleModalFieldSearchChange
+     * @description: handle search text change in modal combobox.
+     */
+    handleModalFieldSearchChange(event) {
+        this.searchTerm1 = event.target.value;
+    }
+
+    /**
+     * Method Name: handleModalFieldFocus
+     * @description: handle focus event in modal combobox.
+     */
+    handleModalFieldFocus() {
+        this.isFocused1 = true;
+    }
+
+    /**
+     * Method Name: handleModalFieldBlur
+     * @description: handle blur event in modal combobox.
+     */
+    handleModalFieldBlur() {
+        this.isFocused1 = false;
+    }
+
+    /**
+     * Method Name: isLookupField
+     * @description: check field is lookup or reference.
+     */
+    isLookupField(fieldType) {
+        return fieldType === 'REFERENCE' || fieldType === 'Lookup';
+    }
+
+    /**
+     * Method Name: handleNotCheckboxChange
+     * @description: handle the not checkbox change.
+     */
+    handleNotCheckboxChange(event) {
+        this.notCheckboxValue = event.target.checked;
+        if (this.selectedField && this.selectedField.length > 0) {
+            this.selectedField[0].isNot = event.target.checked;
+        }
+    }
+
+    /**
+     * Method Name: operationSelect
+     * @description: handle the operation combobox change.
+     */
+    operationSelect(event) {
+        if (this.selectedField && this.selectedField.length > 0) {
+            this.selectedField[0].operation = event.target.value;
+        }
+        this.handleAddButtonDisable();
+    }
+
+    /**
+     * Method Name: handleAddButtonDisable
+     * @description: set add button disable when selectedField or operation is empty.
+     */
+    handleAddButtonDisable() {
+        this.isAddButtonDisabled = !(this.selectedField && this.selectedField.length > 0 && this.selectedField[0] && this.selectedField[0].operation);
     }
 
     /**
@@ -1473,7 +1875,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 this.applyFilters();
             }
         } catch (error) {
-            console.log('Error in handleApplyCustomLogic:', error.stack);
+            console.error('Error in handleApplyCustomLogic:', error.stack);
             errorDebugger('ListingManagerFilterCmp', 'handleApplyCustomLogic', error, 'warn', 'Error in handleApplyCustomLogic');
             this.dispatchEvent(
                 new ShowToastEvent({
@@ -1535,7 +1937,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
                 }
             }
         } catch (error) {
-            console.log('Error in handleCustomLogicToggle:', error.stack);
+            console.error('Error in handleCustomLogicToggle:', error.stack);
             errorDebugger('ListingManagerFilterCmp', 'handleCustomLogicToggle', error, 'warn', 'Error in handleCustomLogicToggle');
         }
     }
@@ -1543,10 +1945,8 @@ export default class ListingManagerFilterCmp extends LightningElement {
     handleCustomLogicChange(event) {
         try {
             this.customLogicExpression = event.target.value;
-            // this.validateCustomLogic();
-            // No validation or filtering here; wait for Apply button click
         } catch (error) {
-            console.log('Error in handleCustomLogicChange:', error.stack);
+            console.error('Error in handleCustomLogicChange:', error.stack);
             errorDebugger('ListingManagerFilterCmp', 'handleCustomLogicChange', error, 'warn', 'Error in handleCustomLogicChange');
         }
     }
@@ -1678,7 +2078,6 @@ export default class ListingManagerFilterCmp extends LightningElement {
 
             this.customLogicError = null;
         } catch (error) {
-            console.log('Error in validateCustomLogic:', error.stack);
             errorDebugger('ListingManagerFilterCmp', 'validateCustomLogic', error, 'warn', 'Error in validateCustomLogic');
             this.customLogicError = 'Error validating custom logic expression.';
         }

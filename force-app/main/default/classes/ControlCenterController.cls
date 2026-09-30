@@ -11,8 +11,10 @@ public with sharing class ControlCenterController {
     @AuraEnabled
     public static MVEX__Listing__c getListingDetails(Id recordId) {
         try {
-            MVEX__Listing__c listing = [SELECT Id, Name,MVEX__Listing_Type__c,MVEX__Property_Category__c,MVEX__Property_Type__c, MVEX__Sq_Ft__c, MVEX__Listing_Address__Street__s, MVEX__Listing_Address__City__s, MVEX__Listing_Address__StateCode__s, MVEX__Listing_Address__PostalCode__s,
-                                    MVEX__Listing_Address__CountryCode__s FROM MVEX__Listing__c WHERE Id = :recordId WITH USER_MODE LIMIT 1];
+            MVEX__Listing__c listing = [SELECT Id, Name,MVEX__Listing_Type__c,MVEX__Property_Category__c,MVEX__Property_Type__c, MVEX__Sq_Ft__c, 
+                                            MVEX__Listing_Address__Street__s, MVEX__Listing_Address__City__s, MVEX__Listing_Address__StateCode__s,
+                                            MVEX__Listing_Address__PostalCode__s, MVEX__Listing_Address__CountryCode__s FROM MVEX__Listing__c 
+                                            WHERE Id = :recordId WITH USER_MODE LIMIT 1];
 
             return listing;
 
@@ -50,12 +52,13 @@ public with sharing class ControlCenterController {
                 result.objectFields.add(fw);
             }
             
-            String userQuery = 'SELECT Id, Name FROM User WHERE IsActive = true WITH USER_MODE ORDER BY Name';
-            result.users = Database.query(userQuery);
+            String userQuery = 'SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name';
+            result.users = Database.query(userQuery, AccessLevel.USER_MODE);
 
             // Get rules
             result.rules = [SELECT Id, Name, MVEX__Conditions__c, MVEX__Logic_Type__c, MVEX__Logical_Expression__c, MVEX__User_Order__c, MVEX__Object_Name__c
-                            FROM MVEX__Lead_Assignment_Setting__c WHERE MVEX__Object_Name__c = 'Contact'  AND (Default_User__c = false OR Default_User__c = null) WITH USER_MODE ORDER BY MVEX__User_Order__c];
+                                FROM MVEX__Lead_Assignment_Setting__c WHERE MVEX__Object_Name__c = 'Contact'  AND (Default_User__c = false OR Default_User__c = null) 
+                                WITH USER_MODE ORDER BY MVEX__User_Order__c LIMIT 50000];
 
             // Get the default assignee record (Default_User__c = true; Name stores the userId)
             List<MVEX__Lead_Assignment_Setting__c> defaultRules = [SELECT Id, Name, Default_User__c FROM MVEX__Lead_Assignment_Setting__c
@@ -139,12 +142,8 @@ public with sharing class ControlCenterController {
                 if (String.isBlank(ruleId)) {
                     return 'Rule ID is required for deletion.';
                 }
-                List<MVEX__Lead_Assignment_Setting__c> rulesToDelete = [
-                    SELECT Id FROM MVEX__Lead_Assignment_Setting__c 
-                    WHERE Id = :ruleId AND MVEX__Object_Name__c = 'Contact'  
-                    AND (Default_User__c = false OR Default_User__c = null)
-                    WITH USER_MODE LIMIT 1
-                ];
+                List<MVEX__Lead_Assignment_Setting__c> rulesToDelete = [SELECT Id FROM MVEX__Lead_Assignment_Setting__c WHERE Id = :ruleId AND MVEX__Object_Name__c = 'Contact'  
+                                                                            AND (Default_User__c = false OR Default_User__c = null) WITH USER_MODE LIMIT 1];
                 if (!rulesToDelete.isEmpty()) {
                     delete as user rulesToDelete;
                 } else {
@@ -191,17 +190,9 @@ public with sharing class ControlCenterController {
                 String defaultId = (String)rule.get('Id');
                 List<MVEX__Lead_Assignment_Setting__c> toDelete;
                 if (String.isNotBlank(defaultId)) {
-                    toDelete = [
-                        SELECT Id FROM MVEX__Lead_Assignment_Setting__c
-                        WHERE Id = :defaultId AND Default_User__c = true
-                        WITH USER_MODE LIMIT 1
-                    ];
+                    toDelete = [SELECT Id FROM MVEX__Lead_Assignment_Setting__c WHERE Id = :defaultId AND Default_User__c = true WITH USER_MODE LIMIT 1];
                 } else {
-                    toDelete = [
-                        SELECT Id FROM MVEX__Lead_Assignment_Setting__c
-                        WHERE MVEX__Object_Name__c = 'Contact' AND Default_User__c = true
-                        WITH USER_MODE LIMIT 1
-                    ];
+                    toDelete = [SELECT Id FROM MVEX__Lead_Assignment_Setting__c WHERE MVEX__Object_Name__c = 'Contact' AND Default_User__c = true WITH USER_MODE LIMIT 1];
                 }
                 if (!toDelete.isEmpty()) {
                     delete as user toDelete;
@@ -254,8 +245,8 @@ public with sharing class ControlCenterController {
                 }
 
                 List<String> ids = objectToIds.get(objName);
-                String query = 'SELECT Id, Name FROM ' + objName + ' WHERE Id IN :ids WITH USER_MODE';
-                List<SObject> records = Database.query(query);
+                String query = 'SELECT Id, Name FROM ' + objName + ' WHERE Id IN :ids';
+                List<SObject> records = Database.query(query, AccessLevel.USER_MODE);
                 for (SObject rec : records) {
                     result.put((String)rec.get('Id'), (String)rec.get('Name'));
                 }

@@ -110,13 +110,15 @@ public with sharing class PortalMappingController {
 
             List<MVEX__Portal_Listing_Mapping__c> portalListingMap ;
 
-            portalListingMap = [SELECT Id, Name, MVEX__Listing_Field_API_Name__c, MVEX__Portal_Field_Description__c, MVEX__Portal_Field_Example__c, MVEX__Required__c, MVEX__Allowed_Field_Datatype__c FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c =: portalName WITH USER_MODE ORDER BY MVEX__Required__c DESC, Name ASC];
+            portalListingMap = [SELECT Id, Name, MVEX__Listing_Field_API_Name__c, MVEX__Portal_Field_Description__c, MVEX__Portal_Field_Example__c, MVEX__Required__c, 
+                                    MVEX__Allowed_Field_Datatype__c FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c =: portalName WITH USER_MODE 
+                                    ORDER BY MVEX__Required__c DESC, Name ASC LIMIT 50000];
 
-            sObject blockFields = getBlockedFields(portalName);
+            String blockFields = getBlockedFields(portalName);
 
             Set<String> blockedFields = new Set<String>();
-            if (blockFields != null && blockFields.get('MVEX__Fields_Name__c') != null) {
-                blockedFields = new Set<String>(((String)blockFields.get('MVEX__Fields_Name__c')).split(';'));
+            if (blockFields != null) {
+                blockedFields = new Set<String>(blockFields.split(';'));
             }
 
             Schema.DescribeSObjectResult describeResult = Schema.getGlobalDescribe().get('MVEX__Listing__c').getDescribe();
@@ -170,26 +172,26 @@ public with sharing class PortalMappingController {
     * @param portalName: Name of the Portal.
     * @return sObject: Returns the custom setting record of the specified type and name.
     */
-    public static sObject getBlockedFields(String portalName) {
+    public static String getBlockedFields(String portalName) {
         try {
             switch on portalName {
                 when 'Propertyfinder' {
-                    return MVEX__BFFPF__c.getOrgDefaults();
+                    return 'Id;MVEX__Property__c;MVEX__Listing_Type__c;MVEX__PF_Listing_ID__c';
                 }
                 when 'Zoopla' {
-                    return MVEX__BFFZ__c.getOrgDefaults();
+                    return 'Id;MVEX__Property__c';
                 }
                 when 'Bayut' {
-                    return MVEX__BFFB__c.getOrgDefaults();
+                    return 'Id;MVEX__Property__c;LastModifiedDate';
                 }
                 when 'Rightmove' {
-                    return MVEX__BFFR__c.getOrgDefaults();
+                    return 'Id;MVEX__Property__c;MVEX__Listing_Type__c';
                 }
                 when 'Rightmove Overseas' {
-                    return MVEX__BFFRO__c.getOrgDefaults();
+                    return 'Id;MVEX__Property__c';
                 }
                 when 'Dubizzle' {
-                    return MVEX__BFFB__c.getOrgDefaults();
+                    return 'Id;MVEX__Property__c;LastModifiedDate';
                 }
                 when else {
                     return null;
@@ -374,8 +376,6 @@ public with sharing class PortalMappingController {
     @AuraEnabled
     public static String savePropertyPortalRecord(String portalWrapper, String portalName) {
         try {
-            System.debug('portalWrapper -> '+portalWrapper);
-            System.debug('portalName -> '+portalName);
             List<String> portalsName = new List<String>{'Bayut', 'Dubizzle'};
             
             if(portalName == null || portalName == '') {
@@ -384,7 +384,9 @@ public with sharing class PortalMappingController {
             String escapePortalName = String.escapeSingleQuotes(portalName);
 
             PropertyPortalWrapper wrapper = (PropertyPortalWrapper)JSON.deserialize(portalWrapper, PropertyPortalWrapper.class);
-            List<MVEX__Portal_Listing_Mapping__c> portalListingMaps = [SELECT Id, MVEX__Listing_Field_API_Name__c, Name FROM MVEX__Portal_Listing_Mapping__c WHERE MVEX__Portal_Name__c =: escapePortalName AND MVEX__Listing_Field_API_Name__c != null WITH USER_MODE];
+            List<MVEX__Portal_Listing_Mapping__c> portalListingMaps = [SELECT Id, MVEX__Listing_Field_API_Name__c, Name FROM MVEX__Portal_Listing_Mapping__c 
+                                                                        WHERE MVEX__Portal_Name__c =: escapePortalName AND MVEX__Listing_Field_API_Name__c != null 
+                                                                        WITH USER_MODE LIMIT 50000];
             Map<String, String> jsonBodyMap = new Map<String, String>();
             String jsonBody = '';
             if(!portalListingMaps.isEmpty()) {
@@ -668,7 +670,8 @@ public with sharing class PortalMappingController {
         try {
             Set<Id> listingIds = new Set<Id>();
 
-            List<MVEX__PortalListing__c> portalListings = [SELECT Id, MVEX__Listing__c, MVEX__Portal__c FROM MVEX__PortalListing__c WHERE MVEX__Portal__c =: portalId AND MVEX__SystemIsActive__c = True WITH USER_MODE];
+            List<MVEX__PortalListing__c> portalListings = [SELECT Id, MVEX__Listing__c, MVEX__Portal__c FROM MVEX__PortalListing__c WHERE MVEX__Portal__c =: portalId 
+                                                            AND MVEX__SystemIsActive__c = True WITH USER_MODE];
 
             if (portalListings.isEmpty()) {
                 response.status = 'Failed';
@@ -683,7 +686,7 @@ public with sharing class PortalMappingController {
             }
 
             List<MVEX__Listing__c> properties = [SELECT Id, Name, MVEX__Broker_s_Listing_ID__c, MVEX__Listing_Type__c FROM MVEX__Listing__c 
-                                            WHERE Id IN :listingIds WITH USER_MODE ORDER BY Name ASC];
+                                            WHERE Id IN :listingIds WITH USER_MODE ORDER BY Name ASC LIMIT 50000];
             
             // Prepare response
             List<Map<String, Object>> resultData = new List<Map<String, Object>>();

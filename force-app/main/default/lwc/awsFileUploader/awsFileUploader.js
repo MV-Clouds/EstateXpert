@@ -710,7 +710,7 @@ export default class AwsFileUploader extends NavigationMixin(LightningElement) {
                     await this.uploadToAWS(this.selectedFilesToUpload);
                     uploadSucceeded = true;
                 } catch (uploadError) {
-                    console.log('uploadError->' + uploadError);
+                    console.error('uploadError->' + uploadError);
                     this.showSpinner = false;
                     this.uploadStatus = false;
                     this.isFileUploading = false;
@@ -720,7 +720,7 @@ export default class AwsFileUploader extends NavigationMixin(LightningElement) {
                     }
                     // Detect CORS-related errors and surface a specific, actionable message.
                     const isCorsError = this.isCorsError(uploadError);
-                    console.log('isCorsError->' + isCorsError);
+                    console.error('isCorsError->' + isCorsError);
                     if (isCorsError) {
                         this.showToast(
                             'AWS CORS Configuration Required',

@@ -145,12 +145,8 @@
     <tabs>standard-Contact</tabs>
     <tabs>Inquiry__c</tabs>
     <tabs>Marketing_List</tabs>
-    <tabs>Marketing_Campaign</tabs>
-    <tabs>WhatsApp_Broadcast</tabs>
-    <tabs>Multi_Channel_Group</tabs>
     <tabs>Offer__c</tabs>
     <tabs>Closing__c</tabs>
-    <tabs>Payment_Schedule__c</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>EXP_Admin_UtilityBar</utilityBar>
 </CustomApplication>

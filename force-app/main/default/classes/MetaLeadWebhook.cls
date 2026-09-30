@@ -148,16 +148,9 @@ global without sharing class MetaLeadWebhook {
     }
     
 
-    private static void createSalesforceContact(Map<String, Object> leadData, String formName) {
+    private static String createSalesforceContact(Map<String, Object> leadData, String formName) {
         if (leadData.containsKey('id') || String.isNotBlank(leadId)) {
             Contact newContact = new Contact();
-            
-            // --- 1. Store Full JSON ---
-            try {
-                newContact.MVEX__Meta_Raw_JSON__c = JSON.serializePretty(leadData);
-            } catch(Exception e) {
-                System.debug('JSON too large for field');
-            }
 
             // --- 2. Handle Platform ---
             String platform = leadData.containsKey('platform') ? (String) leadData.get('platform') : 'facebook';
@@ -298,11 +291,64 @@ global without sharing class MetaLeadWebhook {
             }
             
             // --- 6. Insert ---
+            Map<String, Object> retryPayload = new Map<String, Object>();
+            retryPayload.put('leadId', leadId);
+            retryPayload.put('pageId', pageId);
+            retryPayload.put('formId', formId);
+            retryPayload.put('formName', formName);
+            retryPayload.put('leadData', leadData);
+            
             try {
-                insert newContact;
+                Database.SaveResult sr = Database.insert(newContact, false);
+                if (!sr.isSuccess()) {
+                    MVEX__Error_Handling__c errRec = new MVEX__Error_Handling__c();
+                    errRec.MVEX__Error_Body__c = JSON.serializePretty(retryPayload);
+                    errRec.MVEX__Source_of_Error__c = 'MetaFailedLeads';
+                    insert errRec;
+                    return sr.getErrors()[0].getMessage();
+                }
+                return 'Success';
             } catch (Exception e) {
-                // ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'createSalesforceLead', e.getMessage());
+                MVEX__Error_Handling__c errRec = new MVEX__Error_Handling__c();
+                errRec.MVEX__Error_Body__c = JSON.serializePretty(retryPayload);
+                errRec.MVEX__Source_of_Error__c = 'MetaFailedLeads';
+                insert errRec;
+                return e.getMessage();
             }
+        }
+        return 'Invalid Lead Data';
+    }
+
+    @AuraEnabled
+    public static List<MVEX__Error_Handling__c> getFailedLeads() {
+        return [SELECT Id, Name, CreatedDate, MVEX__Source_of_Error__c 
+                FROM MVEX__Error_Handling__c 
+                WHERE MVEX__Source_of_Error__c = 'MetaFailedLeads' 
+                ORDER BY CreatedDate DESC LIMIT 50];
+    }
+
+    @AuraEnabled
+    public static String retryFailedLead(String errorRecordId) {
+        try {
+            MVEX__Error_Handling__c err = [SELECT Id, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE Id = :errorRecordId LIMIT 1];
+            if (err == null || String.isBlank(err.MVEX__Error_Body__c)) {
+                return 'Error record not found or body is empty.';
+            }
+            
+            Map<String, Object> retryPayload = (Map<String, Object>) JSON.deserializeUntyped(err.MVEX__Error_Body__c);
+            leadId = (String) retryPayload.get('leadId');
+            pageId = (String) retryPayload.get('pageId');
+            formId = (String) retryPayload.get('formId');
+            String fName = (String) retryPayload.get('formName');
+            Map<String, Object> lData = (Map<String, Object>) retryPayload.get('leadData');
+            
+            String result = createSalesforceContact(lData, fName);
+            if (result == 'Success') {
+                delete err;
+            }
+            return result;
+        } catch (Exception e) {
+            return 'Retry Error: ' + e.getMessage();
         }
     }
 }

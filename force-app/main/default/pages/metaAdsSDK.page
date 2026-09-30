@@ -516,8 +516,8 @@
                             draggable="false" />
                         <div class="page-header-content">
                             <h1 class="page-title">Connect Meta Lead Ads</h1>
-                            <p class="page-subtitle">Integrate your Facebook Pages, permanent tokens, and real-time
-                                Webhook subscriptions</p>
+                            <p class="page-subtitle">Seamlessly integrate your Facebook Pages to capture and sync leads
+                                directly into Salesforce in real-time.</p>
                         </div>
                     </div>
 
@@ -542,7 +542,7 @@
                             <div class="input-group">
                                 <label class="input-label" for="app-id-input">Meta Application ID</label>
                                 <input type="text" id="app-id-input" class="input-field"
-                                    placeholder="Enter your Meta Application ID (e.g. 514916280628381)" />
+                                    placeholder="Enter your Meta Application ID" />
                             </div>
 
                             <div class="info-box">
@@ -552,10 +552,17 @@
                                         clip-rule="evenodd" />
                                 </svg>
                                 <div class="info-content">
-                                    <p class="info-title">Automatic Setup on Click:</p>
-                                    <p class="info-text">1. <strong>Subscribes the Page to Real-Time Webhooks</strong>
-                                        (<code>leadgen</code>).<br />2. Discovers all active <strong>Lead Forms &amp;
-                                            Dynamic Fields</strong>!</p>
+                                    <p class="info-title">What happens when you connect?</p>
+                                    <ul
+                                        style="margin: 6px 0 0 0; padding-left: 20px; color: #4B5563; font-size: 14px; line-height: 1.6;">
+                                        <li>Securely authenticates with your Meta Business account.</li>
+                                        <li>Automatically enables real-time lead webhooks for your pages.</li>
+                                        <li>Discovers and synchronizes all active lead generation forms.</li>
+                                    </ul>
+                                    <div
+                                        style="margin-top: 12px; background-color: #faf8e0; color: #8a510f; padding: 10px 12px; border-radius: 6px; border-left: 4px solid #ffd24b; font-size: 13px; font-weight: 500; display: inline-block;">
+                                        <strong>Note:</strong> It might take 3-5 minutes to process after connecting.
+                                    </div>
                                 </div>
                             </div>
 
@@ -659,10 +666,7 @@
             }
 
             function backToControlCenter() {
-                var basePath = '/lightning/n/Control_Center';
-                if (window.location.pathname.indexOf('MVEX__') !== -1) {
-                    basePath = '/lightning/n/MVEX__Control_Center';
-                }
+                var basePath = '/lightning/n/control_center_x';
                 window.top.location.href = basePath;
             }
 
@@ -761,15 +765,11 @@
             }
 
             function renderResults(data) {
-                var basePath = '/lightning/n/Control_Center';
-                basePath = '/lightning/n/MVEX__Control_Center';
+                var basePath = '/lightning/n/control_center_x';
 
                 // Show loading spinner while Metadata API deploys
                 setLoading(true, 'Saving configuration... Please wait');
-
-                setTimeout(function () {
-                    window.top.location.href = basePath + '?c__openComponent=metaAdsMapping';
-                }, 3500);
+                window.top.location.href = basePath + '?c__openComponent=metaAdsMapping';
             }
         </script>
     </body>

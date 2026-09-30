@@ -220,37 +220,41 @@
                                         <span class="wizard-step-badge">3</span>
                                         Map Fields
                                     </div>
-                                    <template for:each={currentFormFields} for:item="field">
-                                        <div key={field.key} class={field.rowClass}>
-                                            <div class="mapping-col">
-                                                <div class="filter_label_css" style="margin-bottom: 4px;">
-                                                    Meta Form Field
-                                                    <template if:true={field.required}>
-                                                        <span class="required-badge">Required in Salesforce</span>
+                                    <template if:true={currentFormFields.length}>
+                                        <template for:each={currentFormFields} for:item="field">
+                                            <div key={field.key} class={field.rowClass}>
+                                                <div class="mapping-col">
+                                                    <div class="filter_label_css">
+                                                        Salesforce Contact Field
+                                                        <template if:true={field.required}>
+                                                            <span class="required-badge">Required</span>
+                                                        </template>
+                                                    </div>
+                                                    <div class="meta-field-pill">{field.label}</div>
+                                                </div>
+                                                <div class="mapping-icon">&#10145;</div>
+                                                <div class="mapping-col">
+                                                    <div class="filter_label_css">Meta Form Field</div>
+                                                    <lightning-combobox
+                                                        data-key={field.key}
+                                                        value={field.value}
+                                                        options={field.options}
+                                                        onchange={handleMappingChange}
+                                                        placeholder="-- Do Not Map --"
+                                                        variant="label-hidden"
+                                                        class="custom-combobox">
+                                                    </lightning-combobox>
+                                                    <template if:true={field.showRequiredError}>
+                                                        <div class="wizard-hint-error">This required field must be mapped.</div>
                                                     </template>
                                                 </div>
-                                                <div class="meta-field-pill">{field.label}</div>
                                             </div>
-                                            <div class="mapping-icon">&#10145;</div>
-                                            <div class="mapping-col">
-                                                <div class="filter_label_css" style="margin-bottom: 4px;">Salesforce Contact Field</div>
-                                                <lightning-combobox
-                                                    data-key={field.key}
-                                                    value={field.value}
-                                                    options={field.options}
-                                                    onchange={handleMappingChange}
-                                                    placeholder="-- Do Not Map --"
-                                                    variant="label-hidden"
-                                                    class="custom-combobox">
-                                                </lightning-combobox>
-                                                <template if:true={field.showRequiredError}>
-                                                    <div class="wizard-hint-error">This field is required — please map it.</div>
-                                                </template>
-                                            </div>
-                                        </div>
+                                        </template>
                                     </template>
                                     <template if:false={currentFormFields.length}>
-                                        <div class="wizard-hint-muted" style="text-align:center; margin-top:12px;">No fields found in this form.</div>
+                                        <div class="wizard-disabled-box">
+                                            No Salesforce Contact fields are available for mapping.
+                                        </div>
                                     </template>
                                 </div>
                             </template>

@@ -264,10 +264,8 @@ export default class MetaAdsFormMapping extends LightningElement {
             return;
         }
 
-        // Find form questions
         const form = this.availableForms.find(f => String(f.id) === String(this.selectedFormId));
         if (form && form.questions) {
-            // Load existing mappings for this form (if any)
             let existingMappings = {};
             if (this.fullMappingJson[this.selectedPageId]) {
                 let pageObj = this.fullMappingJson[this.selectedPageId];
@@ -279,70 +277,59 @@ export default class MetaAdsFormMapping extends LightningElement {
                 }
             }
 
-            this.currentFormFields = form.questions.map(q => {
-                let key      = q.key;
-                let metaType = q.type || '';
-                let options  = this.getFilteredFieldOptions(metaType);
+            let invertedMappings = {};
+            for (let mKey in existingMappings) {
+                invertedMappings[existingMappings[mKey]] = mKey;
+            }
 
-                // 1. Use existing saved mapping if available
-                let currentValue = existingMappings[key] || '';
+            this.currentFormFields = this.salesforceLeadFields.map(sf => {
+                let key = sf.value;
+                let sfType = sf.type ? sf.type.toUpperCase() : 'STRING';
+                
+                let options = this.getFilteredMetaFieldOptions(form.questions, sfType);
+                let currentValue = invertedMappings[key] || '';
 
-                // 2. Auto-populate: smart match by field name if no saved mapping
-                if (!currentValue) {
-                    currentValue = this.autoMatchSalesforceField(key, metaType, options);
+                let required = sf.required === 'true';
+
+                if (!currentValue && required) {
+                    currentValue = this.autoMatchMetaField(key, options);
                 }
 
                 return {
-                    key:               key,
-                    label:             q.label || key,
-                    metaType:          metaType,
-                    value:             currentValue,
-                    options:           options,
-                    required:          false,
-                    showRequiredError:  false,
-                    rowClass:          'mapping-row'
+                    key: key,
+                    label: sf.label.split(' (')[0],
+                    value: currentValue,
+                    options: options,
+                    required: required,
+                    showRequiredError: required && !currentValue,
+                    rowClass: required && !currentValue
+                        ? 'mapping-row mapping-row--required mapping-row--error'
+                        : (required ? 'mapping-row mapping-row--required' : 'mapping-row')
                 };
             });
-
-            // 3. Inject unmapped required SF Contact fields as rows so user must map them
-            this.injectRequiredSalesforceFields(existingMappings);
-
         } else {
             this.currentFormFields = [];
         }
     }
 
-    /**
-     * Smart name-matching: given a Meta field key (e.g. "email", "phone_number", "full_name"),
-     * find the best-fit Salesforce Contact field API name from the filtered option list.
-     */
-    autoMatchSalesforceField(metaKey, metaType, options) {
+    autoMatchMetaField(sfKey, options) {
         if (!options || options.length === 0) return '';
+        const norm = sfKey.toLowerCase().replace(/_/g, '').replace(/__c$/i, '');
 
-        // Normalise the meta key: strip underscores, lowercase
-        const norm = metaKey.toLowerCase().replace(/_/g, '');
-
-        // Priority map: exact API name matches (lowercase, no underscores)
         const priorityMap = {
-            'email':          'Email',
-            'workemail':      'Email',
-            'phonenumber':    'Phone',
-            'workphonenumber':'Phone',
-            'phone':          'Phone',
-            'firstname':      'FirstName',
-            'lastname':       'LastName',
-            'fullname':       'LastName',   // best Contact equivalent
-            'city':           'MailingCity',
-            'state':          'MailingState',
-            'country':        'MailingCountry',
-            'zip':            'MailingPostalCode',
-            'postalcode':     'MailingPostalCode',
-            'streetaddress':  'MailingStreet',
-            'address':        'MailingStreet',
-            'company':        'AccountId',
-            'jobtitle':       'Title',
-            'dateofbirth':    'Birthdate',
-            'dob':            'Birthdate',
+            'email':          'email',
+            'phone':          'phone_number',
+            'mobilephone':    'phone_number',
+            'firstname':      'first_name',
+            'lastname':       'last_name',
+            'mailingcity':    'city',
+            'mailingstate':   'state',
+            'mailingcountry': 'country',
+            'mailingpostalcode': 'zip_code',
+            'mailingstreet':  'street_address',
+            'accountid':      'company_name',
+            'title':          'job_title',
+            'birthdate':      'date_of_birth'
         };
 
         const priorityMatch = priorityMap[norm];
@@ -351,83 +338,48 @@ export default class MetaAdsFormMapping extends LightningElement {
             if (found) return found.value;
         }
 
-        // Fuzzy fallback: find option whose API name contains the meta key
         const fuzzy = options.find(o =>
             o.value.toLowerCase().includes(norm) ||
-            norm.includes(o.value.toLowerCase().replace(/__c$/i, ''))
+            norm.includes(o.value.toLowerCase())
         );
         return fuzzy ? fuzzy.value : '';
     }
 
-    /**
-     * Find required Contact fields that are NOT yet covered by any form field mapping,
-     * and append them as extra mapping rows so the user is forced to map them.
-     */
-    injectRequiredSalesforceFields(existingMappings) {
-        // Collect all SF fields currently mapped by form fields
-        const alreadyMapped = new Set(this.currentFormFields.map(f => f.value).filter(Boolean));
-        // Also include existing saved mappings
-        Object.values(existingMappings).forEach(v => alreadyMapped.add(v));
+    getFilteredMetaFieldOptions(formQuestions, sfType) {
+        let options = [];
+        
+        formQuestions.forEach(q => {
+            let metaType = (q.type || '').toUpperCase();
+            let allowedSfTypes = ['STRING', 'TEXTAREA', 'PICKLIST', 'MULTIPICKLIST']; 
 
-        // Find required SF fields not yet mapped
-        const requiredUnmapped = this.salesforceLeadFields.filter(sf =>
-            sf.required === 'true' && !alreadyMapped.has(sf.value)
-        );
+            if (metaType === 'EMAIL' || metaType === 'WORK_EMAIL') {
+                allowedSfTypes = ['EMAIL', 'STRING'];
+            } else if (metaType === 'PHONE' || metaType === 'WORK_PHONE_NUMBER') {
+                allowedSfTypes = ['PHONE', 'STRING'];
+            } else if (metaType === 'DOB' || metaType === 'DATE_OF_BIRTH') {
+                allowedSfTypes = ['DATE', 'DATETIME', 'STRING'];
+            } else if (metaType === 'GENDER' || metaType === 'MARITAL_STATUS' || metaType === 'RELATIONSHIP_STATUS' || metaType === 'MILITARY_STATUS') {
+                allowedSfTypes = ['PICKLIST', 'STRING'];
+            }
 
-        // Add a required-injection row for each
-        requiredUnmapped.forEach(sf => {
-            // Check if we already have a row for this SF field
-            const alreadyHasRow = this.currentFormFields.some(f => f.sfRequired === sf.value);
-            if (!alreadyHasRow) {
-                this.currentFormFields = [...this.currentFormFields, {
-                    key:               '__required__' + sf.value,
-                    label:             sf.label.split(' (')[0],
-                    metaType:          sf.type,
-                    value:             existingMappings[sf.value] || '',
-                    options:           this.salesforceLeadFields,
-                    required:          true,
-                    showRequiredError:  false,
-                    sfRequired:        sf.value,
-                    rowClass:          'mapping-row mapping-row--required'
-                }];
+            if (allowedSfTypes.includes(sfType)) {
+                options.push({ label: q.label || q.key, value: q.key });
             }
         });
-    }
-
-    getFilteredFieldOptions(metaType) {
-        if (!metaType) return this.salesforceLeadFields;
-
-        metaType = metaType.toUpperCase();
-        // Default allowed Salesforce field types for strings/text
-        let allowedSfTypes = ['STRING', 'TEXTAREA', 'PICKLIST', 'MULTIPICKLIST']; 
-
-        if (metaType === 'EMAIL' || metaType === 'WORK_EMAIL') {
-            allowedSfTypes = ['EMAIL', 'STRING'];
-        } else if (metaType === 'PHONE' || metaType === 'WORK_PHONE_NUMBER') {
-            allowedSfTypes = ['PHONE', 'STRING'];
-        } else if (metaType === 'DOB' || metaType === 'DATE_OF_BIRTH') {
-            allowedSfTypes = ['DATE', 'DATETIME', 'STRING'];
-        } else if (metaType === 'GENDER' || metaType === 'MARITAL_STATUS' || metaType === 'RELATIONSHIP_STATUS' || metaType === 'MILITARY_STATUS') {
-            allowedSfTypes = ['PICKLIST', 'STRING'];
-        }
-
-        return this.salesforceLeadFields.filter(f => {
-            let sfType = f.type ? f.type.toUpperCase() : 'STRING';
-            return allowedSfTypes.includes(sfType);
-        });
+        
+        return options;
     }
 
     handleMappingChange(event) {
-        const metaKey = event.target.dataset.key;
-        const sfField = event.detail.value;
+        const sfKey = event.target.dataset.key;
+        const metaField = event.detail.value;
 
-        // Must reassign array to trigger reactivity
         this.currentFormFields = this.currentFormFields.map(f => {
-            if (f.key === metaKey) {
+            if (f.key === sfKey) {
                 return Object.assign({}, f, {
-                    value: sfField,
-                    showRequiredError: f.required && !sfField,
-                    rowClass: (f.required && !sfField)
+                    value: metaField,
+                    showRequiredError: f.required && !metaField,
+                    rowClass: (f.required && !metaField)
                         ? 'mapping-row mapping-row--required mapping-row--error'
                         : (f.required ? 'mapping-row mapping-row--required' : 'mapping-row')
                 });
@@ -437,25 +389,20 @@ export default class MetaAdsFormMapping extends LightningElement {
     }
 
     async saveMapping() {
-        // ── Validate: all required SF fields must be mapped ──────────────────
-        const mappedSfFields = new Set(this.currentFormFields.map(f => f.value).filter(Boolean));
-        const unmappedRequired = this.salesforceLeadFields.filter(sf => sf.required === 'true' && !mappedSfFields.has(sf.value));
+        const unmappedRequired = this.currentFormFields.filter(f => f.required && !f.value);
         
         if (unmappedRequired.length > 0) {
-            const names = unmappedRequired.map(f => f.label.split(' (')[0]).join(', ');
+            const names = unmappedRequired.map(f => f.label).join(', ');
             this.showToast('Validation Error',
                 `The following required Salesforce fields must be mapped before saving: ${names}`,
                 'error');
             return;
         }
 
-        // Build mapping object: { metaFieldKey: sfFieldApiName }
         let formMapping = {};
         this.currentFormFields.forEach(f => {
-            // Skip injected required-field rows that weren't given a meta key
-            const key = f.sfRequired ? f.sfRequired : f.key;
             if (f.value) {
-                formMapping[key] = f.value;
+                formMapping[f.value] = f.key;
             }
         });
 

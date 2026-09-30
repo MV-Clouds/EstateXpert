@@ -173,7 +173,7 @@
                             <!-- Section 1: Select Page (always visible) -->
                             <div class="wizard-section">
                                 <div class="wizard-step-label">
-                                    <span class="wizard-step-badge">1</span>
+                                    <span class="wizard-step-badge">Step 1</span>
                                     Select Meta Page
                                 </div>
                                 <lightning-combobox
@@ -197,7 +197,7 @@
                             <!-- Section 2: Select Form (disabled until page selected) -->
                             <div class="wizard-section">
                                 <div class="wizard-step-label">
-                                    <span class="wizard-step-badge" class:wizard-step-badge-disabled={isFormSectionDisabled}>2</span>
+                                    <span class="wizard-step-badge" class:wizard-step-badge-disabled={isFormSectionDisabled}>Step 2</span>
                                     Select Lead Form
                                     <template if:true={isFormSectionDisabled}>
                                         <span class="wizard-hint-muted">&nbsp;— Select a page first</span>
@@ -224,7 +224,7 @@
                                 <div class="wizard-divider"></div>
                                 <div class="wizard-section">
                                     <div class="wizard-step-label">
-                                        <span class="wizard-step-badge">3</span>
+                                        <span class="wizard-step-badge">Step 3</span>
                                         Map Fields
                                     </div>
                                     <template if:true={currentFormFields.length}>
@@ -266,15 +266,28 @@
                                                     </template>
 
                                                     <template if:true={field.isCustomValue}>
-                                                        <lightning-input 
-                                                            data-key={field.key} 
-                                                            type="text" 
-                                                            value={field.customValue} 
-                                                            onchange={handleCustomValueChange} 
-                                                            placeholder="Enter custom value" 
-                                                            variant="label-hidden" 
-                                                            class="mapping-secondary-input">
-                                                        </lightning-input>
+                                                        <template if:true={field.isReferenceField}>
+                                                            <lightning-record-picker 
+                                                                data-key={field.key} 
+                                                                label={field.label} 
+                                                                placeholder="Search and select record" 
+                                                                object-api-name={field.referenceTo} 
+                                                                value={field.customValue} 
+                                                                onchange={handleReferenceChange} 
+                                                                class="mapping-secondary-input">
+                                                            </lightning-record-picker>
+                                                        </template>
+                                                        <template if:false={field.isReferenceField}>
+                                                            <lightning-input 
+                                                                data-key={field.key} 
+                                                                type="text" 
+                                                                value={field.customValue} 
+                                                                onchange={handleCustomValueChange} 
+                                                                placeholder="Enter custom value" 
+                                                                variant="label-hidden" 
+                                                                class="mapping-secondary-input">
+                                                            </lightning-input>
+                                                        </template>
                                                     </template>
 
                                                     <template if:true={field.showRequiredError}>

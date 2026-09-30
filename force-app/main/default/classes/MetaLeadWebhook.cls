@@ -168,7 +168,8 @@ global without sharing class MetaLeadWebhook {
             }
 
             // --- 4. Process Field Mappings ---
-            Map<String, String> currentFormMapping = new Map<String, String>();
+            Map<String, List<String>> metaToSfFields = new Map<String, List<String>>();
+            Map<String, String> sfToCustomValue = new Map<String, String>();
             try {
                 List<MVEX__Configuration_Settings__c> settings = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Meta Ads Mappings' LIMIT 1];
                 if (!settings.isEmpty() && String.isNotBlank(settings[0].MVEX__Fields_Data__c)) {
@@ -195,9 +196,34 @@ global without sharing class MetaLeadWebhook {
                                 // Fallback to old format where formObj directly contains mappings
                                 mappingsObj = formObj;
                             }
-                            
-                            for (String metaField : mappingsObj.keySet()) {
-                                currentFormMapping.put(metaField, String.valueOf(mappingsObj.get(metaField)));
+                            for (String key : mappingsObj.keySet()) {
+                                Object val = mappingsObj.get(key);
+                                if (val instanceof Map<String, Object>) {
+                                    // New format! key is Salesforce field.
+                                    Map<String, Object> fieldObj = (Map<String, Object>) val;
+                                    String sType = (String) fieldObj.get('sourceType');
+                                    if (sType == 'Meta Form Field') {
+                                        String mField = (String) fieldObj.get('metaField');
+                                        if (String.isNotBlank(mField)) {
+                                            if (!metaToSfFields.containsKey(mField)) metaToSfFields.put(mField, new List<String>());
+                                            metaToSfFields.get(mField).add(key);
+                                        }
+                                    } else if (sType == 'Custom Value') {
+                                        String cVal = (String) fieldObj.get('customValue');
+                                        if (String.isNotBlank(cVal)) {
+                                            sfToCustomValue.put(key, cVal);
+                                        }
+                                    }
+                                } else {
+                                    // Old format! key is Meta Field or "custom", val is Salesforce field.
+                                    String sfField = String.valueOf(val);
+                                    if (key.startsWith('"') && key.endsWith('"')) {
+                                        sfToCustomValue.put(sfField, key.substring(1, key.length() - 1));
+                                    } else {
+                                        if (!metaToSfFields.containsKey(key)) metaToSfFields.put(key, new List<String>());
+                                        metaToSfFields.get(key).add(sfField);
+                                    }
+                                }
                             }
                         }
                     }
@@ -219,13 +245,14 @@ global without sharing class MetaLeadWebhook {
                     
                     if (String.isBlank(fieldValue)) continue;
                     
-                    if (currentFormMapping.containsKey(fieldName)) {
-                        String sfField = currentFormMapping.get(fieldName);
-                        try {
-                            newContact.put(sfField, fieldValue);
-                        } catch (Exception e) {
-                            System.debug('Failed to map ' + fieldName + ' to ' + sfField);
-                            unmappedData += fieldName + ': ' + fieldValue + '\n';
+                    if (metaToSfFields.containsKey(fieldName)) {
+                        for (String sfField : metaToSfFields.get(fieldName)) {
+                            try {
+                                newContact.put(sfField, fieldValue);
+                            } catch (Exception e) {
+                                System.debug('Failed to map ' + fieldName + ' to ' + sfField);
+                                unmappedData += fieldName + ' (' + sfField + '): ' + fieldValue + '\n';
+                            }
                         }
                     } else {
                         // Append unmapped fields to a string
@@ -235,15 +262,12 @@ global without sharing class MetaLeadWebhook {
             }
             
             // Apply custom value mappings
-            for (String metaField : currentFormMapping.keySet()) {
-                if (metaField.startsWith('"') && metaField.endsWith('"')) {
-                    String sfField = currentFormMapping.get(metaField);
-                    String customValue = metaField.substring(1, metaField.length() - 1);
-                    try {
-                        newContact.put(sfField, customValue);
-                    } catch (Exception e) {
-                        System.debug('Failed to map custom value ' + customValue + ' to ' + sfField);
-                    }
+            for (String sfField : sfToCustomValue.keySet()) {
+                String customValue = sfToCustomValue.get(sfField);
+                try {
+                    newContact.put(sfField, customValue);
+                } catch (Exception e) {
+                    System.debug('Failed to map custom value ' + customValue + ' to ' + sfField);
                 }
             }
 

@@ -299,12 +299,25 @@ export default class MetaAdsFormMapping extends LightningElement {
                 }
             }
 
-            let invertedMappings = {};
-            for (let mKey in existingMappings) {
-                invertedMappings[existingMappings[mKey]] = mKey;
+            let mappingData = {};
+            const savedFieldKeys = [];
+            
+            for (let k in existingMappings) {
+                let val = existingMappings[k];
+                if (typeof val === 'object' && val !== null) {
+                    // New format! k is the Salesforce Field
+                    mappingData[k] = val;
+                    savedFieldKeys.push(k);
+                } else {
+                    // Old format! k is Meta Field or "custom", val is Salesforce Field
+                    mappingData[val] = {
+                        sourceType: (k.startsWith('"') && k.endsWith('"')) ? SOURCE_CUSTOM : SOURCE_META,
+                        metaField: (k.startsWith('"') && k.endsWith('"')) ? '' : k,
+                        customValue: (k.startsWith('"') && k.endsWith('"')) ? k.slice(1, -1) : ''
+                    };
+                    savedFieldKeys.push(val);
+                }
             }
-
-            const savedFieldKeys = Object.keys(invertedMappings);
 
             const fieldsToDisplay = this.salesforceLeadFields.filter(sf => {
                 const key = sf.value;
@@ -320,18 +333,14 @@ export default class MetaAdsFormMapping extends LightningElement {
                 let sfType = sf.type ? sf.type.toUpperCase() : 'STRING';
                 
                 let options = this.getFilteredMetaFieldOptions(form.questions, sfType);
-                let currentValue = invertedMappings[key] || '';
+                let savedData = mappingData[key] || {};
 
                 let required = sf.required === 'true';
 
-                let isCustom = currentValue && currentValue.startsWith('"') && currentValue.endsWith('"');
-                let customVal = isCustom ? currentValue.slice(1, -1) : '';
-                let metaVal = isCustom ? '' : currentValue;
-                let sourceType = '';
+                let sourceType = savedData.sourceType || '';
+                let customVal = savedData.customValue || '';
+                let metaVal = savedData.metaField || '';
                 
-                if (metaVal) sourceType = SOURCE_META;
-                else if (customVal) sourceType = SOURCE_CUSTOM;
-
                 if (!sourceType && required) {
                     metaVal = this.autoMatchMetaField(key, options);
                     if (metaVal) sourceType = SOURCE_META;
@@ -350,6 +359,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                     metaOptions: options,
                     isCustomValue: sourceType === SOURCE_CUSTOM,
                     customValue: customVal,
+                    isReferenceField: this.isReferenceField(sf),
+                    referenceTo: sf.referenceTo || '',
                     required: required,
                     showRequiredError: required && !sourceType,
                     rowClass: required && !sourceType
@@ -362,7 +373,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                 return {
                     label: sf.label.split(' (')[0],
                     value: sf.value,
-                    type: sf.type
+                    type: sf.type,
+                    referenceTo: sf.referenceTo || ''
                 };
             });
 
@@ -432,6 +444,10 @@ export default class MetaAdsFormMapping extends LightningElement {
         return options;
     }
 
+    isReferenceField(salesforceField) {
+        return salesforceField?.type === 'REFERENCE' || !!salesforceField?.referenceTo;
+    }
+
     handleSourceTypeChange(event) {
         const sfKey = event.target.dataset.key;
         const type = event.detail.value;
@@ -488,6 +504,25 @@ export default class MetaAdsFormMapping extends LightningElement {
                 });
             }
             return f;
+        });
+    }
+
+    handleReferenceChange(event) {
+        const key = event.target.dataset.key;
+        const recordId = event.detail.recordId || '';
+
+        this.currentFormFields = this.currentFormFields.map(field => {
+            if (field.key !== key) {
+                return field;
+            }
+            let isMapped = (field.sourceType === SOURCE_META && field.metaField) || (field.sourceType === SOURCE_CUSTOM && recordId?.trim());
+            return Object.assign({}, field, {
+                customValue: recordId,
+                showRequiredError: field.required && !isMapped,
+                rowClass: (field.required && !isMapped)
+                    ? 'mapping-row mapping-row--required mapping-row--error'
+                    : (field.required ? 'mapping-row mapping-row--required' : 'mapping-row')
+            });
         });
     }
 
@@ -554,6 +589,8 @@ export default class MetaAdsFormMapping extends LightningElement {
             ],
             isMetaField: false,
             isCustomValue: false,
+            isReferenceField: this.isReferenceField(salesforceField),
+            referenceTo: salesforceField.referenceTo || '',
             showRequiredError: false,
             rowClass: 'mapping-row'
         };
@@ -583,9 +620,15 @@ export default class MetaAdsFormMapping extends LightningElement {
         let formMapping = {};
         this.currentFormFields.forEach(f => {
             if (f.sourceType === SOURCE_META && f.metaField) {
-                formMapping[f.metaField] = f.key;
-            } else if (f.sourceType === SOURCE_CUSTOM && f.customValue) {
-                formMapping[`"${f.customValue}"`] = f.key;
+                formMapping[f.key] = {
+                    sourceType: SOURCE_META,
+                    metaField: f.metaField
+                };
+            } else if (f.sourceType === SOURCE_CUSTOM && f.customValue?.trim()) {
+                formMapping[f.key] = {
+                    sourceType: SOURCE_CUSTOM,
+                    customValue: f.customValue.trim()
+                };
             }
         });
 

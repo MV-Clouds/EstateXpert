@@ -150,12 +150,6 @@ public with sharing class MetaAdsFormMappingController {
 
             // Allow updateable, accessible, non-deprecated fields
             if (dfr.isAccessible() && dfr.isUpdateable() && !dfr.isDeprecatedAndHidden()) {
-                // A field is truly required if:
-                //   - It must be supplied on create (isCreateable)
-                //   - It cannot be null (isNillable = false)
-                //   - It has no static default value (getDefaultValue = null)
-                //   - Salesforce does NOT auto-default it on insert (isDefaultedOnCreate = false)
-                //     e.g. OwnerId is defaulted to the running user, so it is NOT user-required
                 Boolean isRequired = dfr.isCreateable()
                     && !dfr.isNillable()
                     && dfr.getDefaultValue() == null
@@ -167,6 +161,14 @@ public with sharing class MetaAdsFormMappingController {
                 f.put('apiName',  dfr.getName());
                 f.put('type',     String.valueOf(dfr.getType()));
                 f.put('required', String.valueOf(isRequired));
+                
+                if (dfr.getType() == Schema.DisplayType.Reference) {
+                    List<Schema.sObjectType> refs = dfr.getReferenceTo();
+                    if (!refs.isEmpty()) {
+                        f.put('referenceTo', String.valueOf(refs[0]));
+                    }
+                }
+                
                 fields.add(f);
             }
         }

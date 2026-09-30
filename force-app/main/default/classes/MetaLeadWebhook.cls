@@ -176,16 +176,28 @@ global without sharing class MetaLeadWebhook {
                     
                     if (rootJson.containsKey(pId)) {
                         Map<String, Object> pageObj = (Map<String, Object>) rootJson.get(pId);
+                        Map<String, Object> formsObj = new Map<String, Object>();
+                        
                         if (pageObj.containsKey('forms')) {
-                            Map<String, Object> formsObj = (Map<String, Object>) pageObj.get('forms');
-                            if (formsObj.containsKey(fId)) {
-                                Map<String, Object> formObj = (Map<String, Object>) formsObj.get(fId);
-                                if (formObj.containsKey('mappings')) {
-                                    Map<String, Object> mappingsObj = (Map<String, Object>) formObj.get('mappings');
-                                    for (String metaField : mappingsObj.keySet()) {
-                                        currentFormMapping.put(metaField, String.valueOf(mappingsObj.get(metaField)));
-                                    }
-                                }
+                            formsObj = (Map<String, Object>) pageObj.get('forms');
+                        } else {
+                            // Fallback to old format where pageObj directly contains form IDs
+                            formsObj = pageObj;
+                        }
+                        
+                        if (formsObj.containsKey(fId)) {
+                            Map<String, Object> formObj = (Map<String, Object>) formsObj.get(fId);
+                            Map<String, Object> mappingsObj = new Map<String, Object>();
+                            
+                            if (formObj.containsKey('mappings')) {
+                                mappingsObj = (Map<String, Object>) formObj.get('mappings');
+                            } else {
+                                // Fallback to old format where formObj directly contains mappings
+                                mappingsObj = formObj;
+                            }
+                            
+                            for (String metaField : mappingsObj.keySet()) {
+                                currentFormMapping.put(metaField, String.valueOf(mappingsObj.get(metaField)));
                             }
                         }
                     }
@@ -216,28 +228,8 @@ global without sharing class MetaLeadWebhook {
                             unmappedData += fieldName + ': ' + fieldValue + '\n';
                         }
                     } else {
-                        // Smart Fallback for unmapped fields
-                        String lowerName = fieldName.toLowerCase();
-                        if (lowerName.contains('email') && String.isBlank(newContact.Email)) {
-                            newContact.Email = fieldValue;
-                        } else if (lowerName.contains('phone') && String.isBlank(newContact.Phone)) {
-                            newContact.Phone = fieldValue;
-                        } else if (lowerName == 'first_name' && String.isBlank(newContact.FirstName)) {
-                            newContact.FirstName = fieldValue;
-                        } else if (lowerName == 'last_name' && String.isBlank(newContact.LastName)) {
-                            newContact.LastName = fieldValue;
-                        } else if (lowerName == 'full_name' && String.isBlank(newContact.LastName)) {
-                            List<String> nameParts = fieldValue.split(' ', 2);
-                            if (nameParts.size() > 1) {
-                                newContact.FirstName = nameParts[0];
-                                newContact.LastName = nameParts[1];
-                            } else {
-                                newContact.LastName = fieldValue;
-                            }
-                        } else {
-                            // Append unmapped fields to a string
-                            unmappedData += fieldName + ': ' + fieldValue + '\n';
-                        }
+                        // Append unmapped fields to a string
+                        unmappedData += fieldName + ': ' + fieldValue + '\n';
                     }
                 }
             }
@@ -261,44 +253,7 @@ global without sharing class MetaLeadWebhook {
                 newContact.Description = existingDesc + '--- Unmapped Meta Lead Data ---\n' + unmappedData;
             }
 
-            // --- 5. Required Field Fallback (Dynamic) ---
-            if (String.isBlank(newContact.LastName)) {
-                newContact.LastName = 'Unknown Meta Lead';
-            }
-            
-            Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.Contact.fields.getMap();
-            for (String fieldName : fieldMap.keySet()) {
-                Schema.DescribeFieldResult dfr = fieldMap.get(fieldName).getDescribe();
-                
-                // A field is strictly required if it is createable, not nillable, and not defaulted on create.
-                if (dfr.isCreateable() && !dfr.isNillable() && !dfr.isDefaultedOnCreate()) {
-                    // Check if value is already populated
-                    Object currentVal = newContact.get(fieldName);
-                    if (currentVal == null || (currentVal instanceof String && String.isBlank((String)currentVal))) {
-                        Schema.DisplayType fType = dfr.getType();
-                        try {
-                            if (fType == Schema.DisplayType.String || fType == Schema.DisplayType.TextArea || fType == Schema.DisplayType.Phone || fType == Schema.DisplayType.Email || fType == Schema.DisplayType.URL) {
-                                newContact.put(fieldName, 'Empty');
-                            } else if (fType == Schema.DisplayType.Double || fType == Schema.DisplayType.Integer || fType == Schema.DisplayType.Currency || fType == Schema.DisplayType.Percent) {
-                                newContact.put(fieldName, 0);
-                            } else if (fType == Schema.DisplayType.Date) {
-                                newContact.put(fieldName, Date.today());
-                            } else if (fType == Schema.DisplayType.DateTime) {
-                                newContact.put(fieldName, DateTime.now());
-                            } else if (fType == Schema.DisplayType.Boolean) {
-                                newContact.put(fieldName, false);
-                            } else if (fType == Schema.DisplayType.Picklist || fType == Schema.DisplayType.MultiPicklist) {
-                                List<Schema.PicklistEntry> ple = dfr.getPicklistValues();
-                                if (!ple.isEmpty()) {
-                                    newContact.put(fieldName, ple[0].getValue());
-                                }
-                            }
-                        } catch (Exception e) {
-                            System.debug('Could not assign fallback for required field: ' + fieldName);
-                        }
-                    }
-                }
-            }
+            // Removed Required Field Fallback (Dynamic)
             
             // --- 6. Insert ---
             Map<String, Object> retryPayload = new Map<String, Object>();

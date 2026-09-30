@@ -393,7 +393,7 @@ public with sharing class PortalMappingController {
                 }
                 jsonBody = JSON.serialize(jsonBodyMap);
             } else {
-                // jsonBody = CreatePortalListingMappingRecords.createPortalRecords(portalName);
+                jsonBody = CreatePortalListingMappingRecords.createPortalRecords(portalName);
             }
 
             String portalId;

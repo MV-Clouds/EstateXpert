@@ -7,14 +7,14 @@ public with sharing class MetaAdsFormMappingController {
     public static Map<String, Object> getConnectedPages() {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
-            if (tokenConfig == null || String.isBlank(tokenConfig.System_User_Token_1__c)) {
+            OAuth_Configuration__mdt tokenConfig = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
+            if (tokenConfig == null || String.isBlank(tokenConfig.Access_Token__c)) {
                 resultMap.put('success', false);
                 resultMap.put('message', 'Meta Ads is not connected.');
                 return resultMap;
             }
 
-            String systemUserToken = tokenConfig.System_User_Token_1__c + (String.isNotBlank(tokenConfig.System_User_Token_2__c) ? tokenConfig.System_User_Token_2__c : '');
+            String systemUserToken = tokenConfig.Access_Token__c;
             
             Integration_App_Config__mdt config = Integration_App_Config__mdt.getInstance('Meta_Ads');
             if (config == null) {
@@ -59,14 +59,14 @@ public with sharing class MetaAdsFormMappingController {
     public static Map<String, Object> getLeadForms(String pageId) {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
-            if (tokenConfig == null || String.isBlank(tokenConfig.System_User_Token_1__c)) {
+            OAuth_Configuration__mdt tokenConfig = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
+            if (tokenConfig == null || String.isBlank(tokenConfig.Access_Token__c)) {
                 resultMap.put('success', false);
                 resultMap.put('message', 'Meta Ads is not connected.');
                 return resultMap;
             }
 
-            String systemUserToken = tokenConfig.System_User_Token_1__c + (String.isNotBlank(tokenConfig.System_User_Token_2__c) ? tokenConfig.System_User_Token_2__c : '');
+            String systemUserToken = tokenConfig.Access_Token__c;
             String clientAppId = tokenConfig.Client_App_Id__c;
 
             Integration_App_Config__mdt config = Integration_App_Config__mdt.getInstance('Meta_Ads');
@@ -135,8 +135,7 @@ public with sharing class MetaAdsFormMappingController {
 
         // System-managed fields: Salesforce auto-populates these — never require mapping
         Set<String> SYSTEM_FIELDS = new Set<String>{
-            'ownerid', 'recordtypeid', 'currencyisocode',
-            'createdbyid', 'lastmodifiedbyid', 'masterrecordid'
+            'ownerid', 'recordtypeid', 'currencyisocode','createdbyid', 'lastmodifiedbyid', 'masterrecordid'
         };
 
         Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.Contact.fields.getMap();
@@ -227,11 +226,11 @@ public with sharing class MetaAdsFormMappingController {
     }
 
     private static String subscribeWebhookOnTheFly(String pageId) {
-        Meta_Token_Config__c tokenConfig = Meta_Token_Config__c.getOrgDefaults();
-        if (tokenConfig == null || String.isBlank(tokenConfig.System_User_Token_1__c)) {
+        OAuth_Configuration__mdt tokenConfig = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
+        if (tokenConfig == null || String.isBlank(tokenConfig.Access_Token__c)) {
             return null;
         }
-        String systemUserToken = tokenConfig.System_User_Token_1__c + (String.isNotBlank(tokenConfig.System_User_Token_2__c) ? tokenConfig.System_User_Token_2__c : '');
+        String systemUserToken = tokenConfig.Access_Token__c;
         
         Integration_App_Config__mdt config = Integration_App_Config__mdt.getInstance('Meta_Ads');
         String graphApiVersion = config.API_Version__c;
@@ -270,7 +269,7 @@ public with sharing class MetaAdsFormMappingController {
 
     @AuraEnabled
     public static List<MVEX__Error_Handling__c> getFailedLeads(String formId) {
-        List<MVEX__Error_Handling__c> allLeads = [SELECT Id, Name, CreatedDate, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE MVEX__Source_of_Error__c = 'MetaFailedLeads' ORDER BY CreatedDate DESC LIMIT 500];
+        List<MVEX__Error_Handling__c> allLeads = [SELECT Id, Name, CreatedDate, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE MVEX__Source_of_Error__c = 'MetaFailedLeads' WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 500];
         List<MVEX__Error_Handling__c> filtered = new List<MVEX__Error_Handling__c>();
         for (MVEX__Error_Handling__c err : allLeads) {
             if (String.isNotBlank(err.MVEX__Error_Body__c)) {
@@ -290,7 +289,7 @@ public with sharing class MetaAdsFormMappingController {
     @AuraEnabled
     public static String retryFailedLead(String errorRecordId, String mappingJsonOverride) {
         try {
-            MVEX__Error_Handling__c err = [SELECT Id, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE Id = :errorRecordId LIMIT 1];
+            MVEX__Error_Handling__c err = [SELECT Id, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE Id = :errorRecordId WITH USER_MODE LIMIT 1];
             if (err == null || String.isBlank(err.MVEX__Error_Body__c)) {
                 return 'Error record not found or body is empty.';
             }
@@ -302,9 +301,12 @@ public with sharing class MetaAdsFormMappingController {
             String fName = (String) retryPayload.get('formName');
             Map<String, Object> lData = (Map<String, Object>) retryPayload.get('leadData');
             
-            String result = MetaLeadWebhook.createSalesforceContact(lData, fName, pId, fId, lId, true, mappingJsonOverride);
+            MetaLeadWebhook.ContactContext ctx = new MetaLeadWebhook.ContactContext(lData, fName, pId, fId, lId);
+            ctx.isRetry = true;
+            ctx.mappingJsonOverride = mappingJsonOverride;
+            String result = MetaLeadWebhook.createSalesforceContact(ctx);
             if (result == 'Success') {
-                delete err;
+                delete as user err;
             }
             return result;
         } catch (Exception e) {

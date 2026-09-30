@@ -4,7 +4,7 @@
  *                 - Client Application ID handles individual client Webhook subscriptions.
  *                 - Automatically subscribes the Facebook Page to Webhooks (subscribed_apps) for real-time leads.
  */
-public without sharing class MetaAdsTokenController {
+public with sharing class MetaAdsTokenController {
 
     // ─── Configuration from Custom Metadata ──────
     /**

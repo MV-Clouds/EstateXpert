@@ -1,5 +1,35 @@
 @RestResource(urlMapping='/PAGE/webhooks/*')
-global without sharing class MetaLeadWebhook {
+global with sharing class MetaLeadWebhook {
+
+    public class ApiContext {
+        public String token;
+        public String apiVersion;
+        public String baseUrl;
+        public ApiContext(String token, String apiVersion, String baseUrl) {
+            this.token = token;
+            this.apiVersion = apiVersion;
+            this.baseUrl = baseUrl;
+        }
+    }
+
+    public class ContactContext {
+        public Map<String, Object> leadData;
+        public String formName;
+        public String pageId;
+        public String formId;
+        public String leadId;
+        public Boolean isRetry;
+        public String mappingJsonOverride;
+        
+        public ContactContext(Map<String, Object> leadData, String formName, String pageId, String formId, String leadId) {
+            this.leadData = leadData;
+            this.formName = formName;
+            this.pageId = pageId;
+            this.formId = formId;
+            this.leadId = leadId;
+            this.isRetry = false;
+        }
+    }
 
     // ─── IDs parsed from the webhook payload ─────────────────────────────────────
     private static String pageId  = '';
@@ -12,11 +42,11 @@ global without sharing class MetaLeadWebhook {
      * This is the CORRECT token source — the old MVEX__MetaLeadConfig__c is legacy.
      */
     private static String getSystemUserToken() {
-        Meta_Token_Config__c cfg = Meta_Token_Config__c.getOrgDefaults();
-        if (cfg == null || String.isBlank(cfg.System_User_Token_1__c)) {
+        OAuth_Configuration__mdt cfg = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
+        if (cfg == null || String.isBlank(cfg.Access_Token__c)) {
             return null;
         }
-        return cfg.System_User_Token_1__c + (String.isNotBlank(cfg.System_User_Token_2__c) ? cfg.System_User_Token_2__c : '');
+        return cfg.Access_Token__c;
     }
 
     /**
@@ -31,9 +61,9 @@ global without sharing class MetaLeadWebhook {
      * Fetches a Page Access Token on-the-fly using the System User Token.
      * This is the SAME approach used in MetaAdsFormMappingController which works correctly.
      */
-    private static String getPageAccessToken(String pId, String systemUserToken, String apiVersion, String baseUrl) {
+    private static String getPageAccessToken(String pId, ApiContext apiCtx) {
         try {
-            String url = baseUrl + '/' + apiVersion + '/' + pId + '?fields=access_token&access_token=' + EncodingUtil.urlEncode(systemUserToken, 'UTF-8');
+            String url = apiCtx.baseUrl + '/' + apiCtx.apiVersion + '/' + pId + '?fields=access_token&access_token=' + EncodingUtil.urlEncode(apiCtx.token, 'UTF-8');
             Map<String, Object> resp = makeGetRequest(url);
             if (resp.containsKey('access_token')) {
                 return (String) resp.get('access_token');
@@ -42,7 +72,7 @@ global without sharing class MetaLeadWebhook {
             System.debug('Failed to get Page Access Token: ' + e.getMessage());
         }
         // Fallback: use System User Token directly
-        return systemUserToken;
+        return apiCtx.token;
     }
 
     // ─── Webhook GET (verification handshake) ─────────────────────────────────────
@@ -55,7 +85,7 @@ global without sharing class MetaLeadWebhook {
                 response.responseBody = Blob.valueOf(request.params.get('hub.challenge'));
             }
         } catch (Exception e) {
-            // ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'doGet', e.getMessage());
+            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'doGet', e.getMessage());
         }
     }
 
@@ -97,32 +127,36 @@ global without sharing class MetaLeadWebhook {
             String baseUrl    = config != null ? config.Base_Url__c    : 'https://graph.facebook.com';
 
             // Derive Page Access Token (same method used in MetaAdsFormMappingController)
-            String pageAccessToken = getPageAccessToken(pageId, systemUserToken, apiVersion, baseUrl);
+            ApiContext sysCtx = new ApiContext(systemUserToken, apiVersion, baseUrl);
+            String pageAccessToken = getPageAccessToken(pageId, sysCtx);
 
-            Map<String, Object> leadData = fetchLeadData(leadId, pageAccessToken, apiVersion, baseUrl);
-            String formName              = fetchFormName(formId, pageAccessToken, apiVersion, baseUrl);
-            createSalesforceContact(leadData, formName, pageId, formId, leadId);
+            ApiContext pageCtx = new ApiContext(pageAccessToken, apiVersion, baseUrl);
+            Map<String, Object> leadData = fetchLeadData(leadId, pageCtx);
+            String formName = fetchFormName(formId, pageCtx);
+            
+            ContactContext cCtx = new ContactContext(leadData, formName, pageId, formId, leadId);
+            createSalesforceContact(cCtx);
 
         } catch (Exception e) {
             System.debug('MetaLeadWebhook.handlePost Error: ' + e.getMessage() + ' | Line: ' + e.getLineNumber());
-            // ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'handlePost', e.getMessage());
+            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'handlePost', e.getMessage());
         }
     }
 
     // ─── Graph API: fetch lead field data ─────────────────────────────────────────
-    public static Map<String, Object> fetchLeadData(String leadgenId, String token, String apiVersion, String baseUrl) {
-        String url = baseUrl + '/' + apiVersion + '/' + leadgenId
+    public static Map<String, Object> fetchLeadData(String leadgenId, ApiContext apiCtx) {
+        String url = apiCtx.baseUrl + '/' + apiCtx.apiVersion + '/' + leadgenId
                    + '?fields=field_data,platform,created_time,campaign_id,campaign_name'
-                   + '&access_token=' + EncodingUtil.urlEncode(token, 'UTF-8');
+                   + '&access_token=' + EncodingUtil.urlEncode(apiCtx.token, 'UTF-8');
         return makeGetRequest(url);
     }
 
     // ─── Graph API: fetch form name ───────────────────────────────────────────────
-    public static String fetchFormName(String fId, String token, String apiVersion, String baseUrl) {
+    public static String fetchFormName(String fId, ApiContext apiCtx) {
         try {
             if (String.isBlank(fId)) return '';
-            String url = baseUrl + '/' + apiVersion + '/' + fId
-                       + '?fields=name&access_token=' + EncodingUtil.urlEncode(token, 'UTF-8');
+            String url = apiCtx.baseUrl + '/' + apiCtx.apiVersion + '/' + fId
+                       + '?fields=name&access_token=' + EncodingUtil.urlEncode(apiCtx.token, 'UTF-8');
             Map<String, Object> response = makeGetRequest(url);
             return response.containsKey('name') ? (String) response.get('name') : '';
         } catch (Exception e) {
@@ -141,38 +175,29 @@ global without sharing class MetaLeadWebhook {
             HTTPResponse res = http.send(req);
             return (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
         } catch (Exception e) {
-            System.debug('API Error: ' + e.getMessage());
-            // ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'makeGetRequest', e.getMessage());
+            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'makeGetRequest', e.getMessage());
             return new Map<String, Object>();
         }
     }
     
 
-    public static String createSalesforceContact(Map<String, Object> leadData, String formName, String pId, String fId, String lId) {
-        return createSalesforceContact(leadData, formName, pId, fId, lId, false, null);
-    }
-
-    public static String createSalesforceContact(Map<String, Object> leadData, String formName, String pId, String fId, String lId, Boolean isRetry) {
-        return createSalesforceContact(leadData, formName, pId, fId, lId, isRetry, null);
-    }
-
-    public static String createSalesforceContact(Map<String, Object> leadData, String formName, String pId, String fId, String lId, Boolean isRetry, String mappingJsonOverride) {
-        if (leadData.containsKey('id') || String.isNotBlank(lId)) {
+    public static String createSalesforceContact(ContactContext ctx) {
+        if (ctx.leadData.containsKey('id') || String.isNotBlank(ctx.leadId)) {
             Contact newContact = new Contact();
 
             // --- 2. Handle Platform ---
-            String platform = leadData.containsKey('platform') ? (String) leadData.get('platform') : 'facebook';
+            String platform = ctx.leadData.containsKey('platform') ? (String) ctx.leadData.get('platform') : 'facebook';
             newContact.LeadSource = (platform == 'ig') ? 'Instagram' : 'Facebook';
             
             // --- 3. Store Form Name ---
-            newContact.MVEX__Meta_Form_Name__c = formName; // Store the fetched name
+            newContact.MVEX__Meta_Form_Name__c = ctx.formName; // Store the fetched name
             newContact.MVEX__Contact_Type__c = 'Buyer';
 
-            if (leadData.containsKey('campaign_id')) {
-                newContact.MVEX__MetaCampaignId__c = (String) leadData.get('campaign_id');
+            if (ctx.leadData.containsKey('campaign_id')) {
+                newContact.MVEX__MetaCampaignId__c = (String) ctx.leadData.get('campaign_id');
             }
-            if (leadData.containsKey('campaign_name')) {
-                newContact.MVEX__Meta_Campaign_Name__c = (String) leadData.get('campaign_name');
+            if (ctx.leadData.containsKey('campaign_name')) {
+                newContact.MVEX__Meta_Campaign_Name__c = (String) ctx.leadData.get('campaign_name');
             }
 
             // --- 4. Process Field Mappings ---
@@ -180,8 +205,8 @@ global without sharing class MetaLeadWebhook {
             Map<String, String> sfToCustomValue = new Map<String, String>();
             try {
                 String mappingJsonData = '';
-                if (String.isNotBlank(mappingJsonOverride)) {
-                    mappingJsonData = mappingJsonOverride;
+                if (String.isNotBlank(ctx.mappingJsonOverride)) {
+                    mappingJsonData = ctx.mappingJsonOverride;
                 } else {
                     List<MVEX__Configuration_Settings__c> settings = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Meta Ads Mappings' LIMIT 1];
                     if (!settings.isEmpty()) {
@@ -192,8 +217,8 @@ global without sharing class MetaLeadWebhook {
                 if (String.isNotBlank(mappingJsonData)) {
                     Map<String, Object> rootJson = (Map<String, Object>) JSON.deserializeUntyped(mappingJsonData);
                     
-                    if (rootJson.containsKey(pId)) {
-                        Map<String, Object> pageObj = (Map<String, Object>) rootJson.get(pId);
+                    if (rootJson.containsKey(ctx.pageId)) {
+                        Map<String, Object> pageObj = (Map<String, Object>) rootJson.get(ctx.pageId);
                         Map<String, Object> formsObj = new Map<String, Object>();
                         
                         if (pageObj.containsKey('forms')) {
@@ -203,8 +228,8 @@ global without sharing class MetaLeadWebhook {
                             formsObj = pageObj;
                         }
                         
-                        if (formsObj.containsKey(fId)) {
-                            Map<String, Object> formObj = (Map<String, Object>) formsObj.get(fId);
+                        if (formsObj.containsKey(ctx.formId)) {
+                            Map<String, Object> formObj = (Map<String, Object>) formsObj.get(ctx.formId);
                             Map<String, Object> mappingsObj = new Map<String, Object>();
                             
                             if (formObj.containsKey('mappings')) {
@@ -252,8 +277,8 @@ global without sharing class MetaLeadWebhook {
             // Process field data
             String unmappedData = '';
             
-            if (leadData.containsKey('field_data')) {
-                List<Object> fieldData = (List<Object>) leadData.get('field_data');
+            if (ctx.leadData.containsKey('field_data')) {
+                List<Object> fieldData = (List<Object>) ctx.leadData.get('field_data');
                 for (Object field : fieldData) {
                     Map<String, Object> fieldMap = (Map<String, Object>) field;
                     String fieldName = (String) fieldMap.get('name');
@@ -298,11 +323,11 @@ global without sharing class MetaLeadWebhook {
             
             // --- 6. Insert ---
             Map<String, Object> retryPayload = new Map<String, Object>();
-            retryPayload.put('leadId', lId);
-            retryPayload.put('pageId', pId);
-            retryPayload.put('formId', fId);
-            retryPayload.put('formName', formName);
-            retryPayload.put('leadData', leadData);
+            retryPayload.put('leadId', ctx.leadId);
+            retryPayload.put('pageId', ctx.pageId);
+            retryPayload.put('formId', ctx.formId);
+            retryPayload.put('formName', ctx.formName);
+            retryPayload.put('leadData', ctx.leadData);
             
             try {
                 Database.DMLOptions dml = new Database.DMLOptions();
@@ -310,7 +335,7 @@ global without sharing class MetaLeadWebhook {
                 dml.DuplicateRuleHeader.runAsCurrentUser = true;
                 Database.SaveResult sr = Database.insert(newContact, dml);
                 if (!sr.isSuccess()) {
-                    if (!isRetry) {
+                    if (!ctx.isRetry) {
                         MVEX__Error_Handling__c errRec = new MVEX__Error_Handling__c();
                         errRec.MVEX__Error_Body__c = JSON.serializePretty(retryPayload);
                         errRec.MVEX__Source_of_Error__c = 'MetaFailedLeads';

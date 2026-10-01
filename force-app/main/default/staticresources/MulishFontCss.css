@@ -129,18 +129,24 @@
   background-color: #ffffff;
   border: 1px solid #d8d8d8;
   color: #333;
-  padding: 6px 12px;
   margin: 0 2px;
   cursor: pointer;
   transition: all 0.2s;
   border-radius: 5px;
   font-size: 12px;
+  height: 30px;
+  min-height: 30px;
+  max-height: 30px;
+  width: 30px;
+  min-width: 30px;
+  max-width: 30px;
 }
 
 .pagination-btn-css svg {
   fill: black;
   width: 0.7rem;
   height: 0.7rem;
+  margin: auto;
 }
 
 .pagination-btn-css:hover {
@@ -515,41 +521,46 @@
   justify-content: center;
 }
 
-.pagination-button {
+.exp-pagination-button {
   background-color: #ffffff;
   border: 1px solid #d8d8d8;
   color: #333;
-  padding: 6px 12px;
   margin: 0 2px;
   cursor: pointer;
   transition: background-color 0.3s;
   border-radius: 0.3rem;
   font-size: 12px;
+  height: 30px;
+  min-height: 30px;
+  max-height: 30px;
+  width: 30px;
+  min-width: 30px;
+  max-width: 30px;
 }
 
-.pagination-button svg {
+.exp-pagination-button svg {
   fill: black;
   width: 0.7rem;
   height: 0.7rem;
 }
 
-.pagination-button:hover {
+.exp-pagination-button:hover {
   background-color: #f0f0f0;
 }
 
-.pagination-button.active {
+.exp-pagination-button.active {
   background-color: #0070d2;
   color: white;
   border-color: #0070d2;
 }
 
-.pagination-button:disabled {
+.exp-pagination-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.pagination-button:first-child,
-.pagination-button:last-child {
+.exp-pagination-button:first-child,
+.exp-pagination-button:last-child {
   display: flex;
   align-items: center;
   gap: 0.5rem;

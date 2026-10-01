@@ -94,14 +94,6 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     }
 
     /**
-    * Method Name : showPagination
-    * @description : show the pagination only if totalpages are greater than 1.
-    */
-    get showPagination() {
-        return this.totalPages > 1;
-    }
-
-    /**
     * Method Name : showEllipsis
     * @description : show the elipsis when the total pages is gretaer then the visible pages.
     * * Date: 20/08/2024
@@ -179,14 +171,14 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     pages.push({
                         number: i,
                         isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
                     });
                 }
             } else {
                 pages.push({
                     number: 1,
                     isEllipsis: false,
-                    className: `pagination-button ${currentPage === 1 ? 'active' : ''}`
+                    className: `exp-pagination-button ${currentPage === 1 ? 'active' : ''}`
                 });
 
                 if (currentPage > 3) {
@@ -200,7 +192,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     pages.push({
                         number: i,
                         isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
                     });
                 }
 
@@ -211,7 +203,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                 pages.push({
                     number: totalPages,
                     isEllipsis: false,
-                    className: `pagination-button ${currentPage === totalPages ? 'active' : ''}`
+                    className: `exp-pagination-button ${currentPage === totalPages ? 'active' : ''}`
                 });
             }
 

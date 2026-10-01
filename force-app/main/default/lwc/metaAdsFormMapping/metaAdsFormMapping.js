@@ -11,6 +11,7 @@ import retryFailedLead from '@salesforce/apex/MetaAdsFormMappingController.retry
 import retryMultipleFailedLeads from '@salesforce/apex/MetaAdsFormMappingController.retryMultipleFailedLeads';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 
 const SOURCE_META = 'Meta Form Field';
 const SOURCE_CUSTOM = 'Custom Value';
@@ -71,8 +72,11 @@ export default class MetaAdsFormMapping extends LightningElement {
     currentClientAppId = '';
 
     connectedCallback() {
-        loadStyle(this, MulishFontCss).catch(error => {
-            console.error('Error loading MulishFontCss', error);
+        Promise.all([
+            loadStyle(this, MulishFontCss),
+            loadStyle(this, globalStyles)
+        ]).catch(error => {
+            console.error('Error loading styles', error);
         });
         this.loadInitialData();
     }

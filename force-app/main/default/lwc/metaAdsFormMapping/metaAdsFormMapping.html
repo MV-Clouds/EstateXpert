@@ -29,68 +29,109 @@
 
         <div class="main_content_cls">
 
-
             <!-- Custom Table -->
             <template if:true={hasMappings}>
-                <div class="table-content">
-                    <table class="slds-table">
+                <div class="exp-table-content exp-main-table-wrapper">
+                    <table aria-multiselectable="true" class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid">
                         <thead>
-                            <tr class="table_tr_cls">
-                                <th scope="col" class="expand-col"><div></div></th>
-                                <th scope="col" class="sno"><div>No.</div></th>
-                                <th class="groupname" scope="col"><div class="slds-truncate" title="Page Name">Page Name</div></th>
-                                <th class="groupname" scope="col"><div class="slds-truncate" title="Page ID">Page ID</div></th>
-                                <th class="groupname" scope="col"><div class="slds-truncate" title="Mapped Forms">Mapped Forms</div></th>
+                            <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
+                                <th scope="col" class="col-action"><div></div></th>
+                                <th scope="col" class="col-no align-center">
+                                    <div class="slds-truncate header-cell-padding" title="No.">No.</div>
+                                </th>
+                                <th scope="col" class="align-center">
+                                    <div class="slds-truncate header-cell-padding" title="Page Name">Page Name</div>
+                                </th>
+                                <th scope="col" class="col-page-id align-center">
+                                    <div class="slds-truncate header-cell-padding" title="Page ID">Page ID</div>
+                                </th>
+                                <th scope="col" class="col-mapped-forms align-center">
+                                    <div class="slds-truncate header-cell-padding" title="Mapped Forms">Mapped Forms</div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             <template for:each={tableData} for:item="row" for:index="index">
                                 <!-- Parent Row -->
-                                <tr key={row.id} class="parent-row">
-                                    <td data-label="" class="expand-cell">
-                                        <div class="action-icon-container" data-id={row.id} onclick={handleToggleRow}>
-                                            <svg class="action-arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <template if:true={row.isExpanded}>
-                                                    <path d="M7 10l5 5 5-5z" fill="currentColor" />
-                                                </template>
-                                                <template if:false={row.isExpanded}>
-                                                    <path d="M10 17l5-5-5-5z" fill="currentColor" />
-                                                </template>
-                                            </svg>
+                                <tr key={row.id} class="parent-row table-tr">
+                                    <td data-label="" class="expand-cell slds-cell_action-mode" role="gridcell">
+                                        <div class="slds-truncate center-trancate-text flex-center">
+                                            <div class="action-icon-container" data-id={row.id} onclick={handleToggleRow}>
+                                                <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <template if:true={row.isExpanded}>
+                                                        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </template>
+                                                    <template if:false={row.isExpanded}>
+                                                        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </template>
+                                                </svg>
+                                            </div>
                                         </div>
                                     </td>
-                                    <td data-label="No."><div>{row.index}</div></td>
-                                    <td data-label="Page Name"><div>{row.pageName}</div></td>
-                                    <td data-label="Page ID"><div>{row.pageId}</div></td>
-                                    <td data-label="Mapped Forms"><div>{row.forms.length}</div></td>
+                                    <td data-label="No." class="slds-cell_action-mode" role="gridcell">
+                                        <div class="slds-truncate center-trancate-text">{row.index}</div>
+                                    </td>
+                                    <td data-label="Page Name" class="slds-cell_action-mode" role="gridcell">
+                                        <div class="slds-truncate center-trancate-text">{row.pageName}</div>
+                                    </td>
+                                    <td data-label="Page ID" class="slds-cell_action-mode" role="gridcell">
+                                        <div class="slds-truncate center-trancate-text">{row.pageId}</div>
+                                    </td>
+                                    <td data-label="Mapped Forms" class="slds-cell_action-mode" role="gridcell">
+                                        <div class="slds-truncate center-trancate-text">{row.forms.length}</div>
+                                    </td>
                                 </tr>
 
                                 <!-- Accordion Row -->
                                 <template if:true={row.isExpanded}>
                                     <tr key={row.id} class="accordion-row">
-                                        <td colspan="5">
-                                            <div class="accordion-content" style="padding: 10px 20px 10px 40px; background: #fafafa;">
+                                        <td colspan="5" class="no-padding-td">
+                                            <div class="exp-accordion-wrapper">
                                                 <template if:true={row.forms.length}>
-                                                    <div class="table-content">
-                                                        <table class="slds-table" style="border: none;">
+                                                    <div class="exp-accordion-header-container">
+                                                        <div class="exp-accordion-title-section">
+                                                            <h3 class="exp-accordion-title">Mapped Forms</h3>
+                                                            <span class="exp-accordion-badge">{row.forms.length}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="exp-table-content exp-accordion-table-content">
+                                                        <table aria-multiselectable="true" class="slds-table slds-no-row-hover slds-table_fixed-layout slds-table_resizable-cols no-border" role="grid">
                                                             <thead>
-                                                                <tr class="table_tr_cls">
-                                                                    <th scope="col" style="width: 50px;">No.</th>
-                                                                    <th scope="col">Form Name</th>
-                                                                    <th scope="col">Form ID</th>
-                                                                    <th scope="col">Mapped Fields</th>
-                                                                    <th scope="col" style="width: 100px; text-align: center;">Actions</th>
+                                                                <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
+                                                                    <th scope="col" class="slds-cell_action-mode col-action align-center">
+                                                                        <div class="slds-truncate header-cell-padding" title="No.">No.</div>
+                                                                    </th>
+                                                                    <th scope="col" class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header align-center">
+                                                                        <div class="slds-truncate header-cell-padding" title="Form Name">Form Name</div>
+                                                                    </th>
+                                                                    <th scope="col" class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header align-center">
+                                                                        <div class="slds-truncate header-cell-padding" title="Form ID">Form ID</div>
+                                                                    </th>
+                                                                    <th scope="col" class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header align-center">
+                                                                        <div class="slds-truncate header-cell-padding" title="Mapped Fields">Mapped Fields</div>
+                                                                    </th>
+                                                                    <th scope="col" class="slds-cell_action-mode col-actions align-center">
+                                                                        <div class="slds-truncate header-cell-padding" title="Actions">Actions</div>
+                                                                    </th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
                                                                 <template for:each={row.forms} for:item="form">
-                                                                    <tr key={form.id}>
-                                                                        <td>{form.index}</td>
-                                                                        <td>{form.formName}</td>
-                                                                        <td>{form.formId}</td>
-                                                                        <td>{form.mappedCount}</td>
-                                                                        <td style="text-align: center;">
-                                                                            <div style="display: flex; gap: 8px; justify-content: center;">
+                                                                    <tr key={form.id} class="table-tr">
+                                                                        <td class="slds-cell_action-mode" role="gridcell">
+                                                                            <div class="slds-truncate center-trancate-text">{form.index}</div>
+                                                                        </td>
+                                                                        <td class="slds-cell_action-mode" role="gridcell">
+                                                                            <div class="slds-truncate center-trancate-text">{form.formName}</div>
+                                                                        </td>
+                                                                        <td class="slds-cell_action-mode" role="gridcell">
+                                                                            <div class="slds-truncate center-trancate-text">{form.formId}</div>
+                                                                        </td>
+                                                                        <td class="slds-cell_action-mode" role="gridcell">
+                                                                            <div class="slds-truncate center-trancate-text">{form.mappedCount}</div>
+                                                                        </td>
+                                                                        <td class="slds-cell_action-mode align-center" role="gridcell">
+                                                                            <div class="slds-truncate center-trancate-text action-buttons-wrapper">
                                                                                 <div class="action-icon-container" data-id={form.formId} onclick={openFailedLeadsModal} title="Failed Leads">
                                                                                     <svg class="action-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                                                         <circle cx="12" cy="12" r="10"></circle>
@@ -163,7 +204,7 @@
                     </div>
 
                     <div class="slds-modal__content modalbody" id="modal-content-id-1">
-                        <div class="content_body" style="position: relative;">
+                        <div class="content_body relative-position">
 
                             <!-- Spinner Overlay (covers entire screen while loading) -->
                             <template if:true={isModalLoading}>
@@ -374,7 +415,7 @@
                 </div>
 
                 <div class="slds-modal__content modalbody" id="modal-content-id-2">
-                    <div class="content_body" style="position: relative; min-height: 200px;">
+                    <div class="content_body relative-position min-height-200">
                         
                         <!-- Spinner Overlay -->
                         <template if:true={isRetrying}>
@@ -384,27 +425,27 @@
                         <template if:true={isFailedWizardStep1}>
                         <template if:true={failedLeads.length}>
                             <div class="table-content">
-                                <table class="slds-table" style="width: 100%;">
+                                <table class="slds-table full-width">
                                     <thead>
                                         <tr class="table_tr_cls">
-                                            <th style="width: 40px; padding: 10px; text-align: center;">
+                                            <th class="col-checkbox header-cell-padding align-center">
                                                 <input type="checkbox" onchange={handleSelectAllFailedLeads} checked={isAllFailedLeadsSelected} />
                                             </th>
-                                            <th style="padding: 10px;">Error ID</th>
-                                            <th style="padding: 10px;">Received At</th>
-                                            <th style="width: 100px; text-align: center; padding: 10px;">Actions</th>
+                                            <th class="header-cell-padding">Error ID</th>
+                                            <th class="header-cell-padding">Received At</th>
+                                            <th class="col-no align-center header-cell-padding">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <template for:each={failedLeads} for:item="lead">
                                             <tr key={lead.Id}>
-                                                <td style="text-align: center; padding: 10px;">
+                                                <td class="align-center header-cell-padding">
                                                     <input type="checkbox" data-id={lead.Id} checked={lead.selected} onchange={handleFailedLeadSelection} />
                                                 </td>
-                                                <td style="padding: 10px;">{lead.Name}</td>
-                                                <td style="padding: 10px;">{lead.Date}</td>
-                                                <td style="text-align: center; padding: 10px;">
-                                                    <button class="blue-btn-css" data-id={lead.Id} onclick={reviewFailedLead} style="padding: 4px 12px; height: auto;">Review Mapping</button>
+                                                <td class="header-cell-padding">{lead.Name}</td>
+                                                <td class="header-cell-padding">{lead.Date}</td>
+                                                <td class="align-center header-cell-padding">
+                                                    <button class="blue-btn-css btn-small" data-id={lead.Id} onclick={reviewFailedLead}>Review Mapping</button>
                                                 </td>
                                             </tr>
                                         </template>
@@ -413,7 +454,7 @@
                             </div>
                         </template>
                         <template if:false={failedLeads.length}>
-                            <div class="wizard-disabled-box" style="margin-top: 40px; text-align: center;">
+                            <div class="wizard-disabled-box mt-40 align-center">
                                 No failed leads found for this form.
                             </div>
                         </template>
@@ -426,7 +467,7 @@
                                     <div class="mapping-header-col">Salesforce Contact Field</div>
                                     <div class="mapping-header-icon"></div>
                                     <div class="mapping-header-col">Meta Form Field / Custom Value</div>
-                                    <div class="mapping-header-col" style="flex: 1; padding: 0 10px; font-size: 12px; font-weight: 700; color: #4b5563; text-transform: uppercase;">Lead Data</div>
+                                    <div class="mapping-header-col mapping-header-text">Lead Data</div>
                                 </div>
                                 <template for:each={currentFormFields} for:item="field">
                                     <div key={field.key} class={field.rowClass}>
@@ -490,14 +531,14 @@
                                             </template>
                                         </div>
                                         
-                                        <div class="mapping-col" style="flex: 1; padding-left: 10px; align-self: flex-start; margin-top: 2px;">
+                                        <div class="mapping-col mapping-col-custom">
                                             <template if:true={field.failedLeadValue}>
-                                                <div style="background: #f3f4f6; padding: 6px 12px; border-radius: 4px; font-size: 13px; color: #374151; word-break: break-all;">
+                                                <div class="mapping-data-box">
                                                     {field.failedLeadValue}
                                                 </div>
                                             </template>
                                             <template if:false={field.failedLeadValue}>
-                                                <div style="font-size: 13px; color: #9ca3af; font-style: italic; padding: 6px 12px;">No data provided</div>
+                                                <div class="mapping-data-empty">No data provided</div>
                                             </template>
                                         </div>
                                     </div>
@@ -536,7 +577,7 @@
                     <div class="footerbtns">
                         <template if:true={isFailedWizardStep1}>
                             <template if:true={hasSelectedFailedLeads}>
-                                <button class="blue-btn-css" style="margin-right: 10px;" aria-label="Retry Selected" onclick={retrySelectedFailedLeads}>
+                                <button class="blue-btn-css mr-10" aria-label="Retry Selected" onclick={retrySelectedFailedLeads}>
                                     Retry Selected
                                 </button>
                             </template>

@@ -1,7 +1,7 @@
 import { LightningElement, track, api } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
-import designcss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import getContactData from '@salesforce/apex/MarketingListCmpController.getContactData';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -41,7 +41,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track isPrevDisabled = true;
     @track isNextDisabled = false;
     @track pageNumber = 1;
-    @track pageSize = 30;
+    @track pageSize = 20;
     @track shownProcessedContactData = [];
     @track selectedContactList = [];
     @track isContactSelected = true;
@@ -75,14 +75,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     get totalPages() {
         return Math.ceil(this.totalItems / this.pageSize);
-    }
-
-    /**
-    * Method Name : showPagination
-    * @description : show the pagination only if totalpages are greater than 1.
-    */
-    get showPagination() {
-        return this.totalPages > 1;
     }
 
     /**
@@ -122,7 +114,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     * Created By:Vyom Soni
     */
     get startIndex() {
-        return (this.currentPage - 1) * this.pageSize + 1;
+        return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
     }
 
     /**
@@ -135,11 +127,23 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         return Math.min(this.currentPage * this.pageSize, this.totalItems);
     }
 
-     /**
-    * Method Name : filterIconColor
-    * @description : Return filter icon color based on active state.
-    * Black when closed (wrapOn = true), White when open (wrapOn = false)
+    /**
+    * Method Name : recordCountInfo
+    * @description : returns formatted records count info for footer display
     */
+    get recordCountInfo() {
+        const selected = this.totalSelected || 0;
+        if (this.totalItems === 0) {
+            return `Showing 0 records`;
+        }
+        return `Showing ${this.startIndex} - ${this.endIndex} of ${this.totalItems}`;
+    }
+
+    /**
+   * Method Name : filterIconColor
+   * @description : Return filter icon color based on active state.
+   * Black when closed (wrapOn = true), White when open (wrapOn = false)
+   */
     get filterIconColor() {
         return this.wrapOn ? '#000000' : '#ffffff';
     }
@@ -164,7 +168,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     pages.push({
                         number: i,
                         isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
                     });
                 }
             } else {
@@ -172,7 +176,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 pages.push({
                     number: 1,
                     isEllipsis: false,
-                    className: `pagination-button ${currentPage === 1 ? 'active' : ''}`
+                    className: `exp-pagination-button ${currentPage === 1 ? 'active' : ''}`
                 });
 
                 if (currentPage > 3) {
@@ -188,7 +192,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     pages.push({
                         number: i,
                         isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
                     });
                 }
 
@@ -201,7 +205,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 pages.push({
                     number: totalPages,
                     isEllipsis: false,
-                    className: `pagination-button ${currentPage === totalPages ? 'active' : ''}`
+                    className: `exp-pagination-button ${currentPage === totalPages ? 'active' : ''}`
                 });
             }
 
@@ -337,7 +341,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     connectedCallback() {
         this.screenWidth = window?.globalThis?.innerWidth;
         window?.globalThis?.addEventListener('resize', this.handleResize);
-        loadStyle(this, designcss);
+        loadStyle(this, globalStyles);
         this.handleSubscribeRefresh();
         this.getContactDataMethod();
     }
@@ -357,7 +361,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         const messageCallback = (response) => {
             const payload = response?.data?.payload;
             const featureName = payload?.MVEX__Feature_Name__c || payload?.Feature_Name__c;
-            
+
             // Verify feature name before doing any operation
             if (featureName && (featureName.toLowerCase() === 'marketing_list' || featureName.toLowerCase() === 'marketing_list_fields')) {
                 this.handleRealtimeRefresh();
@@ -522,7 +526,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         return getContactData()
             .then(result => {
                 this.contactData = result.contacts;
-                this.pageSize = result.pageSize;
                 this.fields = result.selectedFields.map(field => ({
                     fieldLabel: field.label,
                     fieldName: field.fieldApiname,
@@ -789,6 +792,33 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         }
     }
 
+    /**
+    * Method Name : pageSizeOptions
+    * @description : returns dropdown options for rows per page from 10 to 100
+    */
+    get pageSizeOptions() {
+        const sizes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+        return sizes.map(size => ({
+            label: String(size),
+            value: size,
+            isSelected: this.pageSize === size
+        }));
+    }
+
+    /**
+    * Method Name : handlePageSizeChange
+    * @description : handle change in records per page from dropdown selection
+    */
+    handlePageSizeChange(event) {
+        const value = parseInt(event.target.value, 10);
+        if (!isNaN(value) && this.pageSize !== value) {
+            this.pageSize = value;
+            this.currentPage = 1;
+            this.updateShownData();
+            this.scrollToTop();
+        }
+    }
+
 
     /**
     * Method Name : handleFilteredContacts
@@ -1033,12 +1063,12 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
 
     /**
-    * Method Name : goTOContactPage
+    * Method Name : navigatetoContactPage
     * @description : Open Modal for new contact form
     * Date: 18/07/2024
     * Created By:Vyom Soni
     */
-    goTOContactPage() {
+    navigatetoContactPage() {
         try {
             this[NavigationMixin.Navigate]({
                 type: 'standard__objectPage',
@@ -1051,7 +1081,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 }
             });
         } catch (error) {
-            console.error('Error in goTOContactPage --> ' + error);
+            console.error('Error in navigatetoContactPage --> ' + error);
         }
     }
 
@@ -1173,29 +1203,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
     }
 
-
-    /**
-    * Method Name : updateSortIcons
-    * @description : this method update the sort icons in the wrapbutton
-    * Date: 22/06/2024
-    * Created By:Vyom Soni
-    */
-    // updateSortIcons() {
-    //     try {
-    //         const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-    //         allHeaders.forEach(icon => {
-    //             icon.classList.remove('exp-rotate-asc', 'exp-rotate-desc');
-    //         });
-
-    //         const currentHeader = this.template.querySelector('[data-index="' + this.sortField + '"]');
-    //         if (currentHeader) {
-    //             currentHeader.classList.add(this.sortOrder === 'asc' ? 'exp-rotate-asc' : 'exp-rotate-desc');
-    //         }
-    //     } catch (error) {
-    //         console.log('Error updateSprtIcons->' + error);
-    //     }
-    // }
-
     updateSortIcons() {
         try {
             // Remove icon rotation
@@ -1271,15 +1278,15 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     wrapFilter() {
         try {
             const toggleBtn = this.template.querySelector('.filter-toggle-btn');
-            const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
-            const div1 = this.template.querySelector('.innerDiv1');
-            const div2 = this.template.querySelector('.innerDiv2');
+            const filterDiv = this.template.querySelector('.inner-div-1 .filter-div');
+            const div1 = this.template.querySelector('.inner-div-1');
+            const div2 = this.template.querySelector('.inner-div-2');
 
             if (this.wrapOn) {
                 // Currently hidden, show filter
                 toggleBtn.classList.add('active'); // Blue when filter showing
-                filterDiv.classList.remove('removeInnerDiv1');
-                div1.classList.remove('removeInnerDiv1');
+                filterDiv.classList.remove('remove-inner-div-1');
+                div1.classList.remove('remove-inner-div-1');
 
                 if (this.screenWidth >= 900) {
                     div1.style.width = '22%';
@@ -1307,12 +1314,12 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     // Hide filter content and remove margin after animation starts
                     setTimeout(() => {
                         if (this.wrapOn) {
-                            filterDiv.classList.add('removeInnerDiv1');
-                            div1.classList.add('removeInnerDiv1');
+                            filterDiv.classList.add('remove-inner-div-1');
+                            div1.classList.add('remove-inner-div-1');
                         }
                     }, 150);
                 } else {
-                    filterDiv.classList.add('removeInnerDiv1');
+                    filterDiv.classList.add('remove-inner-div-1');
                     div1.style.height = '0';
                     div1.style.opacity = '0';
                     div1.style.width = '100%';
@@ -1331,7 +1338,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             if (this.wrapOn) {
                 this.wrapFilter();
             } else {
-                const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
+                const filterDiv = this.template.querySelector('.inner-div-1 .filter-div');
                 if (filterDiv) {
                     filterDiv.classList.add('highlight-filter-panel');
                     setTimeout(() => {

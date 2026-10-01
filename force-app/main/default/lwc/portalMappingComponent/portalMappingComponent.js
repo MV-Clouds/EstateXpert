@@ -960,7 +960,7 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
         
         this.listingsDatas = data;
         
-        this.template.querySelectorAll('.sort-cover').forEach(element => {
+        this.template.querySelectorAll('.exp-sort-cover').forEach(element => {
             element.classList.remove('ascending', 'descending');
             let iconElement = element.querySelector('.exp-arrow-icon');
             if (iconElement) {
@@ -968,7 +968,7 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
             }
         });
         
-        const sortedColumn = this.template.querySelector(`th[data-id="${field}"] .sort-cover`);
+        const sortedColumn = this.template.querySelector(`th[data-id="${field}"] .exp-sort-cover`);
         if (sortedColumn) {
             sortedColumn.classList.add(this.sortOrder === 'asc' ? 'ascending' : 'descending');
             let iconElement = sortedColumn.querySelector('.exp-arrow-icon');

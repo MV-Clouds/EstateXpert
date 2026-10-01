@@ -484,7 +484,7 @@
   position: relative;
 }
 
-.exp-table-tr-cls .sort-cover {
+.exp-table-tr-cls .exp-sort-cover {
   height: 100%;
   border-radius: 8px;
   background-color: transparent;
@@ -499,7 +499,7 @@
   gap: 6px;
 }
 
-.exp-table-tr-cls .sort-cover:hover {
+.exp-table-tr-cls .exp-sort-cover:hover {
   background-color: #2c89d6;
 }
 

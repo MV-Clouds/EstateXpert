@@ -9,15 +9,12 @@
         <c-spinner-component></c-spinner-component>
     </template>
 
-    <div class="main-card">
-
-        <div class="filter-search-container">
-            <div class="filter-section">
-                <div class="search-bar">
-                    <lightning-input variant="label-hidden" type="search" placeholder="Search Inquiry Name"
-                        value={searchTerm} onchange={handleSearch} class="search-bar-input"></lightning-input>
-                </div>
-
+    <div class="inquiries-main-card">
+        <div class="sub-main-header-css">
+            <div class="header-block-css">
+                Suggested Inquiries
+            </div>
+            <div class="header-buttons">
                 <div class="open-mapping-div" onclick={handleInsideClick}>
 
                     <div class="btn-container">
@@ -25,16 +22,6 @@
                             <c-record-config-body-cmp feature-name="Suggested_Inquiry_Fields"
                                 onclose={handleCloseModal}></c-record-config-body-cmp>
                         </template>
-
-                        <button class="exp-blue-btn-css" onclick={handleRefresh} title="Refresh">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M17.65 6.35C16.2 4.9 14.21 4 12 4C7.58 4 4.01 7.58 4.01 12C4.01 16.42 7.58 20 12 20C15.73 20 18.84 17.45 19.73 14H17.65C16.83 16.33 14.61 18 12 18C8.69 18 6 15.31 6 12C6 8.69 8.69 6 12 6C13.66 6 15.14 6.69 16.22 7.78L13 11H20V4L17.65 6.35Z"
-                                    fill="white" />
-                            </svg>
-                            <template if:false={isMobileOrTablet}>Refresh</template>
-                        </button>
 
                         <button class="exp-blue-btn-css" onclick={goToNewInquiry}>
                             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
@@ -44,7 +31,42 @@
                             New Inquiry
                         </button>
 
-                        <button class="exp-blue-btn-css" onclick={showModalBox} aria-label="Filters">
+                        <button class="exp-blue-btn-css" onclick={openConfigureSettings} title="Customize View">
+                            <svg fill="white" height="18px" width="18px" version="1.1" viewBox="0 0 512.003 512.003">
+                                <g>
+                                    <path d="M491.584,192.579l-55.918-6.914c-0.919-2.351-1.884-4.682-2.892-6.993l34.648-44.428
+                                        c7.227-9.267,6.412-22.464-1.899-30.773l-57.028-56.996c-8.308-8.304-21.502-9.114-30.763-1.893L333.32,79.216
+                                        c-2.312-1.008-4.644-1.974-6.994-2.894l-6.915-55.904c-1.443-11.66-11.348-20.415-23.097-20.415h-80.637
+                                        c-11.748,0-21.656,8.755-23.097,20.416l-6.914,55.904c-2.349,0.919-4.681,1.884-6.988,2.89l-44.415-34.642
+                                        c-9.261-7.222-22.458-6.414-30.768,1.894l-57.021,57.009c-8.31,8.307-9.123,21.506-1.896,30.771l34.644,44.417
+                                        c-1.012,2.312-1.978,4.647-2.9,7.002l-55.906,6.914C8.757,194.022,0,203.927,0,215.676v80.64c0,11.75,8.758,21.658,20.421,23.097
+                                        l55.901,6.903c0.919,2.352,1.884,4.686,2.894,6.994l-34.641,44.417c-7.224,9.264-6.411,22.46,1.894,30.767l57.021,57.031
+                                        c8.307,8.31,21.507,9.121,30.773,1.896l44.417-34.648c2.306,1.007,4.638,1.974,6.987,2.891l6.914,55.921
+                                        c1.441,11.66,11.348,20.416,23.097,20.416h80.637c11.748,0,21.655-8.755,23.097-20.416l6.915-55.92
+                                        c2.351-0.92,4.682-1.885,6.993-2.892l44.425,34.65c9.266,7.225,22.463,6.414,30.771-1.898l57.015-57.031
+                                        c8.307-8.308,9.117-21.504,1.893-30.768l-34.641-44.409c1.012-2.313,1.978-4.647,2.898-7.002l55.901-6.903
+                                        c11.661-1.44,20.421-11.348,20.421-23.097v-80.64C512,203.927,503.243,194.022,491.584,192.579z M465.455,275.74l-49.864,6.158
+                                        c-9.151,1.131-16.772,7.556-19.431,16.386c-2.813,9.337-6.56,18.387-11.138,26.903c-4.367,8.124-3.525,18.063,2.147,25.335
+                                        l30.898,39.613l-27.924,27.932l-39.621-30.905c-7.269-5.668-17.202-6.513-25.327-2.15c-8.513,4.572-17.565,8.319-26.905,11.134
+                                        c-8.827,2.661-15.25,10.279-16.381,19.427l-6.169,49.883h-39.492l-6.167-49.883c-1.131-9.146-7.551-16.763-16.375-19.425
+                                        c-9.367-2.825-18.417-6.571-26.899-11.132c-8.122-4.369-18.061-3.527-25.336,2.147l-39.615,30.902L93.929,390.13l30.897-39.618
+                                        c5.671-7.273,6.513-17.206,2.147-25.328c-4.568-8.501-8.315-17.554-11.137-26.911c-2.662-8.825-10.282-15.247-19.430-16.376
+                                        l-49.861-6.156v-39.492l49.866-6.167c9.146-1.131,16.763-7.551,19.423-16.375c2.824-9.356,6.572-18.406,11.143-26.9
+                                        c4.374-8.124,3.533-18.067-2.143-25.342l-30.903-39.62l27.924-27.918l39.62,30.902c7.273,5.672,17.209,6.513,25.335,2.146
+                                        c8.493-4.565,17.541-8.31,26.896-11.132c8.825-2.662,15.247-10.279,16.378-19.427l6.166-49.867h39.494l6.169,49.869
+                                        c1.133,9.148,7.557,16.767,16.384,19.427c9.328,2.811,18.379,6.557,26.902,11.135c8.122,4.364,18.055,3.522,25.325-2.149
+                                        l39.616-30.894l27.927,27.912l-30.897,39.618c-5.666,7.267-6.513,17.191-2.158,25.311c4.58,8.54,8.328,17.599,11.138,26.923
+                                        c2.661,8.825,10.279,15.248,19.427,16.381l49.878,6.169V275.74z" />
+                                    <path d="M255.997,155.153c-55.606,0-100.845,45.244-100.845,100.856c0,55.603,45.239,100.839,100.845,100.839
+                                        c55.609,0,100.852-45.236,100.852-100.839C356.849,200.397,311.606,155.153,255.997,155.153z M255.997,310.303
+                                        c-29.941,0-54.3-24.356-54.3-54.294c0-29.947,24.359-54.311,54.3-54.311c29.944,0,54.306,24.363,54.306,54.311
+                                        C310.303,285.947,285.941,310.303,255.997,310.303z" />
+                                </g>
+                            </svg>
+                            <template if:false={isMobileOrTablet}>Customize View</template>
+                        </button>
+
+                        <button class="exp-blue-btn-css" onclick={showModalBox} aria-label="Filters" title="Filters">
                             <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" clip-rule="evenodd"
@@ -52,63 +74,6 @@
                                     fill="white" />
                             </svg><template if:false={isMobileOrTablet}>Filters</template>
                         </button>
-
-                        <div class="custom-dropdown-container" style="position: relative;">
-                            <button class="exp-blue-btn-css" onclick={toggleMoreActions}>
-                                <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
-                                        fill="white" />
-                                    <path
-                                        d="M5 15C6.65685 15 8 13.6569 8 12C8 10.3431 6.65685 9 5 9C3.34315 9 2 10.3431 2 12C2 13.6569 3.34315 15 5 15Z"
-                                        fill="white" />
-                                    <path
-                                        d="M19 15C20.6569 15 22 13.6569 22 12C22 10.3431 20.6569 9 19 9C17.3431 9 16 10.3431 16 12C16 13.6569 17.3431 15 19 15Z"
-                                        fill="white" />
-                                </svg>
-                            </button>
-
-                            <template if:true={showMoreActions}>
-                                <div class="custom-dropdown-menu"
-                                    style="position: absolute; right: 0; top: calc(100% + 5px); background: #ffffff; border-radius: 4px; box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px; display: flex; flex-direction: column; gap: 8px; padding: 10px; z-index: 97; min-width: 200px; border: 1px solid #e5e7eb;">
-                                    <button class="exp-blue-btn-css" onclick={openConfigureSettings}
-                                        style="width: 100%; justify-content: flex-start;"><svg fill="white"
-                                            height="18px" width="18px" version="1.1" viewBox="0 0 512.003 512.003">
-                                            <g>
-                                                <path d="M491.584,192.579l-55.918-6.914c-0.919-2.351-1.884-4.682-2.892-6.993l34.648-44.428
-                                                    c7.227-9.267,6.412-22.464-1.899-30.773l-57.028-56.996c-8.308-8.304-21.502-9.114-30.763-1.893L333.32,79.216
-                                                    c-2.312-1.008-4.644-1.974-6.994-2.894l-6.915-55.904c-1.443-11.66-11.348-20.415-23.097-20.415h-80.637
-                                                    c-11.748,0-21.656,8.755-23.097,20.416l-6.914,55.904c-2.349,0.919-4.681,1.884-6.988,2.89l-44.415-34.642
-                                                    c-9.261-7.222-22.458-6.414-30.768,1.894l-57.021,57.009c-8.31,8.307-9.123,21.506-1.896,30.771l34.644,44.417
-                                                    c-1.012,2.312-1.978,4.647-2.9,7.002l-55.906,6.914C8.757,194.022,0,203.927,0,215.676v80.64c0,11.75,8.758,21.658,20.421,23.097
-                                                    l55.901,6.903c0.919,2.352,1.884,4.686,2.894,6.994l-34.641,44.417c-7.224,9.264-6.411,22.46,1.894,30.767l57.021,57.031
-                                                    c8.307,8.31,21.507,9.121,30.773,1.896l44.417-34.648c2.306,1.007,4.638,1.974,6.987,2.891l6.914,55.921
-                                                    c1.441,11.66,11.348,20.416,23.097,20.416h80.637c11.748,0,21.655-8.755,23.097-20.416l6.915-55.92
-                                                    c2.351-0.92,4.682-1.885,6.993-2.892l44.425,34.65c9.266,7.225,22.463,6.414,30.771-1.898l57.015-57.031
-                                                    c8.307-8.308,9.117-21.504,1.893-30.768l-34.641-44.409c1.012-2.313,1.978-4.647,2.898-7.002l55.901-6.903
-                                                    c11.661-1.44,20.421-11.348,20.421-23.097v-80.64C512,203.927,503.243,194.022,491.584,192.579z M465.455,275.74l-49.864,6.158
-                                                    c-9.151,1.131-16.772,7.556-19.431,16.386c-2.813,9.337-6.56,18.387-11.138,26.903c-4.367,8.124-3.525,18.063,2.147,25.335
-                                                    l30.898,39.613l-27.924,27.932l-39.621-30.905c-7.269-5.668-17.202-6.513-25.327-2.15c-8.513,4.572-17.565,8.319-26.905,11.134
-                                                    c-8.827,2.661-15.25,10.279-16.381,19.427l-6.169,49.883h-39.492l-6.167-49.883c-1.131-9.146-7.551-16.763-16.375-19.425
-                                                    c-9.367-2.825-18.417-6.571-26.899-11.132c-8.122-4.369-18.061-3.527-25.336,2.147l-39.615,30.902L93.929,390.13l30.897-39.618
-                                                    c5.671-7.273,6.513-17.206,2.147-25.328c-4.568-8.501-8.315-17.554-11.137-26.911c-2.662-8.825-10.282-15.247-19.430-16.376
-                                                    l-49.861-6.156v-39.492l49.866-6.167c9.146-1.131,16.763-7.551,19.423-16.375c2.824-9.356,6.572-18.406,11.143-26.9
-                                                    c4.374-8.124,3.533-18.067-2.143-25.342l-30.903-39.62l27.924-27.918l39.62,30.902c7.273,5.672,17.209,6.513,25.335,2.146
-                                                    c8.493-4.565,17.541-8.31,26.896-11.132c8.825-2.662,15.247-10.279,16.378-19.427l6.166-49.867h39.494l6.169,49.869
-                                                    c1.133,9.148,7.557,16.767,16.384,19.427c9.328,2.811,18.379,6.557,26.902,11.135c8.122,4.364,18.055,3.522,25.325-2.149
-                                                    l39.616-30.894l27.927,27.912l-30.897,39.618c-5.666,7.267-6.513,17.191-2.158,25.311c4.58,8.54,8.328,17.599,11.138,26.923
-                                                    c2.661,8.825,10.279,15.248,19.427,16.381l49.878,6.169V275.74z" />
-                                                <path d="M255.997,155.153c-55.606,0-100.845,45.244-100.845,100.856c0,55.603,45.239,100.839,100.845,100.839
-                                                    c55.609,0,100.852-45.236,100.852-100.839C356.849,200.397,311.606,155.153,255.997,155.153z M255.997,310.303
-                                                    c-29.941,0-54.3-24.356-54.3-54.294c0-29.947,24.359-54.311,54.3-54.311c29.944,0,54.306,24.363,54.306,54.311
-                                                    C310.303,285.947,285.941,310.303,255.997,310.303z" />
-                                            </g>
-                                        </svg>Customize View
-                                    </button>
-                                </div>
-                            </template>
-                        </div>
                     </div>
 
                     <template if:true={isShowModal}>
@@ -302,7 +267,7 @@
                                         </div>
                                     </template>
                                 </div>
-                                <div class="custom__footer">
+                                <div class="custom-footer">
                                     <button class="exp-white-btn-css" onclick={hideModalBox}>
                                         <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
@@ -330,14 +295,16 @@
             </div>
         </div>
 
-        <div class="exp-main-content-cls">
-            <template if:true={pagedInquries.length}>
+        <template if:true={pagedInquries.length}>
+            <div class="exp-main-content-cls">
                 <div class="exp-table-content" id="exp-table-content">
-                    <table aria-multiselectable="true" class="slds-table"
-                        aria-label="Example advanced table of Opportunities in actionable mode">
+                    <table aria-multiselectable="true"
+                        class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid"
+                        aria-label="Inquiries">
                         <thead>
                             <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
-                                <th class="header-cell slds-text-align_right slds-cell_action-mode colume1" scope="col">
+                                <th class="header-cell slds-text-align_right slds-cell_action-mode column-1"
+                                    scope="col">
                                     <span id="column-group-header" class="slds-assistive-text">Choose a row</span>
                                     <div class="header-checkbox-div">
                                         <label class="custom-checkbox">
@@ -346,48 +313,57 @@
                                         </label>
                                     </div>
                                 </th>
-
-
-                                <th class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate exp-sorting-header"
-                                    data-id="name" onclick={sortClick}>
-                                    <div class="slds-text-link_rese exp-sort-cover slds-has-flexi-truncate" role="button"
-                                        tabindex="0">
-                                        Inquiry Name
-                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg class="exp-arrow-icon" aria-hidden="true" viewBox="0 0 384 512">
-                                                <path
-                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                            </svg>
-                                        </span>
-                                    </div>
-                                </th>
-                                <th class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate exp-sorting-header"
-                                    data-id="contactname" onclick={sortClick}>
-                                    <div class="slds-text-link_rese exp-sort-cover slds-has-flexi-truncate" role="button"
-                                        tabindex="0">
-                                        Contact Name
-                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg class="exp-arrow-icon" aria-hidden="true" viewBox="0 0 384 512">
-                                                <path
-                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                            </svg>
-                                        </span>
-                                    </div>
-                                </th>
-                                <template for:each={tableColumns} for:item="column">
-                                    <th key={column.fieldName}
-                                        class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate exp-sorting-header column2"
-                                        data-id={column.fieldName} onclick={sortClick}>
-                                        <div class="slds-text-link_rese exp-sort-cover slds-has-flexi-truncate"
-                                            role="button" tabindex="0">
-                                            {column.label}
+                                <th aria-sort="none" data-id="name" onclick={sortClick}
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header colume2"
+                                    scope="col">
+                                    <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                                        <span class="slds-assistive-text">Sort by: </span>
+                                        <div class="slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="Inquiry Name">Inquiry Name</span>
                                             <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                <svg class="exp-arrow-icon" aria-hidden="true"
-                                                    viewBox="0 0 384 512">
+                                                <svg data-index="name" class="exp-arrow-icon" viewBox="0 0 384 512"
+                                                    xmlns="http://www.w3.org/2000/svg">
                                                     <path
                                                         d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                 </svg>
                                             </span>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th aria-sort="none" data-id="contactname" onclick={sortClick}
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header colume2"
+                                    scope="col">
+                                    <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                                        <span class="slds-assistive-text">Sort by: </span>
+                                        <div class="slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="Contact Name">Contact Name</span>
+                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                <svg data-index="contactname" class="exp-arrow-icon"
+                                                    viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </th>
+                                <template for:each={tableColumns} for:item="column">
+                                    <th key={column.fieldName} aria-sort="none" data-id={column.fieldName}
+                                        onclick={sortClick}
+                                        class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header colume2"
+                                        scope="col">
+                                        <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                                            <span class="slds-assistive-text">Sort by: </span>
+                                            <div class="slds-has-flexi-truncate">
+                                                <span class="slds-truncate" title={column.label}>{column.label}</span>
+                                                <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                    <svg data-index={column.fieldName} class="exp-arrow-icon"
+                                                        viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
                                         </div>
                                     </th>
                                 </template>
@@ -395,7 +371,7 @@
                         </thead>
                         <tbody>
                             <template for:each={pagedInquries} for:item="inquiry">
-                                <tr key={inquiry.id}>
+                                <tr key={inquiry.id} aria-selected="false" class="table-tr">
                                     <td class="slds-text-align_right slds-cell_action-mode checkbox-cell"
                                         role="gridcell">
                                         <label class="custom-checkbox custom-checkbox-body">
@@ -404,41 +380,48 @@
                                             <span class="checkmark"></span>
                                         </label>
                                     </td>
-                                    <td class="slds-truncate">
-                                        <a href="javascript:void(0)" data-id={inquiry.id}
-                                            onclick={navigateToRecord}>{inquiry.name}</a>
+                                    <td class="slds-cell_action-mode listing-cls" scope="row" title={inquiry.name}>
+                                        <div class="slds-truncate center-trancate-text" title={inquiry.name}>
+                                            <a href="javascript:void(0)" data-id={inquiry.id}
+                                                onclick={navigateToRecord}>{inquiry.name}</a>
+                                        </div>
                                     </td>
-                                    <td class="slds-truncate">
-                                        <template if:true={inquiry.hasContact}>
-                                            <a href="javascript:void(0)" data-id={inquiry.contactId}
-                                                onclick={navigateToRecord}>{inquiry.contactName}</a>
-                                        </template>
-                                        <template if:false={inquiry.hasContact}>
-                                            -
-                                        </template>
+                                    <td class="slds-cell_action-mode" role="gridcell" title={inquiry.contactName}>
+                                        <div class="slds-truncate center-trancate-text" title={inquiry.contactName}>
+                                            <template if:true={inquiry.hasContact}>
+                                                <a href="javascript:void(0)" data-id={inquiry.contactId}
+                                                    onclick={navigateToRecord}>{inquiry.contactName}</a>
+                                            </template>
+                                            <template if:false={inquiry.hasContact}>
+                                                -
+                                            </template>
+                                        </div>
                                     </td>
                                     <template for:each={inquiry.displayFields} for:item="field">
-                                        <td key={field.key} class="slds-truncate">
-                                            <template if:true={field.hasValue}>
-                                                <template if:true={field.isNameField}>
-                                                    <a href="javascript:void(0)" data-id={inquiry.id}
-                                                        onclick={navigateToRecord}>{field.value}</a>
-                                                </template>
-                                                <template if:true={field.isReference}>
-                                                    <a href="javascript:void(0)" data-id={field.recordId}
-                                                        onclick={navigateToRecord}>{field.value}</a>
-                                                </template>
-                                                <template if:false={field.isNameField}>
-                                                    <template if:false={field.isReference}>
-                                                        <template if:true={field.isCurrency}>
-                                                            {field.value}
-                                                        </template>
-                                                        <template if:false={field.isCurrency}>
-                                                            {field.value}
+                                        <td key={field.key} class="slds-cell_action-mode" role="gridcell"
+                                            title={field.value}>
+                                            <div class="slds-truncate center-trancate-text" title={field.value}>
+                                                <template if:true={field.hasValue}>
+                                                    <template if:true={field.isNameField}>
+                                                        <a href="javascript:void(0)" data-id={inquiry.id}
+                                                            onclick={navigateToRecord}>{field.value}</a>
+                                                    </template>
+                                                    <template if:true={field.isReference}>
+                                                        <a href="javascript:void(0)" data-id={field.recordId}
+                                                            onclick={navigateToRecord}>{field.value}</a>
+                                                    </template>
+                                                    <template if:false={field.isNameField}>
+                                                        <template if:false={field.isReference}>
+                                                            <template if:true={field.isCurrency}>
+                                                                {field.value}
+                                                            </template>
+                                                            <template if:false={field.isCurrency}>
+                                                                {field.value}
+                                                            </template>
                                                         </template>
                                                     </template>
                                                 </template>
-                                            </template>
+                                            </div>
                                         </td>
                                     </template>
                                 </tr>
@@ -446,51 +429,65 @@
                         </tbody>
                     </table>
                 </div>
-            </template>
-            <template if:false={pagedInquries.length}>
-                <div class="exp-no-data-container">
-                    <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                    <div class="exp-no-data-message">No Inquiry found. Please change your search filters and try again.</div>
-                </div>
-            </template>
-            <template if:true={showPagination}>
+
+                <!-- FOOTER / PAGINATION -->
                 <div class="exp-pagination-div">
-                    <div class="exp-btn-cover">
-                        <div class="exp-pagination-container">
-                            <button class="exp-pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
-                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                                    fill="#fff">
-                                    <path
-                                        d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                                </svg>
-                                Previous
-                            </button>
-
-                            <template for:each={pageNumbers} for:item="page">
-                                <template if:false={page.isEllipsis}>
-                                    <button key={page.number} data-id={page.number} class={page.className}
-                                        onclick={handlePageChange}>
-                                        {page.number}
-                                    </button>
-                                </template>
-                                <template if:true={page.isEllipsis}>
-                                    <span key={page.number} class="exp-pagination-ellipsis">...</span>
-                                </template>
+                    <div class="exp-page-size-container">
+                        <label class="exp-page-size-label">Rows per page : </label>
+                        <select class="exp-page-size-select" onchange={handlePageSizeChange}>
+                            <template for:each={pageSizeOptions} for:item="opt">
+                                <option key={opt.value} value={opt.value} selected={opt.isSelected}>
+                                    {opt.label}
+                                </option>
                             </template>
+                        </select>
+                    </div>
 
-                            <button class="exp-pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
-                                Next
-                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                                    fill="#fff">
-                                    <path
-                                        d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                                </svg>
-                            </button>
+                    <div class="exp-pagination-right">
+                        <span class="exp-results-info">{recordCountInfo}</span>
+
+                        <div class="exp-btn-cover">
+                            <div class="exp-pagination-container">
+                                <button class="exp-pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                        fill="#fff">
+                                        <path
+                                            d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                    </svg>
+                                </button>
+
+                                <template for:each={pageNumbers} for:item="page">
+                                    <template if:false={page.isEllipsis}>
+                                        <button key={page.number} data-id={page.number} class={page.className}
+                                            onclick={handlePageChange}>
+                                            {page.number}
+                                        </button>
+                                    </template>
+                                    <template if:true={page.isEllipsis}>
+                                        <span key={page.number} class="exp-pagination-ellipsis">...</span>
+                                    </template>
+                                </template>
+
+                                <button class="exp-pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                        fill="#fff">
+                                        <path
+                                            d="M178 477l208-205c6-6 6-16 0-22L178 45c-6-6-16-6-22 0l-22 22c-6 6-6 16 0 22l163 161c6 6 6 16 0 22L134 433c-6 6-6 16 0 22l22 22c6 6 16 6 22 0z" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </template>
-        </div>
+            </div>
+        </template>
+        <template if:false={pagedInquries.length}>
+            <div class="exp-no-data-container">
+                <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                <div class="exp-no-data-message">No Inquiry found. Please change your search filters and try again.
+                </div>
+            </div>
+        </template>
     </div>
 
 

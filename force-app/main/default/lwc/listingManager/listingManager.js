@@ -43,7 +43,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     @track isPrevDisabled = true;
     @track isNextDisabled = false;
     @track wrapOn = true; // Default to closed (hidden filter)
-    @track pageSize = 30;
+    @track pageSize = 20;
     @track screenWidth = 0;
     @track currentPage = 1;
     @track visiblePages = 5;
@@ -130,7 +130,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     * Created By:Vyom Soni
     */
     get startIndex() {
-        return (this.currentPage - 1) * this.pageSize + 1;
+        return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
     }
 
     /**
@@ -141,6 +141,17 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     */
     get endIndex() {
         return Math.min(this.currentPage * this.pageSize, this.totalItems);
+    }
+
+    /**
+    * Method Name : recordCountInfo
+    * @description : returns formatted records count info for footer display
+    */
+    get recordCountInfo() {
+        if (this.totalItems === 0) {
+            return 'Showing 0 records';
+        }
+        return `Showing ${this.startIndex} - ${this.endIndex} of ${this.totalItems}`;
     }
 
     /**
@@ -483,7 +494,6 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
             .then(result => {
                 this.listingData = result.listings || [];
                 this.propertyMediaUrls = result.medias || {};
-                this.pageSize = result.pageSize || 30;
                 this.fields = (result.selectedFields || []).map(field => ({
                     fieldLabel: field.label,
                     fieldName: field.fieldApiname,
@@ -941,15 +951,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     this.isSilentSync = false;
                 }, 300);
 
-                // Display info toast notification about the real-time update
-                this.dispatchEvent(
-                    new ShowToastEvent({
-                        title: 'Listings Updated',
-                        message: 'The listings data has been synchronized with the latest changes.',
-                        variant: 'info',
-                        mode: 'dismissable'
-                    })
-                );
+                this.showToast('Listings Updated', `The listings data has been synchronized with the latest changes.`, 'info');
             }, 300);
         } catch (error) {
             errorDebugger('ListingManager', 'handleRealtimeRefresh', error, 'warn', 'Error in handleRealtimeRefresh');
@@ -1130,6 +1132,47 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
             this.scrollToTop();
             this.sortData();
         }
+    }
+
+    /**
+    * Method Name : pageSizeOptions
+    * @description : returns dropdown options for rows per page from 10 to 100
+    */
+    get pageSizeOptions() {
+        const sizes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+        return sizes.map(size => ({
+            label: String(size),
+            value: size,
+            isSelected: this.pageSize === size
+        }));
+    }
+
+    /**
+    * Method Name : handlePageSizeChange
+    * @description : handle change in records per page from dropdown selection
+    */
+    handlePageSizeChange(event) {
+        const value = parseInt(event.target.value, 10);
+        if (!isNaN(value) && this.pageSize !== value) {
+            this.pageSize = value;
+            this.currentPage = 1;
+            this.updateShownData();
+            this.scrollToTop();
+        }
+    }
+
+    /**
+    * Method Name : showToast
+    * @description : helper method to dispatch toast notification
+    */
+    showToast(title, message, variant = 'info') {
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title,
+                message,
+                variant
+            })
+        );
     }
 
     /**

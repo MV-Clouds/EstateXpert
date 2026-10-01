@@ -2,7 +2,6 @@ import { LightningElement, wire } from "lwc";
 import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
-import FORM_FACTOR from "@salesforce/client/formFactor";
 
 export default class EstateXpertControlCenter extends NavigationMixin(LightningElement) {
     currentView = 'controlCenter';
@@ -78,16 +77,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
         return this.isChildComponentView 
             ? 'control-center-layout with-breadcrumb' 
             : 'control-center-layout';
-    }
-
-    /**
-     * Method Name: showRightSidebar
-     * @description: Getter to check if the right sidebar should be displayed based on form factor
-     * Date: 23/09/2026
-     * Created By: Vyom Soni
-     */
-    get showRightSidebar() {
-        return FORM_FACTOR === 'Large';
     }
 
     /**

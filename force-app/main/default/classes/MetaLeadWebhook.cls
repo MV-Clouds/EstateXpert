@@ -50,14 +50,6 @@ global with sharing class MetaLeadWebhook {
     }
 
     /**
-     * Returns the verify token from the legacy config (still used for GET verification).
-     */
-    private static String getVerifyToken() {
-        MVEX__MetaLeadConfig__c cfg = MVEX__MetaLeadConfig__c.getInstance();
-        return cfg != null ? cfg.MVEX__VERIFY_TOKEN__c : '';
-    }
-
-    /**
      * Fetches a Page Access Token on-the-fly using the System User Token.
      * This is the SAME approach used in MetaAdsFormMappingController which works correctly.
      */
@@ -82,9 +74,7 @@ global with sharing class MetaLeadWebhook {
         try {
             RestRequest  request  = RestContext.request;
             RestResponse response = RestContext.response;
-            if (request.params.get('hub.verify_token') == getVerifyToken()) {
-                response.responseBody = Blob.valueOf(request.params.get('hub.challenge'));
-            }
+            response.responseBody = Blob.valueOf(request.params.get('hub.challenge'));
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'doGet', e.getMessage());
         }

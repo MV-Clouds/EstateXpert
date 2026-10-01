@@ -10,6 +10,13 @@
                     <div class="broadcast-title">Meta Ads Form Mappings</div>
                 </div>
                 <div class="header-right-info">
+                    <button class="blue-btn-css" onclick={openWebhookModal}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                            <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        Webhook Site
+                    </button>
                     <button class="blue-btn-css" onclick={handleDeactivateClick}>
                         <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
                             <path d="M8 12L5.5 14.5C4.12 15.88 1.88 15.88 0.5 14.5C-0.88 13.12 -0.88 10.88 0.5 9.5L3 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -132,13 +139,6 @@
                                                                         </td>
                                                                         <td class="slds-cell_action-mode align-center" role="gridcell">
                                                                             <div class="slds-truncate center-trancate-text action-buttons-wrapper">
-                                                                                <div class="action-icon-container" data-id={form.formId} onclick={openFailedLeadsModal} title="Failed Leads">
-                                                                                    <svg class="action-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                                                        <circle cx="12" cy="12" r="10"></circle>
-                                                                                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                                                                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                                                                                    </svg>
-                                                                                </div>
                                                                                 <div class="action-icon-container" data-id={form.id} onclick={handleEditRow} title="Edit Mapping">
                                                                                     <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -149,6 +149,13 @@
                                                                                     <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                                                         <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                                                                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                    </svg>
+                                                                                </div>
+                                                                                <div class="action-icon-container" data-id={form.formId} onclick={openFailedLeadsModal} title="Failed Leads">
+                                                                                    <svg class="action-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                                        <circle cx="12" cy="12" r="10"></circle>
+                                                                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                                                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
                                                                                     </svg>
                                                                                 </div>
                                                                             </div>
@@ -211,61 +218,74 @@
                                 <c-spinner-component></c-spinner-component>
                             </template>
 
-                            <!-- Section 1: Select Page (always visible) -->
-                            <div class="wizard-section">
-                                <div class="wizard-step-label">
-                                    <span class="wizard-step-badge">Step 1</span>
-                                    Select Meta Page
-                                </div>
-                                <lightning-combobox
-                                    name="pageSelect"
-                                    label=""
-                                    value={selectedPageId}
-                                    placeholder="-- Choose a Page --"
-                                    options={pageOptions}
-                                    onchange={handlePageSelection}
-                                    disabled={isModalLoading}
-                                    variant="label-hidden"
-                                    class="custom-combobox">
-                                </lightning-combobox>
-                                <template if:false={pageOptions.length}>
-                                    <div class="wizard-hint-error">No pages found. Please connect a Meta Ads account first.</div>
-                                </template>
-                            </div>
-
-                            <div class="wizard-divider"></div>
-
-                            <!-- Section 2: Select Form (disabled until page selected) -->
-                            <div class="wizard-section">
-                                <div class="wizard-step-label">
-                                    <span class="wizard-step-badge" class:wizard-step-badge-disabled={isFormSectionDisabled}>Step 2</span>
-                                    Select Lead Form
-                                    <template if:true={isFormSectionDisabled}>
-                                        <span class="wizard-hint-muted">&nbsp;— Select a page first</span>
+                            <template if:false={isEditingMode}>
+                                <!-- Section 1: Select Page (always visible) -->
+                                <div class="wizard-section">
+                                    <div class="wizard-step-label">
+                                        <span class="wizard-step-badge">Step 1</span>
+                                        Select Meta Page
+                                    </div>
+                                    <lightning-combobox
+                                        name="pageSelect"
+                                        label=""
+                                        value={selectedPageId}
+                                        placeholder="-- Choose a Page --"
+                                        options={pageOptions}
+                                        onchange={handlePageSelection}
+                                        disabled={isPageSelectionDisabled}
+                                        variant="label-hidden"
+                                        class="custom-combobox">
+                                    </lightning-combobox>
+                                    <template if:false={pageOptions.length}>
+                                        <div class="wizard-hint-error">No pages found. Please connect a Meta Ads account first.</div>
                                     </template>
                                 </div>
-                                <lightning-combobox
-                                    name="formSelect"
-                                    label=""
-                                    value={selectedFormId}
-                                    placeholder="-- Choose a Form --"
-                                    options={formOptions}
-                                    onchange={handleFormSelection}
-                                    disabled={isFormDropdownDisabled}
-                                    variant="label-hidden"
-                                    class="custom-combobox">
-                                </lightning-combobox>
-                                <template if:true={showNoFormsMsg}>
-                                    <div class="wizard-hint-error">No available forms. All forms may already be mapped.</div>
-                                </template>
-                            </div>
+
+                                <div class="wizard-divider"></div>
+
+                                <!-- Section 2: Select Form (disabled until page selected) -->
+                                <div class="wizard-section">
+                                    <div class="wizard-step-label">
+                                        <span class="wizard-step-badge" class:wizard-step-badge-disabled={isFormSectionDisabled}>Step 2</span>
+                                        Select Lead Form
+                                        <template if:true={isFormSectionDisabled}>
+                                            <span class="wizard-hint-muted">&nbsp;— Select a page first</span>
+                                        </template>
+                                    </div>
+                                    <lightning-combobox
+                                        name="formSelect"
+                                        label=""
+                                        value={selectedFormId}
+                                        placeholder="-- Choose a Form --"
+                                        options={formOptions}
+                                        onchange={handleFormSelection}
+                                        disabled={isFormDropdownDisabled}
+                                        variant="label-hidden"
+                                        class="custom-combobox">
+                                    </lightning-combobox>
+                                    <template if:true={showNoFormsMsg}>
+                                        <div class="wizard-hint-error">No available forms. All forms may already be mapped.</div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template if:true={isEditingMode}>
+                                <div class="edit-context">
+                                    <span>Page: <strong>{editPageName}</strong></span>
+                                    <span>Form: <strong>{editFormName}</strong></span>
+                                </div>
+                            </template>
 
                             <!-- Section 3: Field Mappings (only visible after form selected) -->
                             <template if:true={hasFormFields}>
-                                <div class="wizard-divider"></div>
+                                <template if:false={isEditingMode}>
+                                    <div class="wizard-divider"></div>
+                                </template>
                                 <div class="wizard-section">
                                     <div class="wizard-step-label">
-                                        <span class="wizard-step-badge">Step 3</span>
+                                        <template if:false={isEditingMode}>
+                                            <span class="wizard-step-badge">Step 3</span>
+                                        </template>
                                         Map Fields
                                     </div>
                                     <template if:true={currentFormFields.length}>
@@ -429,23 +449,27 @@
                                     <thead>
                                         <tr class="table_tr_cls">
                                             <th class="col-checkbox header-cell-padding align-center">
-                                                <input type="checkbox" onchange={handleSelectAllFailedLeads} checked={isAllFailedLeadsSelected} />
+                                                <lightning-input type="checkbox" variant="label-hidden" label="Select all" onchange={handleSelectAllFailedLeads} checked={isAllFailedLeadsSelected}></lightning-input>
                                             </th>
-                                            <th class="header-cell-padding">Error ID</th>
+                                            <th class="header-cell-padding">No.</th>
+                                            <th class="header-cell-padding">Lead ID</th>
                                             <th class="header-cell-padding">Received At</th>
-                                            <th class="col-no align-center header-cell-padding">Actions</th>
+                                            <th class="header-cell-padding">Failure Reason</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <template for:each={failedLeads} for:item="lead">
                                             <tr key={lead.Id}>
                                                 <td class="align-center header-cell-padding">
-                                                    <input type="checkbox" data-id={lead.Id} checked={lead.selected} onchange={handleFailedLeadSelection} />
+                                                    <lightning-input type="checkbox" variant="label-hidden" label="Select lead" data-id={lead.Id} checked={lead.selected} onchange={handleFailedLeadSelection}></lightning-input>
                                                 </td>
-                                                <td class="header-cell-padding">{lead.Name}</td>
+                                                <td class="header-cell-padding">{lead.index}</td>
+                                                <td class="header-cell-padding">
+                                                    <div class="slds-truncate" title={lead.leadId}>{lead.leadId}</div>
+                                                </td>
                                                 <td class="header-cell-padding">{lead.Date}</td>
-                                                <td class="align-center header-cell-padding">
-                                                    <button class="blue-btn-css btn-small" data-id={lead.Id} onclick={reviewFailedLead}>Review Mapping</button>
+                                                <td class="header-cell-padding">
+                                                    <div class="slds-truncate" title={lead.reason}>{lead.reason}</div>
                                                 </td>
                                             </tr>
                                         </template>
@@ -553,19 +577,22 @@
                                         </button>
                                     </template>
                                     <template if:true={showAddField}>
-                                        <div class="add-field-row">
-                                            <lightning-combobox
-                                                name="addField"
-                                                label=""
-                                                value={selectedAdditionalField}
-                                                options={additionalFieldOptions}
-                                                onchange={handleAddFieldChange}
-                                                placeholder="Select field to add..."
-                                                variant="label-hidden"
-                                                class="custom-combobox add-field-combobox">
-                                            </lightning-combobox>
-                                            <button type="button" class="blue-btn-css add-field-save-btn" onclick={handleAddField}>Add</button>
-                                            <button type="button" class="cancel_btn_css add-field-cancel-btn" onclick={handleCancelAddField}>Cancel</button>
+                                        <div class="add-field-box">
+                                            <div class="add-field-title">Add Salesforce Contact Field</div>
+                                            <div class="add-field-controls">
+                                                <lightning-combobox
+                                                    name="addField"
+                                                    label=""
+                                                    value={selectedAdditionalField}
+                                                    options={additionalFieldOptions}
+                                                    onchange={handleAdditionalFieldChange}
+                                                    placeholder="Select field to add..."
+                                                    variant="label-hidden"
+                                                    class="custom-combobox add-field-combobox">
+                                                </lightning-combobox>
+                                                <button type="button" class="blue-btn-css" onclick={handleAddField} disabled={isAddFieldDisabled}>Add</button>
+                                                <button type="button" class="white-btn-css" onclick={handleCancelAddField}>Cancel</button>
+                                            </div>
                                         </div>
                                     </template>
                                 </div>
@@ -576,20 +603,13 @@
                     <!-- Footer -->
                     <div class="footerbtns">
                         <template if:true={isFailedWizardStep1}>
-                            <template if:true={hasSelectedFailedLeads}>
-                                <button class="blue-btn-css mr-10" aria-label="Retry Selected" onclick={retrySelectedFailedLeads}>
-                                    Retry Selected
-                                </button>
-                            </template>
-                            <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeFailedLeadsModal}>
-                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
-                                </svg>
-                                Close
-                            </button>
+                            <button class="white-btn-css" onclick={closeFailedLeadsModal}>Close</button>
+                            <button class="white-btn-css red-text-btn" disabled={isFailedActionDisabled} onclick={discardSelectedFailedLeads}>Discard Selected</button>
+                            <button class="white-btn-css" disabled={isEditMappingDisabled} onclick={reviewSelectedFailedLead}>Edit Mapping &amp; Retry</button>
+                            <button class="blue-btn-css" disabled={isFailedActionDisabled} onclick={retrySelectedFailedLeads}>Retry Selected</button>
                         </template>
                         <template if:true={isFailedWizardStep2}>
-                            <button class="cancel_btn_css" aria-label="Back" onclick={backToFailedLeadsList}>
+                            <button class="white-btn-css" aria-label="Back" onclick={backToFailedLeadsList}>
                                 Back
                             </button>
                             <button class="blue-btn-css" aria-label="Retry" onclick={saveAndRetryFailedLead}>
@@ -602,4 +622,46 @@
         </section>
         <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
     </template>
+    
+    <template if:true={isWebhookModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small section_css">
+            <div class="slds-modal__container">
+                <div class="slds-modal__close exp-close-icon-css close-icon-css" role="button" aria-label="Close" onclick={closeWebhookModal}>
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                        <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937"></path>
+                    </svg>
+                </div>
+                <div class="slds-modal__header exp-pop-up-header-css popup-header">
+                    <h1 id="meta-webhook-title" class="slds-modal__title slds-hyphenate">Webhook Site</h1>
+                </div>
+                <div class="slds-modal__content modalbody">
+                    <div class="content_body relative-position">
+                        <template if:true={isLoading}>
+                            <c-spinner-component is-absolute="true"></c-spinner-component>
+                        </template>
+                        <div class="wizard-section">
+                            <div class="wizard-step-label">Select Active Force.com Site</div>
+                            <template if:true={hasSiteOptions}>
+                                <lightning-combobox name="webhookSite" label="" value={selectedSite} placeholder="-- Choose a Site --" options={siteOptions} onchange={handleSiteChange} variant="label-hidden" class="custom-combobox"></lightning-combobox>
+                                <template if:true={selectedSite}>
+                                    <div class="webhook-endpoint" style="margin-top: 10px; font-weight: bold; word-break: break-all;">
+                                        {webhookEndpointPreview}
+                                    </div>
+                                </template>
+                            </template>
+                            <template if:false={hasSiteOptions}>
+                                <div class="wizard-disabled-box">No active Force.com sites were found.</div>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="footerbtns">
+                        <button class="exp-white-btn-css blue-btn-css" style="background-color: transparent; color: #1877F2; border: 1px solid #1877F2;" onclick={closeWebhookModal}>Cancel</button>
+                        <button class="blue-btn-css" disabled={isCopyWebhookDisabled} onclick={handleCopyWebhook}>Copy Webhook URL</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
+
 </template>

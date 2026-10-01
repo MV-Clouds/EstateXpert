@@ -9,6 +9,8 @@ import deactivateConnection from '@salesforce/apex/MetaAdsTokenController.deacti
 import getFailedLeads from '@salesforce/apex/MetaAdsFormMappingController.getFailedLeads';
 import retryFailedLead from '@salesforce/apex/MetaAdsFormMappingController.retryFailedLead';
 import retryMultipleFailedLeads from '@salesforce/apex/MetaAdsFormMappingController.retryMultipleFailedLeads';
+import deleteFailedLeads from '@salesforce/apex/MetaAdsFormMappingController.deleteFailedLeads';
+import getActiveSites from '@salesforce/apex/MetaAdsFormMappingController.getActiveSites';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import globalStyles from '@salesforce/resourceUrl/globalStyles';
@@ -30,7 +32,12 @@ export default class MetaAdsFormMapping extends LightningElement {
 
     @track isModalOpen = false;
     @track isModalLoading = false;
+    @track isEditingMode = false;
     @track spinnerLabel = 'Loading forms...';
+
+    @track isWebhookModalOpen = false;
+    @track siteOptions = [];
+    @track selectedSite = '';
 
     @track availablePages = [];      // Pages from Meta API
     @track availableForms = [];      // Forms for selected page
@@ -200,12 +207,17 @@ export default class MetaAdsFormMapping extends LightningElement {
 
     /** Form section is locked until a page is chosen */
     get isFormSectionDisabled() {
-        return !this.selectedPageId;
+        return !this.selectedPageId || this.isEditingMode;
     }
 
-    /** Form dropdown is disabled while loading OR no page selected */
+    /** Page selection is disabled while loading or in edit mode */
+    get isPageSelectionDisabled() {
+        return this.isModalLoading || this.isEditingMode;
+    }
+
+    /** Form dropdown is disabled while loading OR no page selected OR in edit mode */
     get isFormDropdownDisabled() {
-        return this.isModalLoading || !this.selectedPageId;
+        return this.isModalLoading || !this.selectedPageId || this.isEditingMode;
     }
 
     /** Show "no forms" message only after forms have been fetched and list is empty */
@@ -221,6 +233,18 @@ export default class MetaAdsFormMapping extends LightningElement {
     /** Save is enabled only when a form is selected */
     get isSaveDisabled() {
         return !this.selectedFormId || this.isModalLoading;
+    }
+
+    get editPageName() {
+        if (!this.selectedPageId) return '';
+        const p = this.availablePages.find(page => String(page.id) === String(this.selectedPageId));
+        return p ? p.name : this.selectedPageId;
+    }
+
+    get editFormName() {
+        if (!this.selectedFormId) return '';
+        const f = this.availableForms.find(form => String(form.id) === String(this.selectedFormId));
+        return f ? f.name : this.selectedFormId;
     }
 
     get pageOptions() {
@@ -261,6 +285,7 @@ export default class MetaAdsFormMapping extends LightningElement {
         this.showAddField = false;
         this.selectedAdditionalField = '';
         this.formsLoaded       = false;
+        this.isEditingMode     = false;
         this.isModalOpen       = true;
     }
 
@@ -370,6 +395,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                     label: sf.label.split(' (')[0],
                     sourceType: sourceType,
                     sourceOptions: [
+                        { label: 'Do Not Map', value: '' },
                         { label: SOURCE_META, value: SOURCE_META },
                         { label: SOURCE_CUSTOM, value: SOURCE_CUSTOM }
                     ],
@@ -440,6 +466,7 @@ export default class MetaAdsFormMapping extends LightningElement {
 
     getFilteredMetaFieldOptions(formQuestions, sfType) {
         let options = [];
+        options.push({ label: 'Do Not Map', value: '' });
         
         formQuestions.forEach(q => {
             let metaType = (q.type || '').toUpperCase();
@@ -608,6 +635,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             metaField: '',
             metaOptions: options,
             sourceOptions: [
+                { label: 'Do Not Map', value: '' },
                 { label: SOURCE_META, value: SOURCE_META },
                 { label: SOURCE_CUSTOM, value: SOURCE_CUSTOM }
             ],
@@ -620,8 +648,7 @@ export default class MetaAdsFormMapping extends LightningElement {
         };
 
         this.currentFormFields = [...this.currentFormFields, newField];
-        this.selectedAdditionalField = '';
-        this.showAddField = false;
+        this.handleCancelAddField();
     }
 
     async saveMapping() {
@@ -757,6 +784,7 @@ export default class MetaAdsFormMapping extends LightningElement {
         this.availableForms    = [];
         this.currentFormFields = [];
         this.formsLoaded       = false;
+        this.isEditingMode     = true;
         this.isModalOpen       = true;
         this.isModalLoading    = true;
         this.spinnerLabel      = 'Loading form fields...';
@@ -848,6 +876,7 @@ export default class MetaAdsFormMapping extends LightningElement {
     }
 
     showMessagePopup(Status, Title, Message) {
+        // ... (this content replaced by full code at the bottom)
         const messageContainer = this.template.querySelector('c-message-popup')
         if (messageContainer) {
             messageContainer.showMessagePopup({
@@ -889,12 +918,21 @@ export default class MetaAdsFormMapping extends LightningElement {
         this.isRetrying = true;
         try {
             const results = await getFailedLeads({ formId: this.selectedFailedLeadsFormId });
-            this.failedLeads = results.map(r => {
+            this.failedLeads = results.map((r, index) => {
+                let leadId = 'Unknown';
+                try {
+                    let payload = JSON.parse(r.MVEX__Error_Body__c);
+                    if (payload.leadId) leadId = payload.leadId;
+                } catch (e) {}
+
                 return {
                     Id: r.Id,
+                    index: index + 1,
+                    leadId: leadId,
                     Name: r.Name,
                     Date: new Date(r.CreatedDate).toLocaleString(),
                     Body: r.MVEX__Error_Body__c,
+                    reason: r.MVEX__Error_Message__c || 'Unknown error',
                     selected: false
                 };
             });
@@ -919,6 +957,20 @@ export default class MetaAdsFormMapping extends LightningElement {
             }
             return l;
         });
+    }
+
+    get hasSelectedFailedLeads() {
+        return this.failedLeads && this.failedLeads.some(l => l.selected);
+    }
+
+    get isFailedActionDisabled() {
+        return !this.hasSelectedFailedLeads || this.isRetrying;
+    }
+
+    get isEditMappingDisabled() {
+        if (!this.failedLeads) return true;
+        const selectedCount = this.failedLeads.filter(l => l.selected).length;
+        return selectedCount !== 1 || this.isRetrying;
     }
 
     async retrySelectedFailedLeads() {
@@ -947,17 +999,37 @@ export default class MetaAdsFormMapping extends LightningElement {
         }
     }
 
-    async reviewFailedLead(event) {
-        const leadId = event.currentTarget.dataset.id;
-        const failedLead = this.failedLeads.find(l => l.Id === leadId);
-        if (!failedLead) return;
+    async discardSelectedFailedLeads() {
+        const selectedIds = this.failedLeads.filter(l => l.selected).map(l => l.Id);
+        if (selectedIds.length === 0) return;
 
+        this.isRetrying = true;
+        try {
+            const success = await deleteFailedLeads({ errorRecordIds: selectedIds });
+            if (success) {
+                this.showToast('Success', `Discarded ${selectedIds.length} failed lead(s).`, 'success');
+                await this.loadFailedLeads();
+            } else {
+                this.showToast('Error', 'Failed to discard selected leads.', 'error');
+            }
+        } catch (error) {
+            this.showToast('Error', error.body ? error.body.message : error.message, 'error');
+        } finally {
+            this.isRetrying = false;
+        }
+    }
+
+    async reviewSelectedFailedLead(event) {
+        const selected = this.failedLeads.find(l => l.selected);
+        if (!selected) return;
+
+        const leadId = selected.Id;
         this.activeFailedLeadId = leadId;
         this.failedWizardStep = 2;
         
         let payload = {};
         try {
-            payload = JSON.parse(failedLead.Body);
+            payload = JSON.parse(selected.Body);
         } catch (e) {
             console.error('Failed to parse error body', e);
         }
@@ -1078,5 +1150,74 @@ export default class MetaAdsFormMapping extends LightningElement {
             this.isRetrying = false;
         }
     }
-}
 
+    // --- Webhook Modal ---
+    
+    get hasSiteOptions() {
+        return this.siteOptions.length > 0;
+    }
+
+    get isCopyWebhookDisabled() {
+        return !this.selectedSite;
+    }
+
+    get webhookEndpointPreview() {
+        if (!this.selectedSite) return '';
+        let base = this.selectedSite.replace(/\/+$/, '');
+        return `${base}/services/apexrest/MVEX/PAGE/webhooks/`;
+    }
+
+    async openWebhookModal() {
+        this.isLoading = true;
+        try {
+            const sites = await getActiveSites();
+            this.siteOptions = (sites || []).map(s => ({ label: s.label, value: s.value }));
+            this.selectedSite = '';
+            this.isWebhookModalOpen = true;
+        } catch (e) {
+            this.showToast('Error', 'Failed to fetch Force.com sites.', 'error');
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    closeWebhookModal() {
+        this.isWebhookModalOpen = false;
+    }
+
+    handleSiteChange(event) {
+        this.selectedSite = event.detail.value;
+    }
+
+    handleCopyWebhook() {
+        if (!this.webhookEndpointPreview) return;
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(this.webhookEndpointPreview)
+                .then(() => {
+                    this.showToast('Success', 'Webhook URL copied to clipboard!', 'success');
+                })
+                .catch(err => {
+                    this.fallbackCopyTextToClipboard(this.webhookEndpointPreview);
+                });
+        } else {
+            this.fallbackCopyTextToClipboard(this.webhookEndpointPreview);
+        }
+    }
+
+    fallbackCopyTextToClipboard(text) {
+        let textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            this.showToast('Success', 'Webhook URL copied to clipboard!', 'success');
+        } catch (err) {
+            this.showToast('Error', 'Failed to copy text.', 'error');
+        }
+        document.body.removeChild(textArea);
+    }
+}

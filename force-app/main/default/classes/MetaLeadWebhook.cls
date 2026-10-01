@@ -42,11 +42,11 @@ global with sharing class MetaLeadWebhook {
      * This is the CORRECT token source — the old MVEX__MetaLeadConfig__c is legacy.
      */
     private static String getSystemUserToken() {
-        OAuth_Configuration__mdt cfg = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
-        if (cfg == null || String.isBlank(cfg.Access_Token__c)) {
+        MVEX__OAuth_Configuration__mdt cfg = MVEX__OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
+        if (cfg == null || String.isBlank(cfg.MVEX__Access_Token__c)) {
             return null;
         }
-        return cfg.Access_Token__c;
+        return cfg.MVEX__Access_Token__c;
     }
 
     /**
@@ -112,9 +112,9 @@ global with sharing class MetaLeadWebhook {
                 return;
             }
 
-            OAuth_Configuration__mdt oauthConfig = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
-            String apiVersion = oauthConfig != null ? oauthConfig.API_Version__c : 'v19.0';
-            String baseUrl    = oauthConfig != null ? oauthConfig.Base_URL__c : 'https://graph.facebook.com';
+            MVEX__OAuth_Configuration__mdt oauthConfig = MVEX__OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
+            String apiVersion = oauthConfig != null ? oauthConfig.MVEX__API_Version__c : 'v19.0';
+            String baseUrl    = oauthConfig != null ? oauthConfig.MVEX__Base_URL__c : 'https://graph.facebook.com';
 
             // Derive Page Access Token (same method used in MetaAdsFormMappingController)
             ApiContext sysCtx = new ApiContext(systemUserToken, apiVersion, baseUrl);
@@ -326,21 +326,26 @@ global with sharing class MetaLeadWebhook {
                 dml.DuplicateRuleHeader.runAsCurrentUser = true;
                 Database.SaveResult sr = Database.insert(newContact, dml);
                 if (!sr.isSuccess()) {
+                    String errorMsg = sr.getErrors()[0].getMessage();
                     if (!ctx.isRetry) {
                         MVEX__Error_Handling__c errRec = new MVEX__Error_Handling__c();
                         errRec.MVEX__Error_Body__c = JSON.serializePretty(retryPayload);
                         errRec.MVEX__Source_of_Error__c = 'MetaFailedLeads';
+                        errRec.MVEX__Error_Message__c = errorMsg;
                         insert errRec;
                     }
-                    return sr.getErrors()[0].getMessage();
+                    return errorMsg;
                 }
                 return 'Success';
             } catch (Exception e) {
                 ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'createSalesforceContact_insert', e.getMessage());
-                MVEX__Error_Handling__c errRec = new MVEX__Error_Handling__c();
-                errRec.MVEX__Error_Body__c = JSON.serializePretty(retryPayload);
-                errRec.MVEX__Source_of_Error__c = 'MetaFailedLeads';
-                insert errRec;
+                if (!ctx.isRetry) {
+                    MVEX__Error_Handling__c errRec = new MVEX__Error_Handling__c();
+                    errRec.MVEX__Error_Body__c = JSON.serializePretty(retryPayload);
+                    errRec.MVEX__Source_of_Error__c = 'MetaFailedLeads';
+                    errRec.MVEX__Error_Message__c = e.getMessage();
+                    insert errRec;
+                }
                 return e.getMessage();
             }
         }

@@ -350,6 +350,14 @@
     background-color: #f3f4f6;
 }
 
+.red-text-btn {
+    color: #dc2626 !important;
+}
+
+.red-text-btn:disabled {
+    color: #9ca3af !important;
+}
+
 .mapping-row {
     display: flex;
     align-items: center;
@@ -490,7 +498,6 @@
     align-items: center;
     gap: 12px;
     margin-bottom: 8px;
-    padding: 0 12px;
 }
 
 .mapping-header-col {
@@ -616,6 +623,24 @@
 }
 
 /* ===== UTILITY CLASSES FOR TABLES ===== */
+.edit-context {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 12px 14px;
+    margin-bottom: 4px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.edit-context strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
 .exp-main-table-wrapper {
     border-radius: 8px;
     overflow: hidden;

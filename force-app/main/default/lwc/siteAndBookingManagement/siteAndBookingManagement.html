@@ -13,7 +13,7 @@
         <div class="contacts-header">
             <h2>Related Inquiries</h2>
             <div class="header-actions">
-                <button class="blue-btn-css" onclick={handleRefreshData} title="Refresh Data" aria-label="Refresh Data">
+                <button class="exp-blue-btn-css" onclick={handleRefreshData} title="Refresh Data" aria-label="Refresh Data">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M21.5 2V8.5M21.5 8.5H15M21.5 8.5L18 5C16.6 3.5 14.8 2.5 12.6 2.1C8.9 1.5 5.4 3.1 3.5 6.1M2.5 22V15.5M2.5 15.5H9M2.5 15.5L6 19C7.4 20.5 9.2 21.5 11.4 21.9C15.1 22.5 18.6 20.9 20.5 17.9"
@@ -22,7 +22,7 @@
                     <template if:false={isMobileOrTablet}>Refresh</template>
                 </button>
                 <template if:false={isMobileOrTablet}>
-                    <button class="blue-btn-css" onclick={openScheduleModal} title="View Full Schedule">
+                    <button class="exp-blue-btn-css" onclick={openScheduleModal} title="View Full Schedule">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z"
@@ -38,55 +38,55 @@
             </div>
         </div>
         <template if:true={isContactDataAvailable}>
-            <div class="table-content">
+            <div class="exp-table-content">
                 <table aria-multiselectable="true" class="slds-table slds-table_fixed-layout slds-table_resizable-cols">
                     <thead>
-                        <tr class="table_tr_cls slds-line-height_reset">
-                            <th aria-sort="none" data-id="Name" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header" scope="col">
-                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                        <tr class="exp-table-tr-cls slds-line-height_reset">
+                            <th aria-sort="none" data-id="Name" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header" scope="col">
+                                <div class="slds-text-link_reset exp-sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                     <span class="slds-truncate" title="Name">Name</span>
                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                        <svg data-index="Name" class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                        <svg data-index="Name" class="exp-arrow-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                         </svg>
                                     </span>
                                 </div>
                             </th>
-                            <th aria-sort="none" data-id="Email" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header" scope="col">
-                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                            <th aria-sort="none" data-id="Email" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header" scope="col">
+                                <div class="slds-text-link_reset exp-sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                     <span class="slds-truncate" title="Email">Email</span>
                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                        <svg data-index="Email" class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                        <svg data-index="Email" class="exp-arrow-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                         </svg>
                                     </span>
                                 </div>
                             </th>
-                            <th aria-sort="none" data-id="MobilePhone" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header" scope="col">
-                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                            <th aria-sort="none" data-id="MobilePhone" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header" scope="col">
+                                <div class="slds-text-link_reset exp-sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                     <span class="slds-truncate" title="Phone">Phone</span>
                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                        <svg data-index="MobilePhone" class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                        <svg data-index="MobilePhone" class="exp-arrow-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                         </svg>
                                     </span>
                                 </div>
                             </th>
-                            <th aria-sort="none" data-id="ShowingStatus" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header" scope="col">
-                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                            <th aria-sort="none" data-id="ShowingStatus" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header" scope="col">
+                                <div class="slds-text-link_reset exp-sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                     <span class="slds-truncate" title="Showing Status">Showing Status</span>
                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                        <svg data-index="ShowingStatus" class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                        <svg data-index="ShowingStatus" class="exp-arrow-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                         </svg>
                                     </span>
                                 </div>
                             </th>
-                            <th aria-sort="none" data-id="FormattedScheduleDate" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header" scope="col">
-                                <div class="slds-text-link_reset sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                            <th aria-sort="none" data-id="FormattedScheduleDate" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header" scope="col">
+                                <div class="slds-text-link_reset exp-sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                                     <span class="slds-truncate" title="Schedule Date">Schedule Date</span>
                                     <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                        <svg data-index="FormattedScheduleDate" class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                        <svg data-index="FormattedScheduleDate" class="exp-arrow-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                         </svg>
                                     </span>
@@ -122,7 +122,7 @@
                                 <td data-label="Actions">
                                     <div class="action-btn">
                                         <template if:false={isMobileOrTablet}>
-                                            <button class="edit-icon-css" onclick={openManageModal} data-contact={contact.Json}
+                                            <button class="exp-edit-icon-css" onclick={openManageModal} data-contact={contact.Json}
                                                 title="Send Email">
                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                                                     xmlns="http://www.w3.org/2000/svg">
@@ -135,7 +135,7 @@
                                                 </svg>
                                             </button>
                                         </template>
-                                        <button class="preview-icon-css" onclick={openShowingInNewTab}
+                                        <button class="exp-preview-icon-css" onclick={openShowingInNewTab}
                                             data-showing-id={contact.ShowingId} disabled={contact.isShowingDisabled}
                                             title="View Showing Record">
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -291,7 +291,7 @@
                         </div>
                     </div>
                     <div class="footerbtns">
-                        <button class="white-btn-css" aria-label="Cancel and close" onclick={closeManageModal}>
+                        <button class="exp-white-btn-css" aria-label="Cancel and close" onclick={closeManageModal}>
                             <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
@@ -300,7 +300,7 @@
                             </svg>
                             Cancel
                         </button>
-                        <button class="blue-btn-css" onclick={handleSave}>
+                        <button class="exp-blue-btn-css" onclick={handleSave}>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"

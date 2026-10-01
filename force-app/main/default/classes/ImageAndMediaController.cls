@@ -39,7 +39,7 @@ public with sharing class ImageAndMediaController {
                                                                 MVEX__IsOnPortalFeed__c, MVEX__IsOnWebsite__c, MVEX__IsOnExpose__c, MVEX__Sort_on_Expose__c, 
                                                                 MVEX__Sort_on_Portal_Feed__c, MVEX__Sort_on_Website__c, MVEX__Filename__c, MVEX__MimeType__c FROM 
                                                                 MVEX__Property_File__c WHERE MVEX__Property__c =: listingRecord[0].MVEX__Property__c 
-                                                                WITH USER_MODE ORDER BY Name];
+                                                                WITH USER_MODE ORDER BY Name LIMIT 50000];
                 listingImages.sort();
 
                 newWrap.propertyId = listingRecord[0].MVEX__Property__c;
@@ -145,13 +145,12 @@ public with sharing class ImageAndMediaController {
         try {
             if (id != null) {
                 List<MVEX__Property_File__c> record = [SELECT Id FROM MVEX__Property_File__c WHERE Id = :id WITH USER_MODE LIMIT 1];
-                if (Schema.sObjectType.MVEX__Property_File__c.isDeletable()) {
-                    delete as user record;
-                }
+                delete as user record;
             } else if (propertyId != null) {
                 List<MVEX__Listing__c> listing = [SELECT Id, MVEX__Property__c FROM MVEX__Listing__c WHERE Id= :propertyId WITH USER_MODE LIMIT 1];
                 if (!listing.isEmpty()) {
-                    List<MVEX__Property_File__c> allMedia = [SELECT Id, MVEX__Property__c FROM MVEX__Property_File__c WHERE MVEX__Property__c = :listing[0].MVEX__Property__c];
+                    List<MVEX__Property_File__c> allMedia = [SELECT Id, MVEX__Property__c FROM MVEX__Property_File__c WHERE MVEX__Property__c = :listing[0].MVEX__Property__c
+                                                            WITH USER_MODE LIMIT 50000];
                     if (allMedia != null) {
                         delete as user allMedia;
                     }
@@ -190,7 +189,8 @@ public with sharing class ImageAndMediaController {
     public static AWSWrapper getS3ConfigSettings(){
         AWSWrapper newWrap = new AWSWrapper();
         try {
-            List<ContentVersion>  cvList = [SELECT Id, ContentSize, Title, FileType, VersionDataUrl, VersionData FROM ContentVersion WHERE ExternalDocumentInfo1 = 'watermark3112' AND isLatest = true WITH USER_MODE];
+            List<ContentVersion>  cvList = [SELECT Id, ContentSize, Title, FileType, VersionDataUrl, VersionData FROM ContentVersion WHERE 
+                                                ExternalDocumentInfo1 = 'watermark3112' AND isLatest = true WITH USER_MODE LIMIT 1];
             newWrap.contentVersionData = cvList.size() > 0 ? EncodingUtil.base64Encode(cvList[0].VersionData) : '';
 
             MVEX__AWS_Config__c awsCredential = MVEX__AWS_Config__c.getOrgDefaults();
@@ -201,7 +201,7 @@ public with sharing class ImageAndMediaController {
             String orgId = UserInfo.getOrganizationId();
             String orgName = '';
             try {
-                Organization org = [SELECT Id, Name FROM Organization LIMIT 1];
+                Organization org = [SELECT Id, Name FROM Organization WITH USER_MODE LIMIT 1];
                 if (org != null && String.isNotBlank(org.Name)) {
                     orgName = org.Name.replaceAll('[^a-zA-Z0-9]', '_').replaceAll('_+', '_').replaceAll('^_|_$', '');
                 }
@@ -290,10 +290,10 @@ public with sharing class ImageAndMediaController {
     @AuraEnabled
     public static void deleteFiles(String contentVersionRecId){ 
         try {
-            List<ContentVersion> cvList = [SELECT Id, ContentDocumentId FROM ContentVersion WHERE Id =: contentVersionRecId WITH USER_MODE];
+            List<ContentVersion> cvList = [SELECT Id, ContentDocumentId FROM ContentVersion WHERE Id =: contentVersionRecId WITH USER_MODE LIMIT 1];
 
             if (!cvList.isEmpty()) {
-                List<ContentDocument> cdList = [SELECT Id FROM ContentDocument WHERE Id =: cvList[0].ContentDocumentId WITH USER_MODE];
+                List<ContentDocument> cdList = [SELECT Id FROM ContentDocument WHERE Id =: cvList[0].ContentDocumentId WITH USER_MODE LIMIT 1];
 
                 if (!cdList.isEmpty()) {
                     delete as user cdList;
@@ -314,7 +314,8 @@ public with sharing class ImageAndMediaController {
     @AuraEnabled
     public static List<ContentVersion> getContentVersionData(){
         try {
-            List<ContentVersion> cvList = [SELECT Id, ContentSize, Title, FileType, VersionDataUrl FROM ContentVersion WHERE ExternalDocumentInfo1 = 'watermark3112' WITH USER_MODE];
+            List<ContentVersion> cvList = [SELECT Id, ContentSize, Title, FileType, VersionDataUrl FROM ContentVersion WHERE ExternalDocumentInfo1 = 'watermark3112' 
+                                            WITH USER_MODE LIMIT 1];
 
             if (!cvList.isEmpty()) {
                 return cvList;

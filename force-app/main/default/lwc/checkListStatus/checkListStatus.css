@@ -1,6 +1,5 @@
 * {
     font-family: 'Mulish';
-    user-select: none;
 }
 
 /* ── Outer wrapper ─────────────────────────────────────── */
@@ -313,9 +312,4 @@
     .header {
         gap: 10px;
     }
-}
-
-.buttons .blue-btn-css {
-    height: 34px;
-    min-height: 34px;
 }

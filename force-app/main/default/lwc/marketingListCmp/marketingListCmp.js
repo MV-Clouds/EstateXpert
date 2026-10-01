@@ -1,7 +1,7 @@
 import { LightningElement, track, api } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
-import designcss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import getContactData from '@salesforce/apex/MarketingListCmpController.getContactData';
 import { NavigationMixin } from 'lightning/navigation';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -41,7 +41,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track isPrevDisabled = true;
     @track isNextDisabled = false;
     @track pageNumber = 1;
-    @track pageSize = 30;
+    @track pageSize = 20;
     @track shownProcessedContactData = [];
     @track selectedContactList = [];
     @track isContactSelected = true;
@@ -75,14 +75,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     get totalPages() {
         return Math.ceil(this.totalItems / this.pageSize);
-    }
-
-    /**
-    * Method Name : showPagination
-    * @description : show the pagination only if totalpages are greater than 1.
-    */
-    get showPagination() {
-        return this.totalPages > 1;
     }
 
     /**
@@ -122,7 +114,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     * Created By:Vyom Soni
     */
     get startIndex() {
-        return (this.currentPage - 1) * this.pageSize + 1;
+        return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
     }
 
     /**
@@ -135,11 +127,23 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         return Math.min(this.currentPage * this.pageSize, this.totalItems);
     }
 
-     /**
-    * Method Name : filterIconColor
-    * @description : Return filter icon color based on active state.
-    * Black when closed (wrapOn = true), White when open (wrapOn = false)
+    /**
+    * Method Name : recordCountInfo
+    * @description : returns formatted records count info for footer display
     */
+    get recordCountInfo() {
+        const selected = this.totalSelected || 0;
+        if (this.totalItems === 0) {
+            return `Showing 0 records`;
+        }
+        return `Showing ${this.startIndex} - ${this.endIndex} of ${this.totalItems}`;
+    }
+
+    /**
+   * Method Name : filterIconColor
+   * @description : Return filter icon color based on active state.
+   * Black when closed (wrapOn = true), White when open (wrapOn = false)
+   */
     get filterIconColor() {
         return this.wrapOn ? '#000000' : '#ffffff';
     }
@@ -164,7 +168,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     pages.push({
                         number: i,
                         isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
                     });
                 }
             } else {
@@ -172,7 +176,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 pages.push({
                     number: 1,
                     isEllipsis: false,
-                    className: `pagination-button ${currentPage === 1 ? 'active' : ''}`
+                    className: `exp-pagination-button ${currentPage === 1 ? 'active' : ''}`
                 });
 
                 if (currentPage > 3) {
@@ -188,7 +192,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     pages.push({
                         number: i,
                         isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
                     });
                 }
 
@@ -201,13 +205,13 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 pages.push({
                     number: totalPages,
                     isEllipsis: false,
-                    className: `pagination-button ${currentPage === totalPages ? 'active' : ''}`
+                    className: `exp-pagination-button ${currentPage === totalPages ? 'active' : ''}`
                 });
             }
 
             return pages;
         } catch (error) {
-            console.log('Error pageNumbers->' + error);
+            console.error('Error pageNumbers->' + error);
             return null;
         }
     }
@@ -337,13 +341,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     connectedCallback() {
         this.screenWidth = window?.globalThis?.innerWidth;
         window?.globalThis?.addEventListener('resize', this.handleResize);
-        loadStyle(this, designcss)
-            .then(() => {
-                console.log('Styles loaded successfully');
-            })
-            .catch(error => {
-                console.error('Error loading styles', error);
-            });
+        loadStyle(this, globalStyles);
         this.handleSubscribeRefresh();
         this.getContactDataMethod();
     }
@@ -361,10 +359,9 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     handleSubscribeRefresh() {
         const messageCallback = (response) => {
-            console.log('RefreshEvent received in marketingListCmp:', response);
             const payload = response?.data?.payload;
             const featureName = payload?.MVEX__Feature_Name__c || payload?.Feature_Name__c;
-            
+
             // Verify feature name before doing any operation
             if (featureName && (featureName.toLowerCase() === 'marketing_list' || featureName.toLowerCase() === 'marketing_list_fields')) {
                 this.handleRealtimeRefresh();
@@ -500,7 +497,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 this.isSortApplied = true;
             }
         } catch (error) {
-            console.log('Error renderedCallback->' + error);
+            console.error('Error renderedCallback->' + error);
         }
     }
 
@@ -529,7 +526,6 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         return getContactData()
             .then(result => {
                 this.contactData = result.contacts;
-                this.pageSize = result.pageSize;
                 this.fields = result.selectedFields.map(field => ({
                     fieldLabel: field.label,
                     fieldName: field.fieldApiname,
@@ -554,7 +550,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     this.spinnerShow = false;
                     this.showToast('Error', error.body?.message || 'An unknown error occurred', 'error');
                 }
-                console.log('error in getContactData -> ' + JSON.stringify(error, null, 2));
+                console.error('error in getContactData -> ' + JSON.stringify(error, null, 2));
                 throw error;
             })
             .finally(() => {
@@ -669,7 +665,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 this.spinnerShow = false;
             }
         } catch (error) {
-            console.log('Error processContacts->' + error);
+            console.error('Error processContacts->' + error);
         }
     }
 
@@ -746,7 +742,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
             this.shownProcessedContactData = this.processedContactData.slice(startIndex, endIndex);
         } catch (error) {
-            console.log('Error updateShownData->' + error);
+            console.error('Error updateShownData->' + error);
         }
     }
 
@@ -796,6 +792,33 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
         }
     }
 
+    /**
+    * Method Name : pageSizeOptions
+    * @description : returns dropdown options for rows per page from 10 to 100
+    */
+    get pageSizeOptions() {
+        const sizes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+        return sizes.map(size => ({
+            label: String(size),
+            value: size,
+            isSelected: this.pageSize === size
+        }));
+    }
+
+    /**
+    * Method Name : handlePageSizeChange
+    * @description : handle change in records per page from dropdown selection
+    */
+    handlePageSizeChange(event) {
+        const value = parseInt(event.target.value, 10);
+        if (!isNaN(value) && this.pageSize !== value) {
+            this.pageSize = value;
+            this.currentPage = 1;
+            this.updateShownData();
+            this.scrollToTop();
+        }
+    }
+
 
     /**
     * Method Name : handleFilteredContacts
@@ -828,7 +851,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
                 // Reset all icons to remove rotation classes
                 const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-                allHeaders.forEach(icon => icon.classList.remove('rotate-asc', 'rotate-desc'));
+                allHeaders.forEach(icon => icon.classList.remove('exp-rotate-asc', 'exp-rotate-desc'));
                 this.isSortApplied = false;
             }
 
@@ -887,7 +910,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
                 // Reset all icons to remove rotation classes
                 const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-                allHeaders.forEach(icon => icon.classList.remove('rotate-asc', 'rotate-desc'));
+                allHeaders.forEach(icon => icon.classList.remove('exp-rotate-asc', 'exp-rotate-desc'));
 
                 // Deselect all items in processedListingData and unchangedProcessListings
                 const resetCheckedFlag = item => ({ ...item, isChecked: false });
@@ -901,7 +924,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 this.updateSelectedProperties();
             }
         } catch (error) {
-            console.log('Error -> handleFilteredListings' + error);
+            console.error('Error -> handleFilteredListings' + error);
         }
     }
 
@@ -924,7 +947,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             this.selectedContactList = this.processedContactData.filter(item => item.isChecked == true);
             this.isContactSelected = this.selectedContactList.length <= 0;
         } catch (error) {
-            console.log('Error handleContactSelect->' + error);
+            console.error('Error handleContactSelect->' + error);
         }
     }
 
@@ -960,7 +983,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 });
             }
         } catch (error) {
-            console.log('Error redirectToRecord->' + error);
+            console.error('Error redirectToRecord->' + error);
         }
     }
 
@@ -996,7 +1019,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             })
             this.updateSelectedProperties();
         } catch (e) {
-            console.log('Error checkCoxValueChange ->' + e);
+            console.error('Error checkCoxValueChange ->' + e);
         }
     }
 
@@ -1013,7 +1036,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             this.sortOrder = 'asc';
             const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
             allHeaders.forEach(icon => {
-                icon.classList.remove('rotate-asc', 'rotate-desc');
+                icon.classList.remove('exp-rotate-asc', 'exp-rotate-desc');
             });
             this.processedContactData = this.processedContactData.map(item => {
                 return { ...item, isChecked: isChecked };
@@ -1034,18 +1057,18 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             this.updateShownData();
             this.updateSelectedProperties();
         } catch (error) {
-            console.log('Error selectAllCheckbox->' + error);
+            console.error('Error selectAllCheckbox->' + error);
         }
     }
 
 
     /**
-    * Method Name : goTOContactPage
+    * Method Name : navigatetoContactPage
     * @description : Open Modal for new contact form
     * Date: 18/07/2024
     * Created By:Vyom Soni
     */
-    goTOContactPage() {
+    navigatetoContactPage() {
         try {
             this[NavigationMixin.Navigate]({
                 type: 'standard__objectPage',
@@ -1058,7 +1081,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 }
             });
         } catch (error) {
-            console.log('Error in goTOContactPage --> ' + error);
+            console.error('Error in navigatetoContactPage --> ' + error);
         }
     }
 
@@ -1114,7 +1137,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             this.updateSortIcons();
             this.updateShownData();
         } catch (error) {
-            console.log('Error sortClick->' + error);
+            console.error('Error sortClick->' + error);
         }
     }
 
@@ -1175,61 +1198,38 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 return this.sortOrder === 'asc' ? compare : -compare;
             });
         } catch (error) {
-            console.log('Error sortData->' + error);
+            console.error('Error sortData->' + error);
         }
 
     }
 
-
-    /**
-    * Method Name : updateSortIcons
-    * @description : this method update the sort icons in the wrapbutton
-    * Date: 22/06/2024
-    * Created By:Vyom Soni
-    */
-    // updateSortIcons() {
-    //     try {
-    //         const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-    //         allHeaders.forEach(icon => {
-    //             icon.classList.remove('rotate-asc', 'rotate-desc');
-    //         });
-
-    //         const currentHeader = this.template.querySelector('[data-index="' + this.sortField + '"]');
-    //         if (currentHeader) {
-    //             currentHeader.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
-    //         }
-    //     } catch (error) {
-    //         console.log('Error updateSprtIcons->' + error);
-    //     }
-    // }
-
     updateSortIcons() {
         try {
             // Remove icon rotation
-            const allIcons = this.template.querySelectorAll('.table-content .slds-icon-utility-arrowdown svg');
+            const allIcons = this.template.querySelectorAll('.exp-table-content .slds-icon-utility-arrowdown svg');
             allIcons.forEach(icon => {
-                icon.classList.remove('rotate-asc', 'rotate-desc');
+                icon.classList.remove('exp-rotate-asc', 'exp-rotate-desc');
             });
 
             // Remove active class from all headers
-            const allHeaders = this.template.querySelectorAll('.table-content .sorting_header');
+            const allHeaders = this.template.querySelectorAll('.exp-table-content .exp-sorting-header');
             allHeaders.forEach(header => {
                 header.classList.remove('active-sort');
             });
 
             // Set active header
-            const currentHeader = this.template.querySelector('.table-content [data-id="' + this.sortField + '"]');
+            const currentHeader = this.template.querySelector('.exp-table-content [data-id="' + this.sortField + '"]');
             if (currentHeader) {
                 currentHeader.classList.add('active-sort');
 
                 const icon = currentHeader.querySelector('svg');
                 if (icon) {
-                    icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                    icon.classList.add(this.sortOrder === 'asc' ? 'exp-rotate-asc' : 'exp-rotate-desc');
                 }
             }
 
         } catch (error) {
-            console.log('Error in updateSortIcons --> ' + error);
+            console.error('Error in updateSortIcons --> ' + error);
         }
     }
 
@@ -1241,12 +1241,12 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     scrollToTop() {
         try {
-            const tableDiv = this.template.querySelector('.table-content');
+            const tableDiv = this.template.querySelector('.exp-table-content');
             if (tableDiv) {
                 tableDiv.scrollTop = 0;
             }
         } catch (error) {
-            console.log('Error scrollToTop->' + error);
+            console.error('Error scrollToTop->' + error);
         }
     }
 
@@ -1278,15 +1278,15 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     wrapFilter() {
         try {
             const toggleBtn = this.template.querySelector('.filter-toggle-btn');
-            const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
-            const div1 = this.template.querySelector('.innerDiv1');
-            const div2 = this.template.querySelector('.innerDiv2');
+            const filterDiv = this.template.querySelector('.inner-div-1 .filter-div');
+            const div1 = this.template.querySelector('.inner-div-1');
+            const div2 = this.template.querySelector('.inner-div-2');
 
             if (this.wrapOn) {
                 // Currently hidden, show filter
                 toggleBtn.classList.add('active'); // Blue when filter showing
-                filterDiv.classList.remove('removeInnerDiv1');
-                div1.classList.remove('removeInnerDiv1');
+                filterDiv.classList.remove('remove-inner-div-1');
+                div1.classList.remove('remove-inner-div-1');
 
                 if (this.screenWidth >= 900) {
                     div1.style.width = '22%';
@@ -1314,12 +1314,12 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     // Hide filter content and remove margin after animation starts
                     setTimeout(() => {
                         if (this.wrapOn) {
-                            filterDiv.classList.add('removeInnerDiv1');
-                            div1.classList.add('removeInnerDiv1');
+                            filterDiv.classList.add('remove-inner-div-1');
+                            div1.classList.add('remove-inner-div-1');
                         }
                     }, 150);
                 } else {
-                    filterDiv.classList.add('removeInnerDiv1');
+                    filterDiv.classList.add('remove-inner-div-1');
                     div1.style.height = '0';
                     div1.style.opacity = '0';
                     div1.style.width = '100%';
@@ -1338,7 +1338,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             if (this.wrapOn) {
                 this.wrapFilter();
             } else {
-                const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
+                const filterDiv = this.template.querySelector('.inner-div-1 .filter-div');
                 if (filterDiv) {
                     filterDiv.classList.add('highlight-filter-panel');
                     setTimeout(() => {
@@ -1361,7 +1361,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                 },
             });
         } catch (error) {
-            console.log('error--> ', error);
+            console.error('error in backToControlCenter --> ', error);
         }
     }
 

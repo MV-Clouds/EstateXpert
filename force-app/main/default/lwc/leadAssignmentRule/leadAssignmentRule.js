@@ -1,7 +1,7 @@
 import { LightningElement, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import getLeadAssignmentInitData from '@salesforce/apex/ControlCenterController.getLeadAssignmentInitData';
 import manageRule from '@salesforce/apex/ControlCenterController.manageRule';
 import getRecordNames from '@salesforce/apex/ControlCenterController.getRecordNames';
@@ -94,7 +94,7 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
 
     connectedCallback() {
         this.isLoading = true;
-        loadStyle(this, MulishFontCss);
+        loadStyle(this, globalStyles);
 
         // Load email notification toggle state
         getEmailNotificationEnabled()
@@ -107,8 +107,6 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
 
         getLeadAssignmentInitData({ objectName: 'Contact' })
             .then(data => {
-                console.log('Initialization data received:', data);
-
                 this.fieldOptions = data.objectFields
                     .filter(field => !['ID', 'ADDRESS'].includes(field.dataType))
                     .map(field => ({
@@ -184,6 +182,7 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
                 logicalExpression: rule.MVEX__Logical_Expression__c || '',
                 displayLogicalExpression: rule.MVEX__Logical_Expression__c || 'All conditions must be true (AND)',
                 showConditions: false,
+                conditionsBlockClass: 'conditions-block',
                 visibleIconName: 'utility:chevronright'
             });
         });
@@ -813,6 +812,7 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
                     displayUserName: this.currentRule.displayUserName || 'Select User',
                     displayLogicalExpression: this.currentRule.logicalExpression || 'All conditions must be true (AND)',
                     showConditions: false,
+                    conditionsBlockClass: 'conditions-block',
                     visibleIconName: 'utility:chevronright'
                 };
 
@@ -1040,16 +1040,15 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
 
     toggleConditions(event) {
         const index = parseInt(event.currentTarget.dataset.index, 10);
+        const isAlreadyOpen = this.userGroups[index]?.showConditions;
         this.userGroups = this.userGroups.map((group, gIndex) => {
-            if (gIndex === index) {
-                const show = !group.showConditions;
-                return {
-                    ...group,
-                    showConditions: show,
-                    visibleIconName: show ? 'utility:chevrondown' : 'utility:chevronright'
-                };
-            }
-            return group;
+            const show = gIndex === index ? !isAlreadyOpen : false;
+            return {
+                ...group,
+                showConditions: show,
+                conditionsBlockClass: show ? 'conditions-block is-open' : 'conditions-block',
+                visibleIconName: show ? 'utility:chevrondown' : 'utility:chevronright'
+            };
         });
         this.userGroups = [...this.userGroups];
     }

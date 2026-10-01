@@ -1,7 +1,7 @@
 import { LightningElement, api, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { refreshApex } from '@salesforce/apex';
-import getOfferTimeline from '@salesforce/apex/ShowOffersDetailController.getOfferTimeline';
+import getOfferTimeline from '@salesforce/apex/CreateOfferFromListingController.getOfferTimeline';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import USER_CURRENCY from '@salesforce/i18n/currency';

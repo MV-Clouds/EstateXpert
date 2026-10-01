@@ -8,8 +8,8 @@ import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import getObjectName from '@salesforce/apex/PropertySearchController.getObjectName';
 import { errorDebugger } from 'c/globalProperties';
-import getObjectFields from '@salesforce/apex/RecordManagersCmpController.getObjectFields';
-import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappings';
+import getObjectFields from '@salesforce/apex/PropertySearchController.getObjectFieldsByFeature';
+import saveMappings from '@salesforce/apex/PropertySearchController.saveMappings';
 import getRecordName from '@salesforce/apex/PropertySearchController.getRecordName';
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
@@ -1210,8 +1210,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
         getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
             .then(result => {
-                console.log('fetchListings result:', result);
-
                 // Store reference name mappings from Apex
                 if (result.referenceNameMappings) {
                     this.referenceNameMappings = result.referenceNameMappings;
@@ -1681,8 +1679,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
                 getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
                     .then(result => {
-                        console.log('Linked filter result:', result);
-
                         if (this.objectName === 'MVEX__Listing__c') {
                             if (result.inquiries && result.inquiries.length > 0) {
                                 this.totalinquiry = this.convertKeysToLowercase(result.inquiries);
@@ -1720,8 +1716,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
                 getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
                     .then(result => {
-                        console.log('Related filter result:', result);
-
                         if (this.objectName === 'MVEX__Listing__c') {
                             if (result.inquiries && result.inquiries.length > 0) {
                                 this.totalinquiry = this.convertKeysToLowercase(result.inquiries);
@@ -2183,8 +2177,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                                 relationshipName: field.relationshipName
                             }));
                         this.pageSize = parseInt(result.metadataRecords[1], 10) || this.pageSize;
-                        console.log('this.inquiryColumns', JSON.stringify(this.inquiryColumns));
-
                     } catch (e) {
                         this.inquiryColumns = this.defaultColumns;
                     }
@@ -2354,16 +2346,16 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
                 // Find the sort icon within this header
                 // Updated selector to match our new HTML structure
-                const icon = currentHeader.querySelector('.listing-manager-icon');
+                const icon = currentHeader.querySelector('.exp-arrow-icon');
                 if (icon) {
                     // Remove existing rotation classes
-                    icon.classList.remove('rotate-asc', 'rotate-desc');
+                    icon.classList.remove('exp-rotate-asc', 'exp-rotate-desc');
 
                     // Add appropriate rotation class based on sort order
                     if (this.sortOrder === 'asc') {
-                        icon.classList.add('rotate-asc');
+                        icon.classList.add('exp-rotate-asc');
                     } else {
-                        icon.classList.add('rotate-desc');
+                        icon.classList.add('exp-rotate-desc');
                     }
                     // Force inline visibility to ensure it shows in popup headers
                     try {
@@ -2402,7 +2394,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     handleSubscribeRefresh() {
         const messageCallback = (response) => {
-            console.log('RefreshEvent received in displayInquiry:', response);
             const payload = response?.data?.payload;
             const featureName = payload?.MVEX__Feature_Name__c || payload?.Feature_Name__c;
 

@@ -76,7 +76,7 @@ public with sharing class SupportEmailService implements Messaging.InboundEmailH
                 supportCase.MVEX__Priority__c = priorityVal;
                 insert as user supportCase;
 
-                SendEmailToCustomer.sendAcknowledgmentEmail(supportCase);
+                sendAcknowledgmentEmail(supportCase);
         
                 List<ContentVersion> contentVersions = new List<ContentVersion>();
                 List<ContentDocumentLink> contentLinks = new List<ContentDocumentLink>();
@@ -121,7 +121,7 @@ public with sharing class SupportEmailService implements Messaging.InboundEmailH
                         }
                     }
 
-                    SendEmailToCustomer.sendAcknowledgmentEmail(supportList[0]);
+                    sendAcknowledgmentEmail(supportList[0]);
                 } else {
 
                     Map<String, Map<String, String>> supportEmailInfoMap = new Map<String, Map<String, String>>();
@@ -306,6 +306,32 @@ public with sharing class SupportEmailService implements Messaging.InboundEmailH
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'ReplyEmailService', 'createCaseEmailMessage', 'Error while creating Case Email Message');
+        }
+    }
+
+    public static void sendAcknowledgmentEmail(MVEX__Support_Case__c supportCase) {
+        try {
+            if (supportCase.MVEX__Email__c != null) {
+                Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+                email.setToAddresses(new String[] {supportCase.MVEX__Email__c});
+                email.setSubject('Acknowledgment of Your Support Request - Ticket ID ' + supportCase.Id);
+                
+                String emailBody = 'Dear ' + supportCase.MVEX__Name__c + ',\n\n'
+                    + 'Thank you for reaching out to us. Your support request has been successfully received. Below are the details:\n\n'
+                    + 'Ticket ID: ' + supportCase.Id + '\n'
+                    + 'Subject: ' + supportCase.MVEX__Subject__c + '\n'
+                    + 'Priority: ' + supportCase.MVEX__Priority__c + '\n'
+                    + 'Description: ' + supportCase.MVEX__Description__c + '\n\n'
+                    + 'Our support team will review your request and contact you shortly.\n\n'
+                    + 'Thank you for your patience and for giving us the opportunity to assist you.\n\n'
+                    + 'Best Regards,\n'
+                    + 'The Support Team';
+                
+                email.setPlainTextBody(emailBody);
+                Messaging.sendEmail(new Messaging.SingleEmailMessage[] {email});
+            }
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'SupportEmailService', 'sendAcknowledgmentEmail', 'Error while sending acknowledgment email.');
         }
     }
 }

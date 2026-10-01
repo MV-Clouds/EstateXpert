@@ -483,19 +483,132 @@ public with sharing class PropertySearchController {
         }
     }
 
+    public class RecordManagerData {
+        @AuraEnabled public List<FieldDetails> fieldDetailsList;
+        @AuraEnabled public List<String> metadataRecords;
+    }
+    
+    public class FieldInfoWrapper {
+        @AuraEnabled public String value;
+        @AuraEnabled public String label;
+    }
+
     /**
-     * @description       : This method checks if Business Account ID is configured in custom metadata
-     * @last modified on  : 03-02-2026
-     **/
+     * Method Name : getObjectFields
+     * @description : Get object fields and fetch configuration from Custom Object.
+     */
     @AuraEnabled
-    public static Boolean hasBusinessAccountId() {
+    public static RecordManagerData getObjectFieldsByFeature(String objectApiName, String featureName) {
         try {
-            MVEX__WhatsAppConfig__c config = MVEX__WhatsAppConfig__c.getOrgDefaults();
-            return config != null && String.isNotBlank(config.MVEX__Whatsapp_Business_Account_Id__c);
+            RecordManagerData recordData = new RecordManagerData();
+            List<FieldDetails> fieldDetailsList = new List<FieldDetails>();
+
+            // 1. Get Schema Details
+            Schema.DescribeSObjectResult objDescribe = Schema.getGlobalDescribe().get(objectApiName).getDescribe();
+            Map<String, Schema.SObjectField> fieldsMap = objDescribe.fields.getMap();
+
+            for (String fieldName : fieldsMap.keySet()) {
+                Schema.SObjectField field = fieldsMap.get(fieldName);
+                Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
+                Schema.DisplayType fieldType = fieldDescribe.getType();
+
+                FieldDetails fieldDetails = new FieldDetails();
+                fieldDetails.label = fieldDescribe.getLabel();
+                fieldDetails.value = fieldDescribe.getName();
+                fieldDetails.fieldType = String.valueOf(fieldType);
+
+                if (fieldType == Schema.DisplayType.Reference) {
+                    List<Schema.SObjectType> referenceTo = fieldDescribe.getReferenceTo();
+                    if (!referenceTo.isEmpty()) {
+                        fieldDetails.referenceObjectName = referenceTo[0].getDescribe().getName();
+                    }
+                    fieldDetails.relationshipName = fieldDescribe.getRelationshipName();
+                } else {
+                    fieldDetails.referenceObjectName = objectApiName;
+                }
+
+                if (fieldType == Schema.DisplayType.Picklist) {
+                    List<PicklistValue> picklistValues = new List<PicklistValue>();
+                    for (Schema.PicklistEntry picklistEntry : fieldDescribe.getPicklistValues()) {
+                        PicklistValue picklistValue = new PicklistValue();
+                        picklistValue.label = picklistEntry.getLabel();
+                        picklistValue.value = picklistEntry.getValue();
+                        picklistValues.add(picklistValue);
+                    }
+                    fieldDetails.picklistValues = picklistValues;
+                }
+
+                fieldDetailsList.add(fieldDetails);
+            }
+            recordData.fieldDetailsList = fieldDetailsList;
+
+            // 2. Fetch Configuration from Custom Object
+            List<String> configValues = new List<String>();
+            
+            // Query the generic Custom Object
+            List<MVEX__Configuration_Settings__c> settings = [SELECT MVEX__Fields_Data__c, MVEX__Page_Size__c FROM MVEX__Configuration_Settings__c 
+                                                                WHERE MVEX__Feature_Name__c = :featureName WITH USER_MODE LIMIT 1];
+
+            if (!settings.isEmpty()) {
+                MVEX__Configuration_Settings__c setting = settings[0];
+                configValues.add(setting.MVEX__Fields_Data__c);
+                configValues.add(String.valueOf(setting.MVEX__Page_Size__c));
+            }
+
+            recordData.metadataRecords = configValues;
+
+            return recordData;
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'PropertySearchController', 'hasBusinessAccountId', 'Error while checking business account ID.');
-            return false;
+            ErrorHandler.insertErrorData(e, 'PropertySearchController', 'getObjectFields', e.getMessage());
+            return null;
         }
     }
 
+    public class FieldDetails {
+        @AuraEnabled public String label { get; set; }
+        @AuraEnabled public String value { get; set; }
+        @AuraEnabled public String fieldType { get; set; }
+        @AuraEnabled public String referenceObjectName { get; set; }
+        @AuraEnabled public String relationshipName { get; set; }
+        @AuraEnabled public List<PicklistValue> picklistValues { get; set; }
+    }
+
+    public class PicklistValue {
+        @AuraEnabled public String label { get; set; }
+        @AuraEnabled public String value { get; set; }
+    }
+
+    /**
+     * Method Name : saveMappings
+     * @description : Save mappings using standard DML on Custom Object (No Metadata Deploy needed).
+     */
+    @AuraEnabled
+    public static String saveMappings(String checklistData, String objectApiName, String featureName) {
+        try {
+            // Check if record exists
+            List<MVEX__Configuration_Settings__c> settingsList = [SELECT Id FROM MVEX__Configuration_Settings__c WHERE MVEX__Feature_Name__c = :featureName
+                                                                    WITH USER_MODE LIMIT 1];
+
+            MVEX__Configuration_Settings__c settingToSave;
+
+            if (!settingsList.isEmpty()) {
+                settingToSave = settingsList[0];
+            } else {
+                settingToSave = new MVEX__Configuration_Settings__c();
+                settingToSave.MVEX__Object_API_Name__c = objectApiName;
+                settingToSave.MVEX__Feature_Name__c = featureName;
+                settingToSave.Name = featureName + '_' + objectApiName; 
+            }
+
+            settingToSave.MVEX__Fields_Data__c = checklistData;
+
+            upsert settingToSave;
+
+            return 'Success';
+
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'PropertySearchController', 'saveMappings', e.getStackTraceString());
+            return e.getMessage();
+        }
+    }
 }

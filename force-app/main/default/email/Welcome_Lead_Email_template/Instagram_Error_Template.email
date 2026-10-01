@@ -1,0 +1,58 @@
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Verdana';
+      }
+      table {
+        border-spacing: 0;
+        width: 100%;
+      }
+      td {
+        padding: 0;
+      }
+      .container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .content {
+        padding: 10px;
+        font-size: 16px;
+        color: #333333;
+      }
+      .content p {
+        margin-bottom: 15px;
+      }
+      .content .error-details {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-left: 4px solid red;
+        border-radius: 4px;
+      }
+      .content img {
+        max-width: 100%; /* Ensure image is responsive */
+        height: auto; /* Maintain aspect ratio */
+        margin-bottom: 15px; /* Space below the image */
+      }
+    </style>
+  </head>
+  <body>
+    <table class="container">
+      <tr>
+        <td class="content">
+    <p>Dear User,</p>
+          <p>We encountered an issue while processing your Instagram post.</p>
+          <p><strong>Error Details:</strong></p>
+          <div class="error-details">
+            {!errorDetails}
+          </div>
+          <p>Please review the error and try again. If the issue persists, contact your Salesforce administrator for assistance.</p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

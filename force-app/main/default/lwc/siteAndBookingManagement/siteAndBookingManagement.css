@@ -78,7 +78,7 @@
 /* ================================
 == TABLE CONTAINER
 ================================ */
-.table-content {
+.exp-table-content {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-radius: 8px;
     margin-top: 1rem;
@@ -410,7 +410,7 @@
     border-radius: 4px;
 }
 
-.table-content .slds-table_resizable-cols thead th{
+.exp-table-content .slds-table_resizable-cols thead th{
     width: 11rem;
 }
 
@@ -421,13 +421,4 @@
     .modal-preview-area {
         border-left: none !important;
     }
-}
-
-.header-actions .blue-btn-css {
-    height: 34px;
-    min-height: 34px;
-}
-
-.exp-no-data-container{
-    margin-top: 3rem;
 }

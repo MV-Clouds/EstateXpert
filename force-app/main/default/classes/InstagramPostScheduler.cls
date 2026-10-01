@@ -86,10 +86,6 @@ public class InstagramPostScheduler implements Schedulable {
                 Http http2 = new Http();
                 HttpResponse res = http2.send(req);
 
-                if(res.getStatusCode() == 200) {
-                    System.debug('Files successfully deleted' + res.getBody());
-                }
-
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'InstagramPostScheduler', 'publishPost', 'Error while publishing post.');

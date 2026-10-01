@@ -84,16 +84,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     }
 
     /**
-     * Method Name: showRightSidebar
-     * @description: Getter to check if the right sidebar should be displayed based on form factor
-     * Date: 23/09/2026
-     * Created By: Vyom Soni
-     */
-    get showRightSidebar() {
-        return FORM_FACTOR === 'Large';
-    }
-
-    /**
      * Method Name: isMapFieldsComponent
      * @description: Checks if MapFields component is selected
      * Date: 23/09/2026
@@ -150,16 +140,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      */
     get isPortalMappingLandingPageComponent() {
         return this.selectedComponent === 'portalMappingLandingPage';
-    }
-
-    /**
-     * Method Name: isGoogleLeadFieldMappingComponent
-     * @description: Checks if GoogleLeadFieldMapping component is selected
-     * Date: 23/09/2026
-     * Created By: Vyom Soni
-     */
-    get isGoogleLeadFieldMappingComponent() {
-        return this.selectedComponent === 'googleLeadFieldMapping';
     }
 
     /**
@@ -247,7 +227,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         } catch (e) {
-            console.log('Error in goToControlCenter:', e);
+            console.error('Error in goToControlCenter:', e.stack);
         }
     }
 
@@ -258,25 +238,16 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Created By: Karan Singh
      */
     goToParentComponent() {
-        // Go back to parent component (one level up)
         if (this.parentComponentTitle === 'Portal Integration') {
             this.selectedComponent = 'portalMapping';
             this.selectedComponentTitle = 'Portal Integration';
             this.selectedComponentDescription = 'Connect and manage your portal integrations';
             this.parentComponentTitle = '';
-            // Clear portal state
             this.portalId = null;
             this.portalGen = null;
             this.portalName = null;
             this.portalIconUrl = null;
             this.portalStatus = null;
-        } else if (this.parentComponentTitle === 'Lead Capture') {
-            this.selectedComponent = 'leadCaptureCmp';
-            this.selectedComponentTitle = 'Lead Capture';
-            this.selectedComponentDescription = 'The "Lead Capture" integrates with Meta Ads and Google Ads to automatically capture leads from your advertising accounts directly into Salesforce. Configure custom field mapping to ensure lead data flows seamlessly into your CRM for immediate follow-up.';
-            this.parentComponentTitle = '';
-            // Clear lead capture state
-            this.integrationType = null;
         }
     }
 

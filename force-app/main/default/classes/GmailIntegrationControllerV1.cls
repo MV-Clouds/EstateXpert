@@ -5,7 +5,6 @@ public with sharing class GmailIntegrationControllerV1 {
     public String errorMessage { get; set; }
     public static String gmailEndpoint = System.label.Google_Endpoint;
     public static String gmailSendingEndpoint = System.label.Gmail_Sending_Endpoint;
-    @TestVisible public static List<MVEX__recordManagerConfig__mdt> mockMetadata = null;
 
         
     public GmailIntegrationControllerV1() {
@@ -24,15 +23,14 @@ public with sharing class GmailIntegrationControllerV1 {
             String clientId = '';
             String clientSecret = '';
             String redirectUrl = '';
+            String tokenUrl = '';
             
-            List<MVEX__recordManagerConfig__mdt> mdtList = mockMetadata != null ? mockMetadata : [SELECT MVEX__FieldsData__c FROM MVEX__recordManagerConfig__mdt where DeveloperName = 'RecordConfig'  LIMIT 1];
-            if(!mdtList.isEmpty() && mdtList[0].MVEX__FieldsData__c != null) {
-                String[] parts = mdtList[0].MVEX__FieldsData__c.split(';');
-                if(parts.size() >= 3) {
-                    clientId = parts[0];
-                    clientSecret = parts[1];
-                    redirectUrl = parts[2];
-                }
+            List<OAuth_Configuration__mdt> mdtList = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Gmail_OAuth' WITH USER_MODE LIMIT 1];
+            if(!mdtList.isEmpty()) {
+                clientId = mdtList[0].Client_Id__c;
+                clientSecret = mdtList[0].Client_Secret__c;
+                redirectUrl = mdtList[0].Redirect_URI__c;
+                tokenUrl = mdtList[0].Token_Endpoint__c;
             }
 
             if(String.isBlank(clientId) || String.isBlank(clientSecret) || String.isBlank(redirectUrl)){
@@ -41,10 +39,8 @@ public with sharing class GmailIntegrationControllerV1 {
                 return;
             }
             
-            String endPoint = gmailEndpoint + 'token';
-            
             HttpRequest req = new HttpRequest();
-            req.setEndpoint(endPoint);
+            req.setEndpoint(tokenUrl);
             req.setMethod('POST');
             req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
             req.setBody('code=' + authCode +

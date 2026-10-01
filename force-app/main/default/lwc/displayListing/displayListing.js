@@ -3,13 +3,12 @@ import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import getRecords from '@salesforce/apex/PropertySearchController.getRecords';
 import NoImageFound from '@salesforce/resourceUrl/blankImage';
 import propertyIcons from '@salesforce/resourceUrl/PropertyIcons';
-import location_icon from '@salesforce/resourceUrl/location_icon';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getFieldMap from '@salesforce/apex/PropertySearchController.getObjectFields';
-import getConfigObjectFields from '@salesforce/apex/RecordManagersCmpController.getObjectFields';
-import saveMappings from '@salesforce/apex/RecordManagersCmpController.saveMappings';
+import getConfigObjectFields from '@salesforce/apex/PropertySearchController.getObjectFieldsByFeature';
+import saveMappings from '@salesforce/apex/PropertySearchController.saveMappings';
 import { errorDebugger } from 'c/globalProperties';
 import emptyState from '@salesforce/resourceUrl/emptyState';
 import getRecordName from '@salesforce/apex/PropertySearchController.getRecordName';
@@ -30,7 +29,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track pageSize = 9;
     @track bathroom_icon = propertyIcons + '/PropertyIcons/Bathroom.png';
     @track bedroom_icon = propertyIcons + '/PropertyIcons/Bedroom.png';
-    @track location_icon = location_icon;
     @track filteredListingData = [];
     @track pagedFilteredListingData = [];
     @track propertyMediaUrls = [];
@@ -751,7 +749,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             if (!column.sortable) {
                 column.className = 'slds-is-resizable slds-cell_action-mode header-cell slds-truncate image-column';
             } else {
-                column.className = 'slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate sorting_header colume2';
+                column.className = 'slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate exp-sorting-header colume2';
             }
 
             return column;
@@ -1186,7 +1184,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             } else if (this.conditiontype === 'linked') {
                 this.selectedConditionType = 'Linked Listings';
                 this.pagedFilteredListingData = [...this.totalListing];
-                console.log(this.pagedFilteredListingData.length);
 
                 // Show a message if no linked listings found
                 if (this.pagedFilteredListingData.length === 0) {
@@ -1627,9 +1624,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                     totalPages: 0
                 })
                     .then(result => {
-                        if (result === 'Success') {
-                            console.log('Configuration saved successfully');
-                        } else {
+                        if (result !== 'Success') {
                             this.showToast('Error', 'Failed to save configuration: ' + result, 'error');
                         }
                     })
@@ -1705,9 +1700,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
             else if (this.conditiontype === 'related') {
                 this.isLoading = true;
                 const filterType = 'related';
-
-                console.log('fetching related listings');
-
 
                 getRecords({ recId: this.recordId, objectName: this.objectName, filterType: filterType })
                     .then(result => {
@@ -2247,16 +2239,16 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 currentHeader.classList.add('active-sort');
                 // Find the sort icon within this header
                 // Updated selector to match our new HTML structure
-                const icon = currentHeader.querySelector('.listing-manager-icon');
+                const icon = currentHeader.querySelector('.exp-arrow-icon');
                 if (icon) {
                     // Remove existing rotation classes
-                    icon.classList.remove('rotate-asc', 'rotate-desc');
+                    icon.classList.remove('exp-rotate-asc', 'exp-rotate-desc');
 
                     // Add appropriate rotation class based on sort order
                     if (this.sortOrder === 'asc') {
-                        icon.classList.add('rotate-asc');
+                        icon.classList.add('exp-rotate-asc');
                     } else {
-                        icon.classList.add('rotate-desc');
+                        icon.classList.add('exp-rotate-desc');
                     }
                     // Force inline visibility to ensure it shows in popup headers
                     try {

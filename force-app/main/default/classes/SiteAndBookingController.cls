@@ -1,9 +1,5 @@
 public with sharing class SiteAndBookingController {
-    public static MVEX__WhatsAppConfig__c wbConfig = MVEX__WhatsAppConfig__c.getOrgDefaults();
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Helper: get the Record Type Id for "Showing" on Event
-    // ─────────────────────────────────────────────────────────────────────────
     private static Id showingRecordTypeId {
         get {
             if (showingRecordTypeId == null) {
@@ -59,7 +55,7 @@ public with sharing class SiteAndBookingController {
             if (!contactIds.isEmpty()) {
                 List<Event> showingEvents = [SELECT Id, MVEX__Buyer__c, MVEX__Status__c, MVEX__Scheduled_Date__c, MVEX__Reschedule_Date__c, MVEX__Communication_Method__c
                                                 FROM Event WHERE MVEX__Buyer__c IN :contactIds AND MVEX__Listing__c = :escapedListingId AND RecordTypeId = :showingRecordTypeId
-                                                ORDER BY CreatedDate DESC];
+                                                WITH USER_MODE ORDER BY CreatedDate DESC];
                 for (Event ev : showingEvents) {
                     // Keep only the most recent event per buyer
                     if (!contactToEvent.containsKey(ev.MVEX__Buyer__c)) {
@@ -117,13 +113,12 @@ public with sharing class SiteAndBookingController {
             }
             EmailTemplate template = templateList[0];
 
-            System.debug('scheduleDateTime: ' + scheduleDateTime);
             // Create or update showings
             Map<String, Object> showingResult = createShowings(contactIds, listingId, scheduleDateTime, durationValue, communicationMethod);
             List<Id> showingIds = (List<Id>)showingResult.get('showingIds');
 
             // Fetch inserted/updated showings with contact email
-            List<Event> insertedShowings = [SELECT Id, MVEX__Buyer__c, MVEX__Buyer__r.Email FROM Event WHERE Id IN :showingIds];
+            List<Event> insertedShowings = [SELECT Id, MVEX__Buyer__c, MVEX__Buyer__r.Email FROM Event WHERE Id IN :showingIds WITH USER_MODE];
 
             // Prepare emails
             List<Messaging.SingleEmailMessage> emails = new List<Messaging.SingleEmailMessage>();

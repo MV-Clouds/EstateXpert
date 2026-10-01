@@ -173,7 +173,7 @@
                     <!-- Child Component View (for in-place components + portal mapping + lead capture) -->
                     <template if:true={isChildComponentView}>
                         <div class="child-component-container">
-                            <!-- <template if:true={isMapFieldsComponent}>
+                            <template if:true={isMapFieldsComponent}>
                                 <c-map-fields></c-map-fields>
                             </template>
                             <template if:true={isLeadAssignmentRuleComponent}>
@@ -181,12 +181,12 @@
                             </template>
                             <template if:true={isStorageIntegrationComponent}>
                                 <c-storage-integration></c-storage-integration>
-                            </template> -->
+                            </template>
                             <template if:true={isMetaAdsMappingComponent}>
                                 <c-meta-ads-form-mapping
                                     onmvexdeactivated={handleMetaAdsDeactivated}></c-meta-ads-form-mapping>
                             </template>
-                            <!-- <template if:true={isPortalMappingComponent}>
+                            <template if:true={isPortalMappingComponent}>
                                 <c-portal-mapping-component
                                     onportalnavigate={handlePortalNavigation}></c-portal-mapping-component>
                             </template>
@@ -196,62 +196,9 @@
                                     portal-status={portalStatus} is-x-m-l-for-p-f={isXMLForPF}>
                                 </c-portal-mapping-landing-page>
                             </template>
-                            <template if:true={isGoogleLeadFieldMappingComponent}>
-                                <c-google-lead-field-mapping integration-type={integrationType}>
-                                </c-google-lead-field-mapping>
-                            </template> -->
                         </div>
                     </template>
                 </div>
-
-                <template if:true={showRightSidebar}>
-                    <!-- Right Sidebar Info Panel -->
-                    <div class="sidebar-info">
-                        <div class="sidebar-header">
-                            <div class="logo-area">
-                                <div class="logo-circle"></div>
-                                <h2 class="sidebar-title">Control Center</h2>
-                            </div>
-                        </div>
-
-                        <!-- Feature Description while component is open -->
-                        <template if:true={isChildComponentView}>
-                            <div class="feature-description active">
-                                <div class="description-icon">
-                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </div>
-                                <h3 class="description-title">{selectedComponentTitle}</h3>
-                                <p class="description-text">{selectedComponentDescription}</p>
-                            </div>
-                        </template>
-
-                        <!-- Feature Description Area (shown when on control center) -->
-                        <template if:true={isControlCenterView}>
-                            <div class="feature-description">
-                                <div class="description-icon">
-                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                        <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </div>
-                                <h3 class="description-title">Hover over a feature</h3>
-                                <p class="description-text">Hover over any feature card to see detailed information here
-                                </p>
-                            </div>
-                        </template>
-                    </div>
-                </template>
             </div>
         </div>
     </div>

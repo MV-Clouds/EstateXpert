@@ -1,0 +1,51 @@
+<messaging:emailTemplate subject="Welcome to {!$Organization.Name}!" recipientType="Contact">
+    
+    <messaging:htmlEmailBody >
+        <div style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #333333; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+            
+            <h2 style="color: #005290; margin-top: 0;">Welcome to {!$Organization.Name}!</h2>
+            
+            <p>Hi {!recipient.FirstName},</p>
+            
+            <p>Thank you for getting in touch with us. We are thrilled to welcome you and look forward to assisting you.</p>
+            
+            <p>Your dedicated agent, <strong>{!recipient.Owner.Name}</strong>, has been assigned to your profile and is currently reviewing your details. They will be reaching out to you shortly to discuss your specific requirements and next steps.</p>
+            
+            <p>If you have any immediate questions in the meantime, you can reach out to them directly using the contact details below:</p>
+            
+            <ul style="list-style-type: none; padding-left: 0; background-color: #f9f9f9; padding: 15px; border-radius: 4px;">
+                <li style="margin-bottom: 8px;"><strong>Agent:</strong> {!recipient.Owner.Name}</li>
+                <li style="margin-bottom: 8px;"><strong>Email:</strong> <a href="mailto:{!recipient.Owner.Email}" style="color: #005290; text-decoration: none;">{!recipient.Owner.Email}</a></li>
+                <li><strong>Phone:</strong> {!recipient.Owner.Phone}</li>
+            </ul>
+            
+            <p>We are excited to work with you!</p>
+            
+            <p style="margin-bottom: 0;">Best regards,<br/>
+            <strong>The {!$Organization.Name} Team</strong></p>
+
+        </div>
+    </messaging:htmlEmailBody>
+    
+    <messaging:plainTextEmailBody >
+Welcome to {!$Organization.Name}!
+        
+Hi {!recipient.FirstName},
+        
+Thank you for getting in touch with us. We are thrilled to welcome you and look forward to assisting you.
+        
+Your dedicated agent, {!recipient.Owner.Name}, has been assigned to your profile and is currently reviewing your details. They will be reaching out to you shortly to discuss your specific requirements and next steps.
+        
+If you have any immediate questions in the meantime, you can reach out to them directly using the contact details below:
+        
+Agent: {!recipient.Owner.Name}
+Email: {!recipient.Owner.Email}
+Phone: {!recipient.Owner.Phone}
+        
+We are excited to work with you!
+        
+Best regards,
+The {!$Organization.Name} Team
+    </messaging:plainTextEmailBody>
+    
+</messaging:emailTemplate>

@@ -1,5 +1,5 @@
 import { LightningElement } from 'lwc';
-import sendFeedbackEmail from '@salesforce/apex/GeminiChatService.sendFeedbackEmail';
+import sendFeedbackEmail from '@salesforce/apex/ControlCenterController.sendFeedbackEmail';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';

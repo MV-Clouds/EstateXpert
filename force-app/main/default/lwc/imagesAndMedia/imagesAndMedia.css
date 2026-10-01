@@ -1051,31 +1051,31 @@
     opacity: 0.8;
 }
 
-.table-content .slds-table td {
+.exp-table-content .slds-table td {
     height: 4rem;
 }
 
-.table-content .thumbnail-col {
+.exp-table-content .thumbnail-col {
     width: 8rem;
 }
 
-.table-content .title-col {
+.exp-table-content .title-col {
     width: 15rem;
 }
 
-.table-content .size-col {
+.exp-table-content .size-col {
     width: 8rem;
 }
 
-.table-content .tags-col {
+.exp-table-content .tags-col {
     width: 12rem;
 }
 
-.table-content .status-col {
+.exp-table-content .status-col {
     width: 14rem;
 }
 
-.table-content .actions-col {
+.exp-table-content .actions-col {
     width: 11rem;
 }
 
@@ -1093,10 +1093,4 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
-}
-
-.stylebtn .blue-btn-css,
-.stylebtn .white-btn-css {
-    height: 34px;
-    min-height: 34px;
 }

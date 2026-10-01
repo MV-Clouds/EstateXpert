@@ -614,7 +614,7 @@
 }
 
 /* Table styles for conditions (borrowed from googleLeadFieldMapping) */
-.table-content {
+.exp-table-content {
     margin: 0;
     height: auto;
     max-height: 45vh;
@@ -626,14 +626,14 @@
     justify-content: space-between;
 }
 
-.popup-table-content {
+.popup-exp-table-content {
     margin: 0;
     height: auto;
     max-height: 45vh;
     overflow: auto;
 }
 
-.popup-table-content .slds-table .index-display {
+.popup-exp-table-content .slds-table .index-display {
     text-align: center;
 }
 
@@ -643,16 +643,10 @@
     width: 100%;
 }
 
-.action-btn {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
 /* Ensure inputs inside table fill cell */
-.popup-table-content .slds-table td .combobox_cls lightning-combobox,
-.popup-table-content .slds-table td .combobox_cls lightning-input,
-.popup-table-content .slds-table td .combobox_cls lightning-record-picker {
+.popup-exp-table-content .slds-table td .combobox_cls lightning-combobox,
+.popup-exp-table-content .slds-table td .combobox_cls lightning-input,
+.popup-exp-table-content .slds-table td .combobox_cls lightning-record-picker {
     width: 100%;
 }
 
@@ -684,52 +678,52 @@ lightning-combobox .slds-dropdown,
 }
 
 /* ===== Fixed-width condition table in popup ===== */
-.popup-table-content .slds-table {
+.popup-exp-table-content .slds-table {
     table-layout: fixed !important;
     width: 100% !important;
 }
 
 /* Column width assignments */
-.popup-table-content .slds-table th:nth-child(1),
-.popup-table-content .slds-table td:nth-child(1) {
+.popup-exp-table-content .slds-table th:nth-child(1),
+.popup-exp-table-content .slds-table td:nth-child(1) {
     width: 5% !important;
     min-width: 2.5rem !important;
     text-align: center !important;
 }
 
-.popup-table-content .slds-table th:nth-child(2),
-.popup-table-content .slds-table td:nth-child(2) {
+.popup-exp-table-content .slds-table th:nth-child(2),
+.popup-exp-table-content .slds-table td:nth-child(2) {
     width: 28% !important;
 }
 
-.popup-table-content .slds-table th:nth-child(3),
-.popup-table-content .slds-table td:nth-child(3) {
+.popup-exp-table-content .slds-table th:nth-child(3),
+.popup-exp-table-content .slds-table td:nth-child(3) {
     width: 24% !important;
 }
 
-.popup-table-content .slds-table th:nth-child(4),
-.popup-table-content .slds-table td:nth-child(4) {
+.popup-exp-table-content .slds-table th:nth-child(4),
+.popup-exp-table-content .slds-table td:nth-child(4) {
     width: 35% !important;
 }
 
-.popup-table-content .slds-table th:nth-child(5),
-.popup-table-content .slds-table td:nth-child(5) {
+.popup-exp-table-content .slds-table th:nth-child(5),
+.popup-exp-table-content .slds-table td:nth-child(5) {
     width: 8% !important;
     text-align: center !important;
 }
 
 /* Prevent td content from overflowing its fixed cell */
-.popup-table-content .slds-table td {
+.popup-exp-table-content .slds-table td {
     overflow: hidden !important;
     max-width: 0 !important;
     /* forces table-layout:fixed to respect widths */
 }
 
 /* Inputs always fill their fixed cell */
-.popup-table-content .slds-table td .combobox_cls,
-.popup-table-content .slds-table td .combobox_cls lightning-combobox,
-.popup-table-content .slds-table td .combobox_cls lightning-input,
-.popup-table-content .slds-table td .combobox_cls lightning-record-picker {
+.popup-exp-table-content .slds-table td .combobox_cls,
+.popup-exp-table-content .slds-table td .combobox_cls lightning-combobox,
+.popup-exp-table-content .slds-table td .combobox_cls lightning-input,
+.popup-exp-table-content .slds-table td .combobox_cls lightning-record-picker {
     width: 100% !important;
     min-width: 0 !important;
 }
@@ -801,7 +795,6 @@ lightning-combobox .slds-dropdown,
     gap: 8px;
 }
 
-/* Empty / not-configured dashed prompt — uses same button reset as .blue-btn-css */
 .default-empty-card {
     display: flex;
     align-items: center;

@@ -309,10 +309,10 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     */
     updateSortIcons(event) {
         try {
-            let svgElements = this.template.querySelectorAll('svg.listing-manager-icon');
+            let svgElements = this.template.querySelectorAll('svg.exp-arrow-icon');
             let clickedSortField = event ? event.currentTarget.dataset.id : this.sortBy;
             
-            this.template.querySelectorAll('.sorting_header').forEach(el => {
+            this.template.querySelectorAll('.exp-sorting-header').forEach(el => {
                 el.classList.remove('active-sort');
             });
             
@@ -325,12 +325,12 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
 
             svgElements.forEach(svg => {
                 const sortFieldParent = svg.dataset.index;
-                svg.classList.remove('rotate-asc', 'rotate-desc');
+                svg.classList.remove('exp-rotate-asc', 'exp-rotate-desc');
                 if (sortFieldParent === clickedSortField) {
                     if (this.sortDirection === 'asc') {
-                        svg.classList.add('rotate-asc');
+                        svg.classList.add('exp-rotate-asc');
                     } else {
-                        svg.classList.add('rotate-desc');
+                        svg.classList.add('exp-rotate-desc');
                     }
                 }
             });

@@ -1,5 +1,5 @@
 /* BLUE BUTTON CSS START HERE */
-.blue-btn-css {
+.exp-blue-btn-css {
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -15,25 +15,25 @@
   transition: all 0.2s ease;
 }
 
-.blue-btn-css:hover {
+.exp-blue-btn-css:hover {
   background: #0156A3;
   box-shadow: 0 4px 8px rgba(43, 52, 59, 0.25);
   transform: translateY(-1px);
 }
 
-.blue-btn-css:disabled {
+.exp-blue-btn-css:disabled {
   background-color: #b2aeae;
   cursor: not-allowed;
 }
 
-.blue-btn-css:disabled:hover {
+.exp-blue-btn-css:disabled:hover {
   box-shadow: unset;
   transform: unset;
 }
 /* BLUE BUTTON CSS END HERE */
 
 /* WHITE BUTTON CSS START HERE */
-.white-btn-css {
+.exp-white-btn-css {
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -49,27 +49,27 @@
   transition: all 0.2s ease;
 }
 
-.white-btn-css:hover {
+.exp-white-btn-css:hover {
   background: #F3F6F9;
   box-shadow: 0 4px 8px rgba(43, 52, 59, 0.25);
   transform: translateY(-1px);
 }
 
-.white-btn-css:disabled {
+.exp-white-btn-css:disabled {
   background-color: #b2aeae;
   color: white;
   border: none;
   cursor: not-allowed;
 }
 
-.white-btn-css:disabled:hover {
+.exp-white-btn-css:disabled:hover {
   box-shadow: unset;
   transform: unset;
 }
 /* WHITE BUTTON CSS END HERE */
 
 /* RED BUTTON CSS START HERE */
-.red-btn-css {
+.exp-red-btn-css {
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -85,25 +85,25 @@
   transition: all 0.2s ease;
 }
 
-.red-btn-css:hover {
+.exp-red-btn-css:hover {
   background: #8b1d17;
   box-shadow: 0 4px 8px rgba(43, 52, 59, 0.25);
   transform: translateY(-1px);
 }
 
-.red-btn-css:disabled {
+.exp-red-btn-css:disabled {
   background-color: #b2aeae;
   cursor: not-allowed;
 }
 
-.red-btn-css:disabled:hover {
+.exp-red-btn-css:disabled:hover {
   box-shadow: unset;
   transform: unset;
 }
 /* RED BUTTON CSS END HERE */
 
 /* CLOSE ICON CSS START HERE */
-.close-icon-css {
+.exp-close-icon-css {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -116,13 +116,13 @@
   transition: all 0.2s ease;
 }
 
-.close-icon-css svg path {
+.exp-close-icon-css svg path {
   fill: #1F2937;
 }
 /* CLOSE ICON CSS END HERE */
 
 /* POP UP HEADER CSS START HERE */
-.pop-up-header-css {
+.exp-pop-up-header-css {
   background-color: #0176D3;
   color: white;
   border-bottom-style: unset;
@@ -132,7 +132,7 @@
 /* POP UP HEADER CSS END HERE */
 
 /* PAGINATION BUTTON CSS START HERE */
-.pagination-btn-css {
+.exp-pagination-btn-css {
   background-color: #ffffff;
   border: 1px solid #d8d8d8;
   color: #333;
@@ -149,43 +149,43 @@
   max-width: 30px;
 }
 
-.pagination-btn-css svg {
+.exp-pagination-btn-css svg {
   fill: black;
   width: 0.7rem;
   height: 0.7rem;
   margin: auto;
 }
 
-.pagination-btn-css:hover {
+.exp-pagination-btn-css:hover {
   background-color: #f0f0f0;
   border-color: #0176D3;
 }
 
-.pagination-btn-css:disabled:hover {
+.exp-pagination-btn-css:disabled:hover {
   background-color: unset;
   border-color: unset;
 }
 
-.pagination-btn-css.active {
+.exp-pagination-btn-css.active {
   background-color: #0070d2;
   color: white;
   border-color: #0070d2;
 }
 
-.pagination-btn-css:disabled {
+.exp-pagination-btn-css:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.pagination-btn-css:first-child,
-.pagination-btn-css:last-child {
+.exp-pagination-btn-css:first-child,
+.exp-pagination-btn-css:last-child {
   font-weight: 500;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.paginationDiv {
+.exp-pagination-div {
   flex-shrink: 0;
   padding: 0.5rem 1rem;
   display: flex;
@@ -196,12 +196,12 @@
   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.02);
 }
 
-.paginationDiv .btnCover {
+.exp-pagination-div .exp-btn-cover {
   display: flex;
   justify-content: center;
 }
 
-.pagination-container {
+.exp-pagination-container {
   display: flex;
   align-items: center;
   font-size: 14px;
@@ -253,7 +253,7 @@
   gap: 0.5rem;
 }
 
-.pagination-ellipsis {
+.exp-pagination-ellipsis {
   margin: 0 2px;
   color: #999;
   font-weight: 500;
@@ -261,10 +261,10 @@
 /* PAGINATION BUTTON CSS END HERE */
 
 /* TABLE ACTION BUTTON CSS START HERE */
-.edit-icon-css,
-.preview-icon-css,
-.delete-icon-css,
-.clone-icon-css {
+.exp-edit-icon-css,
+.exp-preview-icon-css,
+.exp-delete-icon-css,
+.exp-clone-icon-css {
   padding: 6px;
   border: 1.5px solid #8a8c8e;
   border-radius: 6px;
@@ -277,202 +277,58 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-.delete-icon-css:hover {
+.exp-delete-icon-css:hover {
   background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
   border-color: #ef4444;
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
 }
 
-.delete-icon-css:hover svg {
+.exp-delete-icon-css:hover svg {
   fill: #dc2626;
 }
 
-.delete-icon-css:hover svg path {
+.exp-delete-icon-css:hover svg path {
   stroke: #dc2626;
 }
 
-.edit-icon-css:hover,
-.preview-icon-css:hover {
+.exp-edit-icon-css:hover,
+.exp-preview-icon-css:hover {
   background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
   border-color: #0176D3;
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(1, 118, 211, 0.2);
 }
 
-.edit-icon-css:hover svg,
-.preview-icon-css:hover svg {
+.exp-edit-icon-css:hover svg,
+.exp-preview-icon-css:hover svg {
   fill: #0176d3;
 }
 
-.edit-icon-css:hover svg path,
-.preview-icon-css:hover svg path {
+.exp-edit-icon-css:hover svg path,
+.exp-preview-icon-css:hover svg path {
   stroke: #0176d3;
 }
 
-.clone-icon-css:hover {
+.exp-clone-icon-css:hover {
   background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
   border-color: #059669;
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2);
 }
 
-.clone-icon-css:hover svg rect,
-.clone-icon-css:hover svg path {
+.exp-clone-icon-css:hover svg rect,
+.exp-clone-icon-css:hover svg path {
   stroke: #059669;
 }
 
-.edit-icon-css:disabled,
-.preview-icon-css:disabled,
-.delete-icon-css:disabled,
-.clone-icon-css:disabled {
+.exp-edit-icon-css:disabled,
+.exp-preview-icon-css:disabled,
+.exp-delete-icon-css:disabled,
+.exp-clone-icon-css:disabled {
   opacity: 0.5;
   pointer-events: none;
   cursor: not-allowed;
-}
-/* TABLE ACTION BUTTON CSS END HERE */
-
-.header-search-bar-css .slds-form-element__help {
-  display: none;
-}
-
-.header-search-bar-css .slds-input {
-  min-height: 36px;
-}
-
-.header-combobox .slds-form-element__help {
-  display: none;
-}
-
-.header-combobox .slds-combobox__input {
-  min-height: 36px;
-  align-items: center;
-}
-
-/* TABLE RELATED CLASSES */
-
-.table-content {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
-  scroll-behavior: smooth;
-  scrollbar-width: thin;
-  scrollbar-color: #0170d27d transparent;
-}
-
-.table-content .slds-table th {
-  text-align: center;
-  font-size: 14px;
-  font-weight: 400;
-  color: #585858;
-  height: 45px;
-  background: #0176D3;
-  color: white;
-  font-weight: 500;
-  letter-spacing: 0.3px;
-  padding: 0;
-}
-
-.table-content .slds-table td {
-  text-align: center;
-  font-size: 14px;
-  font-weight: 400;
-  color: #585858;
-  height: 3rem;
-  max-width: 25rem;
-}
-
-.table-content .slds-table_resizable-cols thead th,
-.table-content .slds-table--resizable-cols thead th {
-  padding: 0;
-  background: #0376D3;
-  color: white;
-  font-size: 14px;
-  height: 45px;
-}
-
-.table-content table thead tr {
-  position: sticky;
-  top: 0;
-  z-index: 96;
-}
-
-.table-content tbody tr:nth-child(odd) {
-  background-color: aliceblue;
-}
-
-.table-content table tbody tr:hover td {
-  background-color: #ebf3f6 !important;
-  border: none;
-}
-
-.table-content .slds-dropdown-trigger_click .slds-dropdown,
-.slds-dropdown-trigger_click:hover .slds-dropdown,
-.slds-dropdown-trigger--click .slds-dropdown,
-.slds-dropdown-trigger--click:hover .slds-dropdown {
-  /* display: none; */
-  z-index: 100;
-}
-
-.table_div {
-  overflow: hidden;
-  font-size: 14px;
-  background-color: transparent;
-}
-
-.table_tr_cls {
-  position: relative;
-}
-
-.table_tr_cls .sort-cover {
-  height: 100%;
-  border-radius: 8px;
-  background-color: transparent;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  transition: background-color 0.5s ease;
-  justify-content: center;
-  position: relative;
-  padding: 0rem 18px;
-  padding-left: 28px;
-  gap: 6px;
-}
-
-.table_tr_cls .sort-cover:hover {
-  background-color: #2c89d6;
-}
-
-.table_tr_cls .slds-icon-utility-arrowdown svg {
-  height: 1rem;
-  fill: white;
-  position: absolute;
-  bottom: 32%;
-}
-
-.sno {
-  width: 4rem;
-}
-
-.truncate_css {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 150px;
-}
-
-.truncate_css div {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.min_width_css {
-  min-width: 5rem;
-}
-
-.tableStatusCol {
-  text-align: center;
 }
 
 .action-btn {
@@ -540,47 +396,182 @@
 .action-div:hover svg path {
   stroke: #0176d3;
 }
+/* TABLE ACTION BUTTON CSS END HERE */
 
-/* SORTING RELATED CLASSES */
+/* SEARCH BAR RELATED CSS START HERE */
+.header-search-bar-css .slds-form-element__help {
+  display: none;
+}
 
-.sorting_header {
+.header-search-bar-css .slds-input {
+  min-height: 36px;
+}
+
+.header-combobox .slds-form-element__help {
+  display: none;
+}
+
+.header-combobox .slds-combobox__input {
+  min-height: 36px;
+  align-items: center;
+}
+/* SEARCH BAR RELATED CSS END HERE */
+
+/* TABLE RELATED CSS START HERE */
+.exp-table-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #0170d27d transparent;
+}
+
+.exp-table-content .slds-table th {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 400;
+  color: #585858;
+  height: 45px;
+  background: #0176D3;
+  color: white;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  padding: 0;
+}
+
+.exp-table-content .slds-table td {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 400;
+  color: #585858;
+  height: 3rem;
+  max-width: 25rem;
+}
+
+.exp-table-content .slds-table_resizable-cols thead th,
+.exp-table-content .slds-table--resizable-cols thead th {
+  padding: 0;
+  background: #0376D3;
+  color: white;
+  font-size: 14px;
+  height: 45px;
+}
+
+.exp-table-content table thead tr {
+  position: sticky;
+  top: 0;
+  z-index: 96;
+}
+
+.exp-table-content tbody tr:nth-child(odd) {
+  background-color: aliceblue;
+}
+
+.exp-table-content table tbody tr:hover td {
+  background-color: #ebf3f6 !important;
+  border: none;
+}
+
+.exp-table-content .slds-dropdown-trigger_click .slds-dropdown,
+.exp-table-content .slds-dropdown-trigger_click:hover .slds-dropdown,
+.exp-table-content .slds-dropdown-trigger--click .slds-dropdown,
+.exp-table-content .slds-dropdown-trigger--click:hover .slds-dropdown {
+  z-index: 100;
+}
+
+.exp-table-tr-cls {
+  position: relative;
+}
+
+.exp-table-tr-cls .sort-cover {
+  height: 100%;
+  border-radius: 8px;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.5s ease;
+  justify-content: center;
+  position: relative;
+  padding: 0rem 18px;
+  padding-left: 28px;
+  gap: 6px;
+}
+
+.exp-table-tr-cls .sort-cover:hover {
+  background-color: #2c89d6;
+}
+
+.exp-table-tr-cls .slds-icon-utility-arrowdown svg {
+  height: 1rem;
+  fill: white;
+  position: absolute;
+  bottom: 32%;
+}
+
+.exp-truncate-css {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.exp-truncate-css div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exp-min-width-css {
+  min-width: 5rem;
+}
+
+.exp-table-status-col {
+  text-align: center;
+}
+/* TABLE RELATED CSS END HERE */
+
+/* SORTING RELATED CSS START HERE */
+.exp-sorting-header {
   min-width: 11rem;
 }
 
-.sorting_header .slds-icon_container {
+.exp-sorting-header .slds-icon_container {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.5s ease, visibility 0.5s ease;
 }
 
-.sorting_header:hover .slds-icon_container {
+.exp-sorting-header:hover .slds-icon_container {
   opacity: 1;
   visibility: visible;
 }
 
-.sorting_header.active-sort .slds-icon_container {
+.exp-sorting-header.active-sort .slds-icon_container {
   opacity: 1 !important;
   visibility: visible !important;
 }
 
-.listing-manager-icon {
+.exp-arrow-icon {
   width: 1rem;
   height: 1rem;
   cursor: pointer;
   fill: white;
 }
 
-.rotate-asc {
+.exp-rotate-asc {
   transform: rotate(0deg);
   transition: transform 0.3s;
 }
 
-.rotate-desc {
+.exp-rotate-desc {
   transform: rotate(180deg);
   transition: transform 0.3s;
 }
+/* SORTING RELATED CSS END HERE */
 
-.main_content_cls {
+.exp-main-content-cls {
   background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
   border-radius: 12px;
   display: flex;
@@ -592,7 +583,7 @@
   position: relative;
 }
 
-.main_content_cls .section-control {
+.exp-main-content-cls .section-control {
   background: #0176d3;
   color: white;
   margin: auto;
@@ -600,6 +591,7 @@
   --slds-g-shadow-outline-focus-1: none !important;  
 }
 
+/* NO DATA MESSAGE RELATED CSS START HERE */
 .exp-no-data-container {
   display: flex;
   flex-direction: column;
@@ -630,6 +622,7 @@
   text-align: center;
   letter-spacing: 0.3px;
 }
+/* NO DATA MESSAGE RELATED CSS END HERE */
 
 /* MULISH FONT CSS START HERE*/
 @font-face {

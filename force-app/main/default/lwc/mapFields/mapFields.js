@@ -138,7 +138,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
 
     renderedCallback() {
         if (this.isScroll) {
-            const container = this.template.querySelector('.table-content');
+            const container = this.template.querySelector('.exp-table-content');
             if (container) {
                 container.scrollTop = container.scrollHeight;
             }

@@ -299,19 +299,6 @@
     align-items: end;
 }
 
-.action-btn .delete-icon-css:hover {
-    border-color: #fca5a5;
-    background: #fff1f2;
-    color: #d72f2f;
-    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.16);
-}
-
-.action-btn .edit-icon-css svg path,
-.action-btn .delete-icon-css svg path {
-    stroke: currentColor;
-    fill: none;
-}
-
 .empty-state {
     width: 100%;
     height: 100%;
@@ -848,12 +835,6 @@
   flex-shrink: 0;
 }
 
-.main_content_cls {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
-}
-
 @media only screen and (max-width: 900px) {
   .position_css {
     min-width: 10rem;
@@ -901,7 +882,7 @@ lightning-combobox .slds-dropdown,
   display: none;
 }
 
-.table-content .column1 {
+.exp-table-content .column1 {
   width: 15rem;
 }
 

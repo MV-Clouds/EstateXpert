@@ -2346,16 +2346,16 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
                 // Find the sort icon within this header
                 // Updated selector to match our new HTML structure
-                const icon = currentHeader.querySelector('.listing-manager-icon');
+                const icon = currentHeader.querySelector('.exp-arrow-icon');
                 if (icon) {
                     // Remove existing rotation classes
-                    icon.classList.remove('rotate-asc', 'rotate-desc');
+                    icon.classList.remove('exp-rotate-asc', 'exp-rotate-desc');
 
                     // Add appropriate rotation class based on sort order
                     if (this.sortOrder === 'asc') {
-                        icon.classList.add('rotate-asc');
+                        icon.classList.add('exp-rotate-asc');
                     } else {
-                        icon.classList.add('rotate-desc');
+                        icon.classList.add('exp-rotate-desc');
                     }
                     // Force inline visibility to ensure it shows in popup headers
                     try {

@@ -143,10 +143,6 @@ button:disabled {
     border: 1px solid #0176D3;
 }
 
-.main_content_cls {
-    height: 30rem;
-}
-
 .mapping-item-inactive {
     padding: 0.75rem;
     border: 1px solid #D1D5DB;
@@ -1275,14 +1271,9 @@ span {
     bottom: 0;
 }
 
-.table-content .slds-table td {
+.exp-table-content .slds-table td {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 12rem;
-}
-
-.btn-container .blue-btn-css {
-    height: 34px;
-    min-height: 34px;
 }

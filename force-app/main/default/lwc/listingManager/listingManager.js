@@ -1343,11 +1343,11 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
             // Remove icon rotation
             const allIcons = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
             allIcons.forEach(icon => {
-                icon.classList.remove('rotate-asc', 'rotate-desc');
+                icon.classList.remove('exp-rotate-asc', 'exp-rotate-desc');
             });
 
             // Remove active class from all headers
-            const allHeaders = this.template.querySelectorAll('.sorting_header');
+            const allHeaders = this.template.querySelectorAll('.exp-sorting-header');
             allHeaders.forEach(header => {
                 header.classList.remove('active-sort');
             });
@@ -1359,7 +1359,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
 
                 const icon = currentHeader.querySelector('svg');
                 if (icon) {
-                    icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                    icon.classList.add(this.sortOrder === 'asc' ? 'exp-rotate-asc' : 'exp-rotate-desc');
                 }
             }
 
@@ -1439,7 +1439,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     */
     scrollToTop() {
         try {
-            const tableDiv = this.template.querySelector('.table-content');
+            const tableDiv = this.template.querySelector('.exp-table-content');
             if (tableDiv) {
                 tableDiv.scrollTop = 0;
             }

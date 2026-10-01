@@ -83,7 +83,7 @@ export default class EditCheckListModal extends LightningElement {
     renderedCallback() {
         try {
             if (this.setScroll) {
-                const container = this.template.querySelector('.table-content');
+                const container = this.template.querySelector('.exp-table-content');
                 container.scrollTop = container.scrollHeight;
                 this.setScroll = false;
             }

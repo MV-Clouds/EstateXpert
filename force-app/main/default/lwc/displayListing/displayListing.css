@@ -919,11 +919,7 @@ button:disabled {
     min-width: 12rem;
 }
 
-.main_content_cls {
-    height: 30rem;
-}
-
-.table-content .colume2 {
+.exp-table-content .colume2 {
     width: 9rem;
 }
 
@@ -940,13 +936,8 @@ button:disabled {
     display: none !important;
 }
 
-.table-content .slds-table td {
+.exp-table-content .slds-table td {
     max-width: 12rem;
-}
-
-.btn-container .blue-btn-css {
-    height: 34px;
-    min-height: 34px;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════

@@ -33,12 +33,6 @@
     background-color: #0157a0;
 }
 
-.pagination-container {
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-}
-
 .pagination-button {
     background-color: #ffffff;
     border: 1px solid #d8d8d8;
@@ -390,31 +384,18 @@ span {
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.main_content_cls {
-    background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-    border: 1px solid rgba(1, 118, 211, 0.1);
-    position: relative;
-}
-
-
 .expanded2 {
     width: 100%;
     /* Width when innerDiv1 is expanded */
 }
 
-.table-content .header-checkbox-div {
+.exp-table-content .header-checkbox-div {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.table-content .slds-table_resizable-cols thead th {
+.exp-table-content .slds-table_resizable-cols thead th {
     width: 12rem
 }
 
@@ -646,30 +627,6 @@ span {
     height: 3rem;
 }
 
-
-
-.paginationDiv {
-    flex-shrink: 0;
-    padding: 0.5rem 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: transparent;
-    border-top: 1px solid rgba(1, 118, 211, 0.08);
-    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.02);
-}
-
-.paginationDiv .btnCover {
-    display: flex;
-    justify-content: center;
-}
-
-.paginationDiv .pageNumberDiv {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 .conat_cls {
     transition: unset !important;
 }
@@ -716,12 +673,7 @@ span {
         height: 24rem;
     }
 
-    .paginationDiv {
-        margin-top: 0.5rem;
-        border-radius: 0 0 10px 10px;
-    }
-
-    .table-content {
+    .exp-table-content {
         height: 90%;
         border-radius: 8px;
     }
@@ -788,7 +740,7 @@ span {
 
 @media only screen and (max-width: 900px) {
 
-    .table-content .header-checkbox-div {
+    .exp-table-content .header-checkbox-div {
         padding: 0rem 0.5rem;
     }
 
@@ -814,7 +766,7 @@ input[type=checkbox]::before {
     border-color: white;
 }
 
-.table-content .checkbox-cell {
+.exp-table-content .checkbox-cell {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -958,7 +910,7 @@ input[type=checkbox]::before {
     cursor: pointer;
 }
 
-.table-content tbody tr:nth-child(odd) {
+.exp-table-content tbody tr:nth-child(odd) {
     background-color: aliceblue;
 }
 
@@ -1798,10 +1750,6 @@ input[type=checkbox]::before {
     overflow: hidden;
     background: #F9FAFB;
     box-shadow: rgba(15, 23, 42, 0.24) 0px 14px 36px -12px;
-}
-
-.popup-table .delete-icon-css {
-    margin: auto;
 }
 
 .center-trancate-text {

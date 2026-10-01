@@ -10,7 +10,7 @@
                         Listing Manager
                     </div>
                     <div class="header-buttons">
-                        <button onclick={openConfigureSettings} class="blue-btn-css">
+                        <button onclick={openConfigureSettings} class="exp-blue-btn-css">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
@@ -19,7 +19,7 @@
                             </svg>
                             Customize View
                         </button>
-                        <button onclick={goTONewListing} class="blue-btn-css">
+                        <button onclick={goTONewListing} class="exp-blue-btn-css">
                             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
@@ -70,7 +70,7 @@
             </template>
             <div class="body">
                 <template if:false={fieldsModal}>
-                    <div class="innerDiv2 main_content_cls">
+                    <div class="innerDiv2 exp-main-content-cls">
                         <template if:true={listingSpinnerLoading}>
                             <c-spinner-component is-absolute="true"></c-spinner-component>
                         </template>
@@ -107,7 +107,7 @@
                                             </template>
                                         </div>
                                         <div class="no-data-action-wrapper">
-                                            <button class="blue-btn-css modify-filter-btn" onclick={openFilterPanel}>
+                                            <button class="exp-blue-btn-css modify-filter-btn" onclick={openFilterPanel}>
                                                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none"
                                                     xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M0 3H16V1H0V3Z" fill="currentColor"></path>
@@ -132,18 +132,18 @@
                         <template if:false={showSection}>
                             <!-- LIST VIEW -->
                             <template if:true={showList}>
-                                <div class="table-content" id="table-content">
+                                <div class="exp-table-content" id="exp-table-content">
                                     <table aria-multiselectable="true"
                                         class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid"
                                         aria-label="Example advanced table of Opportunities in actionable mode">
                                         <thead>
-                                            <tr class="slds-line-height_reset fields-names table_tr_cls">
+                                            <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
                                                 <th class="slds-cell_action-mode imageColume" scope="col">
                                                     <div class="slds-truncate slds-assistive-text" title="Actions">
                                                         Actions</div>
                                                 </th>
                                                 <th aria-sort="none" data-id="Name" onclick={sortClick}
-                                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header colume2"
+                                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header colume2"
                                                     scope="col">
                                                     <div class="slds-text-link_reset sort-cover" role="button"
                                                         tabindex="0">
@@ -153,7 +153,7 @@
                                                                 Name</span>
                                                             <span
                                                                 class="slds-icon_container slds-icon-utility-arrowdown">
-                                                                <svg data-index="Name" class="listing-manager-icon"
+                                                                <svg data-index="Name" class="exp-arrow-icon"
                                                                     viewBox="0 0 384 512"
                                                                     xmlns="http://www.w3.org/2000/svg">
                                                                     <path
@@ -166,7 +166,7 @@
                                                 <template for:each={fields} for:item="listing" for:index="index">
                                                     <th key={listing.fieldName} data-id={listing.fieldName}
                                                         onclick={sortClick} aria-sort="none"
-                                                        class="slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header colume2"
+                                                        class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header colume2"
                                                         scope="col">
                                                         <div class="sort-cover" role="button" tabindex="0">
                                                             <span class="slds-assistive-text">Sort by: </span>
@@ -176,7 +176,7 @@
                                                                 <span
                                                                     class="slds-icon_container slds-icon-utility-arrowdown">
                                                                     <svg data-index={listing.fieldName}
-                                                                        class="listing-manager-icon"
+                                                                        class="exp-arrow-icon"
                                                                         viewBox="0 0 384 512"
                                                                         xmlns="http://www.w3.org/2000/svg">
                                                                         <path
@@ -240,7 +240,7 @@
                             </template>
 
                             <!-- FOOTER / PAGINATION -->
-                            <div class="paginationDiv">
+                            <div class="exp-pagination-div">
                                 <div class="page-size-container">
                                     <label class="page-size-label">Rows per page : </label>
                                     <select class="page-size-select" onchange={handlePageSizeChange}>
@@ -255,9 +255,9 @@
                                 <div class="pagination-right">
                                     <span class="results-info">{recordCountInfo}</span>
 
-                                    <div class="btnCover">
-                                        <div class="pagination-container">
-                                            <button class="pagination-btn-css" disabled={isFirstPage}
+                                    <div class="exp-btn-cover">
+                                        <div class="exp-pagination-container">
+                                            <button class="exp-pagination-btn-css" disabled={isFirstPage}
                                                 onclick={handlePrevious}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
                                                     viewBox="0 0 520 520" fill="#fff">
@@ -274,11 +274,11 @@
                                                     </button>
                                                 </template>
                                                 <template if:true={page.isEllipsis}>
-                                                    <span key={page.number} class="pagination-ellipsis">...</span>
+                                                    <span key={page.number} class="exp-pagination-ellipsis">...</span>
                                                 </template>
                                             </template>
 
-                                            <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                                            <button class="exp-pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
                                                     viewBox="0 0 520 520" fill="#fff">
                                                     <path
@@ -316,7 +316,7 @@
             <div class="slds-modal__container">
 
                 <!-- Close -->
-                <div class="slds-modal__close close-icon-css" onclick={handleRecordTypePickerClose}>
+                <div class="slds-modal__close exp-close-icon-css" onclick={handleRecordTypePickerClose}>
                     <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -358,7 +358,7 @@
                 <!-- Footer -->
                 <div class="slds-modal__footer slds-m-top_none">
                     <div class="slds-button-group slds-grid slds-grid_align-center">
-                        <button class="white-btn-css slds-m-right_small" onclick={handleRecordTypePickerClose}>
+                        <button class="exp-white-btn-css slds-m-right_small" onclick={handleRecordTypePickerClose}>
                             <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
@@ -367,7 +367,7 @@
                             </svg>
                             Cancel
                         </button>
-                        <button class="blue-btn-css" onclick={handleRecordTypeContinue}>
+                        <button class="exp-blue-btn-css" onclick={handleRecordTypeContinue}>
                             Continue
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">

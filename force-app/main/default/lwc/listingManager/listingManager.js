@@ -4,7 +4,7 @@ import getListingData from '@salesforce/apex/ListingManagerController.getListing
 import { NavigationMixin } from 'lightning/navigation';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 import LISTING_OBJECT from '@salesforce/schema/MVEX__Listing__c';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import { errorDebugger } from 'c/globalProperties';
 import USER_CURRENCY from '@salesforce/i18n/currency';
 import USER_LOCALE from '@salesforce/i18n/locale';
@@ -408,7 +408,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     */
     connectedCallback() {
         try {
-            loadStyle(this, MulishFontCss);
+            loadStyle(this, globalStyles);
             this.updateScreenWidth();
             if (!import.meta.env.SSR) {
                 window?.globalThis?.addEventListener('resize', this.updateScreenWidth);

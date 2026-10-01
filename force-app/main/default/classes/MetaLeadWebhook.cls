@@ -114,7 +114,7 @@ global with sharing class MetaLeadWebhook {
 
             OAuth_Configuration__mdt oauthConfig = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
             String apiVersion = oauthConfig != null ? oauthConfig.API_Version__c : 'v19.0';
-            String baseUrl    = oauthConfig != null ? oauthConfig.Authorization_Endpoint__c : 'https://graph.facebook.com';
+            String baseUrl    = oauthConfig != null ? oauthConfig.Base_URL__c : 'https://graph.facebook.com';
 
             // Derive Page Access Token (same method used in MetaAdsFormMappingController)
             ApiContext sysCtx = new ApiContext(systemUserToken, apiVersion, baseUrl);

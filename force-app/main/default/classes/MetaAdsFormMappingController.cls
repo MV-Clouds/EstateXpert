@@ -7,18 +7,18 @@ public with sharing class MetaAdsFormMappingController {
     public static Map<String, Object> getConnectedPages() {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            List<MVEX__OAuth_Configuration__mdt> tokenConfigs = [SELECT MVEX__Access_Token__c, MVEX__API_Version__c, MVEX__Authorization_Endpoint__c, MVEX__Client_App_Id__c FROM MVEX__OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' WITH USER_MODE LIMIT 1];
-            MVEX__OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
-            if (tokenConfig == null || String.isBlank(tokenConfig.MVEX__Access_Token__c)) {
+            List<OAuth_Configuration__mdt> tokenConfigs = [SELECT Access_Token__c, API_Version__c, Base_URL__c, Client_App_Id__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' WITH USER_MODE LIMIT 1];
+            OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
+            if (tokenConfig == null || String.isBlank(tokenConfig.Access_Token__c)) {
                 resultMap.put('success', false);
                 resultMap.put('message', 'Meta Ads is not connected.');
                 return resultMap;
             }
 
             // Read directly from metadata — no manipulation
-            String accessToken     = tokenConfig.MVEX__Access_Token__c;
-            String graphApiVersion = tokenConfig.MVEX__API_Version__c;
-            String graphBaseUrl    = tokenConfig.MVEX__Authorization_Endpoint__c;
+            String accessToken     = tokenConfig.Access_Token__c;
+            String graphApiVersion = tokenConfig.API_Version__c;
+            String graphBaseUrl    = tokenConfig.Base_URL__c;
 
             Http http = new Http();
             HttpRequest pageReq = new HttpRequest();
@@ -67,19 +67,19 @@ public with sharing class MetaAdsFormMappingController {
     public static Map<String, Object> getLeadForms(String pageId) {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            List<MVEX__OAuth_Configuration__mdt> tokenConfigs = [SELECT MVEX__Access_Token__c, MVEX__API_Version__c, MVEX__Authorization_Endpoint__c, MVEX__Client_App_Id__c FROM MVEX__OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' WITH USER_MODE LIMIT 1];
-            MVEX__OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
-            if (tokenConfig == null || String.isBlank(tokenConfig.MVEX__Access_Token__c)) {
+            List<OAuth_Configuration__mdt> tokenConfigs = [SELECT Access_Token__c, API_Version__c, Base_URL__c, Client_App_Id__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' WITH USER_MODE LIMIT 1];
+            OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
+            if (tokenConfig == null || String.isBlank(tokenConfig.Access_Token__c)) {
                 resultMap.put('success', false);
                 resultMap.put('message', 'Meta Ads is not connected.');
                 return resultMap;
             }
 
             // Read directly from metadata — no manipulation
-            String accessToken     = tokenConfig.MVEX__Access_Token__c;
-            String clientAppId     = tokenConfig.MVEX__Client_App_Id__c;
-            String graphApiVersion = tokenConfig.MVEX__API_Version__c;
-            String graphBaseUrl    = tokenConfig.MVEX__Authorization_Endpoint__c;
+            String accessToken     = tokenConfig.Access_Token__c;
+            String clientAppId     = tokenConfig.Client_App_Id__c;
+            String graphApiVersion = tokenConfig.API_Version__c;
+            String graphBaseUrl    = tokenConfig.Base_URL__c;
 
 
             Http http = new Http();
@@ -191,7 +191,7 @@ public with sharing class MetaAdsFormMappingController {
     }
 
     /**
-     * @description Fetches the existing Meta Ads mappings from Configuration_Settings__c
+     * @description Fetches the existing Meta Ads mappings from    MVEX__Configuration_Settings__c
      */
     @AuraEnabled
     public static String getExistingMappings() {
@@ -243,15 +243,15 @@ public with sharing class MetaAdsFormMappingController {
     }
 
     private static String subscribeWebhookOnTheFly(String pageId) {
-        List<MVEX__OAuth_Configuration__mdt> tokenConfigs = [SELECT MVEX__Access_Token__c, MVEX__API_Version__c, MVEX__Authorization_Endpoint__c, MVEX__Client_App_Id__c FROM MVEX__OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1];
-        MVEX__OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
-        if (tokenConfig == null || String.isBlank(tokenConfig.MVEX__Access_Token__c)) {
+        List<OAuth_Configuration__mdt> tokenConfigs = [SELECT Access_Token__c, API_Version__c, Base_URL__c, Client_App_Id__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1];
+        OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
+        if (tokenConfig == null || String.isBlank(tokenConfig.Access_Token__c)) {
             return null;
         }
-        String systemUserToken = tokenConfig.MVEX__Access_Token__c;
+        String systemUserToken = tokenConfig.Access_Token__c;
         
-        String graphApiVersion = tokenConfig.MVEX__API_Version__c;
-        String graphBaseUrl = tokenConfig.MVEX__Authorization_Endpoint__c;
+        String graphApiVersion = tokenConfig.API_Version__c;
+        String graphBaseUrl = tokenConfig.Base_URL__c;
         
         Http http = new Http();
         

@@ -3,7 +3,7 @@
         <c-spinner-component></c-spinner-component>
     </template>
     <div class="slds-grid slds-wrap slds-align_absolute-center full-page-container">
-        <div class="main">
+        <div class="exp-main-tab-container">
             <template if:false={isMobileOrTablet}>
                 <div class="sub_main_header_css">
                     <div class="header_block_css">
@@ -68,7 +68,7 @@
                     </div>
                 </div>
             </template>
-            <div class="body">
+            <div class="exp-content-container">
                 <template if:false={fieldsModal}>
                     <div class="innerDiv2 exp-main-content-cls">
                         <template if:true={listingSpinnerLoading}>
@@ -107,7 +107,8 @@
                                             </template>
                                         </div>
                                         <div class="no-data-action-wrapper">
-                                            <button class="exp-blue-btn-css modify-filter-btn" onclick={openFilterPanel}>
+                                            <button class="exp-blue-btn-css modify-filter-btn"
+                                                onclick={openFilterPanel}>
                                                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none"
                                                     xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M0 3H16V1H0V3Z" fill="currentColor"></path>
@@ -176,8 +177,7 @@
                                                                 <span
                                                                     class="slds-icon_container slds-icon-utility-arrowdown">
                                                                     <svg data-index={listing.fieldName}
-                                                                        class="exp-arrow-icon"
-                                                                        viewBox="0 0 384 512"
+                                                                        class="exp-arrow-icon" viewBox="0 0 384 512"
                                                                         xmlns="http://www.w3.org/2000/svg">
                                                                         <path
                                                                             d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
@@ -199,8 +199,10 @@
                                                                 alt="Listing Image" draggable="false" />
                                                         </div>
                                                     </td>
-                                                    <td class="slds-cell_action-mode conat_cls" scope="row">
-                                                        <div class="slds-truncate center-trancate-text">
+                                                    <td class="slds-cell_action-mode conat_cls" scope="row"
+                                                        title={listing.Name}>
+                                                        <div class="slds-truncate center-trancate-text"
+                                                            title={listing.Name}>
                                                             <a data-id={listing.Id} onclick={redirectToRecord}
                                                                 tabindex="0">{listing.Name}</a>
                                                         </div>
@@ -241,9 +243,9 @@
 
                             <!-- FOOTER / PAGINATION -->
                             <div class="exp-pagination-div">
-                                <div class="page-size-container">
-                                    <label class="page-size-label">Rows per page : </label>
-                                    <select class="page-size-select" onchange={handlePageSizeChange}>
+                                <div class="exp-page-size-container">
+                                    <label class="exp-page-size-label">Rows per page : </label>
+                                    <select class="exp-page-size-select" onchange={handlePageSizeChange}>
                                         <template for:each={pageSizeOptions} for:item="opt">
                                             <option key={opt.value} value={opt.value} selected={opt.isSelected}>
                                                 {opt.label}
@@ -252,8 +254,8 @@
                                     </select>
                                 </div>
 
-                                <div class="pagination-right">
-                                    <span class="results-info">{recordCountInfo}</span>
+                                <div class="exp-pagination-right">
+                                    <span class="exp-results-info">{recordCountInfo}</span>
 
                                     <div class="exp-btn-cover">
                                         <div class="exp-pagination-container">
@@ -268,8 +270,8 @@
 
                                             <template for:each={pageNumbers} for:item="page">
                                                 <template if:false={page.isEllipsis}>
-                                                    <button key={page.number} data-id={page.number} class={page.className}
-                                                        onclick={handlePageChange}>
+                                                    <button key={page.number} data-id={page.number}
+                                                        class={page.className} onclick={handlePageChange}>
                                                         {page.number}
                                                     </button>
                                                 </template>
@@ -278,7 +280,8 @@
                                                 </template>
                                             </template>
 
-                                            <button class="exp-pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                                            <button class="exp-pagination-btn-css" disabled={isLastPage}
+                                                onclick={handleNext}>
                                                 <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
                                                     viewBox="0 0 520 520" fill="#fff">
                                                     <path

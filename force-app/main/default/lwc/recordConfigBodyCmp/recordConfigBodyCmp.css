@@ -71,26 +71,6 @@
     width: 100%;
 }
 
-.page-size-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.page-size-label {
-    font-size: 14px;
-    color: #333;
-}
-
-.page-size-input {
-    width: 60px;
-    height: 32px;
-    border: 1px solid #dddbda;
-    border-radius: 4px;
-    padding: 0 8px;
-    text-align: center;
-}
-
 .add-new-btn {
     display: flex;
     justify-content: center;

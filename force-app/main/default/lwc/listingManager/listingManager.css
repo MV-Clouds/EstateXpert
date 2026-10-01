@@ -18,7 +18,7 @@
     position: relative;
 }
 
-.main {
+.exp-main-tab-container {
     width: 100%;
     height: 100%;
     display: flex;
@@ -197,30 +197,6 @@
     stroke: white;
 }
 
-.sort-desc {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    border: 1px solid #d0d4d8;
-    border-radius: 8px;
-    padding: 8px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-    cursor: default;
-}
-
-.sort-icon {
-    display: flex;
-    align-items: center;
-}
-
-.sort-text {
-    font-size: 14px;
-    font-weight: 500;
-    color: #445058;
-    white-space: nowrap;
-}
-
 .tab-btns ul {
     display: flex;
     gap: 4px;
@@ -306,7 +282,7 @@
 }
 
 /* ===== BODY LAYOUT ===== */
-.main .body {
+.exp-main-tab-container .exp-content-container {
     width: 100%;
     flex-grow: 1;
     display: flex;
@@ -317,7 +293,7 @@
 }
 
 /* ===== FILTER SIDEBAR ===== */
-.main .body .innerDiv1 {
+.exp-main-tab-container .exp-content-container .innerDiv1 {
     display: flex;
     width: 22%;
     flex-shrink: 0;
@@ -331,7 +307,7 @@
     margin-left: 0.75rem;
 }
 
-.main .body .innerDiv1.removeInnerDiv1 {
+.exp-main-tab-container .exp-content-container .innerDiv1.removeInnerDiv1 {
     margin-left: 0;
 }
 
@@ -339,13 +315,13 @@
     width: fit-content;
 }
 
-.main .body .innerDiv1 .removeInnerDiv1 {
+.exp-main-tab-container .exp-content-container .innerDiv1 .removeInnerDiv1 {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.main .body .innerDiv1 .filterDiv {
+.exp-main-tab-container .exp-content-container .innerDiv1 .filterDiv {
     background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
     width: 100%;
     height: 100%;
@@ -355,7 +331,7 @@
 }
 
 /* ===== MAIN CONTENT PANEL ===== */
-.main .body .innerDiv2 {
+.exp-main-tab-container .exp-content-container .innerDiv2 {
     flex: 1;
     overflow: hidden;
     border-radius: 8px;
@@ -586,140 +562,25 @@
 }
 
 /* ===== TABLE ACTION CELLS ===== */
-.main .body .innerDiv2 .colume1 {
+.exp-main-tab-container .exp-content-container .innerDiv2 .colume1 {
     width: 3.25rem;
 }
 
-.main .body .innerDiv2 .imageColume {
+.exp-main-tab-container .exp-content-container .innerDiv2 .imageColume {
     width: 5.25rem;
 }
 
-.main .body .innerDiv2 .property-image {
+.exp-main-tab-container .exp-content-container .innerDiv2 .property-image {
     width: 3.3rem;
     height: 2.2rem;
 }
 
-/* ===== TABLE CELL TEXT ===== */
-.center-trancate-text {
-    text-align: center;
-    color: #585858;
-}
-
-.center-trancate-head {
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    font-weight: 500;
-    align-items: center;
-}
-
-.main .slds-table td {
+.exp-main-tab-container .slds-table td {
     height: 3rem;
 }
 
-.main .slds-icon_small,
-.slds-icon--small {
+.exp-main-tab-container .slds-icon_small {
     height: 1rem;
-}
-
-.page-size-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.page-size-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: #444;
-    white-space: nowrap;
-}
-
-.page-size-select {
-    height: 32px;
-    padding: 0 24px 0 10px;
-    border: 1px solid #dddbda;
-    border-radius: 4px;
-    background-color: #ffffff;
-    font-size: 13px;
-    font-weight: 500;
-    color: #080707;
-    cursor: pointer;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23555555%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-}
-
-.page-size-select:focus {
-    outline: none;
-    border-color: #0176d3;
-    box-shadow: 0 0 3px #0176d3;
-}
-
-.page-size-select:hover {
-    border-color: #0176d3;
-}
-
-.pagination-right {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    margin-left: auto;
-}
-
-.results-info {
-    font-size: 13px;
-    color: #555;
-    font-weight: 500;
-    white-space: nowrap;
-    margin: 0;
-}
-
-.pagination-button {
-    background-color: #ffffff;
-    border: 1px solid #d8d8d8;
-    color: #333;
-    padding: 6px 12px;
-    margin: 0 2px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border-radius: 5px;
-    font-size: 12px;
-}
-
-.pagination-button svg {
-    fill: black;
-    width: 0.7rem;
-    height: 0.7rem;
-}
-
-.pagination-button:hover {
-    background-color: #f0f0f0;
-    border-color: #0176D3;
-}
-
-.pagination-button.active {
-    background-color: #0070d2;
-    color: white;
-    border-color: #0070d2;
-}
-
-.pagination-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.pagination-button:first-child,
-.pagination-button:last-child {
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 span {
@@ -874,19 +735,19 @@ span {
         margin-left: unset;
     }
 
-    .main .body .innerDiv1 {
+    .exp-main-tab-container .exp-content-container .innerDiv1 {
         position: relative;
         width: 100%;
         flex-direction: column;
         border-radius: 10px;
     }
 
-    .main .body .innerDiv1 .filterDiv {
+    .exp-main-tab-container .exp-content-container .innerDiv1 .filterDiv {
         padding-bottom: 0;
         border-radius: 10px;
     }
 
-    .main .body .innerDiv2 {
+    .exp-main-tab-container .exp-content-container .innerDiv2 {
         width: 100%;
         border-radius: 10px;
     }
@@ -895,7 +756,7 @@ span {
         height: 24rem;
     }
 
-    .pagination-right {
+    .exp-pagination-right {
         margin-left: 0;
         flex-wrap: wrap;
         justify-content: center;
@@ -931,16 +792,6 @@ span {
     .tab-section {
         width: 100%;
         justify-content: space-between;
-    }
-
-    .pagination-button {
-        padding: 3px 5px;
-    }
-
-    .pagination-button:first-child,
-    .pagination-button:last-child {
-        gap: 0;
-        padding: 3px 3px;
     }
 }
 

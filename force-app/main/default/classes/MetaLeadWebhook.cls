@@ -69,7 +69,8 @@ global with sharing class MetaLeadWebhook {
                 return (String) resp.get('access_token');
             }
         } catch (Exception e) {
-            System.debug('Failed to get Page Access Token: ' + e.getMessage());
+            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'getPageAccessToken', e.getMessage());
+            // Ignore exception
         }
         // Fallback: use System User Token directly
         return apiCtx.token;
@@ -118,13 +119,12 @@ global with sharing class MetaLeadWebhook {
             // Resolve the correct token chain
             String systemUserToken = getSystemUserToken();
             if (String.isBlank(systemUserToken)) {
-                System.debug('MetaLeadWebhook: No System User Token found in Meta_Token_Config__c. Cannot fetch lead.');
                 return;
             }
 
-            Integration_App_Config__mdt config = Integration_App_Config__mdt.getInstance('Meta_Ads');
-            String apiVersion = config != null ? config.API_Version__c : 'v19.0';
-            String baseUrl    = config != null ? config.Base_Url__c    : 'https://graph.facebook.com';
+            OAuth_Configuration__mdt oauthConfig = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
+            String apiVersion = oauthConfig != null ? oauthConfig.API_Version__c : 'v19.0';
+            String baseUrl    = oauthConfig != null ? oauthConfig.Authorization_Endpoint__c : 'https://graph.facebook.com';
 
             // Derive Page Access Token (same method used in MetaAdsFormMappingController)
             ApiContext sysCtx = new ApiContext(systemUserToken, apiVersion, baseUrl);
@@ -138,7 +138,6 @@ global with sharing class MetaLeadWebhook {
             createSalesforceContact(cCtx);
 
         } catch (Exception e) {
-            System.debug('MetaLeadWebhook.handlePost Error: ' + e.getMessage() + ' | Line: ' + e.getLineNumber());
             ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'handlePost', e.getMessage());
         }
     }
@@ -160,7 +159,7 @@ global with sharing class MetaLeadWebhook {
             Map<String, Object> response = makeGetRequest(url);
             return response.containsKey('name') ? (String) response.get('name') : '';
         } catch (Exception e) {
-            System.debug('Error fetching form name: ' + e.getMessage());
+            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'fetchFormName', e.getMessage());
             return '';
         }
     }
@@ -208,7 +207,7 @@ global with sharing class MetaLeadWebhook {
                 if (String.isNotBlank(ctx.mappingJsonOverride)) {
                     mappingJsonData = ctx.mappingJsonOverride;
                 } else {
-                    List<MVEX__Configuration_Settings__c> settings = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Meta Ads Mappings' LIMIT 1];
+                    List<MVEX__Configuration_Settings__c> settings = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Meta Ads Mappings' WITH USER_MODE LIMIT 1];
                     if (!settings.isEmpty()) {
                         mappingJsonData = settings[0].MVEX__Fields_Data__c;
                     }
@@ -271,7 +270,8 @@ global with sharing class MetaLeadWebhook {
                     }
                 }
             } catch (Exception e) {
-                System.debug('Error fetching/parsing mappings JSON: ' + e.getMessage());
+                ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'createSalesforceContact_fetchMappings', e.getMessage());
+                // Ignore mapping fetch error
             }
             
             // Process field data
@@ -292,7 +292,7 @@ global with sharing class MetaLeadWebhook {
                             try {
                                 newContact.put(sfField, fieldValue);
                             } catch (Exception e) {
-                                System.debug('Failed to map ' + fieldName + ' to ' + sfField);
+                                ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'createSalesforceContact_mapField', e.getMessage());
                                 unmappedData += fieldName + ' (' + sfField + '): ' + fieldValue + '\n';
                             }
                         }
@@ -309,7 +309,8 @@ global with sharing class MetaLeadWebhook {
                 try {
                     newContact.put(sfField, customValue);
                 } catch (Exception e) {
-                    System.debug('Failed to map custom value ' + customValue + ' to ' + sfField);
+                    ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'createSalesforceContact_customValue', e.getMessage());
+                    // mapping failure is ignored
                 }
             }
 
@@ -345,6 +346,7 @@ global with sharing class MetaLeadWebhook {
                 }
                 return 'Success';
             } catch (Exception e) {
+                ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'createSalesforceContact_insert', e.getMessage());
                 MVEX__Error_Handling__c errRec = new MVEX__Error_Handling__c();
                 errRec.MVEX__Error_Body__c = JSON.serializePretty(retryPayload);
                 errRec.MVEX__Source_of_Error__c = 'MetaFailedLeads';

@@ -7,28 +7,22 @@ public with sharing class MetaAdsFormMappingController {
     public static Map<String, Object> getConnectedPages() {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            OAuth_Configuration__mdt tokenConfig = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
+            List<OAuth_Configuration__mdt> tokenConfigs = [SELECT Access_Token__c, API_Version__c, Authorization_Endpoint__c, Client_App_Id__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' WITH USER_MODE LIMIT 1];
+            OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
             if (tokenConfig == null || String.isBlank(tokenConfig.Access_Token__c)) {
                 resultMap.put('success', false);
                 resultMap.put('message', 'Meta Ads is not connected.');
                 return resultMap;
             }
 
-            String systemUserToken = tokenConfig.Access_Token__c;
-            
-            Integration_App_Config__mdt config = Integration_App_Config__mdt.getInstance('Meta_Ads');
-            if (config == null) {
-                resultMap.put('success', false);
-                resultMap.put('message', 'Integration configuration for Meta Ads is missing.');
-                return resultMap;
-            }
-
-            String GRAPH_API_VERSION = config.API_Version__c;
-            String GRAPH_BASE_URL = config.Base_Url__c;
+            // Read directly from metadata — no manipulation
+            String accessToken     = tokenConfig.Access_Token__c;
+            String graphApiVersion = tokenConfig.API_Version__c;
+            String graphBaseUrl    = tokenConfig.Authorization_Endpoint__c;
 
             Http http = new Http();
             HttpRequest pageReq = new HttpRequest();
-            pageReq.setEndpoint(GRAPH_BASE_URL + '/' + GRAPH_API_VERSION + '/me/accounts?fields=id,name,access_token&access_token=' + EncodingUtil.urlEncode(systemUserToken, 'UTF-8'));
+            pageReq.setEndpoint(graphBaseUrl + '/' + graphApiVersion + '/me/accounts?fields=id,name,access_token&access_token=' + EncodingUtil.urlEncode(accessToken, 'UTF-8'));
             pageReq.setMethod('GET');
             pageReq.setTimeout(20000);
 
@@ -41,11 +35,25 @@ public with sharing class MetaAdsFormMappingController {
                 }
                 resultMap.put('success', true);
             } else {
+                String errorMsg = 'HTTP ' + pageRes.getStatusCode();
+                try {
+                    Map<String, Object> errBody = (Map<String, Object>) JSON.deserializeUntyped(pageRes.getBody());
+                    if (errBody.containsKey('error')) {
+                        Map<String, Object> errObj = (Map<String, Object>) errBody.get('error');
+                        errorMsg += ' | ' + errObj.get('message');
+                    } else {
+                        errorMsg += ' | ' + pageRes.getBody();
+                    }
+                } catch (Exception parseEx) {
+                    ErrorHandler.insertErrorData(parseEx, 'MetaAdsFormMappingController', 'getConnectedPages', parseEx.getMessage());
+                    errorMsg += ' | ' + pageRes.getBody();
+                }
                 resultMap.put('success', false);
-                resultMap.put('message', 'Failed to fetch pages. ' + pageRes.getBody());
+                resultMap.put('message', 'Failed to fetch pages. ' + errorMsg);
             }
 
         } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaAdsFormMappingController', 'getConnectedPages', e.getMessage());
             resultMap.put('success', false);
             resultMap.put('message', e.getMessage());
         }
@@ -59,65 +67,72 @@ public with sharing class MetaAdsFormMappingController {
     public static Map<String, Object> getLeadForms(String pageId) {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            OAuth_Configuration__mdt tokenConfig = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
+            List<OAuth_Configuration__mdt> tokenConfigs = [SELECT Access_Token__c, API_Version__c, Authorization_Endpoint__c, Client_App_Id__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' WITH USER_MODE LIMIT 1];
+            OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
             if (tokenConfig == null || String.isBlank(tokenConfig.Access_Token__c)) {
                 resultMap.put('success', false);
                 resultMap.put('message', 'Meta Ads is not connected.');
                 return resultMap;
             }
 
-            String systemUserToken = tokenConfig.Access_Token__c;
-            String clientAppId = tokenConfig.Client_App_Id__c;
+            // Read directly from metadata — no manipulation
+            String accessToken     = tokenConfig.Access_Token__c;
+            String clientAppId     = tokenConfig.Client_App_Id__c;
+            String graphApiVersion = tokenConfig.API_Version__c;
+            String graphBaseUrl    = tokenConfig.Authorization_Endpoint__c;
 
-            Integration_App_Config__mdt config = Integration_App_Config__mdt.getInstance('Meta_Ads');
-            if (config == null) {
-                resultMap.put('success', false);
-                resultMap.put('message', 'Integration configuration for Meta Ads is missing.');
-                return resultMap;
-            }
-
-            String GRAPH_API_VERSION = config.API_Version__c;
-            String GRAPH_BASE_URL = config.Base_Url__c;
 
             Http http = new Http();
-            
-            // 1. Fetch Page Access Token on the fly using System User Token
+
+            // ── Step 1: Fetch Page Access Token ───────────────────────────────
             HttpRequest pageReq = new HttpRequest();
-            pageReq.setEndpoint(GRAPH_BASE_URL + '/' + GRAPH_API_VERSION + '/' + pageId + '?fields=access_token&access_token=' + EncodingUtil.urlEncode(systemUserToken, 'UTF-8'));
+            pageReq.setEndpoint(graphBaseUrl + '/' + graphApiVersion + '/' + pageId + '?fields=access_token&access_token=' + accessToken);
             pageReq.setMethod('GET');
             pageReq.setTimeout(20000);
             HttpResponse pageRes = http.send(pageReq);
-            
-            String pageAccessToken = systemUserToken; // fallback
+
+            String pageAccessToken = accessToken; // fallback to system user token
             if (pageRes.getStatusCode() == 200) {
                 Map<String, Object> pMap = (Map<String, Object>) JSON.deserializeUntyped(pageRes.getBody());
                 if (pMap.containsKey('access_token')) {
                     pageAccessToken = (String) pMap.get('access_token');
                 }
             }
-            
-            // 2. Fetch Forms using the Page Access Token
+
+            // ── Step 2: Fetch Lead Forms ──────────────────────────────────────
             HttpRequest formReq = new HttpRequest();
-            formReq.setEndpoint(GRAPH_BASE_URL + '/' + GRAPH_API_VERSION + '/' + pageId + '/leadgen_forms?fields=id,name,status,created_time,questions&access_token=' + EncodingUtil.urlEncode(pageAccessToken, 'UTF-8'));
+            formReq.setEndpoint(graphBaseUrl + '/' + graphApiVersion + '/' + pageId + '/leadgen_forms?fields=id,name,status,created_time,questions&access_token=' + pageAccessToken);
             formReq.setMethod('GET');
             formReq.setTimeout(20000);
-
             HttpResponse formRes = http.send(formReq);
 
             if (formRes.getStatusCode() == 200) {
                 Map<String, Object> formMap = (Map<String, Object>) JSON.deserializeUntyped(formRes.getBody());
-                if (formMap.containsKey('data')) {
-                    resultMap.put('forms', formMap.get('data'));
-                }
+                List<Object> forms = formMap.containsKey('data') ? (List<Object>) formMap.get('data') : new List<Object>();
+                resultMap.put('forms', forms);
                 resultMap.put('client_app_id', clientAppId);
                 resultMap.put('page_id', pageId);
                 resultMap.put('success', true);
             } else {
+                String errorMsg = 'HTTP ' + formRes.getStatusCode();
+                try {
+                    Map<String, Object> errBody = (Map<String, Object>) JSON.deserializeUntyped(formRes.getBody());
+                    if (errBody.containsKey('error')) {
+                        Map<String, Object> errObj = (Map<String, Object>) errBody.get('error');
+                        errorMsg += ' | ' + errObj.get('message') + ' (Meta code: ' + errObj.get('code') + ')';
+                    } else {
+                        errorMsg += ' | ' + formRes.getBody();
+                    }
+                } catch (Exception parseEx) {
+                    ErrorHandler.insertErrorData(parseEx, 'MetaAdsFormMappingController', 'getLeadForms', parseEx.getMessage());
+                    errorMsg += ' | ' + formRes.getBody();
+                }
                 resultMap.put('success', false);
-                resultMap.put('message', 'Failed to fetch forms. HTTP ' + formRes.getStatusCode() + ' - ' + formRes.getBody());
+                resultMap.put('message', 'Failed to fetch forms. ' + errorMsg);
             }
 
         } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaAdsFormMappingController', 'getLeadForms', e.getMessage());
             resultMap.put('success', false);
             resultMap.put('message', e.getMessage());
         }
@@ -184,6 +199,7 @@ public with sharing class MetaAdsFormMappingController {
             MVEX__Configuration_Settings__c setting = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Meta Ads Mappings' WITH USER_MODE LIMIT 1];
             return setting.MVEX__Fields_Data__c;
         } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaAdsFormMappingController', 'getExistingMappings', e.getMessage());
             return null;
         }
     }
@@ -219,6 +235,7 @@ public with sharing class MetaAdsFormMappingController {
             
             resultMap.put('success', true);
         } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaAdsFormMappingController', 'saveMapping', e.getMessage());
             resultMap.put('success', false);
             resultMap.put('message', e.getMessage());
         }
@@ -226,15 +243,15 @@ public with sharing class MetaAdsFormMappingController {
     }
 
     private static String subscribeWebhookOnTheFly(String pageId) {
-        OAuth_Configuration__mdt tokenConfig = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
+        List<OAuth_Configuration__mdt> tokenConfigs = [SELECT Access_Token__c, API_Version__c, Authorization_Endpoint__c, Client_App_Id__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1];
+        OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
         if (tokenConfig == null || String.isBlank(tokenConfig.Access_Token__c)) {
             return null;
         }
         String systemUserToken = tokenConfig.Access_Token__c;
         
-        Integration_App_Config__mdt config = Integration_App_Config__mdt.getInstance('Meta_Ads');
-        String graphApiVersion = config.API_Version__c;
-        String graphBaseUrl = config.Base_Url__c;
+        String graphApiVersion = tokenConfig.API_Version__c;
+        String graphBaseUrl = tokenConfig.Authorization_Endpoint__c;
         
         Http http = new Http();
         
@@ -310,6 +327,7 @@ public with sharing class MetaAdsFormMappingController {
             }
             return result;
         } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaAdsFormMappingController', 'retryFailedLead', e.getMessage());
             return 'Retry Error: ' + e.getMessage();
         }
     }

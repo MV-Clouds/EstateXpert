@@ -532,7 +532,7 @@
                                 <p class="info-title" style="color: #991B1B;">Configuration Missing</p>
                                 <p class="info-text" style="color: #991B1B;">The Meta Ads integration configuration is
                                     missing. Please ask your administrator to configure the Tech Provider App
-                                    credentials in Custom Metadata (Integration_App_Config__mdt) first.</p>
+                                    credentials in Custom Metadata (OAuth_Configuration__mdt) first.</p>
                             </div>
                         </div>
                     </apex:outputPanel>

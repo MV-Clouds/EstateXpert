@@ -81,6 +81,7 @@ public with sharing class MetaAdsTokenController {
             return resultMap;
 
         } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaAdsTokenController', 'exchangeCodeForToken', e.getMessage());
             resultMap.put('success', false);
             resultMap.put('message', 'Exception: ' + e.getMessage());
             return resultMap;
@@ -168,6 +169,7 @@ public with sharing class MetaAdsTokenController {
             resultMap.put('success', true);
             
         } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaAdsTokenController', 'getConnectionStatus', e.getMessage());
             resultMap.put('success', false);
             resultMap.put('message', e.getMessage());
         }
@@ -189,6 +191,7 @@ public with sharing class MetaAdsTokenController {
             }
             resultMap.put('success', true);
         } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaAdsTokenController', 'deactivateConnection', e.getMessage());
             resultMap.put('success', false);
             resultMap.put('message', e.getMessage());
         }

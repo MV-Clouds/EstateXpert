@@ -600,6 +600,10 @@
   text-align: center;
 }
 
+.exp-table-content th span {
+  margin: 0 5px;
+}
+
 /* TABLE RELATED CSS END HERE */
 
 /* SORTING RELATED CSS START HERE */

@@ -109,13 +109,6 @@
     stroke: white;
 }
 
-.center-trancate-head {
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    font-weight: 500;
-}
-
 .exp-main-tab-container .exp-content-container {
     width: 100%;
     flex-grow: 1;

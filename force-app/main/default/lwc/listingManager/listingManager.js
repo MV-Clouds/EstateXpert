@@ -313,7 +313,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
             if (this.wrapOn) {
                 this.wrapFilter();
             } else {
-                const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
+                const filterDiv = this.template.querySelector('.inner-div-1 .filter-div');
                 if (filterDiv) {
                     filterDiv.classList.add('highlight-filter-panel');
                     setTimeout(() => {
@@ -435,13 +435,13 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
             // Only initialize filter state once on first render
             if (!this.hasInitializedFilter && this.wrapOn) {
                 const toggleBtn = this.template.querySelector('.filter-toggle-btn');
-                const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
-                const div1 = this.template.querySelector('.innerDiv1');
+                const filterDiv = this.template.querySelector('.inner-div-1 .filter-div');
+                const div1 = this.template.querySelector('.inner-div-1');
 
                 if (toggleBtn && filterDiv && div1) {
                     // Filter should be hidden by default
-                    filterDiv.classList.add('removeInnerDiv1');
-                    div1.classList.add('removeInnerDiv1');
+                    filterDiv.classList.add('remove-inner-div-1');
+                    div1.classList.add('remove-inner-div-1');
 
                     if (this.screenWidth >= 900) {
                         div1.style.width = '0';
@@ -1457,15 +1457,15 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
     wrapFilter() {
         try {
             const toggleBtn = this.template.querySelector('.filter-toggle-btn');
-            const filterDiv = this.template.querySelector('.innerDiv1 .filterDiv');
-            const div1 = this.template.querySelector('.innerDiv1');
-            const div2 = this.template.querySelector('.innerDiv2');
+            const filterDiv = this.template.querySelector('.inner-div-1 .filter-div');
+            const div1 = this.template.querySelector('.inner-div-1');
+            const div2 = this.template.querySelector('.inner-div-2');
 
             if (this.wrapOn) {
                 // Currently hidden, show filter
                 toggleBtn.classList.add('active'); // Blue when filter showing
-                filterDiv.classList.remove('removeInnerDiv1');
-                div1.classList.remove('removeInnerDiv1');
+                filterDiv.classList.remove('remove-inner-div-1');
+                div1.classList.remove('remove-inner-div-1');
 
                 if (this.screenWidth >= 900) {
                     div1.style.width = '22%';
@@ -1491,12 +1491,12 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                     // Hide filter content and remove margin after animation starts
                     setTimeout(() => {
                         if (this.wrapOn) {
-                            filterDiv.classList.add('removeInnerDiv1');
-                            div1.classList.add('removeInnerDiv1');
+                            filterDiv.classList.add('remove-inner-div-1');
+                            div1.classList.add('remove-inner-div-1');
                         }
                     }, 150);
                 } else {
-                    filterDiv.classList.add('removeInnerDiv1');
+                    filterDiv.classList.add('remove-inner-div-1');
                     div1.style.height = '0';
                     div1.style.opacity = '0';
                     div1.style.width = '100%';

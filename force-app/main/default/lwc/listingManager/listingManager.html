@@ -5,8 +5,8 @@
     <div class="slds-grid slds-wrap slds-align_absolute-center full-page-container">
         <div class="exp-main-tab-container">
             <template if:false={isMobileOrTablet}>
-                <div class="sub_main_header_css">
-                    <div class="header_block_css">
+                <div class="sub-main-header-css">
+                    <div class="header-block-css">
                         Listing Manager
                     </div>
                     <div class="header-buttons">
@@ -139,7 +139,7 @@
                                         aria-label="Example advanced table of Opportunities in actionable mode">
                                         <thead>
                                             <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
-                                                <th class="slds-cell_action-mode imageColume" scope="col">
+                                                <th class="slds-cell_action-mode image-column" scope="col">
                                                     <div class="slds-truncate slds-assistive-text" title="Actions">
                                                         Actions</div>
                                                 </th>
@@ -149,7 +149,7 @@
                                                     <div class="slds-text-link_reset exp-sort-cover" role="button"
                                                         tabindex="0">
                                                         <span class="slds-assistive-text">Sort by: </span>
-                                                        <div class="slds-has-flexi-truncate center-trancate-head">
+                                                        <div class="slds-has-flexi-truncate">
                                                             <span class="slds-truncate" title="Title">Listing
                                                                 Name</span>
                                                             <span
@@ -171,7 +171,7 @@
                                                         scope="col">
                                                         <div class="exp-sort-cover" role="button" tabindex="0">
                                                             <span class="slds-assistive-text">Sort by: </span>
-                                                            <div class="slds-has-flexi-truncate center-trancate-head">
+                                                            <div class="slds-has-flexi-truncate">
                                                                 <span class="slds-truncate"
                                                                     title={listing.fieldLabel}>{listing.fieldLabel}</span>
                                                                 <span
@@ -199,7 +199,7 @@
                                                                 alt="Listing Image" draggable="false" />
                                                         </div>
                                                     </td>
-                                                    <td class="slds-cell_action-mode conat_cls" scope="row"
+                                                    <td class="slds-cell_action-mode listing-cls" scope="row"
                                                         title={listing.Name}>
                                                         <div class="slds-truncate center-trancate-text"
                                                             title={listing.Name}>
@@ -234,7 +234,7 @@
                             <!-- MAP VIEW -->
                             <template if:true={showMap}>
                                 <div class="map-view-container">
-                                    <div class="mapCmp">
+                                    <div class="map-cmp">
                                         <lightning-map class="map-class" map-markers={mapMarkers} list-view="hide">
                                         </lightning-map>
                                     </div>
@@ -296,8 +296,8 @@
                     </div>
                 </template>
                 <template if:false={isMobileOrTablet}>
-                    <div class="innerDiv1">
-                        <div class="filterDiv">
+                    <div class="inner-div-1">
+                        <div class="filter-div">
                             <c-listing-manager-filter-cmp onvalueselected={handleFilteredListings}
                                 onmodalvaluechange={handleAddModalChange} onvaluereset={handleReset}
                                 onloading={handleLoading}>

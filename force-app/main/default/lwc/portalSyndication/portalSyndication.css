@@ -1,6 +1,5 @@
 * {
     font-family: 'Mulish';
-    user-select: none;
 }
 
 .my_popup_container {
@@ -40,7 +39,7 @@
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 
-.table-content .inactive_cls {
+.exp-table-content .inactive_cls {
     background-color: #dcdcdc;
     color: #1f2937;
     border-radius: 15px;
@@ -49,7 +48,7 @@
     font-weight: 400;
 }
 
-.table-content .active_cls {
+.exp-table-content .active_cls {
     background-color: #2e844a;
     color: white;
     border-radius: 15px;
@@ -58,7 +57,7 @@
     font-weight: 400;
 }
 
-.table-content .publish_css {
+.exp-table-content .publish_css {
     background-color: #0176D3;
     color: white;
     padding: 8px 16px;
@@ -76,17 +75,17 @@
      box-shadow: 0 2px 8px rgba(1, 118, 211, 0.3);
 }
 
-.table-content .publish_css:hover {
+.exp-table-content .publish_css:hover {
     background: #0157a0;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(1, 118, 211, 0.4);
 }
 
-.table-content .publish_css svg {
+.exp-table-content .publish_css svg {
     pointer-events: none;
 }
 
-.table-content .unpublish_css {
+.exp-table-content .unpublish_css {
     background-color: #ba0517;
     color: white;
     padding: 8px 16px;
@@ -103,13 +102,13 @@
     transition: all 0.3s ease;
 }
 
-.table-content .unpublish_css:hover {
+.exp-table-content .unpublish_css:hover {
     background-color: rgb(138, 4, 17);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(138, 4, 17, 0.4);
 }
 
-.table-content .unpublish_css svg {
+.exp-table-content .unpublish_css svg {
     pointer-events: none;
 }
 
@@ -326,22 +325,10 @@
     font-weight: 500;
 }
 
-.portal-syndication .table-content .slds-table td {
+.portal-syndication .exp-table-content .slds-table td {
     height: 2rem;
 }
 
-.portal-syndication .table-content .slds-table th {
+.portal-syndication .exp-table-content .slds-table th {
     height: 2.5rem;
-}
-
-.portal-syndication .blue-btn-css {
-    height: 30px;
-    min-height: 30px;
-    gap: 4px;
-}
-
-.portal-syndication .red-btn-css {
-    height: 30px;
-    min-height: 30px;
-    gap: 4px;
 }

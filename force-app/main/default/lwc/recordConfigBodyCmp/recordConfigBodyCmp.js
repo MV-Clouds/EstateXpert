@@ -14,7 +14,6 @@ export default class RecordConfigBodyCmp extends LightningElement {
     // Tracker variables from child
     @track fieldOptions = [];
     @track setScroll = false;
-    @track pageSize = 30; // Default Page Size
     @track checklistItems = [];
     @track searchText = '';
     @track filteredFieldOptions = [];
@@ -113,14 +112,6 @@ export default class RecordConfigBodyCmp extends LightningElement {
         this.dispatchEvent(new CustomEvent('close'));
     }
 
-    handlePageSizeChange(event) {
-        let value = parseInt(event.target.value, 10);
-        if (isNaN(value) || value < 1) {
-            value = 20;
-        }
-        this.pageSize = value;
-    }
-
     /* ================= DATA FETCHING ================= */
 
     fetchMetadata() {
@@ -174,11 +165,6 @@ export default class RecordConfigBodyCmp extends LightningElement {
                             hasError: false,
                             rowClass: this.computeRowClass(false)
                         }));
-                    }
-                    if (result.metadataRecords[1]) {
-                        this.pageSize = parseInt(result.metadataRecords[1], 10);
-                    } else {
-                        this.pageSize = 30; // Default if not found
                     }
                 }
                 this.isLoading = false;
@@ -428,14 +414,6 @@ export default class RecordConfigBodyCmp extends LightningElement {
 
     saveChecklistRecords() {
         try {
-            // Validate page size range
-            const MIN_PAGE_SIZE = 10;
-            const MAX_PAGE_SIZE = 50;
-            if (this.pageSize < MIN_PAGE_SIZE || this.pageSize > MAX_PAGE_SIZE) {
-                this.toast('Error', `Records per page must be between ${MIN_PAGE_SIZE} and ${MAX_PAGE_SIZE}.`, 'error');
-                return;
-            }
-
             // Validate field selections — highlight ALL empty rows at once
             this.checklistItems = this.checklistItems.map((item) => {
                 if (!item.fieldName) {
@@ -498,15 +476,7 @@ export default class RecordConfigBodyCmp extends LightningElement {
 
             this.isLoading = true;
 
-            // Ensure pageSize is valid before saving
-            const pageSizeToSave = this.pageSize || 30;
-
-            saveMetadata({
-                checklistData: checklistData,
-                totalPages: pageSizeToSave,
-                objectApiName: this.selectedTabObject,
-                featureName: this.featureName
-            })
+            saveMetadata({checklistData: checklistData, objectApiName: this.selectedTabObject, featureName: this.featureName})
                 .then(() => {
                     this.toast('Success', 'Configuration updated successfully', 'success');
                     this.isLoading = false;

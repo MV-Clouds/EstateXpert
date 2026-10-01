@@ -4,7 +4,7 @@
   </template>
   <div class="maindiv">
     <div class="stylebtn">
-      <button class="blue-btn-css" onclick={saveChanges} disabled={disableEnableBtn} aria-label="Save Changes">
+      <button class="exp-blue-btn-css" onclick={saveChanges} disabled={disableEnableBtn} aria-label="Save Changes">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z"
@@ -14,7 +14,7 @@
         </svg>
         <template if:false={isMobileOrTablet}>Save Changes</template>
       </button>
-      <button class="white-btn-css" onclick={cancelChanges} disabled={disableEnableBtn} aria-label="Cancel">
+      <button class="exp-white-btn-css" onclick={cancelChanges} disabled={disableEnableBtn} aria-label="Cancel">
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -22,13 +22,13 @@
         </svg>
         <template if:false={isMobileOrTablet}>Cancel</template>
       </button>
-      <button class="blue-btn-css" onclick={modalPopup} aria-label="Add New Files">
+      <button class="exp-blue-btn-css" onclick={modalPopup} aria-label="Add New Files">
         <svg width="14" height="14" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
         </svg>
         <template if:false={isMobileOrTablet}>Add New Files</template>
       </button>
-      <button class="white-btn-css" onclick={toDeleteAllMedia} disabled={isAllDelete} aria-label="Delete All">
+      <button class="exp-white-btn-css" onclick={toDeleteAllMedia} disabled={isAllDelete} aria-label="Delete All">
         <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
@@ -191,29 +191,29 @@
 
         <template if:false={showMobileView}>
           <div class="field-mapping-container">
-            <div class="table-content table-border">
+            <div class="exp-table-content table-border">
               <table aria-multiselectable="true"
                 class="slds-table slds-table_fixed-layout slds-table_resizable-cols slds-table_cell-buffer ">
                 <thead>
-                  <tr class="table_tr_cls slds-line-height_reset">
+                  <tr class="exp-table-tr-cls slds-line-height_reset">
                     <th class="thumbnail-col" scope="col">
                       <div class="slds-truncate" title="Thumbnail"></div>
                     </th>
-                    <th aria-sort="none" data-id="Name" onclick={sortClick} class="title-col slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header" scope="col">
-                      <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                    <th aria-sort="none" data-id="Name" onclick={sortClick} class="title-col slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header" scope="col">
+                      <div class="slds-text-link_rese exp-sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                         <span class="slds-truncate" title="Title">Title</span>
                         <span class="slds-icon_container slds-icon-utility-arrowdown">
-                            <svg data-index="Name" class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                            <svg data-index="Name" class="exp-arrow-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                             </svg>
                         </span>
                       </div>
                     </th>
-                    <th aria-sort="none" data-id="MVEX__Size__c" onclick={sortClick} class="size-col slds-is-resizable slds-is-sortable slds-cell_action-mode sorting_header" scope="col">
-                      <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
+                    <th aria-sort="none" data-id="MVEX__Size__c" onclick={sortClick} class="size-col slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header" scope="col">
+                      <div class="slds-text-link_rese exp-sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
                         <span class="slds-truncate" title="Size (kb)">Size (kb)</span>
                         <span class="slds-icon_container slds-icon-utility-arrowdown">
-                            <svg data-index="MVEX__Size__c" class="listing-manager-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                            <svg data-index="MVEX__Size__c" class="exp-arrow-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                             </svg>
                         </span>
@@ -240,7 +240,7 @@
                             draggable="false" onerror={handleImageError} />
                         </div>
                       </td>
-                      <td data-label="Title" class="truncate_css">
+                      <td data-label="Title" class="exp-truncate-css">
                         <div class="slds-truncate font_style_css">
                           {item.Name}
                         </div>
@@ -250,7 +250,7 @@
                           {item.MVEX__Size__c}
                         </div>
                       </td>
-                      <td data-label="Tags" class="truncate_css">
+                      <td data-label="Tags" class="exp-truncate-css">
                         <div class="tags_css font_style_css slds-truncate">
                           <template for:each={item.MVEX__Tags__c} for:item="tag">
                             <template if:true={item.MVEX__Tags__c}>
@@ -284,7 +284,7 @@
                       </td>
                       <td data-label="Actions">
                         <div class="action_icons_css">
-                          <div class="preview-icon-css" data-recid={item.Id} data-index={index}
+                          <div class="exp-preview-icon-css" data-recid={item.Id} data-index={index}
                             data-description={item.Name} data-src={item.MVEX__BaseUrl__c}
                             data-exturl={item.MVEX__ExternalLink__c} data-size={item.MVEX__Size__c}
                             data-mimetype={item.MVEX__MimeType__c} onclick={handleImgClick}>
@@ -297,7 +297,7 @@
                               </path>
                             </svg>
                           </div>
-                          <div class="preview-icon-css" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
+                          <div class="exp-preview-icon-css" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
                             data-name={item.Name} data-isexternal={item.MVEX__Size__c} onclick={downloadRowImage}>
                             <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                               xmlns="http://www.w3.org/2000/svg">
@@ -306,7 +306,7 @@
                                 stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
-                          <div class="edit-icon-css" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
+                          <div class="exp-edit-icon-css" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
                             data-tags={item.MVEX__Tags__c} data-name={item.Name} onclick={editImageNameToStore}>
                             <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                               xmlns="http://www.w3.org/2000/svg">
@@ -315,7 +315,7 @@
                                 stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
-                          <div class="delete-icon-css" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
+                          <div class="exp-delete-icon-css" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
                             data-label={item.MVEX__Filename__c} data-size={item.MVEX__Size__c} onclick={deleteRow}>
                             <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
                               xmlns="http://www.w3.org/2000/svg">
@@ -377,7 +377,7 @@
                 </div>
 
                 <div class="slds-truncate btn-div" title="actions">
-                  <div class="preview-icon-css slds-p-around_xx-small" data-recid={item.Id} data-index={index}
+                  <div class="exp-preview-icon-css slds-p-around_xx-small" data-recid={item.Id} data-index={index}
                     data-description={item.Name} data-src={item.MVEX__BaseUrl__c}
                     data-exturl={item.MVEX__ExternalLink__c} data-mimetype={item.MVEX__MimeType__c}
                     data-size={item.MVEX__Size__c} onclick={handleImgClick}>
@@ -390,7 +390,7 @@
                       </path>
                     </svg>
                   </div>
-                  <div class="preview-icon-css slds-p-around_xx-small" title="download" data-key={item.Id}
+                  <div class="exp-preview-icon-css slds-p-around_xx-small" title="download" data-key={item.Id}
                     data-isexternal={item.MVEX__Size__c} data-url={item.MVEX__BaseUrl__c} data-name={item.Name}
                     onclick={downloadRowImage}>
                     <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -399,7 +399,7 @@
                         stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                   </div>
-                  <div class="edit-icon-css slds-p-around_xx-small" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
+                  <div class="exp-edit-icon-css slds-p-around_xx-small" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
                     data-tags={item.MVEX__Tags__c} data-name={item.Name} onclick={editImageNameToStore}>
                     <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
@@ -407,7 +407,7 @@
                         stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                   </div>
-                  <div class="delete-icon-css slds-p-around_xx-small" data-key={item.Id}
+                  <div class="exp-delete-icon-css slds-p-around_xx-small" data-key={item.Id}
                     data-url={item.MVEX__BaseUrl__c} onclick={deleteRow}>
                     <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
@@ -436,7 +436,7 @@
       <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
         class="slds-modal slds-fade-in-open">
         <div class="slds-modal__container">
-          <div class="slds-modal__close close-icon-css" onclick={closePopupEdit}>
+          <div class="slds-modal__close exp-close-icon-css" onclick={closePopupEdit}>
             <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -479,7 +479,7 @@
               </div>
             </div>
             <div class="edit_modal_footerbtns">
-              <button class="white-btn-css" aria-label="Cancel and close" onclick={closePopupEdit}>
+              <button class="exp-white-btn-css" aria-label="Cancel and close" onclick={closePopupEdit}>
                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -487,7 +487,7 @@
                 </svg>
                 Close
               </button>
-              <button class="blue-btn-css" onclick={confirmEdit}>
+              <button class="exp-blue-btn-css" onclick={confirmEdit}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
                 </svg>
@@ -509,7 +509,7 @@
       <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
         class="slds-modal slds-fade-in-open">
         <div class="slds-modal__container">
-          <div class="slds-modal__close close-icon-css" onclick={closePopup}>
+          <div class="slds-modal__close exp-close-icon-css" onclick={closePopup}>
             <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -525,7 +525,7 @@
               <p>Are you sure to delete Media?</p>
             </div>
             <div class="edit_modal_footerbtns">
-              <button class="white-btn-css" onclick={closePopup}>
+              <button class="exp-white-btn-css" onclick={closePopup}>
                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -533,7 +533,7 @@
                 </svg>
                 No
               </button>
-              <button class="red-btn-css" onclick={handleDelete}>
+              <button class="exp-red-btn-css" onclick={handleDelete}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
                 </svg>
@@ -550,7 +550,7 @@
       <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
         class="slds-modal slds-fade-in-open">
         <div class="slds-modal__container">
-          <div class="slds-modal__close close-icon-css" onclick={closePopup}>
+          <div class="slds-modal__close exp-close-icon-css" onclick={closePopup}>
             <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -566,7 +566,7 @@
               <p>Are you sure to delete all Media?</p>
             </div>
             <div class="edit_modal_footerbtns">
-              <button class="white-btn-css" aria-label="Cancel and close" onclick={closePopup}>
+              <button class="exp-white-btn-css" aria-label="Cancel and close" onclick={closePopup}>
                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -574,7 +574,7 @@
                 </svg>
                 No
               </button>
-              <button class="red-btn-css" onclick={deleteAllMedia}>
+              <button class="exp-red-btn-css" onclick={deleteAllMedia}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
                 </svg>

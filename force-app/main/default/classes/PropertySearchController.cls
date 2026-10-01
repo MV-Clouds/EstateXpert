@@ -583,7 +583,7 @@ public with sharing class PropertySearchController {
      * @description : Save mappings using standard DML on Custom Object (No Metadata Deploy needed).
      */
     @AuraEnabled
-    public static String saveMappings(String checklistData, Integer totalPages, String objectApiName, String featureName) {
+    public static String saveMappings(String checklistData, String objectApiName, String featureName) {
         try {
             // Check if record exists
             List<MVEX__Configuration_Settings__c> settingsList = [SELECT Id FROM MVEX__Configuration_Settings__c WHERE MVEX__Feature_Name__c = :featureName
@@ -597,12 +597,10 @@ public with sharing class PropertySearchController {
                 settingToSave = new MVEX__Configuration_Settings__c();
                 settingToSave.MVEX__Object_API_Name__c = objectApiName;
                 settingToSave.MVEX__Feature_Name__c = featureName;
-                // Setting a Name is optional if Auto-Number, but good for reference
                 settingToSave.Name = featureName + '_' + objectApiName; 
             }
 
             settingToSave.MVEX__Fields_Data__c = checklistData;
-            settingToSave.MVEX__Page_Size__c = totalPages;
 
             upsert settingToSave;
 

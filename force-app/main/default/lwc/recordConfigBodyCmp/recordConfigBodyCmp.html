@@ -2,7 +2,7 @@
     <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
         class="slds-modal slds-fade-in-open slds-modal_small">
         <div class="slds-modal__container">
-            <div class="slds-modal__close close-icon-css" onclick={handleDialogueClose}>
+            <div class="slds-modal__close exp-close-icon-css" onclick={handleDialogueClose}>
                 <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -24,13 +24,7 @@
                 <div class="main-div">
                     <div class="header_container_css">
                         <div class="header-action">
-                            <div class="page-size-container">
-                                <label class="page-size-label">Records to Display per Page:</label>
-                                <input type="number" class="page-size-input" value={pageSize}
-                                    onchange={handlePageSizeChange} min="10" max="50" />
-                            </div>
-
-                            <button class="blue-btn-css" onclick={addNewRow}>
+                            <button class="exp-blue-btn-css" onclick={addNewRow}>
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -45,20 +39,20 @@
                     <div class="table-body-div">
                         <div class="tableContainer">
                             <template if:true={isDataAvailable}>
-                                <div class="table-content tableContainer">
+                                <div class="exp-table-content tableContainer">
                                     <table aria-multiselectable="true"
                                         class="slds-table slds-table_fixed-layout slds-table_resizable-cols record-config-table">
                                         <thead>
-                                            <tr class="table_tr_cls slds-line-height_reset">
+                                            <tr class="exp-table-tr-cls slds-line-height_reset">
                                                 <th scope="col" style="width: 50px;"></th>
-                                                <th scope="col" class="sorting_header">
+                                                <th scope="col" class="exp-sorting-header">
                                                     <div class="slds-truncate" title="Field">Field</div>
                                                 </th>
-                                                <th scope="col" class="sorting_header">
+                                                <th scope="col" class="exp-sorting-header">
                                                     <div class="slds-truncate" title="Display Format">Display Format
                                                     </div>
                                                 </th>
-                                                <th scope="col" class="sorting_header" style="width: 80px;">
+                                                <th scope="col" class="exp-sorting-header" style="width: 80px;">
                                                     <div class="slds-truncate" title="Delete">Delete</div>
                                                 </th>
                                             </tr>
@@ -154,7 +148,7 @@
                                                     </td>
 
                                                     <td class="order_btn_grp">
-                                                        <div class="delete-icon-css" onclick={handleDelete}
+                                                        <div class="exp-delete-icon-css" onclick={handleDelete}
                                                             data-index={index}>
                                                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                                                 xmlns="http://www.w3.org/2000/svg">
@@ -181,7 +175,7 @@
                     </div>
                 </div>
                 <div class="footerbtns">
-                    <button class="white-btn-css" aria-label="Cancel and close" onclick={handleDialogueClose}>
+                    <button class="exp-white-btn-css" aria-label="Cancel and close" onclick={handleDialogueClose}>
                         <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                 d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -189,7 +183,7 @@
                         </svg>
                         Cancel
                     </button>
-                    <button class="blue-btn-css" onclick={saveChecklistRecords}>
+                    <button class="exp-blue-btn-css" onclick={saveChecklistRecords}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
                         </svg>

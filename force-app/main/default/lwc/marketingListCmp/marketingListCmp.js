@@ -821,7 +821,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
                 // Reset all icons to remove rotation classes
                 const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-                allHeaders.forEach(icon => icon.classList.remove('rotate-asc', 'rotate-desc'));
+                allHeaders.forEach(icon => icon.classList.remove('exp-rotate-asc', 'exp-rotate-desc'));
                 this.isSortApplied = false;
             }
 
@@ -880,7 +880,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
 
                 // Reset all icons to remove rotation classes
                 const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
-                allHeaders.forEach(icon => icon.classList.remove('rotate-asc', 'rotate-desc'));
+                allHeaders.forEach(icon => icon.classList.remove('exp-rotate-asc', 'exp-rotate-desc'));
 
                 // Deselect all items in processedListingData and unchangedProcessListings
                 const resetCheckedFlag = item => ({ ...item, isChecked: false });
@@ -1006,7 +1006,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             this.sortOrder = 'asc';
             const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
             allHeaders.forEach(icon => {
-                icon.classList.remove('rotate-asc', 'rotate-desc');
+                icon.classList.remove('exp-rotate-asc', 'exp-rotate-desc');
             });
             this.processedContactData = this.processedContactData.map(item => {
                 return { ...item, isChecked: isChecked };
@@ -1184,12 +1184,12 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     //     try {
     //         const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');
     //         allHeaders.forEach(icon => {
-    //             icon.classList.remove('rotate-asc', 'rotate-desc');
+    //             icon.classList.remove('exp-rotate-asc', 'exp-rotate-desc');
     //         });
 
     //         const currentHeader = this.template.querySelector('[data-index="' + this.sortField + '"]');
     //         if (currentHeader) {
-    //             currentHeader.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+    //             currentHeader.classList.add(this.sortOrder === 'asc' ? 'exp-rotate-asc' : 'exp-rotate-desc');
     //         }
     //     } catch (error) {
     //         console.log('Error updateSprtIcons->' + error);
@@ -1199,25 +1199,25 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     updateSortIcons() {
         try {
             // Remove icon rotation
-            const allIcons = this.template.querySelectorAll('.table-content .slds-icon-utility-arrowdown svg');
+            const allIcons = this.template.querySelectorAll('.exp-table-content .slds-icon-utility-arrowdown svg');
             allIcons.forEach(icon => {
-                icon.classList.remove('rotate-asc', 'rotate-desc');
+                icon.classList.remove('exp-rotate-asc', 'exp-rotate-desc');
             });
 
             // Remove active class from all headers
-            const allHeaders = this.template.querySelectorAll('.table-content .sorting_header');
+            const allHeaders = this.template.querySelectorAll('.exp-table-content .exp-sorting-header');
             allHeaders.forEach(header => {
                 header.classList.remove('active-sort');
             });
 
             // Set active header
-            const currentHeader = this.template.querySelector('.table-content [data-id="' + this.sortField + '"]');
+            const currentHeader = this.template.querySelector('.exp-table-content [data-id="' + this.sortField + '"]');
             if (currentHeader) {
                 currentHeader.classList.add('active-sort');
 
                 const icon = currentHeader.querySelector('svg');
                 if (icon) {
-                    icon.classList.add(this.sortOrder === 'asc' ? 'rotate-asc' : 'rotate-desc');
+                    icon.classList.add(this.sortOrder === 'asc' ? 'exp-rotate-asc' : 'exp-rotate-desc');
                 }
             }
 
@@ -1234,7 +1234,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     scrollToTop() {
         try {
-            const tableDiv = this.template.querySelector('.table-content');
+            const tableDiv = this.template.querySelector('.exp-table-content');
             if (tableDiv) {
                 tableDiv.scrollTop = 0;
             }

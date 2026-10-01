@@ -1,6 +1,5 @@
 * {
     font-family: 'Mulish';
-    user-select: none;
 }
 
 .blue-header {
@@ -229,7 +228,6 @@ progress::-moz-progress-bar {
     border-radius: 8px;
     background: linear-gradient(135deg, #f0f4f8 0%, #e8eef4 100%);
     box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
-    user-select: none;
 }
 
 .tab-menu ul li {

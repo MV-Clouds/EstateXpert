@@ -26,7 +26,7 @@
                                 onclose={handleCloseModal}></c-record-config-body-cmp>
                         </template>
 
-                        <button class="blue-btn-css" onclick={handleRefresh} title="Refresh">
+                        <button class="exp-blue-btn-css" onclick={handleRefresh} title="Refresh">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
@@ -36,7 +36,7 @@
                             <template if:false={isMobileOrTablet}>Refresh</template>
                         </button>
 
-                        <button class="blue-btn-css" onclick={goToNewInquiry}>
+                        <button class="exp-blue-btn-css" onclick={goToNewInquiry}>
                             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
@@ -44,7 +44,7 @@
                             New Inquiry
                         </button>
 
-                        <button class="blue-btn-css" onclick={showModalBox} aria-label="Filters">
+                        <button class="exp-blue-btn-css" onclick={showModalBox} aria-label="Filters">
                             <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" clip-rule="evenodd"
@@ -54,7 +54,7 @@
                         </button>
 
                         <div class="custom-dropdown-container" style="position: relative;">
-                            <button class="blue-btn-css" onclick={toggleMoreActions}>
+                            <button class="exp-blue-btn-css" onclick={toggleMoreActions}>
                                 <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -72,7 +72,7 @@
                             <template if:true={showMoreActions}>
                                 <div class="custom-dropdown-menu"
                                     style="position: absolute; right: 0; top: calc(100% + 5px); background: #ffffff; border-radius: 4px; box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px; display: flex; flex-direction: column; gap: 8px; padding: 10px; z-index: 97; min-width: 200px; border: 1px solid #e5e7eb;">
-                                    <button class="blue-btn-css" onclick={openConfigureSettings}
+                                    <button class="exp-blue-btn-css" onclick={openConfigureSettings}
                                         style="width: 100%; justify-content: flex-start;"><svg fill="white"
                                             height="18px" width="18px" version="1.1" viewBox="0 0 512.003 512.003">
                                             <g>
@@ -279,7 +279,7 @@
                                                 </template>
                                             </div>
                                             <div class="condition-div-footer">
-                                                <button class="white-btn-css" onclick={closeAddConditionModal}>
+                                                <button class="exp-white-btn-css" onclick={closeAddConditionModal}>
                                                     <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
                                                         <path
@@ -288,7 +288,7 @@
                                                     </svg>
                                                     Cancel
                                                 </button>
-                                                <button class="blue-btn-css" onclick={saveCondition}>
+                                                <button class="exp-blue-btn-css" onclick={saveCondition}>
                                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                                                         xmlns="http://www.w3.org/2000/svg">
                                                         <path
@@ -303,7 +303,7 @@
                                     </template>
                                 </div>
                                 <div class="custom__footer">
-                                    <button class="white-btn-css" onclick={hideModalBox}>
+                                    <button class="exp-white-btn-css" onclick={hideModalBox}>
                                         <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <path
@@ -312,7 +312,7 @@
                                         </svg>
                                         Cancel
                                     </button>
-                                    <button class="blue-btn-css" onclick={applyModalFilters}
+                                    <button class="exp-blue-btn-css" onclick={applyModalFilters}
                                         disabled={isApplyButtonDisabled}>
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
@@ -330,13 +330,13 @@
             </div>
         </div>
 
-        <div class="main_content_cls">
+        <div class="exp-main-content-cls">
             <template if:true={pagedInquries.length}>
-                <div class="table-content" id="table-content">
+                <div class="exp-table-content" id="exp-table-content">
                     <table aria-multiselectable="true" class="slds-table"
                         aria-label="Example advanced table of Opportunities in actionable mode">
                         <thead>
-                            <tr class="slds-line-height_reset fields-names table_tr_cls">
+                            <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
                                 <th class="header-cell slds-text-align_right slds-cell_action-mode colume1" scope="col">
                                     <span id="column-group-header" class="slds-assistive-text">Choose a row</span>
                                     <div class="header-checkbox-div">
@@ -348,26 +348,26 @@
                                 </th>
 
 
-                                <th class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate sorting_header"
+                                <th class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate exp-sorting-header"
                                     data-id="name" onclick={sortClick}>
-                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button"
+                                    <div class="slds-text-link_rese exp-sort-cover slds-has-flexi-truncate" role="button"
                                         tabindex="0">
                                         Inquiry Name
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg class="listing-manager-icon" aria-hidden="true" viewBox="0 0 384 512">
+                                            <svg class="exp-arrow-icon" aria-hidden="true" viewBox="0 0 384 512">
                                                 <path
                                                     d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                             </svg>
                                         </span>
                                     </div>
                                 </th>
-                                <th class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate sorting_header"
+                                <th class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate exp-sorting-header"
                                     data-id="contactname" onclick={sortClick}>
-                                    <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate" role="button"
+                                    <div class="slds-text-link_rese exp-sort-cover slds-has-flexi-truncate" role="button"
                                         tabindex="0">
                                         Contact Name
                                         <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                            <svg class="listing-manager-icon" aria-hidden="true" viewBox="0 0 384 512">
+                                            <svg class="exp-arrow-icon" aria-hidden="true" viewBox="0 0 384 512">
                                                 <path
                                                     d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                             </svg>
@@ -376,13 +376,13 @@
                                 </th>
                                 <template for:each={tableColumns} for:item="column">
                                     <th key={column.fieldName}
-                                        class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate sorting_header column2"
+                                        class="slds-is-resizable slds-is-sortable slds-cell_action-mode header-cell slds-truncate exp-sorting-header column2"
                                         data-id={column.fieldName} onclick={sortClick}>
-                                        <div class="slds-text-link_rese sort-cover slds-has-flexi-truncate"
+                                        <div class="slds-text-link_rese exp-sort-cover slds-has-flexi-truncate"
                                             role="button" tabindex="0">
                                             {column.label}
                                             <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                <svg class="listing-manager-icon" aria-hidden="true"
+                                                <svg class="exp-arrow-icon" aria-hidden="true"
                                                     viewBox="0 0 384 512">
                                                     <path
                                                         d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
@@ -454,10 +454,10 @@
                 </div>
             </template>
             <template if:true={showPagination}>
-                <div class="paginationDiv">
-                    <div class="btnCover">
-                        <div class="pagination-container">
-                            <button class="pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
+                <div class="exp-pagination-div">
+                    <div class="exp-btn-cover">
+                        <div class="exp-pagination-container">
+                            <button class="exp-pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
                                 <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
                                     fill="#fff">
                                     <path
@@ -474,11 +474,11 @@
                                     </button>
                                 </template>
                                 <template if:true={page.isEllipsis}>
-                                    <span key={page.number} class="pagination-ellipsis">...</span>
+                                    <span key={page.number} class="exp-pagination-ellipsis">...</span>
                                 </template>
                             </template>
 
-                            <button class="pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                            <button class="exp-pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
                                 Next
                                 <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
                                     fill="#fff">

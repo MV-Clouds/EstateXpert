@@ -1,6 +1,6 @@
 import { LightningElement, api, track } from 'lwc';
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import EvoCalendarZip from '@salesforce/resourceUrl/evoCalender';
 import emptyState from '@salesforce/resourceUrl/emptyState';
 import getPropertyAndContactData from '@salesforce/apex/SiteAndBookingController.getPropertyAndContactData';
@@ -30,7 +30,6 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     @track contacts = [];
     @track currentImageIndex = 0;
     @track mapMarkers = [];
-    @track error;
     @track isLoading = true;
 
     // --- MODAL STATE ---
@@ -156,7 +155,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             .then(() => {
                 if (!window.jQuery.fn.evoCalendar) { throw new Error('EvoCalendar plugin failed to load'); }
                 return Promise.all([
-                    loadStyle(this, MulishFontCss),
+                    loadStyle(this, globalStyles),
                     loadStyle(this, EVO_CALENDAR_CSS_PATH),
                     loadStyle(this, EVO_CALENDAR_NAVY_CSS_PATH)
                 ]);
@@ -178,10 +177,6 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             if (this.showScheduleModal && !this.scheduleCalendarInitialized) {
                 this.initializeScheduleCalendar();
             }
-            // Initialize "Manage Showing" modal calendar
-            // if (this.showManageModal && !this.manageCalendarInitialized && this.showDateTimeInputs) {
-            //     this.initializeManageCalendar();
-            // }
 
             // Update sort icons after DOM is rendered
             if (!this.isLoading && this.contacts.length > 0) {
@@ -231,13 +226,16 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                     },
                     title: this.listing?.MVEX__Address__c || ''
                 }];
-                this.error = undefined;
                 this.startCarousel();
             })
             .catch(error => {
-                this.error = error.body?.message || 'Unknown error';
-                this.listing = {}; this.images = []; this.contacts = []; this.mapMarkers = [];
-                this.showToast('Error', 'Failed to load property data: ' + error.body?.message, 'error');
+                this.listing = {};
+                this.images = [];
+                this.contacts = [];
+                this.mapMarkers = [];
+                const errorMsg = error.body?.message || error.message || 'Unknown error';
+                this.showToast('Error', 'Error loading data: ' + errorMsg, 'error');
+                console.error('Error loading data:', error);
             })
             .finally(() => {
                 this.isLoading = false;

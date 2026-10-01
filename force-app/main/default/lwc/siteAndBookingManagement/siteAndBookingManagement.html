@@ -3,16 +3,12 @@
         <c-spinner-component></c-spinner-component>
     </template>
 
-    <template if:true={error}>
-        <div class="error-message slds-m-around_medium">
-            Error loading data: {error}
-        </div>
-    </template>
-
     <div class="contacts-container">
-        <div class="contacts-header">
-            <h2>Related Inquiries</h2>
-            <div class="header-actions">
+        <div class="sub-main-header-css">
+            <div class="header-block-css">
+                Related Inquiries
+            </div>
+            <div class="header-buttons">
                 <button class="exp-blue-btn-css" onclick={handleRefreshData} title="Refresh Data" aria-label="Refresh Data">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -167,7 +163,7 @@
         <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
             aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
             <div class="slds-modal__container">
-                <div class="slds-modal__close closs_icon_css" onclick={closeScheduleModal}>
+                <div class="slds-modal__close exp-close-icon-css" onclick={closeScheduleModal}>
                     <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -195,7 +191,7 @@
             aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
             <div class="slds-modal__container">
 
-                <div class="slds-modal__close closs_icon_css" onclick={closeManageModal}>
+                <div class="slds-modal__close exp-close-icon-css" onclick={closeManageModal}>
                     <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -241,14 +237,6 @@
                         </div>
 
                         <div class="slds-col slds-size_6-of-8 slds-p-around_medium slds-border_left modal-preview-area">
-
-                            <!-- <template if:true={showDateTimeInputs}> -->
-                            <!-- <h3 class="slds-text-heading_medium slds-m-bottom_small">Select Date</h3> -->
-                            <!-- <div class="calendar-container-wrapper">
-                                    <div class="evo-calendar manage-calendar"></div>
-                                </div> -->
-                            <!-- </template> -->
-
                             <template if:true={showCommunicationInputs}>
                                 <h3 class="slds-text-heading_medium slds-m-bottom_small">Live Preview</h3>
                                 <div class="slds-box slds-theme_default preview-container">

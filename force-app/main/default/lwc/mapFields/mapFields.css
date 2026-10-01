@@ -757,7 +757,6 @@
     font-family: 'Mulish', sans-serif;
     color: #374151;
     cursor: pointer;
-    user-select: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -796,5 +795,4 @@
     margin: 3px 2px 0;
     font-style: italic;
     line-height: 1.4;
-    user-select: none;
 }

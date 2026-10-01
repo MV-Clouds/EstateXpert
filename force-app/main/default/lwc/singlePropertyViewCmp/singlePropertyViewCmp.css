@@ -1,11 +1,3 @@
-* {
-    user-select: none;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    box-sizing: border-box;
-}
-
 .container {
     width: 100%;
     max-width: 1400px;
@@ -993,8 +985,6 @@
     text-align: center;
     min-height: 80vh;
     padding: 3rem 1.5rem;
-    user-select: none;
-    -webkit-user-select: none;
 }
 
 .exp-no-data-container img {

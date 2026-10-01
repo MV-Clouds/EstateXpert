@@ -609,12 +609,6 @@
     display: none;
 }
 
-/* === portalMappingLandingPage.css === */
-* {
-  font-family: 'Mulish';
-  user-select: none;
-}
-
 .logo img {
   width: 8rem;
   height: auto;
@@ -911,12 +905,6 @@ lightning-combobox .slds-dropdown,
   width: 15rem;
 }
 
-/* === listOfPublishedListings.css === */
-* {
-    font-family: 'Mulish';
-    user-select: none;
-}
-
 .mainDiv {
     background-color: white;
     height: 53rem;
@@ -1159,12 +1147,6 @@ lightning-combobox .slds-dropdown,
     text-decoration: underline;
 }
 
-/* === newPopUp.css === */
-* {
-    font-family: 'Mulish';
-    user-select: none;
-}
-
 .input-container {
     position: relative;
     margin-bottom: 1rem;
@@ -1348,12 +1330,6 @@ input[type=number] {
     .width_css {
         width: 60%;
     }
-}
-
-/* === settingPopUp.css === */
-* {
-    font-family: 'Mulish';
-    user-select: none;
 }
 
 .input-container {

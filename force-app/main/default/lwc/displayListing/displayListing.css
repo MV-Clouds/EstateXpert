@@ -123,7 +123,6 @@
 
 .sortable-header {
     cursor: pointer;
-    user-select: none;
 }
 
 .property-image img {

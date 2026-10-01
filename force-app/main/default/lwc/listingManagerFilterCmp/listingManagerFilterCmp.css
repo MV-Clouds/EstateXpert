@@ -1,6 +1,5 @@
 * {
     font-family: 'Mulish';
-    user-select: none;
 }
 
 .filter-header{
@@ -312,7 +311,6 @@
     top: 0.3rem;
     cursor: pointer;
     height: 0.9rem;
-    user-select: none;
     transition: fill 0.15s ease;
 }
 
@@ -328,7 +326,6 @@
     bottom: 0.8rem;
     cursor: pointer;
     height: 0.9rem;
-    user-select: none;
     transition: fill 0.15s ease;
 }
 

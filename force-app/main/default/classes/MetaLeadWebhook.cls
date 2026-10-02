@@ -42,11 +42,11 @@ global with sharing class MetaLeadWebhook {
      * This is the CORRECT token source — the old MVEX__MetaLeadConfig__c is legacy.
      */
     private static String getSystemUserToken() {
-        MVEX__OAuth_Configuration__mdt cfg = MVEX__OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
-        if (cfg == null || String.isBlank(cfg.MVEX__Access_Token__c)) {
+        OAuth_Configuration__mdt cfg = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
+        if (cfg == null || String.isBlank(cfg.Access_Token__c)) {
             return null;
         }
-        return cfg.MVEX__Access_Token__c;
+        return cfg.Access_Token__c;
     }
 
     /**
@@ -112,9 +112,9 @@ global with sharing class MetaLeadWebhook {
                 return;
             }
 
-            MVEX__OAuth_Configuration__mdt oauthConfig = MVEX__OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
-            String apiVersion = oauthConfig != null ? oauthConfig.MVEX__API_Version__c : 'v19.0';
-            String baseUrl    = oauthConfig != null ? oauthConfig.MVEX__Base_URL__c : 'https://graph.facebook.com';
+            OAuth_Configuration__mdt oauthConfig = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
+            String apiVersion = oauthConfig != null ? oauthConfig.API_Version__c : 'v25.0';
+            String baseUrl    = oauthConfig != null ? oauthConfig.Base_URL__c : 'https://graph.facebook.com';
 
             // Derive Page Access Token (same method used in MetaAdsFormMappingController)
             ApiContext sysCtx = new ApiContext(systemUserToken, apiVersion, baseUrl);

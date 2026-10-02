@@ -467,7 +467,7 @@ public with sharing class IntegrationPopupController {
             return 'Please fill in both User ID and Long-Lived Access Token.';
         }
 
-        String graphApiVersion = 'v24.0';
+        String graphApiVersion = 'v25.0';
         MVEX__IG_Configuration__c igConfig = MVEX__IG_Configuration__c.getOrgDefaults();
         if (igConfig != null) {
             String configVersion;
@@ -481,7 +481,7 @@ public with sharing class IntegrationPopupController {
             }
         }
         if (String.isBlank(graphApiVersion)) {
-            graphApiVersion = 'v24.0';
+            graphApiVersion = 'v25.0';
         }
         if (!graphApiVersion.toLowerCase().startsWith('v')) {
             graphApiVersion = 'v' + graphApiVersion;

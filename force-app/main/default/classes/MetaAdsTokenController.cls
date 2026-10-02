@@ -12,24 +12,24 @@ public with sharing class MetaAdsTokenController {
 
     public Boolean isConnected { 
         get { 
-            MVEX__OAuth_Configuration__mdt config = getConfig();
-            return config != null && String.isNotBlank(config.MVEX__Access_Token__c); 
+            OAuth_Configuration__mdt config = getConfig();
+            return config != null && String.isNotBlank(config.Access_Token__c); 
         } 
     }
 
-    public String metaAppId    { get { return getConfig()?.MVEX__Client_Id__c; } }
-    public String metaConfigId { get { return getConfig()?.MVEX__Config_Id__c; } }
-    public String apiVersion   { get { return getConfig()?.MVEX__API_Version__c; } }
-    public String apiEndpoint  { get { return getConfig()?.MVEX__Base_URL__c; } }
+    public String metaAppId    { get { return getConfig()?.Client_Id__c; } }
+    public String metaConfigId { get { return getConfig()?.Config_Id__c; } }
+    public String apiVersion   { get { return getConfig()?.API_Version__c; } }
+    public String apiEndpoint  { get { return getConfig()?.Base_URL__c; } }
 
     /**
     * Method Name : getConfig
     * @description : Gets the OAuth Configuration metadata for Meta Ads.
     * @return MVEX__OAuth_Configuration__mdt
     */
-    public static MVEX__OAuth_Configuration__mdt getConfig() {
+    public static OAuth_Configuration__mdt getConfig() {
         try {
-            List<MVEX__OAuth_Configuration__mdt> configs = [SELECT MVEX__Access_Token__c, MVEX__Client_Id__c, MVEX__Client_Secret__c, MVEX__Config_Id__c, MVEX__Base_URL__c, MVEX__API_Version__c, MVEX__Authorization_Endpoint__c, MVEX__Client_App_Id__c FROM MVEX__OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1];
+            List<OAuth_Configuration__mdt> configs = [SELECT Access_Token__c, Client_Id__c, Client_Secret__c, Config_Id__c, Base_URL__c, API_Version__c, Authorization_Endpoint__c, Client_App_Id__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1];
             return configs.isEmpty() ? null : configs[0];
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'MetaAdsTokenController', 'getConfig', e.getMessage());
@@ -91,12 +91,12 @@ public with sharing class MetaAdsTokenController {
     * @param config : OAuth config
     * @return String
     */
-    private static String fetchTokenFromMeta(String authCode, MVEX__OAuth_Configuration__mdt config) {
+    private static String fetchTokenFromMeta(String authCode, OAuth_Configuration__mdt config) {
         try {
-            String appId = config.MVEX__Client_Id__c;
-            String appSecret = config.MVEX__Client_Secret__c;
-            String apiVer = config.MVEX__API_Version__c;
-            String baseUrl = config.MVEX__Base_URL__c;
+            String appId = config.Client_Id__c;
+            String appSecret = config.Client_Secret__c;
+            String apiVer = config.API_Version__c;
+            String baseUrl = config.Base_URL__c;
 
             String tokenUrl = baseUrl + '/' + apiVer + '/oauth/access_token'
                 + '?client_id='     + EncodingUtil.urlEncode(appId, 'UTF-8')
@@ -138,17 +138,17 @@ public with sharing class MetaAdsTokenController {
     private static void saveTokenSettings(String systemUserToken, String clientAppId) {
         try {
             Metadata.CustomMetadata customMetadata = new Metadata.CustomMetadata();
-            customMetadata.fullName = 'MVEX__OAuth_Configuration__mdt.MVEX__Meta_Ads_Config';
+            customMetadata.fullName = 'OAuth_Configuration__mdt.Meta_Ads_Config';
             customMetadata.label = 'Meta Ads Config';
 
             Metadata.CustomMetadataValue tokenField = new Metadata.CustomMetadataValue();
-            tokenField.field = 'MVEX__Access_Token__c';
+            tokenField.field = 'Access_Token__c';
             tokenField.value = systemUserToken;
             customMetadata.values.add(tokenField);
             
             if (clientAppId != null) {
                 Metadata.CustomMetadataValue appField = new Metadata.CustomMetadataValue();
-                appField.field = 'MVEX__Client_App_Id__c';
+                appField.field = 'Client_App_Id__c';
                 appField.value = clientAppId;
                 customMetadata.values.add(appField);
             }
@@ -174,14 +174,14 @@ public with sharing class MetaAdsTokenController {
     public static Map<String, Object> checkConnectionStatus() {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            MVEX__OAuth_Configuration__mdt config = getConfig();
-            if (config == null || String.isBlank(config.MVEX__Access_Token__c)) {
+            OAuth_Configuration__mdt config = getConfig();
+            if (config == null || String.isBlank(config.Access_Token__c)) {
                 resultMap.put('success', false);
                 resultMap.put('message', 'Not connected.');
                 return resultMap;
             }
 
-            String clientAppId = config.MVEX__Client_App_Id__c;
+            String clientAppId = config.Client_App_Id__c;
 
             resultMap.put('account_name', 'System User Account');
             resultMap.put('client_app_id', clientAppId);
@@ -205,8 +205,8 @@ public with sharing class MetaAdsTokenController {
     public static Map<String, Object> deactivateConnection() {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            MVEX__OAuth_Configuration__mdt config = getConfig();
-            if (config != null && String.isNotBlank(config.MVEX__Access_Token__c)) {
+            OAuth_Configuration__mdt config = getConfig();
+            if (config != null && String.isNotBlank(config.Access_Token__c)) {
                 saveTokenSettings(null, null); // Clear the token via Metadata API
             }
             resultMap.put('success', true);

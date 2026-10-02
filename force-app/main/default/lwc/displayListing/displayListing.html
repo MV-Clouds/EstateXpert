@@ -9,15 +9,9 @@
         <c-spinner-component></c-spinner-component>
     </template>
 
-    <div class="main-card">
+    <div class="listing-main-card">
         <div>
             <div class="filter-search-container">
-                <div class="filter-section">
-                    <div class="search-bar">
-                        <lightning-input variant="label-hidden" type="search" placeholder="Enter listing name"
-                            value={searchTerm} onchange={handleSearch}></lightning-input>
-                    </div>
-                </div>
                 <div class="header-actions">
                     <div class="view-buttons">
                         <div class="tab-btns">
@@ -213,7 +207,7 @@
                                                     <template if:true={isNullOperatorSelected}>
                                                         <div
                                                             class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
-                                                            <label><span class="red">*</span>Value</label>
+                                                            <label><span class="required-class">*</span>Value</label>
                                                             <lightning-combobox value={selectedInquiryValue}
                                                                 data-field="MVEX__Value__c"
                                                                 options={isNullPicklistOptions}
@@ -227,7 +221,7 @@
                                                     <template if:false={isNullOperatorSelected}>
                                                         <div
                                                             class="slds-form_element slds-m-bottom_medium slds-m-top_medium">
-                                                            <label><span class="red">*</span>Value</label>
+                                                            <label><span class="required-class">*</span>Value</label>
                                                             <template if:true={isConstant}>
                                                                 <template if:true={listingFieldObject.isPrimary}>
                                                                     <lightning-input
@@ -288,7 +282,7 @@
                                             </div>
                                         </template>
                                     </div>
-                                    <div class="custom__footer">
+                                    <div class="custom-footer">
                                         <button class="exp-white-btn-css" onclick={hideModalBox}>
                                             <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
                                                 xmlns="http://www.w3.org/2000/svg">

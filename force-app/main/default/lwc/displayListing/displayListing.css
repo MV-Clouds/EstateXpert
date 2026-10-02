@@ -2,7 +2,7 @@
     font-family: 'Mulish';
 }
 
-.main-card {
+.listing-main-card {
     min-height: 550px;
     gap: 1rem;
     display: flex;
@@ -30,80 +30,12 @@
     gap: 1rem;
 }
 
-.filter-section {
-    display: flex;
-    align-items: center;
-}
-
-.filter-input {
-    margin-bottom: 1rem;
-    display: flex;
-    gap: 1%;
-    justify-content: center;
-    align-items: end;
-
-}
-
-.filter-btns {
-    display: flex;
-    gap: 4%;
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-    margin-top: 1rem;
-
-}
-
-.dotted-border {
-    border: 1px dashed black;
-    width: 100%;
-    margin-bottom: 1rem;
-}
-
-.details {
-    height: 7rem;
-    border-bottom: 0.5px solid grey;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-}
-
 .main-map {
     background-color: white;
     display: flex;
     width: 100%;
     height: 26.8rem;
     --lwc-fontWeightBold: 500;
-}
-
-.item-1 p {
-    font-size: 16px;
-    color: #1252AE;
-}
-
-.item-2 button {
-    height: 2rem;
-    background-color: #1252AE;
-    border: none;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.no_prop {
-    font-size: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
-    font-family: 'DM Sans';
-}
-
-.listing-buttons {
-    display: flex;
-    gap: 10px;
-    height: fit-content;
 }
 
 .header-cell {
@@ -120,56 +52,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
-.sortable-header {
-    cursor: pointer;
-}
-
-.property-image img {
-    width: 100px;
-    height: 100px;
-    border-radius: 4px;
-}
-
-.view-more-button {
-    background-color: #0070d2;
-    color: #fff;
-    border: none;
-    padding: 4px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.view-more-button:hover {
-    background-color: #005fb2;
-}
-
-.filter-btn,
-.edit-btn {
-    background-color: #0176D3;
-    color: white;
-    border-radius: 4px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    border: none;
-    padding: 5px 16px;
-}
-
-.filter-btn:disabled,
-.edit-btn:disabled {
-    background-color: #737D8C;
-    cursor: not-allowed;
-}
-
-.filter-modal-child .slds-modal__content {
-    min-height: 15rem;
-    max-height: 16rem;
-}
-
-
-/* Old .mapping-item-active style removed/updated in lower section */
 
 .parent-div {
     position: relative;
@@ -201,10 +83,6 @@
     border: 1px solid #0176D3;
 }
 
-button:disabled {
-    background-color: #b2aeae;
-}
-
 .mapping-id {
     font-weight: 500;
     margin-right: 10px;
@@ -218,11 +96,6 @@ button:disabled {
     flex-shrink: 0;
 }
 
-.image-data img {
-    height: 100px;
-    width: 100px;
-}
-
 .mapping-data {
     flex: 1;
     display: flex;
@@ -233,62 +106,6 @@ button:disabled {
     color: #1F2937;
     line-height: 1.4;
 }
-
-.slds-form_element {
-    margin-bottom: 1rem;
-}
-
-.slds-modal__footer {
-    display: flex;
-    justify-content: center;
-    background: white;
-    border: none;
-}
-
-
-.slds-modal__header {
-    background-color: #0070D2;
-    color: white;
-}
-
-.slds-modal__header .slds-modal__close {
-    top: 0.8rem;
-    right: 0.5rem;
-    margin-left: 0;
-    bottom: 0;
-}
-
-
-.filter-modal .slds-modal__content {
-    min-height: 15rem;
-    max-height: 16rem;
-}
-
-.mapping-btn {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #0176D3;
-    color: white;
-    gap: 8px;
-    padding: 0 16px;
-    height: 32px;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
-}
-
-.mapping-btn:hover {
-    background-color: #005fb2;
-    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
-    transform: translateY(-1px);
-}
-
-.red {
-    color: red;
-}
-
-/* vyom changes */
 
 .header-actions {
     display: flex;
@@ -353,93 +170,9 @@ button:disabled {
     height: 30px;
 }
 
-.btn {
-    min-height: 36px;
-    gap: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0px 8px;
-    background-color: #0176D3;
-    border: none;
-    color: white;
-    font-size: 14px;
-    border-radius: 5px;
-    height: 35px;
-    cursor: pointer;
-}
-
-
-.custom__footer {
+.custom-footer {
     display: flex;
     gap: 12px;
-}
-
-.modal-btn-blue {
-    min-height: 36px;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 0.5rem 1.5rem;
-    border: none;
-    background: #0176D3;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.modal-btn-blue:hover:not(:disabled) {
-    background: #0156A3;
-    box-shadow: 0 4px 8px rgba(43, 52, 59, 0.25);
-    transform: translateY(-1px);
-}
-
-.modal-btn-white {
-    min-height: 36px;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 0.5rem 1.5rem;
-    background: #FFFFFF;
-    border: 1.5px solid #0176D3;
-    color: #0176D3;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.modal-btn-white:hover {
-    background: #F3F6F9;
-    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
-}
-
-.exp-results-info {
-    margin-left: 15px;
-    color: #666;
-}
-
-.results-per-page {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-}
-
-.results-per-page label {
-    margin-right: 8px;
-    color: #666;
-}
-
-.results-per-page select {
-    padding: 4px 8px;
-    border: 1px solid #d8d8d8;
-    border-radius: 3px;
 }
 
 .open-mapping-div {
@@ -501,33 +234,11 @@ button:disabled {
     background: #F9FAFB;
 }
 
-.filter-div .delete-div {
-    padding: 6px;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: auto;
-    height: auto;
-    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-
 .delete-div {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     right: 8px;
-}
-
-/* Delete div positioning wrapper if needed */
-.delete-icon-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .filter-header {
@@ -553,20 +264,6 @@ button:disabled {
     background: #F9FAFB;
 }
 
-.filter-div .delete-div:hover {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    border-color: #ef4444;
-    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
-}
-
-.delete-div:hover svg path {
-    stroke: #ef4444;
-}
-
-.delete-div:hover svg {
-    fill: #ef4444;
-}
-
 .filter-div .filter-footer {
     display: flex;
     flex-direction: row;
@@ -579,12 +276,6 @@ button:disabled {
     border-bottom-right-radius: 8px;
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
     z-index: 1;
-}
-
-.filter-div .filter-footer .custtom__footer {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
 }
 
 .filter-div .add-condtion {
@@ -660,12 +351,6 @@ button:disabled {
     overflow: visible;
 }
 
-
-.custtom__footer {
-    display: flex;
-    gap: 8px
-}
-
 .add-condition-icon-btn {
     width: 36px;
     height: 32px;
@@ -715,19 +400,7 @@ button:disabled {
     margin-bottom: 0 !important;
 }
 
-/* Anchor to control the side popover position relative to + icon */
-.add-condition-anchor {
-    position: relative;
-}
-
 @media only screen and (max-width: 900px) {
-    .filter-section {
-        flex-direction: column;
-        gap: 1rem;
-        width: 100%;
-    }
-
-    /* On small screens, drop the popover below the + icon */
     .filter-div .add-condtion .condition-div {
         position: absolute;
         bottom: -55px;
@@ -765,14 +438,6 @@ button:disabled {
         border-right: 1px solid rgba(0, 0, 0, 0.1);
         border-top: 1px solid rgba(0, 0, 0, 0.1);
         box-shadow: 2px -2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    .search-bar {
-        width: 100%;
-    }
-
-    .search-bar lightning-input {
-        width: 100%;
     }
 
     .header-actions {
@@ -830,12 +495,6 @@ button:disabled {
         margin-bottom: 0 !important;
     }
 
-    /* Anchor to control the side popover position relative to + icon */
-    .add-condition-anchor {
-        position: relative;
-    }
-
-    /* Side popover positioning consistent with inquiry */
     .filter-div .add-condtion .condition-div {
         position: absolute;
         bottom: -55px;
@@ -850,7 +509,6 @@ button:disabled {
         overflow: visible;
     }
 
-    /* Popover arrow like inquiry */
     .filter-div .add-condtion .condition-div .arrow {
         width: 12px;
         height: 12px;
@@ -864,18 +522,12 @@ button:disabled {
         box-shadow: 2px -2px 4px rgba(0, 0, 0, 0.05);
     }
 
-    /* Ensure the side popover stays above scroll area */
     .filter-div {
         overflow: visible;
     }
 
     .filter-div .filter-fields {
         overflow-x: visible;
-    }
-
-    /* Tweak + icon alignment in the row */
-    .add-condition-anchor .add-condition-icon-btn {
-        vertical-align: bottom;
     }
 
     .condition-div {
@@ -885,38 +537,6 @@ button:disabled {
     .arrow {
         left: -4px;
     }
-
-    .custom-grid {
-        grid-template-columns: repeat(1, 1fr);
-    }
-}
-
-
-@media only screen and (max-width: 1024px) {
-    .filter-input {
-        flex-wrap: wrap;
-
-    }
-
-    .listing-buttons {
-        margin-top: 1rem;
-    }
-}
-
-.no-prop {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    gap: 2rem;
-    font-size: 1.2rem;
-    margin-top: 4rem;
-    text-align: center;
-}
-
-.no-data-img {
-    max-width: 22%;
-    min-width: 12rem;
 }
 
 .exp-table-content .colume2 {
@@ -938,28 +558,4 @@ button:disabled {
 
 .exp-table-content .slds-table td {
     max-width: 12rem;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   SEND LISTINGS VIA EMAIL — styles (matched to component design language)
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* ── Checkbox column ─────────────────────────────────────────────────────── */
-.checkbox-col {
-    width: 24px;
-    min-width: 24px;
-    max-width: 24px;
-    text-align: center !important;
-    padding: 0 2px !important;
-    vertical-align: middle;
-}
-
-.listing-row-checkbox {
-    width: 15px;
-    height: 15px;
-    cursor: pointer;
-    accent-color: #0176D3;
-    pointer-events: auto;
-    display: block;
-    margin: 0 auto;
 }

@@ -161,6 +161,7 @@ public with sharing class InstagramPostController {
         try {
             String userId;
             String accessToken;
+            String graphApiVersion = 'v24.0';
 
             if (Test.isRunningTest() && mockConfig == null) {
                 userId = '1234567890';
@@ -169,7 +170,7 @@ public with sharing class InstagramPostController {
                 OAuth_Configuration__mdt instaOAuth = mockConfig;
                 if (instaOAuth == null) {
                     List<OAuth_Configuration__mdt> instaOAuthList = [
-                        SELECT User_Id__c, Access_Token__c
+                        SELECT User_Id__c, Access_Token__c, API_Version__c
                         FROM OAuth_Configuration__mdt
                         WHERE DeveloperName = 'Instagram_OAuth'
                         WITH USER_MODE
@@ -188,6 +189,13 @@ public with sharing class InstagramPostController {
 
                 userId      = instaOAuth.User_Id__c;
                 accessToken = instaOAuth.Access_Token__c;
+
+                if (String.isNotBlank(instaOAuth.API_Version__c)) {
+                    graphApiVersion = instaOAuth.API_Version__c.trim();
+                }
+                if (!graphApiVersion.toLowerCase().startsWith('v')) {
+                    graphApiVersion = 'v' + graphApiVersion;
+                }
             }
 
             Http http = new Http();
@@ -197,7 +205,7 @@ public with sharing class InstagramPostController {
                 String mediaType = getMediaTypeFromUrl(mediaUrl);
 
                 HttpRequest req = new HttpRequest();
-                req.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media');
+                req.setEndpoint(INSTAGRAM_ENDPOINT + graphApiVersion + '/' + userId + '/media');
                 req.setMethod('POST');
                 req.setHeader('Content-Type', 'application/json');
 
@@ -251,7 +259,7 @@ public with sharing class InstagramPostController {
 
                     HttpRequest req = new HttpRequest();
                     req.setTimeout(120000);
-                    req.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media');
+                    req.setEndpoint(INSTAGRAM_ENDPOINT + graphApiVersion + '/' + userId + '/media');
                     req.setMethod('POST');
                     req.setHeader('Content-Type', 'application/json');
 

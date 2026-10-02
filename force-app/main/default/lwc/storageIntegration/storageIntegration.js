@@ -1,7 +1,7 @@
 import { LightningElement, track, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import getIntegrationDetails from '@salesforce/apex/IntegrationPopupController.getIntegrationDetails';
 import saveSettings from '@salesforce/apex/IntegrationPopupController.saveSettings';
 import getSettings from '@salesforce/apex/IntegrationPopupController.getSettings';
@@ -97,7 +97,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     */
     connectedCallback(){
         try {
-            loadStyle(this, MulishFontCss);
+            loadStyle(this, globalStyles);
             this.getSocialMediaDataToShow();
         } catch (error) {
             errorDebugger('StorageIntegration', 'connectedCallback', error, 'warn', 'Error occurred while connectedCallback');

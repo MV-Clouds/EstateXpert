@@ -68,6 +68,14 @@
   transform: unset;
 }
 
+.exp-white-btn-css:disabled svg path[fill] {
+  fill: #fff !important;
+}
+
+.exp-white-btn-css:disabled svg path[stroke] {
+  stroke: #fff !important;
+}
+
 /* WHITE BUTTON CSS END HERE */
 
 /* RED BUTTON CSS START HERE */

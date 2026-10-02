@@ -1,5 +1,5 @@
 import { LightningElement, track, wire } from 'lwc';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import getS3ConfigSettings from "@salesforce/apex/ImageAndMediaController.getS3ConfigSettings";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
@@ -93,8 +93,7 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
     * Last modified by : Rachit Shah
     */
     connectedCallback() {
-        loadStyle(this, MulishFontCss);
-
+        loadStyle(this, globalStyles);
         this.getS3ConfigDataAsync();
         this.checkInstagramCredentials();
 

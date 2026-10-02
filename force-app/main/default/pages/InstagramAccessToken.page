@@ -195,7 +195,7 @@
                 window.close();
             }
         </script>
-        <apex:styleSheet value="{!URLFOR($Resource.MulishFontCss)}" />
+        <apex:styleSheet value="{!URLFOR($Resource.globalStyles)}" />
     </head>
 
     <body>
@@ -221,13 +221,13 @@
                     <p class="code" id="userId">{!instagramUserId}</p>
                     <button id="copyBtnId" onclick="copyCode('userId', 'copyBtnId')">Copy Code</button>
                 </div>
-                
+
                 <p class="instructions">Long-Lived Access Token:</p>
                 <div class="codeblock" style="margin-bottom: 5px;">
                     <p class="code" id="longLivedToken">{!longLivedToken}</p>
                     <button id="copyBtnToken" onclick="copyCode('longLivedToken', 'copyBtnToken')">Copy Code</button>
                 </div>
-                
+
                 <div class="btn_cls">
                     <button onclick="closeWindow()">Close this window</button>
                 </div>

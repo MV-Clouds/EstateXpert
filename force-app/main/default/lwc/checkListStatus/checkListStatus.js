@@ -4,7 +4,7 @@ import getCheckList from '@salesforce/apex/CheckListItemController.getCheckList'
 import createCheckListItem from '@salesforce/apex/CheckListItemController.createCheckListItem';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import { errorDebugger } from 'c/globalProperties';
 
 import USER_CURRENCY from '@salesforce/i18n/currency';
@@ -90,7 +90,7 @@ export default class CheckListStatus extends LightningElement {
     */
     connectedCallback() {
         try {
-            loadStyle(this, MulishFontCss);
+            loadStyle(this, globalStyles);
             this.screenWidth = window?.globalThis?.innerWidth;
             window?.globalThis?.addEventListener('resize', this.handleResize);
             this.checklistValues();

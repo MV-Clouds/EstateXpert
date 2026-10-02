@@ -9,8 +9,8 @@ import getS3ConfigSettings from "@salesforce/apex/ImageAndMediaController.getS3C
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import placeholderImage from '@salesforce/resourceUrl/placeholderImage';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import { errorDebugger } from "c/globalProperties";
 import FORM_FACTOR from '@salesforce/client/formFactor';
 
@@ -43,6 +43,220 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     @track finalPicklistValues = [];
     @track disabledDelete = true;
     @track fetchedData = [];
+    @track selectedTags = [];
+    @track selectedStatus = [];
+    @track currentPage = 1;
+    @track pageSize = 20;
+    visiblePages = 5;
+
+    constructor() {
+        super();
+        loadStyle(this, globalStyles);
+    }
+
+    get totalItems() {
+        return this.data ? this.data.length : 0;
+    }
+
+    get totalPages() {
+        return Math.ceil(this.totalItems / this.pageSize) || 1;
+    }
+
+    get isFirstPage() {
+        return this.currentPage === 1;
+    }
+
+    get isLastPage() {
+        return this.currentPage >= this.totalPages;
+    }
+
+    get startIndex() {
+        return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+    }
+
+    get endIndex() {
+        return Math.min(this.currentPage * this.pageSize, this.totalItems);
+    }
+
+    get recordCountInfo() {
+        if (this.totalItems === 0) {
+            return 'Showing 0 records';
+        }
+        return `Showing ${this.startIndex} - ${this.endIndex} of ${this.totalItems}`;
+    }
+
+    get pageSizeOptions() {
+        const sizes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+        return sizes.map(size => ({
+            label: String(size),
+            value: size,
+            isSelected: this.pageSize === size
+        }));
+    }
+
+    get pagedData() {
+        if (!this.data || this.data.length === 0) {
+            return [];
+        }
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        const endIndex = startIndex + this.pageSize;
+        return this.data.slice(startIndex, endIndex);
+    }
+
+    get pageNumbers() {
+        try {
+            const totalPages = this.totalPages;
+            const currentPage = this.currentPage;
+            const visiblePages = this.visiblePages;
+
+            let pages = [];
+
+            if (totalPages <= visiblePages) {
+                for (let i = 1; i <= totalPages; i++) {
+                    pages.push({
+                        number: i,
+                        isEllipsis: false,
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
+                    });
+                }
+            } else {
+                pages.push({
+                    number: 1,
+                    isEllipsis: false,
+                    className: `exp-pagination-button ${currentPage === 1 ? 'active' : ''}`
+                });
+
+                if (currentPage > 3) {
+                    pages.push({ isEllipsis: true });
+                }
+
+                let start = Math.max(2, currentPage - 1);
+                let end = Math.min(currentPage + 1, totalPages - 1);
+
+                for (let i = start; i <= end; i++) {
+                    pages.push({
+                        number: i,
+                        isEllipsis: false,
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
+                    });
+                }
+
+                if (currentPage < totalPages - 2) {
+                    pages.push({ isEllipsis: true });
+                }
+
+                pages.push({
+                    number: totalPages,
+                    isEllipsis: false,
+                    className: `exp-pagination-button ${currentPage === totalPages ? 'active' : ''}`
+                });
+            }
+
+            return pages;
+        } catch (error) {
+            errorDebugger('ImagesAndMedia', 'pageNumbers', error, 'warn', 'Error in pageNumbers');
+            return [];
+        }
+    }
+
+    handlePrevious() {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+            this.scrollToTop();
+        }
+    }
+
+    handleNext() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage++;
+            this.scrollToTop();
+        }
+    }
+
+    handlePageChange(event) {
+        const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
+        if (selectedPage && selectedPage !== this.currentPage) {
+            this.currentPage = selectedPage;
+            this.scrollToTop();
+        }
+    }
+
+    handlePageSizeChange(event) {
+        const value = parseInt(event.target.value, 10);
+        if (!isNaN(value) && this.pageSize !== value) {
+            this.pageSize = value;
+            this.currentPage = 1;
+            this.scrollToTop();
+        }
+    }
+
+    scrollToTop() {
+        try {
+            const tableContainer = this.template.querySelector('.exp-table-content');
+            if (tableContainer) {
+                tableContainer.scrollTop = 0;
+            }
+        } catch (error) {
+            console.error('Error scrolling to top:', error);
+        }
+    }
+
+    get tagOptions() {
+        return [
+            { label: 'Floorplan', value: 'Floorplan' },
+            { label: 'Virtual Tour', value: 'Virtual Tour' },
+            { label: '360tour', value: '360tour' },
+            { label: 'Interior', value: 'Interior' },
+            { label: 'Exterior', value: 'Exterior' }
+        ];
+    }
+
+    get statusOptions() {
+        return [
+            { label: 'Is On Expose', value: 'MVEX__IsOnExpose__c' },
+            { label: 'Is On Website', value: 'MVEX__IsOnWebsite__c' },
+            { label: 'Is On Portal Feed', value: 'MVEX__IsOnPortalFeed__c' }
+        ];
+    }
+
+    handleTagsChange(event) {
+        this.selectedTags = event.detail.value;
+    }
+
+    handleStatusChange(event) {
+        this.selectedStatus = event.detail.value;
+    }
+
+    formatMediaItem(row) {
+        let tags = [];
+        if (row.MVEX__Tags__c) {
+            if (Array.isArray(row.MVEX__Tags__c)) {
+                tags = row.MVEX__Tags__c;
+            } else if (typeof row.MVEX__Tags__c === 'string') {
+                tags = row.MVEX__Tags__c.split(';');
+            }
+        }
+        tags = tags.map(t => t.trim()).filter(Boolean);
+        row.hasTags = tags.length > 0;
+        row.formattedTagsList = tags.map((t, idx) => idx < tags.length - 1 ? `${t};` : t);
+        row.tagsTooltip = tags.join('; ');
+        row.tagsDisplay = tags.length > 0 ? tags.join('; ') : '-';
+
+        let statuses = [];
+        if (row.MVEX__IsOnExpose__c) {
+            statuses.push('Is On Expose');
+        }
+        if (row.MVEX__IsOnWebsite__c) {
+            statuses.push('Is On Website');
+        }
+        if (row.MVEX__IsOnPortalFeed__c) {
+            statuses.push('Is On Portal Feed');
+        }
+        row.hasStatus = statuses.length > 0;
+        row.formattedStatusList = statuses.map((s, idx) => idx < statuses.length - 1 ? `${s};` : s);
+        row.statusTooltip = statuses.join('; ');
+        row.statusDisplay = statuses.length > 0 ? statuses.join('; ') : '-';
+    }
 
     @track screenWidth = 0;
     @track showExpose = true;
@@ -80,7 +294,7 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     * Created By: Karan Singh
     */
     get showMobileView() {
-        return this.screenWidth > 1050 ? false : true;
+        return false;
     }
 
     /**
@@ -148,7 +362,6 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
             this.getS3ConfigDataAsync();
             this.screenWidth = window?.globalThis?.innerWidth;
             window?.globalThis?.addEventListener('resize', this.handleResize);
-            loadStyle(this, MulishFontCss);
             this.fetchingdata();
         } catch (error) {
             errorDebugger('ImagesAndMedia', 'connectedCallback', error, 'warn', 'Error while loading css and fetching data');
@@ -348,6 +561,7 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     fetchingdata() {
         try {
             this.data = [];
+            this.currentPage = 1;
             this.showSpinner = true;
             fetchListingAndImages({ recordId: this.recordId })
                 .then(result => {
@@ -357,8 +571,11 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
                         this.exposeData = this.data.filter(media => media.MVEX__Sort_on_Expose__c !== null && media.MVEX__IsOnExpose__c !== false).sort((a, b) => a.MVEX__Sort_on_Expose__c - b.MVEX__Sort_on_Expose__c);
                         this.websiteData = this.data.filter(media => media.MVEX__Sort_on_Website__c !== null && media.MVEX__IsOnWebsite__c !== false).sort((a, b) => a.MVEX__Sort_on_Website__c - b.MVEX__Sort_on_Website__c);
                         this.portalData = this.data.filter(media => media.MVEX__Sort_on_Portal_Feed__c !== null && media.MVEX__IsOnPortalFeed__c !== false).sort((a, b) => a.MVEX__Sort_on_Portal_Feed__c - b.MVEX__Sort_on_Portal_Feed__c);
-                        this.data.forEach(row => row.MVEX__Size__c = row.MVEX__Size__c ? row.MVEX__Size__c + ' ' + 'kb' : 'External');
-                        this.data.forEach(row => row.MVEX__Tags__c = row.MVEX__Tags__c ? row.MVEX__Tags__c.split(";") : '');
+                        this.data.forEach(row => {
+                            row.MVEX__Size__c = row.MVEX__Size__c ? row.MVEX__Size__c + ' ' + 'kb' : 'External';
+                            row.MVEX__Tags__c = row.MVEX__Tags__c ? row.MVEX__Tags__c.split(";") : [];
+                            this.formatMediaItem(row);
+                        });
                         this.isData = result.listingImages && result.listingImages.length > 0;
                         this.fetchedData = JSON.parse(JSON.stringify(this.data));
                         this.showSpinner = false;
@@ -403,11 +620,17 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
             // Prepare the media list to save
             let combinedMediaListToSave = this.saveOrder();
 
+            const ignoredKeys = [
+                'MVEX__BaseUrl__c', 'MVEX__Size__c', 'MVEX__Property__c',
+                'formattedTagsList', 'formattedStatusList', 'hasTags', 'hasStatus', 'tagsTooltip', 'statusTooltip',
+                'tagsDisplay', 'statusDisplay'
+            ];
+
             // Iterate over this.data to initialize the map with existing records
             this.data.forEach(record => {
                 let existingRecord = { Id: record.Id };
                 for (let key in record) {
-                    if (key !== 'MVEX__BaseUrl__c' && key !== 'MVEX__Size__c' && key !== 'MVEX__Property__c') {
+                    if (!ignoredKeys.includes(key)) {
                         if (key === 'MVEX__Tags__c' && Array.isArray(record[key])) {
                             existingRecord[key] = record[key].join(';');
                         } else {
@@ -613,7 +836,7 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
 
     /**
     * Method Name: editImageNameToStore
-    * @description: Used to edit image name to store.
+    * @description: Used to edit image name and details to store.
     * Created Date: 27/06/2024
     * Created By: Karan Singh
     */
@@ -621,44 +844,41 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
         try {
             this.hideMainDiv();
             this.isEdit = true;
-            this.recIdToUpdate.push(event.currentTarget.dataset.key);
-            this.currentImgName = event.currentTarget.dataset.name;
+            const recId = event.currentTarget.dataset.key;
+            this.recIdToUpdate.push(recId);
+            const currentRecord = this.data.find(item => item.Id === recId);
+            this.currentImgName = currentRecord ? currentRecord.Name : event.currentTarget.dataset.name;
             this.eventImgName = this.currentImgName;
-            this.imgOldName.push(event.currentTarget.dataset.name);
-            this.floorplanChecked = false;
-            this.virtualTourChecked = false;
-            this.tourChecked = false;
-            this.interiorChecked = false;
-            this.exteriorChecked = false;
-            let list_check = event.currentTarget.dataset.tags.split(",");
-            if (list_check.length > 0) {
-                for (let tags_name = 0; tags_name < list_check.length; tags_name++) {
-                    if (list_check[tags_name] === 'Floorplan') {
-                        this.floorplanChecked = true;
-                        this.picklistValues.push(list_check[tags_name]);
-                    }
-                    if (list_check[tags_name] === 'Virtual Tour') {
-                        this.virtualTourChecked = true;
-                        this.picklistValues.push(list_check[tags_name]);
-                    }
-                    if (list_check[tags_name] === '360tour') {
-                        this.tourChecked = true;
-                        this.picklistValues.push(list_check[tags_name]);
-                    }
-                    if (list_check[tags_name] === 'Interior') {
-                        this.interiorChecked = true;
-                        this.picklistValues.push(list_check[tags_name]);
-                    }
-                    if (list_check[tags_name] === 'Exterior') {
-                        this.exteriorChecked = true;
-                        this.picklistValues.push(list_check[tags_name]);
-                    }
+            this.imgOldName.push(this.currentImgName);
+
+            // Populate selected tags
+            let tags = [];
+            if (currentRecord && currentRecord.MVEX__Tags__c) {
+                if (Array.isArray(currentRecord.MVEX__Tags__c)) {
+                    tags = [...currentRecord.MVEX__Tags__c];
+                } else if (typeof currentRecord.MVEX__Tags__c === 'string') {
+                    tags = currentRecord.MVEX__Tags__c.split(';');
                 }
-                this.picklistValues = this.removeDuplicates(this.picklistValues);
+            } else if (event.currentTarget.dataset.tags) {
+                tags = event.currentTarget.dataset.tags.split(',');
             }
+            this.selectedTags = tags.map(t => t.trim()).filter(Boolean);
+
+            // Populate selected status
+            this.selectedStatus = [];
+            if (currentRecord?.MVEX__IsOnExpose__c) {
+                this.selectedStatus.push('MVEX__IsOnExpose__c');
+            }
+            if (currentRecord?.MVEX__IsOnWebsite__c) {
+                this.selectedStatus.push('MVEX__IsOnWebsite__c');
+            }
+            if (currentRecord?.MVEX__IsOnPortalFeed__c) {
+                this.selectedStatus.push('MVEX__IsOnPortalFeed__c');
+            }
+
             this.updateShowModal();
         } catch (error) {
-            errorDebugger('ImagesAndMedia', 'editImageNameToStore', error, 'warn', 'Error while editing image name to store');
+            errorDebugger('ImagesAndMedia', 'editImageNameToStore', error, 'warn', 'Error while editing image details');
         }
     }
 
@@ -671,18 +891,28 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     confirmEdit() {
         try {
             if (this.eventImgName && this.eventImgName != undefined && this.eventImgName.trim() != '') {
-                this.removeDuplicates(this.picklistValues);
-                if (this.picklistValues !== this.finalPicklistValues) {
-                    this.finalPicklistValues.push(this.picklistValues);
-                }
                 let rec_id = this.recIdToUpdate[this.recIdToUpdate.length - 1];
                 let index_of_record = this.data.findIndex(item => item.Id === rec_id);
-                this.data[index_of_record].MVEX__Tags__c = this.picklistValues;
-                if (this.eventImgName != undefined) {
-                    this.data[index_of_record].Name = this.eventImgName;
+                if (index_of_record !== -1) {
+                    if (this.eventImgName != undefined) {
+                        this.data[index_of_record].Name = this.eventImgName;
+                    }
+                    this.data[index_of_record].MVEX__Tags__c = [...this.selectedTags];
+                    this.data[index_of_record].MVEX__IsOnExpose__c = this.selectedStatus.includes('MVEX__IsOnExpose__c');
+                    this.data[index_of_record].MVEX__IsOnWebsite__c = this.selectedStatus.includes('MVEX__IsOnWebsite__c');
+                    this.data[index_of_record].MVEX__IsOnPortalFeed__c = this.selectedStatus.includes('MVEX__IsOnPortalFeed__c');
+
+                    this.formatMediaItem(this.data[index_of_record]);
+                    this.data = [...this.data];
+
+                    this.exposeData = this.data.filter(media => media.MVEX__Sort_on_Expose__c !== null && media.MVEX__IsOnExpose__c !== false).sort((a, b) => a.MVEX__Sort_on_Expose__c - b.MVEX__Sort_on_Expose__c);
+                    this.websiteData = this.data.filter(media => media.MVEX__Sort_on_Website__c !== null && media.MVEX__IsOnWebsite__c !== false).sort((a, b) => a.MVEX__Sort_on_Website__c - b.MVEX__Sort_on_Website__c);
+                    this.portalData = this.data.filter(media => media.MVEX__Sort_on_Portal_Feed__c !== null && media.MVEX__IsOnPortalFeed__c !== false).sort((a, b) => a.MVEX__Sort_on_Portal_Feed__c - b.MVEX__Sort_on_Portal_Feed__c);
                 }
+
                 this.eventImgName = undefined;
-                this.picklistValues = [];
+                this.selectedTags = [];
+                this.selectedStatus = [];
                 this.isEdit = false;
                 this.updateShowModal();
                 this.addMainDiv();
@@ -719,7 +949,8 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     closePopupEdit() {
         try {
             this.addMainDiv();
-            this.picklistValues = [];
+            this.selectedTags = [];
+            this.selectedStatus = [];
             this.isEdit = false;
             this.imgOldName.pop();
             this.recIdToUpdate.pop();
@@ -952,7 +1183,7 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     handleDragEnter(event) {
         try {
             event.preventDefault();
-            event.target.closest(".dropableimage").classList.add("highlight");
+            event.target.closest(".dropable-image").classList.add("highlight");
         } catch (error) {
             errorDebugger('ImagesAndMedia', 'handleDragEnter', error, 'warn', 'Error while handling drag enter');
         }
@@ -968,7 +1199,7 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     handleDragLeave(event) {
         try {
             event.preventDefault();
-            const dropableImage = event.currentTarget.closest(".dropableimage");
+            const dropableImage = event.currentTarget.closest(".dropable-image");
             if (!dropableImage.contains(event.relatedTarget)) {
                 dropableImage.classList.remove("highlight");
             }
@@ -987,7 +1218,7 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     handledDrop(event) {
         try {
             event.preventDefault();
-            event.target.closest(".dropableimage").classList.remove("highlight");
+            event.target.closest(".dropable-image").classList.remove("highlight");
             var tempdata = [];
             const draggedIndex = event.dataTransfer.getData('index');
             const droppedIndex = this.findParentWithDataIndex(event.target);
@@ -1659,8 +1890,8 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     hideMainDiv() {
         try {
             if (this.screenWidth <= 500 && this.isData) {
-                this.template.querySelector('.maindivconatiner').classList.add("removeMain");
-                this.template.querySelector('.maindiv').classList.add("adddiv");
+                this.template.querySelector('.main-div-continer').classList.add("remove-main");
+                this.template.querySelector('.img-main-div').classList.add("add-div");
             }
         } catch (error) {
             errorDebugger('ImagesAndMedia', 'hideMainDiv', error, 'warn', 'Error while hiding main div');
@@ -1676,8 +1907,8 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     addMainDiv() {
         try {
             if (this.screenWidth <= 500 && this.isData) {
-                this.template.querySelector('.maindivconatiner').classList.remove("removeMain");
-                this.template.querySelector('.maindiv').classList.remove("adddiv");
+                this.template.querySelector('.main-div-continer').classList.remove("remove-main");
+                this.template.querySelector('.img-main-div').classList.remove("add-div");
             }
         } catch (error) {
             errorDebugger('ImagesAndMedia', 'addMainDiv', error, 'warn', 'Error while adding main div');

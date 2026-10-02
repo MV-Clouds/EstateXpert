@@ -5,7 +5,7 @@ import getPicklistValues from '@salesforce/apex/ListingManagerController.getPick
 import getFilteredContacts from '@salesforce/apex/MarketingListCmpController.getFilteredContacts';
 import getListingFields from '@salesforce/apex/ListingManagerController.getObjectFields';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import { errorDebugger } from 'c/globalProperties';
 
@@ -104,7 +104,7 @@ export default class MarketingListFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */   
     connectedCallback(){
-        loadStyle(this, MulishFontCss);
+        loadStyle(this, globalStyles);
         if (!import.meta.env.SSR) {
             window?.globalThis?.addEventListener('resize', this.updateScreenWidth);
         }

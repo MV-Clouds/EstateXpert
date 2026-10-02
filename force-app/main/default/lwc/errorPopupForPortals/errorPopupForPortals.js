@@ -1,6 +1,6 @@
 import { LightningElement, api, track } from 'lwc';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import { errorDebugger } from 'c/globalProperties';
 
 export default class ErrorPopupForPortals extends LightningElement {
@@ -22,7 +22,7 @@ export default class ErrorPopupForPortals extends LightningElement {
     */
     connectedCallback() {
         try {
-            loadStyle(this, MulishFontCss);
+            loadStyle(this, globalStyles);
             let parsed = JSON.parse(this.jsonbody);
             this.errors = Array.isArray(parsed) ? parsed.map((err, index) => {
                 let pathVal = err.path;

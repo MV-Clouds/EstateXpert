@@ -4,7 +4,7 @@ import saveMappings from '@salesforce/apex/ControlCenterController.saveMappings'
 import getMetadata from '@salesforce/apex/ControlCenterController.getMetadata';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import externalCss from '@salesforce/resourceUrl/templateCss';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 import { NavigationMixin } from 'lightning/navigation';
@@ -121,7 +121,7 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     * Created By: Vyom Soni
     */
     connectedCallback() {
-        loadStyle(this, MulishFontCss);
+        loadStyle(this, globalStyles);
         // Check if accessed directly via URL
         if (typeof window !== 'undefined') {
             const currentUrl = window.location.href;

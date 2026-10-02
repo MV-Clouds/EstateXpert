@@ -2,45 +2,50 @@
   <template if:true={showSpinner}>
     <c-spinner-component></c-spinner-component>
   </template>
-  <div class="maindiv">
-    <div class="stylebtn">
-      <button class="exp-blue-btn-css" onclick={saveChanges} disabled={disableEnableBtn} aria-label="Save Changes">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z"
-            stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M17 21V13H7V21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M7 3V8H15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-        <template if:false={isMobileOrTablet}>Save Changes</template>
-      </button>
-      <button class="exp-white-btn-css" onclick={cancelChanges} disabled={disableEnableBtn} aria-label="Cancel">
-        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-            fill="#0176D3" />
-        </svg>
-        <template if:false={isMobileOrTablet}>Cancel</template>
-      </button>
-      <button class="exp-blue-btn-css" onclick={modalPopup} aria-label="Add New Files">
-        <svg width="14" height="14" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
-        </svg>
-        <template if:false={isMobileOrTablet}>Add New Files</template>
-      </button>
-      <button class="exp-white-btn-css" onclick={toDeleteAllMedia} disabled={isAllDelete} aria-label="Delete All">
-        <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-            stroke="#0176D3" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-        <template if:false={isMobileOrTablet}>Delete All</template>
-      </button>
+  <div class="img-main-div">
+    <div class="sub-main-header-css">
+      <div class="header-block-css">
+        Images and Media
+      </div>
+      <div class="header-buttons">
+        <button class="exp-blue-btn-css" onclick={saveChanges} disabled={disableEnableBtn} aria-label="Save Changes">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z"
+              stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M17 21V13H7V21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M7 3V8H15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <template if:false={isMobileOrTablet}>Save Changes</template>
+        </button>
+        <button class="exp-white-btn-css" onclick={cancelChanges} disabled={disableEnableBtn} aria-label="Cancel">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+              fill="#0176D3" />
+          </svg>
+          <template if:false={isMobileOrTablet}>Cancel</template>
+        </button>
+        <button class="exp-blue-btn-css" onclick={modalPopup} aria-label="Add New Files">
+          <svg width="14" height="14" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
+          </svg>
+          <template if:false={isMobileOrTablet}>Add New Files</template>
+        </button>
+        <button class="exp-white-btn-css" onclick={toDeleteAllMedia} disabled={isAllDelete} aria-label="Delete All">
+          <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+              stroke="#0176D3" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <template if:false={isMobileOrTablet}>Delete All</template>
+        </button>
+      </div>
     </div>
 
     <template if:true={isData}>
-      <div class="maindivconatiner">
-        <div class="container">
+      <div class="main-div-continer">
+        <div class="section-container">
           <div class="image-tab-container">
             <div class="tab-menu">
               <ul>
@@ -52,16 +57,16 @@
               </ul>
             </div>
 
-            <div class="tab active-tab-content" data-id="tab1">
+            <div class="image-tab active-tab-content" data-id="tab1">
               <div class="sort-container">
-                <div class="sorting_btn">
-                  <button class="sort_btn_white" onclick={getExpose}>
+                <div class="sorting-btn">
+                  <button class="sort-btn-white" onclick={getExpose}>
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="#0176D3" />
                     </svg>
                     Add All
                   </button>
-                  <button class="sort_btn_white" onclick={clearExpose}>
+                  <button class="sort-btn-white" onclick={clearExpose}>
                     <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
                         d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -69,7 +74,7 @@
                     </svg>
                     Clear All
                   </button>
-                  <button class="sort_btn_white" onclick={showImages} data-name="Expose">
+                  <button class="sort-btn-white" onclick={showImages} data-name="Expose">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
                         d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
@@ -81,9 +86,9 @@
               </div>
               <div class="dragable-container" ondragover={handleDragOver} ondrop={handledDrop} data-type="exposeData">
                 <template for:each={exposeData} for:item="imageUrl" for:index="index">
-                  <div key={imageUrl.Id} data-index={index} style={imageUrl.displayStyle} class="dropableimage"
+                  <div key={imageUrl.Id} data-index={index} style={imageUrl.displayStyle} class="dropable-image"
                     ondragenter={handleDragEnter} ondragleave={handleDragLeave}>
-                    <div class="close" onclick={deleteIcon} data-id={imageUrl.Id} data-field="MVEX__IsOnExpose__c">
+                    <div class="image-thumb-cross" onclick={deleteIcon} data-id={imageUrl.Id} data-field="MVEX__IsOnExpose__c">
                       <svg width="10" height="10" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                           d="M7.0999 7.5L4.3999 4.8L1.6999 7.5L0.899902 6.7L3.5999 4L0.899902 1.3L1.6999 0.5L4.3999 3.2L7.0999 0.5L7.8999 1.3L5.1999 4L7.8999 6.7L7.0999 7.5Z"
@@ -97,16 +102,16 @@
               </div>
             </div>
 
-            <div class="tab" data-id="tab2">
+            <div class="image-tab" data-id="tab2">
               <div class="sort-container">
-                <div class="sorting_btn">
-                  <button class="sort_btn_white" onclick={getWebsite}>
+                <div class="sorting-btn">
+                  <button class="sort-btn-white" onclick={getWebsite}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="#0176D3" />
                     </svg>
                     Add All
                   </button>
-                  <button class="sort_btn_white" onclick={clearWebsite}>
+                  <button class="sort-btn-white" onclick={clearWebsite}>
                     <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
                         d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -114,7 +119,7 @@
                     </svg>
                     Clear All
                   </button>
-                  <button class="sort_btn_white" onclick={showImages} data-name="Website">
+                  <button class="sort-btn-white" onclick={showImages} data-name="Website">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
                         d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
@@ -126,9 +131,9 @@
               </div>
               <div class="dragable-container" ondragover={handleDragOver} ondrop={handledDrop} data-type="websiteData">
                 <template for:each={websiteData} for:item="imageUrl" for:index="index">
-                  <div key={imageUrl.Id} data-index={index} style={imageUrl.displayStyle} class="dropableimage"
+                  <div key={imageUrl.Id} data-index={index} style={imageUrl.displayStyle} class="dropable-image"
                     ondragenter={handleDragEnter} ondragleave={handleDragLeave}>
-                    <div class="close" onclick={deleteIcon} data-id={imageUrl.Id} data-field="MVEX__IsOnWebsite__c">
+                    <div class="image-thumb-cross" onclick={deleteIcon} data-id={imageUrl.Id} data-field="MVEX__IsOnWebsite__c">
                       <svg width="10" height="10" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                           d="M7.0999 7.5L4.3999 4.8L1.6999 7.5L0.899902 6.7L3.5999 4L0.899902 1.3L1.6999 0.5L4.3999 3.2L7.0999 0.5L7.8999 1.3L5.1999 4L7.8999 6.7L7.0999 7.5Z"
@@ -142,16 +147,16 @@
               </div>
             </div>
 
-            <div class="tab" data-id="tab3">
+            <div class="image-tab" data-id="tab3">
               <div class="sort-container">
-                <div class="sorting_btn">
-                  <button class="sort_btn_white" onclick={getPortal}>
+                <div class="sorting-btn">
+                  <button class="sort-btn-white" onclick={getPortal}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="#0176D3" />
                     </svg>
                     Add All
                   </button>
-                  <button class="sort_btn_white" onclick={clearPortal}>
+                  <button class="sort-btn-white" onclick={clearPortal}>
                     <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
                         d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -159,7 +164,7 @@
                     </svg>
                     Clear All
                   </button>
-                  <button class="sort_btn_white" onclick={showImages} data-name="Portal">
+                  <button class="sort-btn-white" onclick={showImages} data-name="Portal">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
                         d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
@@ -171,9 +176,9 @@
               </div>
               <div class="dragable-container" ondragover={handleDragOver} ondrop={handledDrop} data-type="portalData">
                 <template for:each={portalData} for:item="imageUrl" for:index="index">
-                  <div key={imageUrl.Id} data-index={index} style={imageUrl.displayStyle} class="dropableimage"
+                  <div key={imageUrl.Id} data-index={index} style={imageUrl.displayStyle} class="dropable-image"
                     ondragenter={handleDragEnter} ondragleave={handleDragLeave}>
-                    <div class="close" onclick={deleteIcon} data-id={imageUrl.Id} data-field="MVEX__IsOnPortalFeed__c">
+                    <div class="image-thumb-cross" onclick={deleteIcon} data-id={imageUrl.Id} data-field="MVEX__IsOnPortalFeed__c">
                       <svg width="10" height="10" viewBox="0 0 8 8" fill="none">
                         <path
                           d="M7.0999 7.5L4.3999 4.8L1.6999 7.5L0.899902 6.7L3.5999 4L0.899902 1.3L1.6999 0.5L4.3999 3.2L7.0999 0.5L7.8999 1.3L5.1999 4L7.8999 6.7L7.0999 7.5Z"
@@ -189,106 +194,77 @@
           </div>
         </div>
 
-        <template if:false={showMobileView}>
-          <div class="field-mapping-container">
-            <div class="exp-table-content table-border">
-              <table aria-multiselectable="true"
-                class="slds-table slds-table_fixed-layout slds-table_resizable-cols slds-table_cell-buffer ">
-                <thead>
-                  <tr class="exp-table-tr-cls slds-line-height_reset">
-                    <th class="thumbnail-col" scope="col">
-                      <div class="slds-truncate" title="Thumbnail"></div>
-                    </th>
-                    <th aria-sort="none" data-id="Name" onclick={sortClick} class="title-col slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header" scope="col">
-                      <div class="slds-text-link_rese exp-sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                        <span class="slds-truncate" title="Title">Title</span>
-                        <span class="slds-icon_container slds-icon-utility-arrowdown">
-                            <svg data-index="Name" class="exp-arrow-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                            </svg>
-                        </span>
-                      </div>
-                    </th>
-                    <th aria-sort="none" data-id="MVEX__Size__c" onclick={sortClick} class="size-col slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header" scope="col">
-                      <div class="slds-text-link_rese exp-sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                        <span class="slds-truncate" title="Size (kb)">Size (kb)</span>
-                        <span class="slds-icon_container slds-icon-utility-arrowdown">
-                            <svg data-index="MVEX__Size__c" class="exp-arrow-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                            </svg>
-                        </span>
-                      </div>
-                    </th>
-                    <th class="tags-col" scope="col">
-                      <div class="slds-truncate" title="Tags">Tags</div>
-                    </th>
-                    <th class="status-col" scope="col">
-                      <div class="slds-truncate" title="Status">Status</div>
-                    </th>
-                    <th class="actions-col" scope="col">
-                      <div class="slds-truncate" title="Actions">Actions</div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <template for:each={data} for:item="item" for:index="index">
-                    <tr class="slds-hint-parent" key={item.Id}>
-                      <td data-label="Thumbnail">
-                        <div class="slds-truncate font_style_css">
-                          <img src={item.MVEX__BaseUrl__c}
-                            class="slds-avatar slds-avatar_rectangle slds-avatar_large customimg" alt="Thumbnail"
-                            draggable="false" onerror={handleImageError} />
-                        </div>
-                      </td>
-                      <td data-label="Title" class="exp-truncate-css">
-                        <div class="slds-truncate font_style_css">
-                          {item.Name}
-                        </div>
-                      </td>
-                      <td data-label="Size (kb)">
-                        <div class="slds-truncate font_style_css">
-                          {item.MVEX__Size__c}
-                        </div>
-                      </td>
-                      <td data-label="Tags" class="exp-truncate-css">
-                        <div class="tags_css font_style_css slds-truncate">
-                          <template for:each={item.MVEX__Tags__c} for:item="tag">
-                            <template if:true={item.MVEX__Tags__c}>
-                              <label key={tag} class="tags_label">{tag}</label>
-                            </template>
-                          </template>
-                        </div>
-                      </td>
-                      <td data-label="Status">
-                        <div class="checklist_css align_css slds-truncate">
-                          <div class="checklist_css_values">
-                            <Label>Appears On</Label>
-                            <div class="checkbox_div">
-                              <input class="checkbox-expose" type="checkbox" name="expose"
-                                value={item.MVEX__IsOnExpose__c} data-field="MVEX__IsOnExpose__c" data-key={item.Id}
-                                onchange={handleCheckboxChange} checked={item.MVEX__IsOnExpose__c} /> Is On Expose
-                            </div>
-                            <div class="checkbox_div">
-                              <input class="checkbox-website statusbox" type="checkbox" name="website"
-                                value={item.MVEX__IsOnWebsite__c} data-field="MVEX__IsOnWebsite__c" data-key={item.Id}
-                                onchange={handleCheckboxChange} checked={item.MVEX__IsOnWebsite__c} /> Is On Website
-                            </div>
-                            <div class="checkbox_div">
-                              <input class="checkbox-portal statusbox" type="checkbox" name="portal"
-                                value={item.MVEX__IsOnPortalFeed__c} data-field="MVEX__IsOnPortalFeed__c"
-                                data-key={item.Id} onchange={handleCheckboxChange}
-                                checked={item.MVEX__IsOnPortalFeed__c} /> Is On Portal Feed
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td data-label="Actions">
-                        <div class="action_icons_css">
-                          <div class="exp-preview-icon-css" data-recid={item.Id} data-index={index}
-                            data-description={item.Name} data-src={item.MVEX__BaseUrl__c}
-                            data-exturl={item.MVEX__ExternalLink__c} data-size={item.MVEX__Size__c}
-                            data-mimetype={item.MVEX__MimeType__c} onclick={handleImgClick}>
-                            <svg width="15" height="15" fill="#000000" xmlns="http://www.w3.org/2000/svg"
+        <div class="exp-main-content-cls">
+          <div class="exp-table-content" id="exp-table-content">
+            <table aria-multiselectable="true" class="slds-table slds-table_fixed-layout slds-table_resizable-cols"
+              role="grid" aria-label="Images & Media">
+            <thead>
+              <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
+                <th class="thumbnail-col" scope="col">
+                  <div class="slds-truncate" title="Thumbnail">Thumbnail</div>
+                </th>
+                <th aria-sort="none" data-id="Name" onclick={sortClick}
+                  class="title-col slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header"
+                  scope="col">
+                  <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                    <span class="slds-assistive-text">Sort by: </span>
+                    <div class="slds-has-flexi-truncate">
+                      <span class="slds-truncate" title="Title">Title</span>
+                      <span class="slds-icon_container slds-icon-utility-arrowdown">
+                        <svg data-index="Name" class="exp-arrow-icon" viewBox="0 0 384 512"
+                          xmlns="http://www.w3.org/2000/svg">
+                          <path
+                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+                </th>
+                <th aria-sort="none" data-id="MVEX__Size__c" onclick={sortClick}
+                  class="size-col slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header"
+                  scope="col">
+                  <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                    <span class="slds-assistive-text">Sort by: </span>
+                    <div class="slds-has-flexi-truncate">
+                      <span class="slds-truncate" title="Size (kb)">Size (kb)</span>
+                      <span class="slds-icon_container slds-icon-utility-arrowdown">
+                        <svg data-index="MVEX__Size__c" class="exp-arrow-icon" viewBox="0 0 384 512"
+                          xmlns="http://www.w3.org/2000/svg">
+                          <path
+                            d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+                </th>
+                <th class="tags-col" scope="col">
+                  <div class="slds-truncate" title="Tags">Tags</div>
+                </th>
+                <th class="status-col" scope="col">
+                  <div class="slds-truncate" title="Status">Status</div>
+                </th>
+                <th class="actions-col" scope="col">
+                  <div class="slds-truncate" title="Actions">Actions</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={pagedData} for:item="item" for:index="index">
+                <tr class="table-tr" key={item.Id} aria-selected="false">
+                  <td data-label="Thumbnail" class="slds-cell_action-mode" role="gridcell">
+                    <div class="thumbnail-cell">
+                      <div class="thumbnail-wrapper"
+                        data-recid={item.Id} data-index={index}
+                        data-description={item.Name} data-src={item.MVEX__BaseUrl__c}
+                        data-exturl={item.MVEX__ExternalLink__c} data-size={item.MVEX__Size__c}
+                        data-mimetype={item.MVEX__MimeType__c} onclick={handleImgClick}
+                        title="Click to preview">
+                        <img src={item.MVEX__BaseUrl__c}
+                          class="slds-avatar slds-avatar_rectangle slds-avatar_large listing-img" alt="Thumbnail"
+                          draggable="false" onerror={handleImageError} />
+                        <div class="thumbnail-overlay">
+                          <div class="thumbnail-preview-btn">
+                            <svg width="16" height="16" fill="#ffffff" xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 52 52" enable-background="new 0 0 52 52" xml:space="preserve">
                               <path
                                 d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
@@ -297,135 +273,125 @@
                               </path>
                             </svg>
                           </div>
-                          <div class="exp-preview-icon-css" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
-                            data-name={item.Name} data-isexternal={item.MVEX__Size__c} onclick={downloadRowImage}>
-                            <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
-                              xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                d="M13.0417 8.45834V11.375C13.0417 11.5408 12.9758 11.6997 12.8586 11.8169C12.7414 11.9342 12.5825 12 12.4167 12H1.58333C1.41754 12 1.25867 11.9342 1.14146 11.8169C1.02425 11.6997 0.958336 11.5408 0.958336 11.375V8.45834M3.875 5.54167L7 8.66667M7 8.66667L10.125 5.54167M7 8.66667V2"
-                                stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div class="exp-edit-icon-css" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
-                            data-tags={item.MVEX__Tags__c} data-name={item.Name} onclick={editImageNameToStore}>
-                            <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
-                              xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
-                                stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div class="exp-delete-icon-css" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
-                            data-label={item.MVEX__Filename__c} data-size={item.MVEX__Size__c} onclick={deleteRow}>
-                            <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
-                              xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
                         </div>
-                      </td>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td data-label="Title" class="slds-cell_action-mode exp-truncate-css" role="gridcell"
+                    title={item.Name}>
+                    <div class="slds-truncate center-trancate-text">
+                      {item.Name}
+                    </div>
+                  </td>
+                  <td data-label="Size (kb)" class="slds-cell_action-mode" role="gridcell"
+                    title={item.MVEX__Size__c}>
+                    <div class="slds-truncate center-trancate-text">
+                      {item.MVEX__Size__c}
+                    </div>
+                  </td>
+                  <td data-label="Tags" class="slds-cell_action-mode exp-truncate-css" role="gridcell" title={item.tagsDisplay}>
+                    <div class="slds-truncate center-trancate-text">
+                      {item.tagsDisplay}
+                    </div>
+                  </td>
+                  <td data-label="Status" class="slds-cell_action-mode exp-truncate-css" role="gridcell" title={item.statusDisplay}>
+                    <div class="slds-truncate center-trancate-text">
+                      {item.statusDisplay}
+                    </div>
+                  </td>
+                  <td data-label="Actions" class="slds-cell_action-mode" role="gridcell">
+                    <div class="action-icons-css center-trancate-text">
+                      <div class="exp-preview-icon-css" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
+                        data-name={item.Name} data-isexternal={item.MVEX__Size__c} onclick={downloadRowImage}
+                        title="Download">
+                        <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
+                          xmlns="http://www.w3.org/2000/svg">
+                          <path
+                            d="M13.0417 8.45834V11.375C13.0417 11.5408 12.9758 11.6997 12.8586 11.8169C12.7414 11.9342 12.5825 12 12.4167 12H1.58333C1.41754 12 1.25867 11.9342 1.14146 11.8169C1.02425 11.6997 0.958336 11.5408 0.958336 11.375V8.45834M3.875 5.54167L7 8.66667M7 8.66667L10.125 5.54167M7 8.66667V2"
+                            stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                      </div>
+                      <div class="exp-edit-icon-css" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
+                        data-tags={item.MVEX__Tags__c} data-name={item.Name} onclick={editImageNameToStore}
+                        title="Edit">
+                        <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
+                          xmlns="http://www.w3.org/2000/svg">
+                          <path
+                            d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
+                            stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                      </div>
+                      <div class="exp-delete-icon-css" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
+                        data-label={item.MVEX__Filename__c} data-size={item.MVEX__Size__c} onclick={deleteRow}
+                        title="Delete">
+                        <svg width="15" height="15" viewBox="0 0 14 14" fill="none"
+                          xmlns="http://www.w3.org/2000/svg">
+                          <path
+                            d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                            stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- FOOTER / PAGINATION -->
+        <div class="exp-pagination-div">
+          <div class="exp-page-size-container">
+            <label class="exp-page-size-label">Rows per page : </label>
+            <select class="exp-page-size-select" onchange={handlePageSizeChange}>
+              <template for:each={pageSizeOptions} for:item="opt">
+                <option key={opt.value} value={opt.value} selected={opt.isSelected}>
+                  {opt.label}
+                </option>
+              </template>
+            </select>
           </div>
-        </template>
 
-        <template if:true={showMobileView}>
-          <template for:each={data} for:item="item">
-            <div class="card-view" key={item.Id}>
-              <div class="inner_card_view">
-                <div class="image_info_cls">
-                  <div class="img-section">
-                    <img src={item.MVEX__BaseUrl__c}
-                      class="slds-avatar slds-avatar_rectangle slds-avatar_large customimg" alt="Thumbnail"
-                      onerror={handleImageError} />
-                  </div>
-                  <div class="detail-section">
-                    <div class="name-section">
-                      <label>Name:</label>
-                      <h2 class="slds-truncate" title="Name">{item.Name}</h2>
-                    </div>
-                    <div class="name-section">
-                      <label>Size:</label>
-                      <h2 class="slds-truncate" title="Size">{item.MVEX__Size__c}</h2>
-                    </div>
-                  </div>
-                  <div class="slds-col checklist_css">
-                    <Label>Appears On</Label>
-                    <div class="checkbox_div">
-                      <input class="checkbox-expose" type="checkbox" name="expose" value={item.MVEX__IsOnExpose__c}
-                        data-field="MVEX__IsOnExpose__c" data-key={item.Id} onchange={handleCheckboxChange}
-                        checked={item.MVEX__IsOnExpose__c} /> Expose
-                    </div>
+          <div class="exp-pagination-right">
+            <span class="exp-results-info">{recordCountInfo}</span>
 
-                    <div class="checkbox_div">
-                      <input class="checkbox-website statusbox" type="checkbox" name="website"
-                        value={item.MVEX__IsOnWebsite__c} data-field="MVEX__IsOnWebsite__c" data-key={item.Id}
-                        onchange={handleCheckboxChange} checked={item.MVEX__IsOnWebsite__c} /> Website
-                    </div>
+            <div class="exp-btn-cover">
+              <div class="exp-pagination-container">
+                <button class="exp-pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
+                  <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                    <path
+                      d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                  </svg>
+                </button>
 
-                    <div class="checkbox_div">
-                      <input class="checkbox-portal statusbox" type="checkbox" name="portal"
-                        value={item.MVEX__IsOnPortalFeed__c} data-field="MVEX__IsOnPortalFeed__c" data-key={item.Id}
-                        onchange={handleCheckboxChange} checked={item.MVEX__IsOnPortalFeed__c} /> Portal Feed
-                    </div>
-                  </div>
-                </div>
+                <template for:each={pageNumbers} for:item="page">
+                  <template if:false={page.isEllipsis}>
+                    <button key={page.number} data-id={page.number} class={page.className} onclick={handlePageChange}>
+                      {page.number}
+                    </button>
+                  </template>
+                  <template if:true={page.isEllipsis}>
+                    <span key={page.number} class="exp-pagination-ellipsis">...</span>
+                  </template>
+                </template>
 
-                <div class="slds-truncate btn-div" title="actions">
-                  <div class="exp-preview-icon-css slds-p-around_xx-small" data-recid={item.Id} data-index={index}
-                    data-description={item.Name} data-src={item.MVEX__BaseUrl__c}
-                    data-exturl={item.MVEX__ExternalLink__c} data-mimetype={item.MVEX__MimeType__c}
-                    data-size={item.MVEX__Size__c} onclick={handleImgClick}>
-                    <svg width="15" height="15" fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52"
-                      enable-background="new 0 0 52 52" xml:space="preserve">
-                      <path
-                        d="M51.8,25.1C47.1,15.6,37.3,9,26,9S4.9,15.6,0.2,25.1c-0.3,0.6-0.3,1.3,0,1.8C4.9,36.4,14.7,43,26,43 s21.1-6.6,25.8-16.1C52.1,26.3,52.1,25.7,51.8,25.1z M26,37c-6.1,0-11-4.9-11-11s4.9-11,11-11s11,4.9,11,11S32.1,37,26,37z">
-                      </path>
-                      <path d="M26,19c-3.9,0-7,3.1-7,7s3.1,7,7,7s7-3.1,7-7S29.9,19,26,19z">
-                      </path>
-                    </svg>
-                  </div>
-                  <div class="exp-preview-icon-css slds-p-around_xx-small" title="download" data-key={item.Id}
-                    data-isexternal={item.MVEX__Size__c} data-url={item.MVEX__BaseUrl__c} data-name={item.Name}
-                    onclick={downloadRowImage}>
-                    <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M13.0417 8.45834V11.375C13.0417 11.5408 12.9758 11.6997 12.8586 11.8169C12.7414 11.9342 12.5825 12 12.4167 12H1.58333C1.41754 12 1.25867 11.9342 1.14146 11.8169C1.02425 11.6997 0.958336 11.5408 0.958336 11.375V8.45834M3.875 5.54167L7 8.66667M7 8.66667L10.125 5.54167M7 8.66667V2"
-                        stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                  </div>
-                  <div class="exp-edit-icon-css slds-p-around_xx-small" data-key={item.Id} data-url={item.MVEX__BaseUrl__c}
-                    data-tags={item.MVEX__Tags__c} data-name={item.Name} onclick={editImageNameToStore}>
-                    <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z"
-                        stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                  </div>
-                  <div class="exp-delete-icon-css slds-p-around_xx-small" data-key={item.Id}
-                    data-url={item.MVEX__BaseUrl__c} onclick={deleteRow}>
-                    <svg width="15" height="15" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                        stroke="#212529" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                  </div>
-                </div>
+                <button class="exp-pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                  <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                    <path
+                      d="M178 477l208-205c6-6 6-16 0-22L178 45c-6-6-16-6-22 0l-22 22c-6 6-6 16 0 22l163 161c6 6 6 16 0 22L134 433c-6 6-6 16 0 22l22 22c6 6 16 6 22 0z" />
+                  </svg>
+                </button>
               </div>
             </div>
-          </template>
-        </template>
+          </div>
+        </div>
       </div>
-    </template>
+    </div>
+  </template>
     <template if:false={isData}>
       <div class="exp-no-data-container">
-          <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-          <div class="exp-no-data-message">No images are available for this listing.</div>
+        <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+        <div class="exp-no-data-message">No images are available for this listing.</div>
       </div>
     </template>
 
@@ -434,8 +400,8 @@
 
     <template if:true={isEdit}>
       <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
-        class="slds-modal slds-fade-in-open">
-        <div class="slds-modal__container">
+        class="slds-modal slds-fade-in-open slds-modal_medium">
+        <div class="slds-modal__container edit-details-modal-container">
           <div class="slds-modal__close exp-close-icon-css" onclick={closePopupEdit}>
             <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -444,41 +410,30 @@
             </svg>
           </div>
 
-          <div class="slds-modal__header blue-header">
-            <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Edit Name</h1>
+          <div class="slds-modal__header exp-pop-up-header-css">
+            <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Edit Media Details</h1>
           </div>
           <div class="slds-modal__content modalbody" id="modal-content-id-1">
-            <div class="content_body">
-              <label for="title" class="slds-m-bottom_small edit_name_label"><abbr title="required"
-                  class="slds-required">*</abbr>Name</label>
-              <lightning-input onchange={storeImgName} value={currentImgName} label="Name"
-                variant="label-hidden"></lightning-input>
-              <br />
-              <label for="title" class="slds-m-bottom_small slds-p-left_xx-small edit_name_label">Tags</label>
-              <div class="slds-truncate slds-p-around_xx-small edit_name_tags">
-                <div class="edit_tags_css">
-                  <input type="checkbox" name="Floorplan" onchange={tagsChecked} value={floorplanChecked}
-                    checked={floorplanChecked} /> Floorplan
-                </div>
-                <div class="edit_tags_css">
-                  <input type="checkbox" name="Virtual Tour" onchange={tagsChecked} value={virtualTourChecked}
-                    checked={virtualTourChecked} /> Virtual Tour
-                </div>
-                <div class="edit_tags_css">
-                  <input type="checkbox" name="360tour" onchange={tagsChecked} value={tourChecked}
-                    checked={tourChecked} /> 360tour
-                </div>
-                <div class="edit_tags_css">
-                  <input type="checkbox" name="Interior" onchange={tagsChecked} value={interiorChecked}
-                    checked={interiorChecked} /> Interior
-                </div>
-                <div class="edit_tags_css">
-                  <input type="checkbox" name="Exterior" onchange={tagsChecked} value={exteriorChecked}
-                    checked={exteriorChecked} />Exterior
-                </div>
+            <div class="content-body">
+              <div class="edit-field-group">
+                <label class="edit-name-label"><abbr title="required" class="slds-required">*</abbr>Name</label>
+                <lightning-input onchange={storeImgName} value={currentImgName} label="Name"
+                  variant="label-hidden"></lightning-input>
+              </div>
+
+              <div class="edit-field-group slds-m-top_medium">
+                <lightning-dual-listbox name="tags" label="Tags" source-label="Available" selected-label="Selected"
+                  options={tagOptions} value={selectedTags} size="4" onchange={handleTagsChange}>
+                </lightning-dual-listbox>
+              </div>
+
+              <div class="edit-field-group slds-m-top_medium">
+                <lightning-dual-listbox name="status" label="Status" source-label="Available" selected-label="Selected"
+                  options={statusOptions} value={selectedStatus} size="3" onchange={handleStatusChange}>
+                </lightning-dual-listbox>
               </div>
             </div>
-            <div class="edit_modal_footerbtns">
+            <div class="edit-modal-footerbtns">
               <button class="exp-white-btn-css" aria-label="Cancel and close" onclick={closePopupEdit}>
                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
@@ -517,14 +472,14 @@
             </svg>
           </div>
 
-          <div class="slds-modal__header blue-header">
+          <div class="slds-modal__header exp-pop-up-header-css">
             <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Delete Media</h1>
           </div>
           <div class="slds-modal__content modalbody">
-            <div class="content_body delete_modal_font_css">
+            <div class="content-body delete-modal-font-css">
               <p>Are you sure to delete Media?</p>
             </div>
-            <div class="edit_modal_footerbtns">
+            <div class="edit-modal-footerbtns">
               <button class="exp-white-btn-css" onclick={closePopup}>
                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
@@ -558,14 +513,14 @@
             </svg>
           </div>
 
-          <div class="slds-modal__header blue-header">
+          <div class="slds-modal__header exp-pop-up-header-css">
             <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Delete All Media</h1>
           </div>
           <div class="slds-modal__content modalbody">
-            <div class="content_body delete_modal_font_css">
+            <div class="content-body delete-modal-font-css">
               <p>Are you sure to delete all Media?</p>
             </div>
-            <div class="edit_modal_footerbtns">
+            <div class="edit-modal-footerbtns">
               <button class="exp-white-btn-css" aria-label="Cancel and close" onclick={closePopup}>
                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path
@@ -589,18 +544,18 @@
   </div>
 
   <template if:true={showImagePreview}>
-    <div class="slds-modal slds-fade-in-open image_preview" style='background: rgba(0, 0, 0, 0.8);' role="dialog"
+    <div class="slds-modal slds-fade-in-open listing-image-preview" style='background: rgba(0, 0, 0, 0.8);' role="dialog"
       aria-modal="true">
-      <div class="image_control_bar" style="background: #0000008c;" onclick={stopEventPropogation}>
-        <div class="image_title">
+      <div class="image-control-bar" style="background: #0000008c;" onclick={stopEventPropogation}>
+        <div class="image-title">
           <lightning-icon icon-name="doctype:image" title="Image" size="medium"></lightning-icon>
           <h2>{previewImageTitle}</h2>
         </div>
-        <div class="close_img" onclick={closeImagePreview}>
+        <div class="close-img" onclick={closeImagePreview}>
           <lightning-icon icon-name="utility:close" title="close" size="small"></lightning-icon>
         </div>
       </div>
-      <div class="img_preview_container">
+      <div class="img-preview-container">
         <template if:true={isImageHavePreview}>
           <img src={previewImageSrc} onload={handleImageLoaded} onerror={handleImageError}
             onclick={stopEventPropogation} />
@@ -618,14 +573,14 @@
           </div>
         </template>
       </div>
-      <div if:true={isNextAndPreviousBtn} class="Next_Previous_btn">
+      <div if:true={isNextAndPreviousBtn} class="next-previous-btn">
         <template if:true={notFirstImg}>
-          <div class="Previous_img_btn" onclick={changeImg} data-name="Previous_Image">
+          <div class="previous-img-btn" onclick={changeImg} data-name="Previous_Image">
             <lightning-icon icon-name="utility:chevronleft" title="Previous" size="small"></lightning-icon>
           </div>
         </template>
         <template if:true={notLastImg}>
-          <div class="Next_img_btn" onclick={changeImg} data-name="Next_Image">
+          <div class="next-img-btn" onclick={changeImg} data-name="Next_Image">
             <lightning-icon icon-name="utility:chevronright" title="Next" size="small"></lightning-icon>
           </div>
         </template>

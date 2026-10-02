@@ -4,7 +4,7 @@ import deleteFiles from '@salesforce/apex/ImageAndMediaController.deleteFiles';
 import getContentVersionData from '@salesforce/apex/ImageAndMediaController.getContentVersionData';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import { errorDebugger } from 'c/globalProperties';
 
 export default class WaterMarkImageUploader extends LightningElement {
@@ -46,7 +46,7 @@ export default class WaterMarkImageUploader extends LightningElement {
     */
     connectedCallback() {
         try {
-            loadStyle(this, MulishFontCss);
+            loadStyle(this, globalStyles);
             this.getData();
         } catch (error) {
             errorDebugger('WaterMarkImageUploader', 'connectedCallback', error, 'warn', 'Error occurred while fetching data');

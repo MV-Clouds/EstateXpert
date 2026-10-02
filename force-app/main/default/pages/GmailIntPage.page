@@ -123,7 +123,7 @@
                 justify-content: center;
             }
 
-            .header_cls img{
+            .header_cls img {
                 position: absolute;
                 left: 0;
             }
@@ -193,7 +193,7 @@
                 window.close();
             }
         </script>
-        <apex:styleSheet value="{!URLFOR($Resource.MulishFontCss)}" />
+        <apex:styleSheet value="{!URLFOR($Resource.globalStyles)}" />
     </head>
 
     <body>

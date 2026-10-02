@@ -1,7 +1,7 @@
 import { LightningElement, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
+import globalStyles from "@salesforce/resourceUrl/globalStyles";
 import getLeadAssignmentInitData from '@salesforce/apex/ControlCenterController.getLeadAssignmentInitData';
 import manageRule from '@salesforce/apex/ControlCenterController.manageRule';
 import getRecordNames from '@salesforce/apex/ControlCenterController.getRecordNames';
@@ -94,7 +94,7 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
 
     connectedCallback() {
         this.isLoading = true;
-        loadStyle(this, MulishFontCss);
+        loadStyle(this, globalStyles);
 
         // Load email notification toggle state
         getEmailNotificationEnabled()

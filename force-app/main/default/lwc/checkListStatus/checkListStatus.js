@@ -367,7 +367,7 @@ export default class CheckListStatus extends LightningElement {
             if (this.screenWidth <= 1050 && this.isDataAvailable) {
                 const dataContainer = this.template.querySelector('.columns-container');
                 const container = this.template.querySelector('.container');
-                if (dataContainer) dataContainer.classList.add('removeMain');
+                if (dataContainer) dataContainer.classList.add('remove-main');
                 if (container) container.classList.add('adddiv');
             }
         } catch (error) {
@@ -388,7 +388,7 @@ export default class CheckListStatus extends LightningElement {
             if (this.screenWidth <= 1050 && this.isDataAvailable) {
                 const dataContainer = this.template.querySelector('.columns-container');
                 const container = this.template.querySelector('.container');
-                if (dataContainer) dataContainer.classList.remove('removeMain');
+                if (dataContainer) dataContainer.classList.remove('remove-main');
                 if (container) container.classList.remove('adddiv');
             }
         } catch (error) {

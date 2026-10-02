@@ -26,14 +26,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     @track unchangedProcessContact = [];
     @track pendingFilterEvent = null; // Store filter event if received before data loads
     @track lastFilterEvent = null; // Store last applied filter event to persist across data reloads
-    @track appliedFilters = [
-        {
-            id: 'MVEX__Contact_Type__c',
-            label: 'Contact Type',
-            value: 'Buyer',
-            displayText: 'Contact Type: Buyer'
-        }
-    ];
+    @track appliedFilters = [];
     @track showAllFilters = false;
     @track sortField = 'Name';
     @track sortOrder = 'asc';
@@ -895,14 +888,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
                     this.appliedFilters = event.detail.appliedFilters;
                     this.lastFilterEvent = event;
                 } else {
-                    this.appliedFilters = [
-                        {
-                            id: 'MVEX__Contact_Type__c',
-                            label: 'Contact Type',
-                            value: 'Buyer',
-                            displayText: 'Contact Type: Buyer'
-                        }
-                    ];
+                    this.appliedFilters = [];
                     this.lastFilterEvent = null;
                 }
                 this.sortField = 'Name';

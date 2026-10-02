@@ -154,21 +154,6 @@
     background: #F9FAFB;
 }
 
-.filter-div .delete-div {
-    padding: 6px;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: auto;
-    height: auto;
-    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-
 .filter-header {
     font-size: 18px;
     color: white;
@@ -539,4 +524,26 @@
 
 .listing-cls svg {
     cursor: pointer;
+}
+
+.mapping-item-active {
+    padding: 0.75rem;
+    border: 1px solid #E5E7EB;
+    margin-bottom: 0.75rem;
+    display: flex;
+    border-radius: 5px;
+    background-color: #FFFFFF;
+    transition: all 0.2s;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    align-items: center;
+}
+
+.mapping-item-active:hover {
+    background-color: #E1F1FE;
+    border-color: #0176D3;
+    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.2);
+    transform: translateY(-1px);
+    background-color: #b3ddff;
+    color: black;
 }

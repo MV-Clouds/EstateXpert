@@ -98,11 +98,6 @@
     align-items: center;
 }
 
-.mapping-item-active:hover {
-    background-color: #b3ddff;
-    color: black;
-}
-
 .selected {
     background-color: #E1F1FE;
     color: #0176D3;
@@ -367,6 +362,7 @@
     border-color: #0176D3;
     box-shadow: 0 2px 4px rgba(1, 118, 211, 0.2);
     transform: translateY(-1px);
+    color: black;
 }
 
 .scroll-div {

@@ -303,14 +303,16 @@
                         aria-label="Inquiries">
                         <thead>
                             <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
-                                <th class="header-cell slds-text-align_right slds-cell_action-mode column-1"
+                                <th class="header-cell slds-cell_action-mode column-1"
                                     scope="col">
                                     <span id="column-group-header" class="slds-assistive-text">Choose a row</span>
                                     <div class="header-checkbox-div">
-                                        <label class="custom-checkbox">
-                                            <input type="checkbox" onchange={selectAllCheckbox} checked={checkAll}>
-                                            <span class="checkmark"></span>
-                                        </label>
+                                        <lightning-input type="checkbox"
+                                            variant="label-hidden"
+                                            label="Select All"
+                                            checked={checkAll}
+                                            onchange={selectAllCheckbox}>
+                                        </lightning-input>
                                     </div>
                                 </th>
                                 <th aria-sort="none" data-id="name" onclick={sortClick}
@@ -372,13 +374,17 @@
                         <tbody>
                             <template for:each={pagedInquries} for:item="inquiry">
                                 <tr key={inquiry.id} aria-selected="false" class="table-tr">
-                                    <td class="slds-text-align_right slds-cell_action-mode checkbox-cell"
+                                    <td class="slds-cell_action-mode column-1 checkbox-cell"
                                         role="gridcell">
-                                        <label class="custom-checkbox custom-checkbox-body">
-                                            <input data-id={inquiry.id} type="checkbox" checked={inquiry.isSelected}
-                                                value={inquiry.isSelected} onchange={checkBoxValueChange}>
-                                            <span class="checkmark"></span>
-                                        </label>
+                                        <div class="row-checkbox-div">
+                                            <lightning-input type="checkbox"
+                                                variant="label-hidden"
+                                                label="Select Inquiry"
+                                                data-id={inquiry.id}
+                                                checked={inquiry.isSelected}
+                                                onchange={checkBoxValueChange}>
+                                            </lightning-input>
+                                        </div>
                                     </td>
                                     <td class="slds-cell_action-mode listing-cls" scope="row" title={inquiry.name}>
                                         <div class="slds-truncate center-trancate-text" title={inquiry.name}>

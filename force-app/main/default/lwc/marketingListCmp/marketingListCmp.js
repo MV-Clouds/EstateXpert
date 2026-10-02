@@ -238,7 +238,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
    * Created By:Vyom Soni
    */
     get checkAll() {
-        return this.processedContactData.every(item => item.isChecked);
+        return Boolean(this.processedContactData && this.processedContactData.length > 0 && this.processedContactData.every(item => item.isChecked));
     }
 
     /**
@@ -995,9 +995,19 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     checkBoxValueChange(event) {
         try {
-            const checkboxId = Number(event.target.dataset.id);
-            const isChecked = event.target.checked;
-            this.shownProcessedContactData[checkboxId].isChecked = isChecked;
+            const checkboxId = Number(event.target.dataset?.id ?? event.currentTarget?.dataset?.id);
+            const contactId = event.target.dataset?.contactId ?? event.currentTarget?.dataset?.contactId;
+            const isChecked = event.target.checked !== undefined ? event.target.checked : event.detail.checked;
+
+            if (this.shownProcessedContactData && this.shownProcessedContactData[checkboxId]) {
+                this.shownProcessedContactData[checkboxId].isChecked = isChecked;
+            } else if (contactId && this.shownProcessedContactData) {
+                const target = this.shownProcessedContactData.find(item => item.Id === contactId);
+                if (target) {
+                    target.isChecked = isChecked;
+                }
+            }
+
             this.processedContactData.forEach(item1 => {
                 this.shownProcessedContactData.forEach(item2 => {
                     if (item1.Id == item2.Id) {
@@ -1019,7 +1029,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
             })
             this.updateSelectedProperties();
         } catch (e) {
-            console.error('Error checkCoxValueChange ->' + e);
+            console.error('Error checkBoxValueChange ->' + e);
         }
     }
 
@@ -1031,7 +1041,7 @@ export default class MarketingListCmp extends NavigationMixin(LightningElement) 
     */
     selectAllCheckbox(event) {
         try {
-            const isChecked = event.target.checked;
+            const isChecked = event.target.checked !== undefined ? event.target.checked : event.detail.checked;
             this.sortField = 'Name';
             this.sortOrder = 'asc';
             const allHeaders = this.template.querySelectorAll('.slds-icon-utility-arrowdown svg');

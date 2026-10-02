@@ -2053,7 +2053,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     }
 
     selectAllCheckbox(event) {
-        this.checkAll = event.target.checked;
+        this.checkAll = event.target.checked !== undefined ? event.target.checked : event.detail.checked;
         // Set all checkboxes to match the state of the "Select All" checkbox
         this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
             return { ...inquiry, isSelected: this.checkAll };
@@ -2062,8 +2062,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
     // Method to handle individual checkbox change
     checkBoxValueChange(event) {
-        const inquiryId = event.target.dataset.id;
-        const isChecked = event.target.checked;
+        const inquiryId = event.target.dataset?.id ?? event.currentTarget?.dataset?.id;
+        const isChecked = event.target.checked !== undefined ? event.target.checked : event.detail.checked;
 
         // Update the selected status of the specific inquiry
         this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
@@ -2074,7 +2074,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         });
 
         // Check if all checkboxes are selected, if yes, check "Select All" checkbox
-        this.checkAll = this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected);
+        this.checkAll = Boolean(this.pagedFilteredInquiryData && this.pagedFilteredInquiryData.length > 0 && this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected));
     }
 
     /**

@@ -3,7 +3,7 @@ import getObjectFields from '@salesforce/apex/CheckListItemController.getObjectF
 import manageChecklistRecords from '@salesforce/apex/CheckListItemController.manageChecklistRecords';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import { errorDebugger } from 'c/globalProperties';
 
 export default class EditCheckListModal extends LightningElement {
@@ -65,7 +65,7 @@ export default class EditCheckListModal extends LightningElement {
     */
     connectedCallback() {
         try {
-            loadStyle(this, MulishFontCss);
+            loadStyle(this, globalStyles);
             this.getObjectFieldsAndName();
         } catch (error) {
             errorDebugger('EditCheckListModal', 'connectedCallback', error, 'warn', 'error in connectedCallback');

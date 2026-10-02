@@ -1,5 +1,5 @@
 import { LightningElement, wire } from "lwc";
-import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
+import globalStyles from "@salesforce/resourceUrl/globalStyles";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
 import FORM_FACTOR from "@salesforce/client/formFactor";
@@ -48,7 +48,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Created By: Vyom Soni
      */
     connectedCallback() {
-        loadStyle(this, MulishFontCss);
+        loadStyle(this, globalStyles);
     }
 
     /**

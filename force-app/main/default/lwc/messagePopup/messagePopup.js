@@ -1,6 +1,6 @@
 import { LightningElement, api, track } from "lwc";
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 export default class MessagePopup extends LightningElement {
     @track type;
     @track status;
@@ -74,7 +74,7 @@ export default class MessagePopup extends LightningElement {
     }
 
     connectedCallback(){
-        loadStyle(this, MulishFontCss);
+        loadStyle(this, globalStyles);
     }
 
     @api

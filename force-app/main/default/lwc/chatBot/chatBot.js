@@ -2,7 +2,7 @@ import { LightningElement } from 'lwc';
 import sendFeedbackEmail from '@salesforce/apex/ControlCenterController.sendFeedbackEmail';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 
 export default class ChatBot extends LightningElement {
     isLoading = false;
@@ -35,7 +35,7 @@ export default class ChatBot extends LightningElement {
     }
 
     connectedCallback() {
-        loadStyle(this, MulishFontCss);
+        loadStyle(this, globalStyles);
     }
 
     handleFormInputChange(event) {

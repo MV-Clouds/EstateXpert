@@ -6,7 +6,7 @@ import getFilteredListings from '@salesforce/apex/ListingManagerController.getFi
 import getListingFields from '@salesforce/apex/ListingManagerController.getObjectFields';
 import Icons from '@salesforce/resourceUrl/listingManagerIcons';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import { errorDebugger } from 'c/globalProperties';
 
@@ -88,7 +88,7 @@ export default class ListingManagerFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */
     connectedCallback() {
-        loadStyle(this, MulishFontCss);
+        loadStyle(this, globalStyles);
         if (!import.meta.env.SSR) {
             window?.globalThis?.addEventListener('resize', this.updateScreenWidth);
         }

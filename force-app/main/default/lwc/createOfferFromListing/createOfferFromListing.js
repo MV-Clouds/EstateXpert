@@ -5,7 +5,7 @@ import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import getRecordDetails from '@salesforce/apex/CreateOfferFromListingController.getRecordDetails';
 import updateOfferRecord from '@salesforce/apex/CreateOfferFromListingController.updateOfferRecord';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 
 export default class CreateOfferFromListing extends NavigationMixin(LightningElement) {
     @track recordId; // Record ID from quick action
@@ -38,7 +38,7 @@ export default class CreateOfferFromListing extends NavigationMixin(LightningEle
      */
     connectedCallback() {
         try {
-            loadStyle(this, MulishFontCss);
+            loadStyle(this, globalStyles);
             this.todayDate = new Date().toISOString();
             this.fetchRecordDetails();
         } catch (error) {

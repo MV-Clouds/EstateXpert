@@ -24,7 +24,7 @@ import updatePropertyPortalRecord from '@salesforce/apex/PortalMappingController
 
 // Resources
 import portalMappingIcon from '@salesforce/resourceUrl/iconimg';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import portalmappingcss from '@salesforce/resourceUrl/portalmappingcss';
 import { errorDebugger } from 'c/globalProperties';
 
@@ -109,7 +109,7 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
     renderedCallback() {
         if (this.isInitalRender) {
             Promise.all([
-                loadStyle(this, MulishFontCss),
+                loadStyle(this, globalStyles),
                 loadStyle(this, portalmappingcss)
             ]).then(() => {
                 this.isInitalRender = false;

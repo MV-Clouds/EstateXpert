@@ -3,16 +3,12 @@
         <c-spinner-component></c-spinner-component>
     </template>
 
-    <template if:true={error}>
-        <div class="error-message slds-m-around_medium">
-            Error loading data: {error}
-        </div>
-    </template>
-
     <div class="contacts-container">
-        <div class="contacts-header">
-            <h2>Related Inquiries</h2>
-            <div class="header-actions">
+        <div class="sub-main-header-css">
+            <div class="header-block-css">
+                Related Inquiries
+            </div>
+            <div class="header-buttons">
                 <button class="exp-blue-btn-css" onclick={handleRefreshData} title="Refresh Data" aria-label="Refresh Data">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -38,120 +34,213 @@
             </div>
         </div>
         <template if:true={isContactDataAvailable}>
-            <div class="exp-table-content">
-                <table aria-multiselectable="true" class="slds-table slds-table_fixed-layout slds-table_resizable-cols">
-                    <thead>
-                        <tr class="exp-table-tr-cls slds-line-height_reset">
-                            <th aria-sort="none" data-id="Name" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header" scope="col">
-                                <div class="slds-text-link_reset exp-sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                    <span class="slds-truncate" title="Name">Name</span>
-                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                        <svg data-index="Name" class="exp-arrow-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                        </svg>
-                                    </span>
-                                </div>
-                            </th>
-                            <th aria-sort="none" data-id="Email" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header" scope="col">
-                                <div class="slds-text-link_reset exp-sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                    <span class="slds-truncate" title="Email">Email</span>
-                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                        <svg data-index="Email" class="exp-arrow-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                        </svg>
-                                    </span>
-                                </div>
-                            </th>
-                            <th aria-sort="none" data-id="MobilePhone" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header" scope="col">
-                                <div class="slds-text-link_reset exp-sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                    <span class="slds-truncate" title="Phone">Phone</span>
-                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                        <svg data-index="MobilePhone" class="exp-arrow-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                        </svg>
-                                    </span>
-                                </div>
-                            </th>
-                            <th aria-sort="none" data-id="ShowingStatus" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header" scope="col">
-                                <div class="slds-text-link_reset exp-sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                    <span class="slds-truncate" title="Showing Status">Showing Status</span>
-                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                        <svg data-index="ShowingStatus" class="exp-arrow-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                        </svg>
-                                    </span>
-                                </div>
-                            </th>
-                            <th aria-sort="none" data-id="FormattedScheduleDate" onclick={sortClick} class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header" scope="col">
-                                <div class="slds-text-link_reset exp-sort-cover slds-has-flexi-truncate" role="button" tabindex="0">
-                                    <span class="slds-truncate" title="Schedule Date">Schedule Date</span>
-                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                        <svg data-index="FormattedScheduleDate" class="exp-arrow-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                        </svg>
-                                    </span>
-                                </div>
-                            </th>
-                            <th scope="col">
-                                <div>Actions</div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template for:each={contacts} for:item="contact">
-                            <tr key={contact.Id}>
-                                <td data-label="Name">
-                                    <div class="slds-truncate" title={contact.Name}><a href="javascript:void(0);" onclick={navigateToContact}
-                                            data-id={contact.Id}>{contact.Name}</a></div>
-                                </td>
-                                <td data-label="Email">
-                                    <div class="slds-truncate" title={contact.Email}>{contact.Email}</div>
-                                </td>
-                                <td data-label="Phone">
-                                    <div class="slds-truncate" title={contact.MobilePhone}>{contact.MobilePhone}</div>
-                                </td>
-                                <td data-label="Showing Status">
-                                    <div class="slds-truncate" title={contact.ShowingStatus}>
-                                        <lightning-formatted-text
-                                            value={contact.ShowingStatus}></lightning-formatted-text>
-                                    </div>
-                                </td>
-                                <td data-label="Schedule Date">
-                                    <div class="slds-truncate" title={contact.FormattedScheduleDate}>{contact.FormattedScheduleDate}</div>
-                                </td>
-                                <td data-label="Actions">
-                                    <div class="action-btn">
-                                        <template if:false={isMobileOrTablet}>
-                                            <button class="exp-edit-icon-css" onclick={openManageModal} data-contact={contact.Json}
-                                                title="Send Email">
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            <div class="exp-main-content-cls">
+                <div class="exp-table-content" id="exp-table-content">
+                    <table aria-multiselectable="true"
+                        class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid"
+                        aria-label="Related Inquiries">
+                        <thead>
+                            <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
+                                <th aria-sort="none" data-id="Name" onclick={sortClick}
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header colume2"
+                                    scope="col">
+                                    <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                                        <span class="slds-assistive-text">Sort by: </span>
+                                        <div class="slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="Name">Name</span>
+                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                <svg data-index="Name" class="exp-arrow-icon" viewBox="0 0 384 512"
                                                     xmlns="http://www.w3.org/2000/svg">
                                                     <path
-                                                        d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z"
-                                                        stroke="#212529" stroke-width="1.5" stroke-linecap="round"
+                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th aria-sort="none" data-id="Email" onclick={sortClick}
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header colume2"
+                                    scope="col">
+                                    <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                                        <span class="slds-assistive-text">Sort by: </span>
+                                        <div class="slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="Email">Email</span>
+                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                <svg data-index="Email" class="exp-arrow-icon" viewBox="0 0 384 512"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th aria-sort="none" data-id="MobilePhone" onclick={sortClick}
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header colume2"
+                                    scope="col">
+                                    <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                                        <span class="slds-assistive-text">Sort by: </span>
+                                        <div class="slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="Phone">Phone</span>
+                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                <svg data-index="MobilePhone" class="exp-arrow-icon" viewBox="0 0 384 512"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th aria-sort="none" data-id="ShowingStatus" onclick={sortClick}
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header colume2"
+                                    scope="col">
+                                    <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                                        <span class="slds-assistive-text">Sort by: </span>
+                                        <div class="slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="Showing Status">Showing Status</span>
+                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                <svg data-index="ShowingStatus" class="exp-arrow-icon" viewBox="0 0 384 512"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th aria-sort="none" data-id="FormattedScheduleDate" onclick={sortClick}
+                                    class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header colume2"
+                                    scope="col">
+                                    <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                                        <span class="slds-assistive-text">Sort by: </span>
+                                        <div class="slds-has-flexi-truncate">
+                                            <span class="slds-truncate" title="Schedule Date">Schedule Date</span>
+                                            <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                <svg data-index="FormattedScheduleDate" class="exp-arrow-icon" viewBox="0 0 384 512"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="slds-cell_action-mode" scope="col">
+                                    <div class="slds-truncate" title="Actions">Actions</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={shownContacts} for:item="contact">
+                                <tr key={contact.Id} aria-selected="false" class="table-tr">
+                                    <td class="slds-cell_action-mode listing-cls" scope="row" title={contact.Name}>
+                                        <div class="slds-truncate center-trancate-text" title={contact.Name}>
+                                            <a href="javascript:void(0);" onclick={navigateToContact}
+                                                data-id={contact.Id} tabindex="0">{contact.Name}</a>
+                                        </div>
+                                    </td>
+                                    <td class="slds-cell_action-mode" role="gridcell" title={contact.Email}>
+                                        <div class="slds-truncate center-trancate-text" title={contact.Email}>{contact.Email}</div>
+                                    </td>
+                                    <td class="slds-cell_action-mode" role="gridcell" title={contact.MobilePhone}>
+                                        <div class="slds-truncate center-trancate-text" title={contact.MobilePhone}>{contact.MobilePhone}</div>
+                                    </td>
+                                    <td class="slds-cell_action-mode" role="gridcell" title={contact.ShowingStatus}>
+                                        <div class="slds-truncate center-trancate-text" title={contact.ShowingStatus}>
+                                            <lightning-formatted-text
+                                                value={contact.ShowingStatus}></lightning-formatted-text>
+                                        </div>
+                                    </td>
+                                    <td class="slds-cell_action-mode" role="gridcell" title={contact.FormattedScheduleDate}>
+                                        <div class="slds-truncate center-trancate-text" title={contact.FormattedScheduleDate}>{contact.FormattedScheduleDate}</div>
+                                    </td>
+                                    <td class="slds-cell_action-mode" role="gridcell">
+                                        <div class="center-trancate-text action-btn">
+                                            <template if:false={isMobileOrTablet}>
+                                                <button class="exp-edit-icon-css" onclick={openManageModal} data-contact={contact.Json}
+                                                    title="Send Email">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z"
+                                                            stroke="#212529" stroke-width="1.5" stroke-linecap="round"
+                                                            stroke-linejoin="round" />
+                                                        <path d="M8 10L12 12L16 10" stroke="#212529" stroke-width="1.5"
+                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                </button>
+                                            </template>
+                                            <button class="exp-preview-icon-css" onclick={openShowingInNewTab}
+                                                data-showing-id={contact.ShowingId} disabled={contact.isShowingDisabled}
+                                                title="View Showing Record">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        d="M13 11L22 2M22 2H16M22 2V8M11 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15V13"
+                                                        stroke="#212529" stroke-width="2" stroke-linecap="round"
                                                         stroke-linejoin="round" />
-                                                    <path d="M8 10L12 12L16 10" stroke="#212529" stroke-width="1.5"
-                                                        stroke-linecap="round" stroke-linejoin="round" />
                                                 </svg>
                                             </button>
-                                        </template>
-                                        <button class="exp-preview-icon-css" onclick={openShowingInNewTab}
-                                            data-showing-id={contact.ShowingId} disabled={contact.isShowingDisabled}
-                                            title="View Showing Record">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <path
-                                                    d="M13 11L22 2M22 2H16M22 2V8M11 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15V13"
-                                                    stroke="#212529" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
-                                            </svg>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- FOOTER / PAGINATION -->
+                <div class="exp-pagination-div">
+                    <div class="exp-page-size-container">
+                        <label class="exp-page-size-label">Rows per page : </label>
+                        <select class="exp-page-size-select" onchange={handlePageSizeChange}>
+                            <template for:each={pageSizeOptions} for:item="opt">
+                                <option key={opt.value} value={opt.value} selected={opt.isSelected}>
+                                    {opt.label}
+                                </option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <div class="exp-pagination-right">
+                        <span class="exp-results-info">{recordCountInfo}</span>
+
+                        <div class="exp-btn-cover">
+                            <div class="exp-pagination-container">
+                                <button class="exp-pagination-btn-css" disabled={isFirstPage}
+                                    onclick={handlePrevious}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                        viewBox="0 0 520 520" fill="#fff">
+                                        <path
+                                            d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                    </svg>
+                                </button>
+
+                                <template for:each={pageNumbers} for:item="page">
+                                    <template if:false={page.isEllipsis}>
+                                        <button key={page.number} data-id={page.number}
+                                            class={page.className} onclick={handlePageChange}>
+                                            {page.number}
                                         </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
+                                    </template>
+                                    <template if:true={page.isEllipsis}>
+                                        <span key={page.number} class="exp-pagination-ellipsis">...</span>
+                                    </template>
+                                </template>
+
+                                <button class="exp-pagination-btn-css" disabled={isLastPage}
+                                    onclick={handleNext}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                        viewBox="0 0 520 520" fill="#fff">
+                                        <path
+                                            d="M178 477l208-205c6-6 6-16 0-22L178 45c-6-6-16-6-22 0l-22 22c-6 6-6 16 0 22l163 161c6 6 6 16 0 22L134 433c-6 6-6 16 0 22l22 22c6 6 16 6 22 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </template>
         <template if:false={isContactDataAvailable}>
@@ -167,16 +256,16 @@
         <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true"
             aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
             <div class="slds-modal__container">
-                <div class="slds-modal__close closs_icon_css" onclick={closeScheduleModal}>
+                <div class="slds-modal__close exp-close-icon-css" onclick={closeScheduleModal}>
                     <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
                             fill="#1F2937" />
                     </svg>
                 </div>
-                <header class="slds-modal__header">
-                    <h2 class="slds-modal__title custom-modal-header">All Showings</h2>
-                </header>
+                <div class="slds-modal__header exp-pop-up-header-css">
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">All Showings</h1>
+                </div>
                 <div class="calender-modal-body">
                     <div class="calender-cover">
                         <div class="calendar-container">
@@ -195,7 +284,7 @@
             aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
             <div class="slds-modal__container">
 
-                <div class="slds-modal__close closs_icon_css" onclick={closeManageModal}>
+                <div class="slds-modal__close exp-close-icon-css" onclick={closeManageModal}>
                     <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
@@ -203,8 +292,8 @@
                     </svg>
                 </div>
 
-                <div class="slds-modal__header blue-header">
-                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Manage Showing</h1>
+                <div class="slds-modal__header exp-pop-up-header-css">
+                    <h1 id="modal-heading-02" class="slds-modal__title slds-hyphenate" tabindex="-1">Manage Showing</h1>
                 </div>
 
                 <div class="slds-modal__content modal-body">
@@ -241,14 +330,6 @@
                         </div>
 
                         <div class="slds-col slds-size_6-of-8 slds-p-around_medium slds-border_left modal-preview-area">
-
-                            <!-- <template if:true={showDateTimeInputs}> -->
-                            <!-- <h3 class="slds-text-heading_medium slds-m-bottom_small">Select Date</h3> -->
-                            <!-- <div class="calendar-container-wrapper">
-                                    <div class="evo-calendar manage-calendar"></div>
-                                </div> -->
-                            <!-- </template> -->
-
                             <template if:true={showCommunicationInputs}>
                                 <h3 class="slds-text-heading_medium slds-m-bottom_small">Live Preview</h3>
                                 <div class="slds-box slds-theme_default preview-container">

@@ -10,17 +10,17 @@
                 </svg>
             </div>
 
-            <div class="slds-modal__header blue-header">
+            <div class="slds-modal__header exp-pop-up-header-css">
                 <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Manage Your Checklist
                 </h1>
             </div>
-            <div class="slds-modal__content background_css" id="modal-content-id-1">
-                <div class="header_container_css">
-                    <div class="object_name_css">
+            <div class="slds-modal__content background-css" id="modal-content-id-1">
+                <div class="header-container-css">
+                    <div class="object-name-css">
                         Selected Object : {selectedObjectName}
                     </div>
                     <div class="header_title_css">
-                        <button class="add-new-btn" onclick={addNewRow}>
+                        <button class="exp-blue-btn-css" onclick={addNewRow}>
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                                 <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white"/>
                             </svg>                                
@@ -53,7 +53,7 @@
                                             <div class="slds-truncate">Description</div>
                                         </th>
                                         <th scope="col" class="action">
-                                            <div class="slds-truncate order_btn_grp">Action</div>
+                                            <div class="slds-truncate order-btn-grp">Action</div>
                                         </th>
                                     </tr>
                                 </thead>
@@ -149,15 +149,14 @@
                                                 <lightning-input type="text" value={item.MVEX__Description__c} data-index={index} data-field="MVEX__Description__c" onchange={handleInputChange} variant="label-hidden"></lightning-input>
                                             </td>
                                             <td data-label="action">
-                                                <div class="order_btn_grp">
+                                                <div class="order-btn-grp">
                                                     <button class="exp-delete-icon-css" onclick={handleDelete} data-index={index}>
-                                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                                            xmlns="http://www.w3.org/2000/svg">
+                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 16 16" fill="#000000" width="14" height="14">
                                                             <path
-                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                                stroke-linejoin="round" />
-                                                        </svg>                                                    
+                                                                d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                                stroke-width="0.0625"></path>
+                                                        </svg>                                          
                                                     </button>
                                                 </div>
                                             </td>

@@ -5,7 +5,7 @@ import getPicklistValues from '@salesforce/apex/ListingManagerController.getPick
 import getFilteredContacts from '@salesforce/apex/MarketingListCmpController.getFilteredContacts';
 import getListingFields from '@salesforce/apex/ListingManagerController.getObjectFields';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import { errorDebugger } from 'c/globalProperties';
 
@@ -104,7 +104,7 @@ export default class MarketingListFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */   
     connectedCallback(){
-        loadStyle(this, MulishFontCss);
+        loadStyle(this, globalStyles);
         if (!import.meta.env.SSR) {
             window?.globalThis?.addEventListener('resize', this.updateScreenWidth);
         }
@@ -123,35 +123,53 @@ export default class MarketingListFilterCmp extends LightningElement {
         this.dispatchEvent(new CustomEvent('loading', { detail: true }));
         getStaticFields({objectApiName: 'Contact', featureName: 'Marketing_List_Filters'})
             .then(result => {
-                this.staticFields = result ? JSON.parse(result) : [];
-                // Always add mandatory Contact Type field at the beginning, regardless of configuration
-                this.filterFields = [JSON.parse(JSON.stringify(this.mandatoryContactTypeField))];
-                // Add configured static fields if any exist
-                if (this.staticFields && this.staticFields.length > 0) {
-                    this.filterFields = this.filterFields.concat(this.staticFields);
+                let savedFields = null;
+                try {
+                    savedFields = result ? JSON.parse(result) : null;
+                } catch (e) {
+                    savedFields = null;
                 }
-                // Load picklist values for the mandatory Contact Type field
-                this.loadMandatoryFieldPicklistValues();
+
+                if (Array.isArray(savedFields)) {
+                    // Check if Contact Type field is present in saved configuration
+                    const hasContactType = savedFields.some(f => f.apiName === 'MVEX__Contact_Type__c');
+                    if (hasContactType) {
+                        this.filterFields = savedFields.map(f => {
+                            if (f.apiName === 'MVEX__Contact_Type__c') {
+                                return { ...f, isMandatory: true };
+                            }
+                            return f;
+                        });
+                    } else {
+                        // Legacy save where Contact Type was excluded: preserve Contact Type as mandatory,
+                        // but with selectedOptions: null because custom filters were saved
+                        const contactTypeField = JSON.parse(JSON.stringify(this.mandatoryContactTypeField));
+                        contactTypeField.selectedOptions = null;
+                        this.filterFields = [contactTypeField, ...savedFields];
+                    }
+                    this.staticFields = JSON.parse(JSON.stringify(this.filterFields));
+                } else {
+                    // Default configuration: mandatory Contact Type with 'Buyer' selected
+                    this.filterFields = [JSON.parse(JSON.stringify(this.mandatoryContactTypeField))];
+                    this.staticFields = JSON.parse(JSON.stringify(this.filterFields));
+                }
+
                 this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
-                // Only load picklist values for static fields if they exist
-                if (this.staticFields && this.staticFields.length > 0) {
-                    this.setPicklistValue();
-                }
+                this.setPicklistValue();
                 this.updateFilterIndices();
                 this.applyFilters();
 
-                 setTimeout(() => {
+                setTimeout(() => {
                     this.isLoading = false;
                     this.dispatchEvent(new CustomEvent('loading', { detail: false }));
-                 },300);
+                }, 300);
             })
             .catch(error => {
                 errorDebugger('MarketingListFilterCmp', 'initializeStaticFields', error, 'warn', 'Error in initializeStaticFields');
-                // Even on error, ensure mandatory Contact Type field is visible
-                this.staticFields = [];
                 this.filterFields = [JSON.parse(JSON.stringify(this.mandatoryContactTypeField))];
-                this.loadMandatoryFieldPicklistValues();
+                this.staticFields = JSON.parse(JSON.stringify(this.filterFields));
                 this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
+                this.setPicklistValue();
                 this.updateFilterIndices();
                 this.applyFilters();
                 this.isLoading = false;
@@ -190,7 +208,7 @@ export default class MarketingListFilterCmp extends LightningElement {
 
     performSaveFilter(){
         // Clear search terms and focus states before saving
-        this.filterFields = this.filterFields.map(field => {
+        const fieldsToSave = this.filterFields.map(field => {
             const f = {...field};
             f.searchTerm = '';
             f.isFocused = false;
@@ -199,22 +217,21 @@ export default class MarketingListFilterCmp extends LightningElement {
             return f;
         });
 
-        const fieldsToSave = this.filterFields.filter(field => !field.isMandatory);
-        
         saveStaticFields({objectApiName: 'Contact', featureName: 'Marketing_List_Filters', fieldsJson: JSON.stringify(fieldsToSave)})
         .then(() => {
+            this.filterFields = fieldsToSave;
             this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
             this.staticFields = JSON.parse(JSON.stringify(fieldsToSave));
 
-             this.dispatchEvent(
-            new ShowToastEvent({
-                title: 'Success',
-                message: 'Fields saved successfully.',
-                variant: 'success'
-            })
-        );
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success',
+                    message: 'Fields saved successfully.',
+                    variant: 'success'
+                })
+            );
         })  
-         .catch(error => {
+        .catch(error => {
             errorDebugger('MarketingListFilterCmp', 'performSaveFilter', error, 'warn', 'Error in performSaveFilter');
         });      
     }
@@ -226,36 +243,42 @@ export default class MarketingListFilterCmp extends LightningElement {
     * Created By: Vyom Soni
     */    
     setPicklistValue(){
-        this.staticFields.forEach(field => {
+        this.filterFields.forEach(field => {
             if (field.picklist) {
                 this.loadPicklistValues(field);
-                }
+            }
         });
     }
 
     /**
     * Method Name: loadPicklistValues
-    * @description: add the picklist values in the static fields.
+    * @description: add the picklist values in the filter fields.
     * Date: 25/06/2024
     * Created By: Vyom Soni
     */    
     loadPicklistValues(field) {
-        getPicklistValues({apiName:field.apiName,objectName:field.objectApiName})
+        getPicklistValues({apiName: field.apiName, objectName: field.objectApiName || 'Contact'})
         .then(result => {
-            this.staticFields = this.staticFields.map(f => {
-                if (f.apiName === field.apiName) {
+            this.filterFields = this.filterFields.map(f => {
+                const isMatch = f.apiName === field.apiName && 
+                    (f.objectApiName === field.objectApiName || (!f.objectApiName && (field.objectApiName === 'Contact' || !field.objectApiName))) &&
+                    (f.prevApiName === field.prevApiName || (!f.prevApiName && !field.prevApiName));
+                if (isMatch) {
+                    const selectedValues = (f.selectedOptions || []).map(opt => opt.value);
+                    const picklistValuesWithIcon = (result || []).map(option => ({
+                        ...option,
+                        showRightIcon: selectedValues.includes(option.value)
+                    }));
                     return {
                         ...f,
-                        picklistValue: result,
-                        unchangePicklistValue: result
+                        picklistValue: picklistValuesWithIcon,
+                        unchangePicklistValue: picklistValuesWithIcon
                     };
                 }
                 return f;
             });
-            // Preserve the mandatory field at index 0
-            const mandatoryField = this.filterFields[0];
-            this.filterFields = [mandatoryField, ...this.staticFields];
             this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
+            this.staticFields = JSON.parse(JSON.stringify(this.filterFields));
             this.updateFilterIndices();
         })
         .catch(error => {
@@ -265,33 +288,12 @@ export default class MarketingListFilterCmp extends LightningElement {
 
     /**
     * Method Name: loadMandatoryFieldPicklistValues
-    * @description: Load picklist values for the mandatory Contact Type field.
+    * @description: Legacy helper, picklist loading is handled uniformly by setPicklistValue.
     * Date: 25/06/2024
     * Created By: Kajal
     */
     loadMandatoryFieldPicklistValues() {
-        getPicklistValues({apiName: 'MVEX__Contact_Type__c', objectName: 'Contact'})
-        .then(result => {
-            // Update the mandatory field with all picklist values
-            if (this.filterFields.length > 0 && this.filterFields[0].isMandatory) {
-                const mandatoryField = this.filterFields[0];
-                const picklistValuesWithIcon = result.map(option => ({
-                    ...option,
-                    showRightIcon: option.value === 'Buyer' // Mark Buyer as selected
-                }));
-                
-                mandatoryField.picklistValue = picklistValuesWithIcon;
-                mandatoryField.unchangePicklistValue = picklistValuesWithIcon;
-                mandatoryField.selectedOptions = [{ label: 'Buyer', value: 'Buyer' }];
-                
-                this.filterFields = [...this.filterFields];
-                this.originalFilterFields = JSON.parse(JSON.stringify(this.filterFields));
-                this.updateFilterIndices();
-            }
-        })
-        .catch(error => {
-            errorDebugger('MarketingListFilterCmp', 'loadMandatoryFieldPicklistValues', error, 'warn', 'Error in loadMandatoryFieldPicklistValues');
-        });
+        // Handled uniformly in setPicklistValue/loadPicklistValues
     }
 
     /**

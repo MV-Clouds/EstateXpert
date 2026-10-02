@@ -4,7 +4,7 @@ import { encodeDefaultFieldValues } from 'lightning/pageReferenceUtils';
 import getRecords from '@salesforce/apex/PropertySearchController.getRecords';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getFieldMap from '@salesforce/apex/PropertySearchController.getObjectFields';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import getObjectName from '@salesforce/apex/PropertySearchController.getObjectName';
 import { errorDebugger } from 'c/globalProperties';
@@ -24,9 +24,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     @track totalRecords = 0;
     @track inquiries = [];
     @track currentPage = 1;
-    @track searchTerm = '';
     @track isLoading = true;
-    @track pageSize = 9;
+    @track pageSize = 20;
     @track pagedFilteredInquiryData = [];
     @track inquirydata = [];
     @track totalinquiry = [];
@@ -117,13 +116,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
     get isMobileOrTablet() {
         return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
-    }
-
-    @track showMoreActions = false;
-
-    toggleMoreActions(event) {
-        event.stopPropagation();
-        this.showMoreActions = !this.showMoreActions;
     }
 
     updateScreenWidth = () => {
@@ -285,7 +277,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Created By:Vyom Soni
     */
     get isLastPage() {
-        return this.currentPage === Math.ceil(this.totalItems / this.pageSize);
+        return this.currentPage === Math.ceil(this.totalItems / this.pageSize) || this.totalItems === 0;
     }
 
     /**
@@ -295,7 +287,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     * Created By:Vyom Soni
     */
     get startIndex() {
-        return (this.currentPage - 1) * this.pageSize + 1;
+        return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
     }
 
     /**
@@ -306,6 +298,28 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     get endIndex() {
         return Math.min(this.currentPage * this.pageSize, this.totalItems);
+    }
+
+    get totalSelected() {
+        return this.pagedFilteredInquiryData ? this.pagedFilteredInquiryData.filter(inq => inq.isSelected).length : 0;
+    }
+
+    get recordCountInfo() {
+        const selected = this.totalSelected || 0;
+        const selectedPrefix = selected > 0 ? `${selected} selected | ` : '';
+        if (this.totalItems === 0) {
+            return `${selectedPrefix}Showing 0 records`;
+        }
+        return `${selectedPrefix}Showing ${this.startIndex} - ${this.endIndex} of ${this.totalItems}`;
+    }
+
+    get pageSizeOptions() {
+        const sizes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+        return sizes.map(size => ({
+            label: String(size),
+            value: size,
+            isSelected: this.pageSize === size
+        }));
     }
 
     /**
@@ -328,7 +342,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     pages.push({
                         number: i,
                         isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
                     });
                 }
             } else {
@@ -336,7 +350,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 pages.push({
                     number: 1,
                     isEllipsis: false,
-                    className: `pagination-button ${currentPage === 1 ? 'active' : ''}`
+                    className: `exp-pagination-button ${currentPage === 1 ? 'active' : ''}`
                 });
 
                 if (currentPage > 3) {
@@ -352,7 +366,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     pages.push({
                         number: i,
                         isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
                     });
                 }
 
@@ -365,7 +379,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                 pages.push({
                     number: totalPages,
                     isEllipsis: false,
-                    className: `pagination-button ${currentPage === totalPages ? 'active' : ''}`
+                    className: `exp-pagination-button ${currentPage === totalPages ? 'active' : ''}`
                 });
             }
 
@@ -456,8 +470,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     async connectedCallback() {
         try {
+            loadStyle(this, globalStyles);
             await this.getObjectApiName();
-            loadStyle(this, MulishFontCss);
             this.getInquiryFields();
             this.fetchInquiryConfiguration();
 
@@ -697,7 +711,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     handleRefresh() {
         this.isLoading = true;
         this.checkAll = false;
-        this.searchTerm = '';
         this.fetchListings();
         // this.checkHideFilterButton();
     }
@@ -886,11 +899,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         if (this.divElement && !this.divElement.contains(event.target)) {
             this.hideModalBox();
             this.closeAddConditionModal();
-        }
-
-        const dropdownContainer = this.template.querySelector('.custom-dropdown-container');
-        if (dropdownContainer && !dropdownContainer.contains(event.target)) {
-            this.showMoreActions = false;
         }
     }
 
@@ -1154,7 +1162,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
             this.totalRecords = this.pagedFilteredInquiryData.length;
             this.currentPage = 1;
             this.hideModalBox(false);
-            this.searchTerm = '';
             this.checkAll = false;
             this.isLoading = false;
 
@@ -1328,24 +1335,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     }
 
     /**
-    * Method Name: handleSearch
-    * @description: this method is used to filter the properties based on the search key without overriding other filters
-    * Date: 17/06/2024
-    * Created By: Mitrajsinh Gohil
-    */
-    handleSearch(event) {
-        try {
-            this.searchTerm = event.target.value.toLowerCase();
-            this.currentPage = 1;
-            this.totalRecords = this.pagedFilteredInquiryData.length;
-            this.isInquiryAvailable = this.totalRecords > 0;
-            this.applyFilters();
-        } catch (error) {
-            errorDebugger('displayInquiry', 'handleSearch', error, 'warn', 'Error in handleSearch method');
-        }
-    }
-
-    /**
     * Method Name: applyFilters
     * @description: this method is used apply filter
     * Date: 25/07/2024
@@ -1353,12 +1342,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     applyFilters() {
         try {
-            this.pagedFilteredInquiryData = this.modalFilteredInquiryData.filter(inquiry => {
-                const searchInquiry = inquiry.name ? inquiry.name.toLowerCase().includes(this.searchTerm) : false;
-                const searchContact = inquiry.contactName ? inquiry.contactName.toLowerCase().includes(this.searchTerm) : false;
-                return searchInquiry || searchContact;
-            });
-
+            this.pagedFilteredInquiryData = [...this.modalFilteredInquiryData];
             this.isInquiryAvailable = this.pagedFilteredInquiryData.length > 0;
             this.currentPage = 1;
             this.totalRecords = this.pagedFilteredInquiryData.length;
@@ -1390,6 +1374,23 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         });
     }
 
+    scrollToTop() {
+        try {
+            const tableContainer = this.template.querySelector('.exp-table-content');
+            if (tableContainer) {
+                tableContainer.scrollTop = 0;
+            }
+        } catch (error) {
+            console.error('Error scrolling to top:', error);
+        }
+    }
+
+    handlePageSizeChange(event) {
+        this.pageSize = parseInt(event.target.value, 10);
+        this.currentPage = 1;
+        this.scrollToTop();
+    }
+
     /**
     * Method Name : handlePrevious
     * @description : handle the previous button click in the pagination.
@@ -1399,6 +1400,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     handlePrevious() {
         if (this.currentPage > 1) {
             this.currentPage--;
+            this.scrollToTop();
         }
     }
 
@@ -1411,6 +1413,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     handleNext() {
         if (this.currentPage < this.totalPages) {
             this.currentPage++;
+            this.scrollToTop();
         }
     }
 
@@ -1424,6 +1427,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
         if (selectedPage !== this.currentPage) {
             this.currentPage = selectedPage;
+            this.scrollToTop();
         }
     }
 
@@ -1693,7 +1697,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                         this.totalRecords = this.pagedFilteredInquiryData.length;
                         this.currentPage = 1;
 
-                        this.searchTerm = '';
                         this.checkAll = false;
 
                         if (this.pagedFilteredInquiryData.length === 0) {
@@ -1730,7 +1733,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                         this.totalRecords = this.pagedFilteredInquiryData.length;
                         this.currentPage = 1;
 
-                        this.searchTerm = '';
                         this.checkAll = false;
 
                         if (this.pagedFilteredInquiryData.length === 0) {
@@ -1767,7 +1769,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                         this.totalRecords = this.pagedFilteredInquiryData.length;
                         this.currentPage = 1;
 
-                        this.searchTerm = '';
                         this.checkAll = false;
 
                         this.hideModalBox(false);
@@ -1788,7 +1789,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     this.totalRecords = this.pagedFilteredInquiryData.length;
                     this.currentPage = 1;
                     this.logicalExpression = '';
-                    this.searchTerm = '';
                     this.checkAll = false;
                     this.hideModalBox(false);
                     this.isLoading = false;
@@ -2053,7 +2053,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     }
 
     selectAllCheckbox(event) {
-        this.checkAll = event.target.checked;
+        this.checkAll = event.target.checked !== undefined ? event.target.checked : event.detail.checked;
         // Set all checkboxes to match the state of the "Select All" checkbox
         this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
             return { ...inquiry, isSelected: this.checkAll };
@@ -2062,8 +2062,8 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
     // Method to handle individual checkbox change
     checkBoxValueChange(event) {
-        const inquiryId = event.target.dataset.id;
-        const isChecked = event.target.checked;
+        const inquiryId = event.target.dataset?.id ?? event.currentTarget?.dataset?.id;
+        const isChecked = event.target.checked !== undefined ? event.target.checked : event.detail.checked;
 
         // Update the selected status of the specific inquiry
         this.pagedFilteredInquiryData = this.pagedFilteredInquiryData.map(inquiry => {
@@ -2074,7 +2074,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
         });
 
         // Check if all checkboxes are selected, if yes, check "Select All" checkbox
-        this.checkAll = this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected);
+        this.checkAll = Boolean(this.pagedFilteredInquiryData && this.pagedFilteredInquiryData.length > 0 && this.pagedFilteredInquiryData.every(inquiry => inquiry.isSelected));
     }
 
     /**
@@ -2176,7 +2176,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                                 referenceObjectName: field.referenceObjectName,
                                 relationshipName: field.relationshipName
                             }));
-                        this.pageSize = parseInt(result.metadataRecords[1], 10) || this.pageSize;
                     } catch (e) {
                         this.inquiryColumns = this.defaultColumns;
                     }
@@ -2313,9 +2312,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
 
             // Persist sorted order in the source (full) list
             this.modalFilteredInquiryData = sortedData;
-
-            // Recompute the displayed data for current page
-            this.updateShownData();
+            this.pagedFilteredInquiryData = [...sortedData];
 
         } catch (error) {
             errorDebugger('displayInquiry', 'sortData', error, 'warn', 'Error in sortData');
@@ -2379,10 +2376,7 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     updateShownData() {
         try {
-            const startIndex = (this.currentPage - 1) * this.pageSize;
-            const endIndex = startIndex + this.pageSize;
-            // Derive the page slice from the full filtered dataset
-            this.pagedFilteredInquiryData = (this.modalFilteredInquiryData || []).slice(startIndex, endIndex);
+            this.pagedFilteredInquiryData = [...(this.modalFilteredInquiryData || [])];
         } catch (error) {
             errorDebugger('displayInquiry', 'updateShownData', error, 'warn', 'Error in updateShownData');
         }
@@ -2451,7 +2445,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
     */
     refreshInquiries() {
         try {
-            const currentSearch = this.searchTerm;
             const savedPage = this.currentPage;
 
             let filterType = 'default';
@@ -2501,12 +2494,6 @@ export default class displayInquiry extends NavigationMixin(LightningElement) {
                     } else {
                         // Apply existing modal filter conditions (all, any, custom)
                         this.applyFiltersData(this.listingRecord);
-                    }
-
-                    // Re-apply search term if user had entered one
-                    if (currentSearch && currentSearch.trim() !== '') {
-                        this.searchTerm = currentSearch;
-                        this.applyFilters();
                     }
 
                     // Re-apply sorting if sortField is set

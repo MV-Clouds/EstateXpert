@@ -404,34 +404,6 @@ progress::-moz-progress-bar {
     margin-bottom: 3px;
 }
 
-.delete-div {
-    padding: 6px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
-    transition: all 0.3s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-
-.delete-div:hover {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    border-color: #ef4444;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
-}
-
-.delete-div:hover svg {
-    fill: #dc2626;
-}
-
-.delete-div:hover svg path {
-    stroke: #dc2626;
-}
-
 .imgd1 {
     font-family: Inter;
     font-size: 14px;

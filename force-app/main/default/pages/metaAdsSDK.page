@@ -1,0 +1,900 @@
+<!--
+  @description       : Meta Ads SDK Page - Complete 2-App Architecture with Webhook Subscription
+  @author            : EstateXpert
+  @last modified on  : 08-31-2026
+-->
+<apex:page html-style="height: 100%;" showHeader="false" sidebar="false" controller="MetaAdsTokenController">
+    <apex:styleSheet value="{!URLFOR($Resource.MulishFontCss)}" />
+    <html>
+
+    <head>
+        <script>
+            // Initialize Meta JavaScript SDK with Tech Provider App ID
+            window.fbAsyncInit = function () {
+                var appId = '{!JSENCODE(metaAppId)}';
+                console.log('[Meta Ads] Initializing FB SDK with Tech Provider App ID:', appId);
+                if (appId) {
+                    FB.init({
+                        appId: appId,
+                        autoLogAppEvents: true,
+                        xfbml: true,
+                        version: '{!JSENCODE(apiVersion)}'
+                    });
+                    console.log('[Meta Ads] FB SDK Initialized successfully.');
+                } else {
+                    console.error('[Meta Ads] Missing App ID. Cannot initialize SDK.');
+                }
+            };
+        </script>
+        <script crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js" async="true"
+            defer="true"></script>
+    </head>
+
+    <body>
+        <style>
+            * {
+                font-family: 'Mulish';
+                user-select: none;
+            }
+
+            html,
+            body {
+                height: 100%;
+                width: 100%;
+                margin: 0;
+                padding: unset !important;
+                overflow: hidden;
+            }
+
+            .mainContainer {
+                width: 100%;
+                height: 100vh;
+                background: #f5f7fa;
+                overflow: hidden;
+            }
+
+            .subContainer {
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Breadcrumb Navigation */
+            .breadcrumb-navigation {
+                padding: 0.75rem 1.5rem;
+                background: #ffffff;
+                border-bottom: 1px solid #e5e9f0;
+                flex-shrink: 0;
+            }
+
+            .breadcrumb-container {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .breadcrumb-item {
+                display: flex;
+                align-items: center;
+                gap: 0.375rem;
+                font-size: 0.8125rem;
+                font-weight: 500;
+                color: #6b7c93;
+                transition: all 0.2s ease;
+            }
+
+            .breadcrumb-item.clickable {
+                cursor: pointer;
+                color: #0176D3;
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+            }
+
+            .breadcrumb-item.clickable:hover {
+                background: #f0f7ff;
+                color: #014a8f;
+            }
+
+            .breadcrumb-item.active {
+                color: #2c3e50;
+                font-weight: 500;
+            }
+
+            .breadcrumb-item svg {
+                color: currentColor;
+            }
+
+            .breadcrumb-separator {
+                color: #b8c5d6;
+                flex-shrink: 0;
+            }
+
+            /* Split Layout Container */
+            .control-center-layout {
+                display: flex;
+                flex: 1;
+                overflow: hidden;
+            }
+
+            /* Main Content Area */
+            .child-component-container {
+                width: 100%;
+                flex: 1;
+                background: #ffffff;
+                overflow-y: auto;
+                min-height: 0;
+                padding: 1.5rem;
+                display: flex;
+                justify-content: center;
+            }
+
+            /* Right Sidebar Info Panel */
+            .sidebar-info {
+                width: 320px;
+                background: linear-gradient(180deg, #0176D3 0%, #014a8f 100%);
+                display: flex;
+                flex-direction: column;
+                box-shadow: -4px 0 20px rgba(1, 118, 211, 0.15);
+                z-index: 10;
+                flex-shrink: 0;
+            }
+
+            .sidebar-header {
+                padding: 23px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .logo-area {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .logo-circle {
+                width: 10px;
+                height: 10px;
+                background: #ffffff;
+                border-radius: 50%;
+                animation: pulse 2.5s ease-in-out infinite;
+            }
+
+            @keyframes pulse {
+                0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+                50% { opacity: 0.8; box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); }
+            }
+
+            .sidebar-title {
+                font-size: 1.125rem;
+                font-weight: 500;
+                color: #ffffff;
+                letter-spacing: -0.3px;
+                margin: 0;
+            }
+
+            /* Feature Description Panel */
+            .feature-description {
+                padding: 2rem 1.5rem;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 1.25rem;
+                opacity: 1;
+            }
+
+            .description-icon {
+                width: 64px;
+                height: 64px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .description-title {
+                font-size: 1.125rem;
+                font-weight: 500;
+                color: #ffffff;
+                letter-spacing: -0.2px;
+                margin: 0;
+                line-height: 1.3;
+            }
+
+            .description-text {
+                font-size: 0.875rem;
+                font-weight: 400;
+                color: rgba(255, 255, 255, 0.85);
+                line-height: 1.6;
+                margin: 0;
+            }
+
+            .config-card {
+                background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+                border-radius: 12px;
+                padding: 2rem;
+                width: 55%;
+                height: 100%;
+                max-height: 100%;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(24, 119, 242, 0.1);
+                z-index: 1;
+                border: 1px solid rgba(24, 119, 242, 0.08);
+                overflow-y: auto;
+                box-sizing: border-box;
+            }
+
+            .background-image {
+                position: fixed;
+                bottom: 16px;
+                right: 24px;
+                height: auto;
+                object-fit: contain;
+                pointer-events: none;
+            }
+
+            .page-title {
+                font-size: 18px;
+                font-weight: 500;
+                color: #0f1419;
+                margin: 0;
+                letter-spacing: 0.3px;
+            }
+
+            .page-subtitle {
+                font-size: 16px;
+                color: #636363;
+                margin: 4px 0 0 0;
+            }
+
+            .page-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+
+            .page-header-content {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .input-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .input-label {
+                display: block;
+                font-size: 14px;
+                font-weight: 500;
+                color: #131314;
+                margin-bottom: 10px;
+            }
+
+            .input-field {
+                width: 100%;
+                padding: 8px 16px;
+                font-size: 14px;
+                border: 1px solid #d0d4d8;
+                border-radius: 8px;
+                box-sizing: border-box;
+                font-family: 'Mulish';
+                background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+                transition: all 0.3s ease;
+                user-select: text;
+            }
+
+            .input-field:focus {
+                outline: none;
+                border-color: #1877F2;
+                box-shadow: 0 3px 12px rgba(24, 119, 242, 0.2);
+                background: #ffffff;
+            }
+
+            .info-box {
+                display: flex;
+                gap: 12px;
+                padding: 16px;
+                background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+                border-radius: 8px;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 2px 6px rgba(24, 119, 242, 0.1);
+                border: 1px solid rgba(24, 119, 242, 0.1);
+            }
+
+            .info-icon {
+                flex-shrink: 0;
+                width: 20px;
+                height: 20px;
+                color: #1877F2;
+            }
+
+            .info-content {
+                flex: 1;
+            }
+
+            .info-title {
+                font-size: 14px;
+                font-weight: 500;
+                color: #131314;
+                margin: 0 0 4px 0;
+            }
+
+            .info-text {
+                font-size: 14px;
+                color: #636363;
+                margin: 0;
+                line-height: 1.5;
+            }
+
+            .connect-btn {
+                width: 100%;
+                height: 30px;
+                padding: 0 24px;
+                font-size: 14px;
+                font-weight: 500;
+                background: #1877F2;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                box-shadow: 0 2px 8px rgba(24, 119, 242, 0.3);
+            }
+
+            .connect-btn:hover {
+                background: #0d65d9;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(24, 119, 242, 0.4);
+            }
+
+            .connect-btn:disabled {
+                background: #9ca3af;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+            }
+
+            .deactivate-btn {
+                width: 100%;
+                height: 30px;
+                padding: 0 24px;
+                font-size: 14px;
+                font-weight: 500;
+                background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+                color: #DC2626;
+                border: 1px solid #DC2626;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                margin-top: 1.5rem;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            }
+
+            .deactivate-btn:hover {
+                background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+                transform: translateY(-1px);
+                box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+            }
+
+            .error-message-text {
+                color: #DC2626;
+                font-size: 14px;
+                margin-top: 8px;
+                display: block;
+            }
+
+            .meta-icon {
+                width: 36px;
+                height: 36px;
+                flex-shrink: 0;
+                object-fit: contain;
+            }
+
+            /* Results Section Styles */
+            .results-container {
+                display: none;
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid #e5e7eb;
+            }
+
+            .badges-row {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                margin-bottom: 1rem;
+            }
+
+            .status-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 14px;
+                background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%);
+                border-radius: 16px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #1877F2;
+                box-shadow: 0 1px 3px rgba(24, 119, 242, 0.1);
+            }
+
+            .status-badge.success {
+                background: #dcfce7;
+                color: #166534;
+                box-shadow: 0 1px 3px rgba(22, 101, 52, 0.1);
+            }
+
+            .webhook-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 14px;
+                background: #e0f2fe;
+                border-radius: 16px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #0369a1;
+                box-shadow: 0 1px 3px rgba(3, 105, 161, 0.1);
+            }
+
+            .status-dot {
+                width: 8px;
+                height: 8px;
+                background: #1877F2;
+                border-radius: 50%;
+            }
+
+            .status-dot.success {
+                background: #16a34a;
+            }
+
+            .section-header {
+                font-size: 16px;
+                font-weight: 500;
+                color: #1f2937;
+                margin: 1.5rem 0 0.5rem 0;
+            }
+
+            .token-box {
+                font-size: 13px;
+                color: #1e293b;
+                word-break: break-all;
+                background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+                padding: 12px;
+                border-radius: 8px;
+                border: 1px solid #E5E7EB;
+                user-select: text;
+                max-height: 80px;
+                overflow-y: auto;
+                margin-bottom: 12px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+            }
+
+            .card {
+                background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+                padding: 16px;
+                border-radius: 8px;
+                border: 1px solid #E5E7EB;
+                margin-top: 8px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+            }
+
+            .field-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 12px;
+                background: white;
+                border-radius: 6px;
+                margin-top: 6px;
+                font-size: 13px;
+                border: 1px solid #edf2f7;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            }
+
+            /* Loading Spinner Overlay from FacebookSDK */
+            .spinner-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.92);
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+                z-index: 2000;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .spinner-overlay.show {
+                display: flex;
+            }
+
+            .spinner-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .spinner-big {
+                width: 48px;
+                height: 48px;
+                border: 4px solid #E5E7EB;
+                border-top: 4px solid #1877F2;
+                border-radius: 50%;
+                animation: spin-big 1s linear infinite;
+            }
+
+            @keyframes spin-big {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .spinner-text {
+                font-size: 14px;
+                font-weight: 500;
+                color: #636363;
+            }
+
+            /* Button spinner from MetaAdsSDK */
+            .spinner {
+                display: none;
+                width: 20px;
+                height: 20px;
+                border: 3px solid rgba(255, 255, 255, 0.4);
+                border-top: 3px solid white;
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            @media (max-width: 1024px) {
+                .background-image {
+                    display: none;
+                }
+
+                .config-card {
+                    width: 100%;
+                    max-width: 100%;
+                }
+            }
+        </style>
+
+        <div class="mainContainer">
+            <div class="subContainer">
+                <!-- Breadcrumb Navigation -->
+                <div class="breadcrumb-navigation">
+                    <div class="breadcrumb-container">
+                        <span class="breadcrumb-item clickable" onclick="backToControlCenter()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            Control Center
+                        </span>
+                        <svg class="breadcrumb-separator" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <span class="breadcrumb-item active">
+                            Meta Ads
+                        </span>
+                    </div>
+                </div>
+
+                <div class="control-center-layout">
+                    <!-- Main Content Area -->
+                    <div class="child-component-container">
+                        <div class="config-card">
+                            <!-- Page Header -->
+                            <div class="page-header">
+                                <img src="/resource/MVEX__controlcenterimg/meta.png" class="meta-icon" alt="Meta"
+                                    draggable="false" />
+                                <div class="page-header-content">
+                                    <h1 class="page-title">Connect Meta Lead Ads</h1>
+                            <p class="page-subtitle">Seamlessly integrate your Facebook Pages to capture and sync leads
+                                        directly into Salesforce in real-time.</p>
+                                </div>
+                            </div>
+
+                            <apex:outputPanel rendered="{!NOT(hasConfig)}">
+                                <div class="info-box" style="background: #FEF2F2; border-color: #F87171;">
+                            <svg class="info-icon" style="color: #EF4444;" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <div class="info-content">
+                                        <p class="info-title" style="color: #991B1B;">Configuration Missing</p>
+                                <p class="info-text" style="color: #991B1B;">The Meta Ads integration configuration is
+                                            missing. Please ask your administrator to configure the Tech Provider App
+                                            credentials in Custom Metadata (OAuth_Configuration__mdt) first.</p>
+                                    </div>
+                                </div>
+                            </apex:outputPanel>
+
+                            <apex:outputPanel rendered="{!hasConfig}">
+                                <div id="setup-form-div">
+                                    <div class="input-group">
+                                        <label class="input-label" for="app-id-input">Meta Application ID</label>
+                                        <input type="text" id="app-id-input" class="input-field"
+                                            placeholder="Enter your Meta Application ID" />
+                                    </div>
+
+                                    <div class="info-box">
+                                        <svg class="info-icon" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        <div class="info-content">
+                                            <p class="info-title">What happens when you connect?</p>
+                                            <ul
+                                                style="margin: 6px 0 0 0; padding-left: 20px; color: #4B5563; font-size: 14px; line-height: 1.6;">
+                                                <li>Securely authenticates with your Meta Business account.</li>
+                                                <li>Automatically enables real-time lead webhooks for your pages.</li>
+                                                <li>Discovers and synchronizes all active lead generation forms.</li>
+                                            </ul>
+                                            <div
+                                                style="margin-top: 12px; background-color: #faf8e0; color: #8a510f; padding: 10px 12px; border-radius: 6px; border-left: 4px solid #ffd24b; font-size: 13px; font-weight: 500; display: inline-block;">
+                                        <strong>Note:</strong> It might take 3-5 minutes to process after connecting.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button class="connect-btn" id="connect-btn" onclick="launchMetaAdsSignup()">
+                                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                                            viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                            <path
+                                                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                                            </path>
+                                        </svg>
+                                        <span id="btn-text">Connect with Meta</span>
+                                        <div class="spinner" id="btn-spinner"></div>
+                                    </button>
+
+                                    <span class="error-message-text" id="error-message"></span>
+                                </div>
+
+                                <!-- Results Section -->
+                                <div class="results-container" id="results-container">
+                                    <div class="badges-row">
+                                        <div class="status-badge success">
+                                            <span class="status-dot success"></span>
+                                            Connected
+                                        </div>
+                                    </div>
+
+                                    <!-- Connected Page -->
+                                    <div class="section-header">📄 Connected Account</div>
+                                    <div class="card" id="page-display"></div>
+
+                                    <button class="deactivate-btn" onclick="deactivateMetaAds()">
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        Deactivate Integration
+                                    </button>
+                                </div>
+                            </apex:outputPanel>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Right Sidebar Info Panel -->
+                    <div class="sidebar-info">
+                        <div class="sidebar-header">
+                            <div class="logo-area">
+                                <div class="logo-circle"></div>
+                                <h2 class="sidebar-title">Control Center</h2>
+                            </div>
+                        </div>
+                        <div class="feature-description">
+                            <div class="description-icon">
+                                <img src="/resource/MVEX__controlcenterimg/leadcapture.png" style="width: 36px; height: 36px; object-fit: contain;" alt="Meta Ads" />
+                            </div>
+                            <h3 class="description-title">Meta Ads</h3>
+                            <p class="description-text">
+                                The "Meta Ads" integration allows you to automatically capture leads from Facebook and Instagram directly into Salesforce. Configure custom field mapping to ensure lead data flows seamlessly.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner Full Page -->
+        <div id="loading-spinner" class="spinner-overlay">
+            <div class="spinner-container">
+                <div class="spinner-big"></div>
+                <div class="spinner-text">Loading...</div>
+            </div>
+        </div>
+
+        <script>
+            var isConnected = {!isConnected};
+
+            document.addEventListener("DOMContentLoaded", function () {
+                if (isConnected && '{!hasConfig}' === 'true') {
+                    document.getElementById('setup-form-div').style.display = 'none';
+                    checkStatusOnLoad();
+                }
+            });
+
+            function checkStatusOnLoad() {
+                var errorEl = document.getElementById('error-message');
+                setLoading(true, 'Checking connection status...');
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.MetaAdsTokenController.checkConnectionStatus}',
+                    function (result, event) {
+                        resetButton();
+                        if (event.status && result && result.success) {
+                            renderResults(result);
+                        } else {
+                            document.getElementById('setup-form-div').style.display = 'block';
+                            if (errorEl) errorEl.textContent = 'Connection check failed: ' + (result ? result.message : event.message);
+                        }
+                    },
+                    { escape: true }
+                );
+            }
+
+            function deactivateMetaAds() {
+                if (confirm('Are you sure you want to deactivate the Meta Ads integration? This will disconnect your account.')) {
+                    setLoading(true, 'Deactivating...');
+                    Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.MetaAdsTokenController.deactivateConnection}',
+                        function (result, event) {
+                            if (event.status && result && result.success) {
+                                window.location.reload();
+                            } else {
+                                resetButton();
+                                alert('Failed to deactivate: ' + (result ? result.message : event.message));
+                            }
+                        },
+                        { escape: true }
+                    );
+                }
+            }
+
+            function backToControlCenter() {
+                var basePath = '/lightning/n/MVEX__Control_Center';
+                window.top.location.href = basePath;
+            }
+
+            function launchMetaAdsSignup() {
+                var errorEl = document.getElementById('error-message');
+                errorEl.textContent = '';
+
+                var appIdInput = document.getElementById('app-id-input').value.trim();
+                if (!appIdInput) {
+                    errorEl.textContent = 'Please enter your Meta Application ID to proceed.';
+                    return;
+                }
+
+                if (typeof FB === 'undefined') {
+                    errorEl.textContent = 'Meta SDK is still loading... please wait a few seconds and try again.';
+                    return;
+                }
+
+                setLoading(true);
+
+                try {
+                    FB.login(function (response) {
+                        console.log('[Meta Ads] FB.login response:', response);
+
+                        if (response.status === 'connected' && response.authResponse) {
+                            var code = response.authResponse.code;
+
+                            if (!code) {
+                                errorEl.textContent = 'Authorization code not received.';
+                                resetButton();
+                                return;
+                            }
+
+                            // ── Call Apex to exchange code, subscribe webhook & discover forms ──
+                            Visualforce.remoting.Manager.invokeAction(
+                                '{!$RemoteAction.MetaAdsTokenController.exchangeCodeForToken}',
+                                code,
+                                appIdInput,
+                                function (result, event) {
+                                    resetButton();
+                                    if (event.status && result) {
+                                        if (result.success) {
+                                            console.log('[Meta Ads] Complete Success:', result);
+                                            renderResults(result);
+                                        } else {
+                                            errorEl.textContent = 'Meta API Error: ' + result.message;
+                                        }
+                                    } else {
+                                        errorEl.textContent = 'Remoting Error: ' + (event.message || 'Unknown error');
+                                    }
+                                },
+                                { escape: true }
+                            );
+
+                        } else {
+                            errorEl.textContent = 'Login was cancelled or window closed.';
+                            resetButton();
+                        }
+                    }, {
+                        config_id: '{!JSENCODE(metaConfigId)}',
+                        response_type: 'code',
+                        override_default_response_type: true
+                    });
+                } catch (e) {
+                    errorEl.textContent = 'Exception: ' + e.message;
+                    resetButton();
+                }
+            }
+
+            function setLoading(loading, msg) {
+                var btn = document.getElementById('connect-btn');
+                var btnText = document.getElementById('btn-text');
+                var spinner = document.getElementById('btn-spinner');
+
+                var overlay = document.getElementById('loading-spinner');
+
+                if (loading) {
+                    if (msg) {
+                        overlay.classList.add('show');
+                        overlay.querySelector('.spinner-text').textContent = msg;
+                    } else {
+                        if (btn) btn.disabled = true;
+                        if (btnText) btnText.textContent = 'Subscribing Webhooks...';
+                        if (spinner) spinner.style.display = 'block';
+                    }
+                } else {
+                    overlay.classList.remove('show');
+                    if (btn) btn.disabled = false;
+                    if (btnText) btnText.textContent = 'Connect with Meta';
+                    if (spinner) spinner.style.display = 'none';
+                }
+            }
+
+            function resetButton() {
+                setLoading(false);
+            }
+
+            function renderResults(data) {
+                var basePath = '/lightning/n/MVEX__Control_Center';
+
+                // Show loading spinner while Metadata API deploys
+                setLoading(true, 'Saving configuration... Please wait');
+                window.top.location.href = basePath + '?c__openComponent=metaAdsMapping';
+            }
+        </script>
+    </body>
+
+    </html>
+</apex:page>

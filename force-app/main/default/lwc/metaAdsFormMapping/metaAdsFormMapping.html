@@ -1,0 +1,667 @@
+<template>
+    <div class="wrapper">
+        <!-- Full-area loading spinner while fetching mappings and pages on init -->
+        <template if:true={isLoading}>
+            <c-spinner-component is-absolute="true"></c-spinner-component>
+        </template>
+        <div class="main_header_cls">
+            <div class="sub_main_header_css">
+                <div class="header_block_css">
+                    <div class="broadcast-title">Meta Ads Form Mappings</div>
+                </div>
+                <div class="header-right-info">
+                    <button class="blue-btn-css" onclick={openWebhookModal}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                            <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        Webhook Site
+                    </button>
+                    <button class="blue-btn-css" onclick={handleDeactivateClick}>
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                            <path d="M8 12L5.5 14.5C4.12 15.88 1.88 15.88 0.5 14.5C-0.88 13.12 -0.88 10.88 0.5 9.5L3 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M12 8L14.5 5.5C15.88 4.12 18.12 4.12 19.5 5.5C20.88 6.88 20.88 9.12 19.5 10.5L17 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        Deactivate
+                    </button>
+                    <button class="blue-btn-css" onclick={openNewMappingModal}>
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        New Mapping
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main_content_cls">
+
+            <!-- Custom Table -->
+            <template if:true={hasMappings}>
+                <div class="exp-table-content exp-main-table-wrapper">
+                    <table aria-multiselectable="true" class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid">
+                        <thead>
+                            <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
+                                <th scope="col" class="col-action"><div></div></th>
+                                <th scope="col" class="col-no align-center">
+                                    <div class="slds-truncate header-cell-padding" title="No.">No.</div>
+                                </th>
+                                <th scope="col" class="align-center">
+                                    <div class="slds-truncate header-cell-padding" title="Page Name">Page Name</div>
+                                </th>
+                                <th scope="col" class="col-page-id align-center">
+                                    <div class="slds-truncate header-cell-padding" title="Page ID">Page ID</div>
+                                </th>
+                                <th scope="col" class="col-mapped-forms align-center">
+                                    <div class="slds-truncate header-cell-padding" title="Mapped Forms">Mapped Forms</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={tableData} for:item="row" for:index="index">
+                                <!-- Parent Row -->
+                                <tr key={row.id} class="parent-row table-tr">
+                                    <td data-label="" class="expand-cell slds-cell_action-mode" role="gridcell">
+                                        <div class="slds-truncate center-trancate-text flex-center">
+                                            <div class="action-icon-container" data-id={row.id} onclick={handleToggleRow}>
+                                                <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <template if:true={row.isExpanded}>
+                                                        <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </template>
+                                                    <template if:false={row.isExpanded}>
+                                                        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </template>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td data-label="No." class="slds-cell_action-mode" role="gridcell">
+                                        <div class="slds-truncate center-trancate-text">{row.index}</div>
+                                    </td>
+                                    <td data-label="Page Name" class="slds-cell_action-mode" role="gridcell">
+                                        <div class="slds-truncate center-trancate-text">{row.pageName}</div>
+                                    </td>
+                                    <td data-label="Page ID" class="slds-cell_action-mode" role="gridcell">
+                                        <div class="slds-truncate center-trancate-text">{row.pageId}</div>
+                                    </td>
+                                    <td data-label="Mapped Forms" class="slds-cell_action-mode" role="gridcell">
+                                        <div class="slds-truncate center-trancate-text">{row.forms.length}</div>
+                                    </td>
+                                </tr>
+
+                                <!-- Accordion Row -->
+                                <template if:true={row.isExpanded}>
+                                    <tr key={row.id} class="accordion-row">
+                                        <td colspan="5" class="no-padding-td">
+                                            <div class="exp-accordion-wrapper">
+                                                <template if:true={row.forms.length}>
+                                                    <div class="exp-accordion-header-container">
+                                                        <div class="exp-accordion-title-section">
+                                                            <h3 class="exp-accordion-title">Mapped Forms</h3>
+                                                            <span class="exp-accordion-badge">{row.forms.length}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="exp-table-content exp-accordion-table-content">
+                                                        <table aria-multiselectable="true" class="slds-table slds-no-row-hover slds-table_fixed-layout slds-table_resizable-cols no-border" role="grid">
+                                                            <thead>
+                                                                <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
+                                                                    <th scope="col" class="slds-cell_action-mode col-action align-center">
+                                                                        <div class="slds-truncate header-cell-padding" title="No.">No.</div>
+                                                                    </th>
+                                                                    <th scope="col" class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header align-center">
+                                                                        <div class="slds-truncate header-cell-padding" title="Form Name">Form Name</div>
+                                                                    </th>
+                                                                    <th scope="col" class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header align-center">
+                                                                        <div class="slds-truncate header-cell-padding" title="Form ID">Form ID</div>
+                                                                    </th>
+                                                                    <th scope="col" class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header align-center">
+                                                                        <div class="slds-truncate header-cell-padding" title="Mapped Fields">Mapped Fields</div>
+                                                                    </th>
+                                                                    <th scope="col" class="slds-cell_action-mode col-actions align-center">
+                                                                        <div class="slds-truncate header-cell-padding" title="Actions">Actions</div>
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <template for:each={row.forms} for:item="form">
+                                                                    <tr key={form.id} class="table-tr">
+                                                                        <td class="slds-cell_action-mode" role="gridcell">
+                                                                            <div class="slds-truncate center-trancate-text">{form.index}</div>
+                                                                        </td>
+                                                                        <td class="slds-cell_action-mode" role="gridcell">
+                                                                            <div class="slds-truncate center-trancate-text">{form.formName}</div>
+                                                                        </td>
+                                                                        <td class="slds-cell_action-mode" role="gridcell">
+                                                                            <div class="slds-truncate center-trancate-text">{form.formId}</div>
+                                                                        </td>
+                                                                        <td class="slds-cell_action-mode" role="gridcell">
+                                                                            <div class="slds-truncate center-trancate-text">{form.mappedCount}</div>
+                                                                        </td>
+                                                                        <td class="slds-cell_action-mode align-center" role="gridcell">
+                                                                            <div class="slds-truncate center-trancate-text action-buttons-wrapper">
+                                                                                <div class="action-icon-container" data-id={form.id} onclick={handleEditRow} title="Edit Mapping">
+                                                                                    <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                    </svg>
+                                                                                </div>
+                                                                                <div class="action-icon-container" data-id={form.id} onclick={handleDeleteRow} title="Delete Mapping">
+                                                                                    <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                    </svg>
+                                                                                </div>
+                                                                                <div class="action-icon-container" data-id={form.formId} onclick={openFailedLeadsModal} title="Failed Leads">
+                                                                                    <svg class="action-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                                        <circle cx="12" cy="12" r="10"></circle>
+                                                                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                                                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                                                                    </svg>
+                                                                                </div>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                </template>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <!-- No Records -->
+            <template if:false={hasMappings}>
+                <div class="no-records-message">
+                    <div class="empty-state">
+                        <div class="empty-state__content">
+                            <div class="empty-icon">
+                                <svg width="42" height="42" viewBox="0 0 24 24" fill="none">
+                                    <path d="M4 4h16v16H4z" stroke="#0176D3" stroke-width="1.5" stroke-linejoin="round"></path>
+                                    <path d="M8 9h8M8 13h5" stroke="#0176D3" stroke-width="1.5" stroke-linecap="round"></path>
+                                </svg>
+                            </div>
+                            <div class="empty-state__message">No Data Available to Show.</div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- ─── Single-Page Mapping Wizard Modal ──────────────────────────────── -->
+        <template if:true={isModalOpen}>
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+                class="slds-modal slds-fade-in-open slds-modal_small section_css">
+                <div class="slds-modal__container">
+
+                    <div class="slds-modal__close close-icon-css" onclick={closeModal}>
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937" />
+                        </svg>
+                    </div>
+
+                    <div class="slds-modal__header blue-header">
+                        <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Form Mapping Wizard</h1>
+                    </div>
+
+                    <div class="slds-modal__content modalbody" id="modal-content-id-1">
+                        <div class="content_body relative-position">
+
+                            <!-- Spinner Overlay (covers entire screen while loading) -->
+                            <template if:true={isModalLoading}>
+                                <c-spinner-component></c-spinner-component>
+                            </template>
+
+                            <template if:false={isEditingMode}>
+                                <!-- Section 1: Select Page (always visible) -->
+                                <div class="wizard-section">
+                                    <div class="wizard-step-label">
+                                        <span class="wizard-step-badge">Step 1</span>
+                                        Select Meta Page
+                                    </div>
+                                    <lightning-combobox
+                                        name="pageSelect"
+                                        label=""
+                                        value={selectedPageId}
+                                        placeholder="-- Choose a Page --"
+                                        options={pageOptions}
+                                        onchange={handlePageSelection}
+                                        disabled={isPageSelectionDisabled}
+                                        variant="label-hidden"
+                                        class="custom-combobox">
+                                    </lightning-combobox>
+                                    <template if:false={pageOptions.length}>
+                                        <div class="wizard-hint-error">No pages found. Please connect a Meta Ads account first.</div>
+                                    </template>
+                                </div>
+
+                                <div class="wizard-divider"></div>
+
+                                <!-- Section 2: Select Form (disabled until page selected) -->
+                                <div class="wizard-section">
+                                    <div class="wizard-step-label">
+                                        <span class="wizard-step-badge" class:wizard-step-badge-disabled={isFormSectionDisabled}>Step 2</span>
+                                        Select Lead Form
+                                        <template if:true={isFormSectionDisabled}>
+                                            <span class="wizard-hint-muted">&nbsp;— Select a page first</span>
+                                        </template>
+                                    </div>
+                                    <lightning-combobox
+                                        name="formSelect"
+                                        label=""
+                                        value={selectedFormId}
+                                        placeholder="-- Choose a Form --"
+                                        options={formOptions}
+                                        onchange={handleFormSelection}
+                                        disabled={isFormDropdownDisabled}
+                                        variant="label-hidden"
+                                        class="custom-combobox">
+                                    </lightning-combobox>
+                                    <template if:true={showNoFormsMsg}>
+                                        <div class="wizard-hint-error">No available forms. All forms may already be mapped.</div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template if:true={isEditingMode}>
+                                <div class="edit-context">
+                                    <span>Page: <strong>{editPageName}</strong></span>
+                                    <span>Form: <strong>{editFormName}</strong></span>
+                                </div>
+                            </template>
+
+                            <!-- Section 3: Field Mappings (only visible after form selected) -->
+                            <template if:true={hasFormFields}>
+                                <template if:false={isEditingMode}>
+                                    <div class="wizard-divider"></div>
+                                </template>
+                                <div class="wizard-section">
+                                    <div class="wizard-step-label">
+                                        <template if:false={isEditingMode}>
+                                            <span class="wizard-step-badge">Step 3</span>
+                                        </template>
+                                        Map Fields
+                                    </div>
+                                    <template if:true={currentFormFields.length}>
+                                        <div class="mapping-header-row">
+                                            <div class="mapping-header-col">Salesforce Contact Field</div>
+                                            <div class="mapping-header-icon"></div>
+                                            <div class="mapping-header-col">Meta Form Field / Custom Value</div>
+                                        </div>
+                                        <template for:each={currentFormFields} for:item="field">
+                                            <div key={field.key} class={field.rowClass}>
+                                                <div class="mapping-col">
+                                                    <template if:true={field.required}>
+                                                        <span class="required-badge">Required</span>
+                                                    </template>
+                                                    <div class="meta-field-pill">{field.label}</div>
+                                                </div>
+                                                <div class="mapping-icon">&#10145;</div>
+                                                <div class="mapping-col">
+                                                    <lightning-combobox
+                                                        data-key={field.key}
+                                                        value={field.sourceType}
+                                                        options={field.sourceOptions}
+                                                        onchange={handleSourceTypeChange}
+                                                        placeholder="-- Do Not Map --"
+                                                        variant="label-hidden"
+                                                        class="custom-combobox">
+                                                    </lightning-combobox>
+                                                    
+                                                    <template if:true={field.isMetaField}>
+                                                        <lightning-combobox
+                                                            data-key={field.key}
+                                                            value={field.metaField}
+                                                            options={field.metaOptions}
+                                                            onchange={handleMetaFieldChange}
+                                                            placeholder="-- Select Meta Form Field --"
+                                                            variant="label-hidden"
+                                                            class="custom-combobox mapping-secondary-input">
+                                                        </lightning-combobox>
+                                                    </template>
+
+                                                    <template if:true={field.isCustomValue}>
+                                                        <template if:true={field.isReferenceField}>
+                                                            <lightning-record-picker 
+                                                                data-key={field.key} 
+                                                                label={field.label} 
+                                                                placeholder="Search and select record" 
+                                                                object-api-name={field.referenceTo} 
+                                                                value={field.customValue} 
+                                                                onchange={handleReferenceChange} 
+                                                                class="mapping-secondary-input">
+                                                            </lightning-record-picker>
+                                                        </template>
+                                                        <template if:false={field.isReferenceField}>
+                                                            <lightning-input 
+                                                                data-key={field.key} 
+                                                                type="text" 
+                                                                value={field.customValue} 
+                                                                onchange={handleCustomValueChange} 
+                                                                placeholder="Enter custom value" 
+                                                                variant="label-hidden" 
+                                                                class="mapping-secondary-input">
+                                                            </lightning-input>
+                                                        </template>
+                                                    </template>
+
+                                                    <template if:true={field.showRequiredError}>
+                                                        <div class="wizard-hint-error">This required field must be mapped.</div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <div class="add-field-section">
+                                            <template if:false={showAddField}>
+                                                <button type="button" class="add-field-btn" onclick={handleShowAddField}>
+                                                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                                                        <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    </svg>
+                                                    Add Field
+                                                </button>
+                                            </template>
+                                            <template if:true={showAddField}>
+                                                <div class="add-field-box">
+                                                    <div class="add-field-title">Add Salesforce Lead Field</div>
+                                                    <div class="add-field-controls">
+                                                        <lightning-combobox value={selectedAdditionalField} options={additionalFieldOptions} onchange={handleAdditionalFieldChange} placeholder="-- Select Salesforce Field --" variant="label-hidden" class="custom-combobox add-field-combobox"></lightning-combobox>
+                                                        <button type="button" class="save_btn_css" onclick={handleAddField} disabled={isAddFieldDisabled}>
+                                                            Add
+                                                        </button>
+                                                        <button type="button" class="cancel_btn_css" onclick={handleCancelAddField}>
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                    <template if:false={hasAdditionalFieldOptions}>
+                                                        <div class="wizard-hint-muted">All available Salesforce fields have already been added.</div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    <template if:false={currentFormFields.length}>
+                                        <div class="wizard-disabled-box">
+                                            No Salesforce Contact fields are available for mapping.
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="footerbtns">
+                            <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeModal}>
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
+                                </svg>
+                                Cancel
+                            </button>
+                            <button class="save_btn_css" disabled={isSaveDisabled} onclick={saveMapping}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                                </svg>
+                                Save Mapping
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+        </template>
+    </div>
+    <c-message-popup onconfirmation={handleConfirmation}></c-message-popup>
+
+    <!-- ─── Failed Leads Modal ──────────────────────────────── -->
+    <template if:true={isFailedLeadsModalOpen}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-02" class="slds-modal slds-fade-in-open slds-modal_small section_css">
+            <div class="slds-modal__container">
+
+                <div class="slds-modal__close close-icon-css" onclick={closeFailedLeadsModal}>
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937" />
+                    </svg>
+                </div>
+
+                <div class="slds-modal__header blue-header">
+                    <h1 id="modal-heading-02" class="slds-modal__title slds-hyphenate" tabindex="-1">Failed Webhook Leads</h1>
+                </div>
+
+                <div class="slds-modal__content modalbody" id="modal-content-id-2">
+                    <div class="content_body relative-position min-height-200">
+                        
+                        <!-- Spinner Overlay -->
+                        <template if:true={isRetrying}>
+                            <c-spinner-component></c-spinner-component>
+                        </template>
+
+                        <template if:true={isFailedWizardStep1}>
+                        <template if:true={failedLeads.length}>
+                            <div class="table-content">
+                                <table class="slds-table full-width">
+                                    <thead>
+                                        <tr class="table_tr_cls">
+                                            <th class="col-checkbox header-cell-padding align-center">
+                                                <lightning-input type="checkbox" variant="label-hidden" label="Select all" onchange={handleSelectAllFailedLeads} checked={isAllFailedLeadsSelected}></lightning-input>
+                                            </th>
+                                            <th class="header-cell-padding">No.</th>
+                                            <th class="header-cell-padding">Lead ID</th>
+                                            <th class="header-cell-padding">Received At</th>
+                                            <th class="header-cell-padding">Failure Reason</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={failedLeads} for:item="lead">
+                                            <tr key={lead.Id}>
+                                                <td class="align-center header-cell-padding">
+                                                    <lightning-input type="checkbox" variant="label-hidden" label="Select lead" data-id={lead.Id} checked={lead.selected} onchange={handleFailedLeadSelection}></lightning-input>
+                                                </td>
+                                                <td class="header-cell-padding">{lead.index}</td>
+                                                <td class="header-cell-padding">
+                                                    <div class="slds-truncate" title={lead.leadId}>{lead.leadId}</div>
+                                                </td>
+                                                <td class="header-cell-padding">{lead.Date}</td>
+                                                <td class="header-cell-padding">
+                                                    <div class="slds-truncate" title={lead.reason}>{lead.reason}</div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                        <template if:false={failedLeads.length}>
+                            <div class="wizard-disabled-box mt-40 align-center">
+                                No failed leads found for this form.
+                            </div>
+                        </template>
+                        </template>
+
+                        <!-- Step 2: Mapping Form -->
+                        <template if:true={isFailedWizardStep2}>
+                            <div class="wizard-section">
+                                <div class="mapping-header-row">
+                                    <div class="mapping-header-col">Salesforce Contact Field</div>
+                                    <div class="mapping-header-icon"></div>
+                                    <div class="mapping-header-col">Meta Form Field / Custom Value</div>
+                                    <div class="mapping-header-col mapping-header-text">Lead Data</div>
+                                </div>
+                                <template for:each={currentFormFields} for:item="field">
+                                    <div key={field.key} class={field.rowClass}>
+                                        <div class="mapping-col">
+                                            <template if:true={field.required}>
+                                                <span class="required-badge">Required</span>
+                                            </template>
+                                            <div class="meta-field-pill">{field.label}</div>
+                                        </div>
+                                        <div class="mapping-icon">&#10145;</div>
+                                        <div class="mapping-col">
+                                            <lightning-combobox
+                                                data-key={field.key}
+                                                value={field.sourceType}
+                                                options={field.sourceOptions}
+                                                onchange={handleSourceTypeChange}
+                                                placeholder="-- Do Not Map --"
+                                                variant="label-hidden"
+                                                class="custom-combobox">
+                                            </lightning-combobox>
+                                            
+                                            <template if:true={field.isMetaField}>
+                                                <lightning-combobox
+                                                    data-key={field.key}
+                                                    value={field.metaField}
+                                                    options={field.metaOptions}
+                                                    onchange={handleMetaFieldChange}
+                                                    placeholder="-- Select Meta Form Field --"
+                                                    variant="label-hidden"
+                                                    class="custom-combobox mapping-secondary-input">
+                                                </lightning-combobox>
+                                            </template>
+
+                                            <template if:true={field.isCustomValue}>
+                                                <template if:true={field.isReferenceField}>
+                                                    <lightning-record-picker 
+                                                        data-key={field.key} 
+                                                        label={field.label} 
+                                                        placeholder="Search and select record" 
+                                                        object-api-name={field.referenceTo} 
+                                                        value={field.customValue} 
+                                                        onchange={handleReferenceChange} 
+                                                        class="mapping-secondary-input">
+                                                    </lightning-record-picker>
+                                                </template>
+                                                <template if:false={field.isReferenceField}>
+                                                    <lightning-input 
+                                                        data-key={field.key} 
+                                                        type="text" 
+                                                        value={field.customValue} 
+                                                        onchange={handleCustomValueChange} 
+                                                        placeholder="Enter custom value" 
+                                                        variant="label-hidden" 
+                                                        class="mapping-secondary-input">
+                                                    </lightning-input>
+                                                </template>
+                                            </template>
+
+                                            <template if:true={field.showRequiredError}>
+                                                <div class="wizard-hint-error">This required field must be mapped.</div>
+                                            </template>
+                                        </div>
+                                        
+                                        <div class="mapping-col mapping-col-custom">
+                                            <template if:true={field.failedLeadValue}>
+                                                <div class="mapping-data-box">
+                                                    {field.failedLeadValue}
+                                                </div>
+                                            </template>
+                                            <template if:false={field.failedLeadValue}>
+                                                <div class="mapping-data-empty">No data provided</div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div class="add-field-section">
+                                    <template if:false={showAddField}>
+                                        <button type="button" class="add-field-btn" onclick={handleShowAddField}>
+                                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                                                <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                            </svg>
+                                            Add Field
+                                        </button>
+                                    </template>
+                                    <template if:true={showAddField}>
+                                        <div class="add-field-box">
+                                            <div class="add-field-title">Add Salesforce Contact Field</div>
+                                            <div class="add-field-controls">
+                                                <lightning-combobox
+                                                    name="addField"
+                                                    label=""
+                                                    value={selectedAdditionalField}
+                                                    options={additionalFieldOptions}
+                                                    onchange={handleAdditionalFieldChange}
+                                                    placeholder="Select field to add..."
+                                                    variant="label-hidden"
+                                                    class="custom-combobox add-field-combobox">
+                                                </lightning-combobox>
+                                                <button type="button" class="blue-btn-css" onclick={handleAddField} disabled={isAddFieldDisabled}>Add</button>
+                                                <button type="button" class="white-btn-css" onclick={handleCancelAddField}>Cancel</button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="footerbtns">
+                        <template if:true={isFailedWizardStep1}>
+                            <button class="white-btn-css" onclick={closeFailedLeadsModal}>Close</button>
+                            <button class="white-btn-css red-text-btn" disabled={isFailedActionDisabled} onclick={discardSelectedFailedLeads}>Discard Selected</button>
+                            <button class="white-btn-css" disabled={isEditMappingDisabled} onclick={reviewSelectedFailedLead}>Edit Mapping &amp; Retry</button>
+                            <button class="blue-btn-css" disabled={isFailedActionDisabled} onclick={retrySelectedFailedLeads}>Retry Selected</button>
+                        </template>
+                        <template if:true={isFailedWizardStep2}>
+                            <button class="white-btn-css" aria-label="Back" onclick={backToFailedLeadsList}>
+                                Back
+                            </button>
+                            <button class="blue-btn-css" aria-label="Retry" onclick={saveAndRetryFailedLead}>
+                                Retry
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
+    
+    <template if:true={isWebhookModalOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_small section_css">
+            <div class="slds-modal__container">
+                <div class="slds-modal__close exp-close-icon-css close-icon-css" role="button" aria-label="Close" onclick={closeWebhookModal}>
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                        <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937"></path>
+                    </svg>
+                </div>
+                <div class="slds-modal__header exp-pop-up-header-css popup-header">
+                    <h1 id="meta-webhook-title" class="slds-modal__title slds-hyphenate">Webhook Site</h1>
+                </div>
+                <div class="slds-modal__content modalbody">
+                    <div class="content_body relative-position">
+                        <template if:true={isLoading}>
+                            <c-spinner-component is-absolute="true"></c-spinner-component>
+                        </template>
+                        <div class="wizard-section">
+                            <div class="wizard-step-label">Select Active Force.com Site</div>
+                            <template if:true={hasSiteOptions}>
+                                <lightning-combobox name="webhookSite" label="" value={selectedSite} placeholder="-- Choose a Site --" options={siteOptions} onchange={handleSiteChange} variant="label-hidden" class="custom-combobox"></lightning-combobox>
+                                <template if:true={selectedSite}>
+                                    <div class="webhook-endpoint" style="margin-top: 10px; font-weight: bold; word-break: break-all;">
+                                        {webhookEndpointPreview}
+                                    </div>
+                                </template>
+                            </template>
+                            <template if:false={hasSiteOptions}>
+                                <div class="wizard-disabled-box">No active Force.com sites were found.</div>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="footerbtns">
+                        <button class="exp-white-btn-css blue-btn-css" style="background-color: transparent; color: #1877F2; border: 1px solid #1877F2;" onclick={closeWebhookModal}>Cancel</button>
+                        <button class="blue-btn-css" disabled={isCopyWebhookDisabled} onclick={handleCopyWebhook}>Copy Webhook URL</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
+
+</template>

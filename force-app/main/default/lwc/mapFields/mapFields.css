@@ -436,69 +436,26 @@
     text-align: center;
 }
 
+/* Override exp-table-content only for combobox dropdown escape */
 .exp-table-content {
     border-radius: 8px;
-    margin: 1rem;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    margin: 0;
+    box-shadow: none;
 }
 
-.exp-table-content .slds-table .sno,
-.exp-table-content .slds-table .listing-field,
-.exp-table-content .slds-table .property-field,
-.exp-table-content .slds-table .actions {
+/* Scoped column widths for mapFields table */
+.exp-table-content .slds-table .mf-sno-col {
+    width: 4rem;
     text-align: center;
 }
 
-.exp-table-content .slds-table .actions {
+.exp-table-content .slds-table .mf-field-col {
+    text-align: center;
+}
+
+.exp-table-content .slds-table .mf-action-col {
     width: 5rem;
-}
-
-.exp-table-content .slds-table td {
-    text-align: left;
-}
-
-.action-btn {
-    display: flex;
-    justify-content: center;
-    gap: 5%;
-}
-
-.action-btn .slds-button {
-    border: 1px solid black !important;
-}
-
-.delete-div {
-    padding: 6px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
-    transition: all 0.3s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-
-.delete-div:hover {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    border-color: #ef4444;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
-}
-
-.delete-div:hover svg {
-    fill: #dc2626;
-}
-
-.delete-div:hover svg path {
-    fill: #dc2626;
-    stroke: #dc2626;
-}
-
-.delete-div:disabled {
-    background-color: rgb(243 243 243);
-    cursor: not-allowed;
+    text-align: center;
 }
 
 .no-data-container {
@@ -528,7 +485,9 @@
     align-items: center;
     flex-direction: row;
     gap: 1rem;
+    padding: 0.5rem 1rem;
     margin-bottom: 0;
+    border-bottom: 1px solid rgba(1, 118, 211, 0.08);
 }
 
 .closs_icon_css {
@@ -640,9 +599,6 @@
     }
 }
 
-.max-width-css {
-    width: 15rem;
-}
 
 /* ════════════════════════════════════════════════════════════════
    Custom Searchable Combobox

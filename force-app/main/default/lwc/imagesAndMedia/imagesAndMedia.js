@@ -48,6 +48,7 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     @track currentPage = 1;
     @track pageSize = 20;
     visiblePages = 5;
+    @track openActionMenuId = null;
 
     constructor() {
         super();
@@ -100,7 +101,18 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
         }
         const startIndex = (this.currentPage - 1) * this.pageSize;
         const endIndex = startIndex + this.pageSize;
-        return this.data.slice(startIndex, endIndex);
+        const pagedList = this.data.slice(startIndex, endIndex);
+        return pagedList.map((item, index) => {
+            const isActionMenuOpen = this.openActionMenuId === item.Id;
+            const isNearBottom = (pagedList.length > 2) && (index >= pagedList.length - 2);
+            return {
+                ...item,
+                isActionMenuOpen,
+                actionButtonClass: `exp-action-dots-btn ${isActionMenuOpen ? 'active' : ''}`,
+                actionMenuClass: `exp-action-dropdown-menu ${isNearBottom ? 'open-upwards' : 'open-downwards'}`,
+                rowClass: `table-tr ${isActionMenuOpen ? 'has-open-menu' : ''}`
+            };
+        });
     }
 
     get pageNumbers() {
@@ -192,6 +204,7 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
 
     scrollToTop() {
         try {
+            this.openActionMenuId = null;
             const tableContainer = this.template.querySelector('.exp-table-content');
             if (tableContainer) {
                 tableContainer.scrollTop = 0;
@@ -359,6 +372,7 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     */
     connectedCallback() {
         try {
+            window?.globalThis?.addEventListener('click', this.handleDocumentClick);
             this.getS3ConfigDataAsync();
             this.screenWidth = window?.globalThis?.innerWidth;
             window?.globalThis?.addEventListener('resize', this.handleResize);
@@ -394,10 +408,42 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     */
     disconnectedCallback() {
         try {
+            window?.globalThis?.removeEventListener('click', this.handleDocumentClick);
             window?.globalThis?.removeEventListener('resize', this.handleResize);
         } catch (error) {
             errorDebugger('ImagesAndMedia', 'disconnectedCallback', error, 'warn', 'Error while removing the resize event');
         }
+    }
+
+    handleDocumentClick = () => {
+        if (this.openActionMenuId) {
+            this.openActionMenuId = null;
+        }
+    };
+
+    toggleActionMenu(event) {
+        event.stopPropagation();
+        const recId = event.currentTarget.dataset.id;
+        this.openActionMenuId = this.openActionMenuId === recId ? null : recId;
+    }
+
+    handleDropdownClick(event) {
+        event.stopPropagation();
+    }
+
+    handleMenuDownload(event) {
+        this.openActionMenuId = null;
+        this.downloadRowImage(event);
+    }
+
+    handleMenuEdit(event) {
+        this.openActionMenuId = null;
+        this.editImageNameToStore(event);
+    }
+
+    handleMenuDelete(event) {
+        this.openActionMenuId = null;
+        this.deleteRow(event);
     }
 
     /**
@@ -408,6 +454,7 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     */
     tabing(event) {
         try {
+            this.openActionMenuId = null;
             const target = event.currentTarget.querySelector('a').getAttribute('data-tab-id');
 
             this.template.querySelectorAll("a").forEach(tabel => {
@@ -436,6 +483,7 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     */
     handleResize = () => {
         try {
+            this.openActionMenuId = null;
             this.screenWidth = window?.globalThis?.innerWidth;
         } catch (error) {
             errorDebugger('ImagesAndMedia', 'handleResize', error, 'warn', 'Error while handling the resize event');
@@ -476,6 +524,7 @@ export default class ImagesAndMedia extends NavigationMixin(LightningElement) {
     */
     sortClick(event) {
         try {
+            this.openActionMenuId = null;
             let sortField = event.currentTarget.dataset.id;
             this.sortBy = sortField;
             if (this.sortDirection === 'asc') {

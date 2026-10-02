@@ -612,102 +612,102 @@
                 <div class="control-center-layout">
                     <!-- Main Content Area -->
                     <div class="child-component-container">
-                <div class="config-card">
-                    <!-- Page Header -->
-                    <div class="page-header">
-                        <img src="/resource/MVEX__controlcenterimg/meta.png" class="meta-icon" alt="Meta"
-                            draggable="false" />
-                        <div class="page-header-content">
-                            <h1 class="page-title">Connect Meta Lead Ads</h1>
+                        <div class="config-card">
+                            <!-- Page Header -->
+                            <div class="page-header">
+                                <img src="/resource/MVEX__controlcenterimg/meta.png" class="meta-icon" alt="Meta"
+                                    draggable="false" />
+                                <div class="page-header-content">
+                                    <h1 class="page-title">Connect Meta Lead Ads</h1>
                             <p class="page-subtitle">Seamlessly integrate your Facebook Pages to capture and sync leads
-                                directly into Salesforce in real-time.</p>
-                        </div>
-                    </div>
+                                        directly into Salesforce in real-time.</p>
+                                </div>
+                            </div>
 
-                    <apex:outputPanel rendered="{!NOT(hasConfig)}">
-                        <div class="info-box" style="background: #FEF2F2; border-color: #F87171;">
+                            <apex:outputPanel rendered="{!NOT(hasConfig)}">
+                                <div class="info-box" style="background: #FEF2F2; border-color: #F87171;">
                             <svg class="info-icon" style="color: #EF4444;" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            <div class="info-content">
-                                <p class="info-title" style="color: #991B1B;">Configuration Missing</p>
+                                        <path fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <div class="info-content">
+                                        <p class="info-title" style="color: #991B1B;">Configuration Missing</p>
                                 <p class="info-text" style="color: #991B1B;">The Meta Ads integration configuration is
-                                    missing. Please ask your administrator to configure the Tech Provider App
-                                    credentials in Custom Metadata (OAuth_Configuration__mdt) first.</p>
-                            </div>
-                        </div>
-                    </apex:outputPanel>
-
-                    <apex:outputPanel rendered="{!hasConfig}">
-                        <div id="setup-form-div">
-                            <div class="input-group">
-                                <label class="input-label" for="app-id-input">Meta Application ID</label>
-                                <input type="text" id="app-id-input" class="input-field"
-                                    placeholder="Enter your Meta Application ID" />
-                            </div>
-
-                            <div class="info-box">
-                                <svg class="info-icon" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                <div class="info-content">
-                                    <p class="info-title">What happens when you connect?</p>
-                                    <ul
-                                        style="margin: 6px 0 0 0; padding-left: 20px; color: #4B5563; font-size: 14px; line-height: 1.6;">
-                                        <li>Securely authenticates with your Meta Business account.</li>
-                                        <li>Automatically enables real-time lead webhooks for your pages.</li>
-                                        <li>Discovers and synchronizes all active lead generation forms.</li>
-                                    </ul>
-                                    <div
-                                        style="margin-top: 12px; background-color: #faf8e0; color: #8a510f; padding: 10px 12px; border-radius: 6px; border-left: 4px solid #ffd24b; font-size: 13px; font-weight: 500; display: inline-block;">
-                                        <strong>Note:</strong> It might take 3-5 minutes to process after connecting.
+                                            missing. Please ask your administrator to configure the Tech Provider App
+                                            credentials in Custom Metadata (OAuth_Configuration__mdt) first.</p>
                                     </div>
                                 </div>
-                            </div>
+                            </apex:outputPanel>
 
-                            <button class="connect-btn" id="connect-btn" onclick="launchMetaAdsSignup()">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-                                    viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                                    <path
-                                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
-                                    </path>
-                                </svg>
-                                <span id="btn-text">Connect with Meta</span>
-                                <div class="spinner" id="btn-spinner"></div>
-                            </button>
+                            <apex:outputPanel rendered="{!hasConfig}">
+                                <div id="setup-form-div">
+                                    <div class="input-group">
+                                        <label class="input-label" for="app-id-input">Meta Application ID</label>
+                                        <input type="text" id="app-id-input" class="input-field"
+                                            placeholder="Enter your Meta Application ID" />
+                                    </div>
 
-                            <span class="error-message-text" id="error-message"></span>
-                        </div>
+                                    <div class="info-box">
+                                        <svg class="info-icon" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        <div class="info-content">
+                                            <p class="info-title">What happens when you connect?</p>
+                                            <ul
+                                                style="margin: 6px 0 0 0; padding-left: 20px; color: #4B5563; font-size: 14px; line-height: 1.6;">
+                                                <li>Securely authenticates with your Meta Business account.</li>
+                                                <li>Automatically enables real-time lead webhooks for your pages.</li>
+                                                <li>Discovers and synchronizes all active lead generation forms.</li>
+                                            </ul>
+                                            <div
+                                                style="margin-top: 12px; background-color: #faf8e0; color: #8a510f; padding: 10px 12px; border-radius: 6px; border-left: 4px solid #ffd24b; font-size: 13px; font-weight: 500; display: inline-block;">
+                                        <strong>Note:</strong> It might take 3-5 minutes to process after connecting.
+                                            </div>
+                                        </div>
+                                    </div>
 
-                        <!-- Results Section -->
-                        <div class="results-container" id="results-container">
-                            <div class="badges-row">
-                                <div class="status-badge success">
-                                    <span class="status-dot success"></span>
-                                    Connected
+                                    <button class="connect-btn" id="connect-btn" onclick="launchMetaAdsSignup()">
+                                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+                                            viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                            <path
+                                                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                                            </path>
+                                        </svg>
+                                        <span id="btn-text">Connect with Meta</span>
+                                        <div class="spinner" id="btn-spinner"></div>
+                                    </button>
+
+                                    <span class="error-message-text" id="error-message"></span>
                                 </div>
-                            </div>
 
-                            <!-- Connected Page -->
-                            <div class="section-header">📄 Connected Account</div>
-                            <div class="card" id="page-display"></div>
+                                <!-- Results Section -->
+                                <div class="results-container" id="results-container">
+                                    <div class="badges-row">
+                                        <div class="status-badge success">
+                                            <span class="status-dot success"></span>
+                                            Connected
+                                        </div>
+                                    </div>
 
-                            <button class="deactivate-btn" onclick="deactivateMetaAds()">
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Deactivate Integration
-                            </button>
+                                    <!-- Connected Page -->
+                                    <div class="section-header">📄 Connected Account</div>
+                                    <div class="card" id="page-display"></div>
+
+                                    <button class="deactivate-btn" onclick="deactivateMetaAds()">
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        Deactivate Integration
+                                    </button>
+                                </div>
+                            </apex:outputPanel>
+
                         </div>
-                    </apex:outputPanel>
-
-                </div>
 
                     </div>
 
@@ -788,7 +788,7 @@
             }
 
             function backToControlCenter() {
-                var basePath = '/lightning/n/control_center_x';
+                var basePath = '/lightning/n/MVEX__Control_Center';
                 window.top.location.href = basePath;
             }
 
@@ -887,7 +887,7 @@
             }
 
             function renderResults(data) {
-                var basePath = '/lightning/n/control_center_x';
+                var basePath = '/lightning/n/MVEX__Control_Center';
 
                 // Show loading spinner while Metadata API deploys
                 setLoading(true, 'Saving configuration... Please wait');

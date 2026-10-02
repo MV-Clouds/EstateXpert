@@ -318,22 +318,12 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
                 );
             } else {
                 // If not connected, navigate to SDK page
-                this[NavigationMixin.Navigate]({
-                    type: "standard__webPage",
-                    attributes: {
-                        url: '/apex/metaAdsSDK'
-                    }
-                });
+                this.handleMetaAdsDeactivated();
             }
         } catch (error) {
             console.error('Error checking Meta Ads connection:', error);
             // Fallback to SDK page
-            this[NavigationMixin.Navigate]({
-                type: "standard__webPage",
-                attributes: {
-                    url: '/apex/metaAdsSDK'
-                }
-            });
+            this.handleMetaAdsDeactivated();
         }
     }
 

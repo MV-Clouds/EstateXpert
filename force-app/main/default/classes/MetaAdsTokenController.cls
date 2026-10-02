@@ -11,8 +11,9 @@ public with sharing class MetaAdsTokenController {
      * @description Gets the OAuth Configuration metadata for Meta Ads.
      * @return OAuth_Configuration__mdt instance
      */
-    public static OAuth_Configuration__mdt getConfig() {
-        return [SELECT MVEX__Access_Token__c, MVEX__Client_Id__c, MVEX__Client_Secret__c, MVEX__Config_Id__c, MVEX__Base_URL__c, MVEX__API_Version__c, MVEX__Authorization_Endpoint__c, MVEX__Client_App_Id__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1][0];
+    public static MVEX__OAuth_Configuration__mdt getConfig() {
+        List<MVEX__OAuth_Configuration__mdt> configs = [SELECT MVEX__Access_Token__c, MVEX__Client_Id__c, MVEX__Client_Secret__c, MVEX__Config_Id__c, MVEX__Base_URL__c, MVEX__API_Version__c, MVEX__Authorization_Endpoint__c, MVEX__Client_App_Id__c FROM MVEX__OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1];
+        return configs.isEmpty() ? null : configs[0];
     }
 
     /**

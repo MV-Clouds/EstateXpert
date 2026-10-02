@@ -18,7 +18,7 @@
 }
 
 .main_header_cls {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    background: #ffffff;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
@@ -63,7 +63,7 @@
 }
 
 .main_content_cls {
-    background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+    background: #ffffff;
     border-radius: 8px;
     display: flex;
     flex-direction: column;
@@ -520,7 +520,7 @@
 
 .meta-field-pill {
     padding: 8px 12px;
-    background: linear-gradient(135deg, #e5e7eb 0%, #f3f4f6 100%);
+    background: #e5e7eb;
     border-radius: 6px;
     font-size: 14px;
     font-weight: 500;
@@ -530,7 +530,7 @@
 
 /* Required field row highlight */
 .mapping-row--required {
-    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    background: #fffbeb;
     border: 1px solid #fbbf24;
     border-radius: 8px;
     padding: 8px;
@@ -538,7 +538,7 @@
 }
 
 .mapping-row--error {
-    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    background: #fee2e2;
     border-color: #f87171;
 }
 

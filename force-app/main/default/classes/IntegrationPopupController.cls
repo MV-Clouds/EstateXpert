@@ -45,31 +45,108 @@ public with sharing class IntegrationPopupController {
                 upsert as user awsSettings;
     
             } else if (integrationType == 'Gmail') {
-                MVEX__GmailConfig__c gmailSettings = MVEX__GmailConfig__c.getOrgDefaults();
-                if (gmailSettings == null) {
-                    gmailSettings = new MVEX__GmailConfig__c();
-                    gmailSettings.SetupOwnerId = UserInfo.getOrganizationId();
-                }
-    
-                for (String apiName : stringFieldMap.keySet()) {
-                    gmailSettings.put(apiName, stringFieldMap.get(apiName));
-                }
+                // Only SubscriberControlled fields (Refresh_Token__c, Access_Token__c, Email__c, Connected_Date__c)
+                String refreshTokenValue = stringFieldMap.get('Refresh_Token__c');
+                String accessTokenValue  = stringFieldMap.get('Access_Token__c');
+                String emailValue        = stringFieldMap.get('Email__c');
 
-                upsert as user gmailSettings;
+                List<OAuth_Configuration__mdt> gmailOAuthList = [
+                    SELECT Id, DeveloperName, Refresh_Token__c, Access_Token__c, Email__c, Connected_Date__c
+                    FROM OAuth_Configuration__mdt
+                    WHERE DeveloperName = 'Gmail_OAuth'
+                    WITH USER_MODE
+                    LIMIT 1
+                ];
+
+                if (!gmailOAuthList.isEmpty()) {
+                    Metadata.CustomMetadata cmtRecord = new Metadata.CustomMetadata();
+                    cmtRecord.fullName  = 'OAuth_Configuration__mdt.Gmail_OAuth';
+                    cmtRecord.label     = gmailOAuthList[0].DeveloperName;
+
+                    if (refreshTokenValue != null) {
+                        Metadata.CustomMetadataValue cmtRefreshToken = new Metadata.CustomMetadataValue();
+                        cmtRefreshToken.field = 'Refresh_Token__c';
+                        cmtRefreshToken.value = refreshTokenValue;
+                        cmtRecord.values.add(cmtRefreshToken);
+                    }
+                    if (accessTokenValue != null) {
+                        Metadata.CustomMetadataValue cmtAccessToken = new Metadata.CustomMetadataValue();
+                        cmtAccessToken.field = 'Access_Token__c';
+                        cmtAccessToken.value = accessTokenValue;
+                        cmtRecord.values.add(cmtAccessToken);
+                    }
+                    if (emailValue != null) {
+                        Metadata.CustomMetadataValue cmtEmail = new Metadata.CustomMetadataValue();
+                        cmtEmail.field = 'Email__c';
+                        cmtEmail.value = emailValue;
+                        cmtRecord.values.add(cmtEmail);
+                    }
+
+                    // Stamp Connected_Date__c only when a refresh token is being saved (i.e. first connect)
+                    // and only if it hasn't been set yet — preserve the original connection date on re-saves.
+                    if (String.isNotBlank(refreshTokenValue) && gmailOAuthList[0].Connected_Date__c == null) {
+                        Metadata.CustomMetadataValue cmtConnectedDate = new Metadata.CustomMetadataValue();
+                        cmtConnectedDate.field = 'Connected_Date__c';
+                        cmtConnectedDate.value = Datetime.now();
+                        cmtRecord.values.add(cmtConnectedDate);
+                    }
+
+                    Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
+                    mdContainer.addMetadata(cmtRecord);
+                    Metadata.Operations.enqueueDeployment(mdContainer, null);
+                }
 
             } else if (integrationType == 'Instagram') {
-                MVEX__IG_Configuration__c instagramSettings = MVEX__IG_Configuration__c.getOrgDefaults();
-                if (instagramSettings == null) {
-                    instagramSettings = new MVEX__IG_Configuration__c();
-                    instagramSettings.SetupOwnerId = UserInfo.getOrganizationId();
-                }
-    
-                for (String apiName : stringFieldMap.keySet()) {
-                    instagramSettings.put(apiName, stringFieldMap.get(apiName));
-                }
-    
-                upsert as user instagramSettings;
+                // Only SubscriberControlled fields (Access_Token__c, User_Id__c, Username__c, Connected_Date__c)
+                // can be written at runtime via Metadata.deployContainer.
+                String accessTokenValue = stringFieldMap.containsKey('Access_Token__c') ? stringFieldMap.get('Access_Token__c') : stringFieldMap.get('MVEX__Long_Access_Token__c');
+                String userIdValue      = stringFieldMap.containsKey('User_Id__c') ? stringFieldMap.get('User_Id__c') : stringFieldMap.get('MVEX__User_Id__c');
+                String usernameValue    = stringFieldMap.get('Username__c');
 
+                List<OAuth_Configuration__mdt> instaOAuthList = [
+                    SELECT Id, DeveloperName, Access_Token__c, User_Id__c, Username__c, Connected_Date__c
+                    FROM OAuth_Configuration__mdt
+                    WHERE DeveloperName = 'Instagram_OAuth'
+                    WITH USER_MODE
+                    LIMIT 1
+                ];
+
+                if (!instaOAuthList.isEmpty()) {
+                    Metadata.CustomMetadata cmtRecord = new Metadata.CustomMetadata();
+                    cmtRecord.fullName = 'OAuth_Configuration__mdt.Instagram_OAuth';
+                    cmtRecord.label    = instaOAuthList[0].DeveloperName;
+
+                    if (accessTokenValue != null) {
+                        Metadata.CustomMetadataValue cmtAccessToken = new Metadata.CustomMetadataValue();
+                        cmtAccessToken.field = 'Access_Token__c';
+                        cmtAccessToken.value = accessTokenValue;
+                        cmtRecord.values.add(cmtAccessToken);
+                    }
+                    if (userIdValue != null) {
+                        Metadata.CustomMetadataValue cmtUserId = new Metadata.CustomMetadataValue();
+                        cmtUserId.field = 'User_Id__c';
+                        cmtUserId.value = userIdValue;
+                        cmtRecord.values.add(cmtUserId);
+                    }
+                    if (usernameValue != null) {
+                        Metadata.CustomMetadataValue cmtUsername = new Metadata.CustomMetadataValue();
+                        cmtUsername.field = 'Username__c';
+                        cmtUsername.value = usernameValue;
+                        cmtRecord.values.add(cmtUsername);
+                    }
+
+                    // Stamp Connected_Date__c only on first connect (when token is set and date not yet stored)
+                    if (String.isNotBlank(accessTokenValue) && instaOAuthList[0].Connected_Date__c == null) {
+                        Metadata.CustomMetadataValue cmtConnectedDate = new Metadata.CustomMetadataValue();
+                        cmtConnectedDate.field = 'Connected_Date__c';
+                        cmtConnectedDate.value = Datetime.now();
+                        cmtRecord.values.add(cmtConnectedDate);
+                    }
+
+                    Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
+                    mdContainer.addMetadata(cmtRecord);
+                    Metadata.Operations.enqueueDeployment(mdContainer, null);
+                }
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'saveSettings', 'Error while saving settings.');
@@ -248,14 +325,32 @@ public with sharing class IntegrationPopupController {
         try {
             // Fetching integration details
             MVEX__AWS_Config__c awsCredential = MVEX__AWS_Config__c.getOrgDefaults();
-            MVEX__GmailConfig__c gmailCredential = MVEX__GmailConfig__c.getOrgDefaults();
-            MVEX__IG_Configuration__c instagramCredential = MVEX__IG_Configuration__c.getOrgDefaults();
+
+            // Gmail — read from OAuth_Configuration__mdt (Custom Metadata Type)
+            // NOTE: CreatedDate/LastModifiedDate are NOT queryable on CMT. SystemModstamp IS.
+            List<OAuth_Configuration__mdt> gmailOAuthList = [
+                SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Refresh_Token__c, Email__c,
+                       Connected_Date__c, SystemModstamp
+                FROM OAuth_Configuration__mdt
+                WHERE DeveloperName = 'Gmail_OAuth'
+                WITH USER_MODE
+                LIMIT 1
+            ];
 
             // Gmail Integration
             FieldWrapperData gmailWrapper = new FieldWrapperData();
             gmailWrapper.integrationName = 'Gmail';
-            gmailWrapper.integrationData = gmailCredential;
-            gmailWrapper.isValid = gmailCredential != null && gmailCredential.MVEX__Client_ID__c != null && gmailCredential.MVEX__Client_Secret__c != null && gmailCredential.MVEX__Redirect_URI__c != null && gmailCredential.MVEX__Refresh_Token__c != null;
+            if (!gmailOAuthList.isEmpty()) {
+                OAuth_Configuration__mdt gmailCredential = gmailOAuthList[0];
+                gmailWrapper.integrationData = gmailCredential;
+                gmailWrapper.isValid = String.isNotBlank(gmailCredential.Client_Id__c)
+                                    && String.isNotBlank(gmailCredential.Client_Secret__c)
+                                    && String.isNotBlank(gmailCredential.Redirect_URI__c)
+                                    && String.isNotBlank(gmailCredential.Refresh_Token__c);
+            } else {
+                gmailWrapper.integrationData = null;
+                gmailWrapper.isValid = false;
+            }
             wrapperList.add(gmailWrapper);
 
             FieldWrapperData awsWrapper = new FieldWrapperData();
@@ -264,11 +359,28 @@ public with sharing class IntegrationPopupController {
             awsWrapper.isValid = awsCredential.MVEX__AWS_Access_Key__c != null && awsCredential.MVEX__AWS_Secret_Access_Key__c != null && awsCredential.MVEX__S3_Bucket_Name__c != null && awsCredential.MVEX__S3_Region_Name__c != null;
             wrapperList.add(awsWrapper);
 
+            // Instagram — read from OAuth_Configuration__mdt
+            List<OAuth_Configuration__mdt> instaOAuthList = [
+                SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Access_Token__c,
+                       User_Id__c, Username__c, Connected_Date__c, SystemModstamp
+                FROM OAuth_Configuration__mdt
+                WHERE DeveloperName = 'Instagram_OAuth'
+                WITH USER_MODE
+                LIMIT 1
+            ];
 
             FieldWrapperData instagramWrapper = new FieldWrapperData();
             instagramWrapper.integrationName = 'Instagram';
-            instagramWrapper.isValid = instagramCredential.MVEX__ClientId__c != null && instagramCredential.MVEX__ClientSecret__c != null;
-            instagramWrapper.integrationData = instagramCredential;
+            if (!instaOAuthList.isEmpty()) {
+                OAuth_Configuration__mdt instaCredential = instaOAuthList[0];
+                instagramWrapper.integrationData = instaCredential;
+                instagramWrapper.isValid = String.isNotBlank(instaCredential.Client_Id__c)
+                                        && String.isNotBlank(instaCredential.Access_Token__c)
+                                        && String.isNotBlank(instaCredential.User_Id__c);
+            } else {
+                instagramWrapper.integrationData = null;
+                instagramWrapper.isValid = false;
+            }
             wrapperList.add(instagramWrapper);
 
             return wrapperList;
@@ -323,14 +435,42 @@ public with sharing class IntegrationPopupController {
     * Method Name : deleteGmailConfig
     * @param recordId : String to stored the record id.
     * @return String : Status of revoke access.
-    * @description : Method to delete gmail config.
+    * @description : Clears the SubscriberControlled token fields (Refresh_Token__c, Access_Token__c, Email__c)
+    *               on the Gmail_OAuth Custom Metadata record.
     */
     public static String deleteGmailConfig(String recordId){
         try {
-            delete as user new MVEX__GmailConfig__c(Id = recordId);
+            Metadata.CustomMetadata cmtRecord = new Metadata.CustomMetadata();
+            cmtRecord.fullName = 'OAuth_Configuration__mdt.Gmail_OAuth';
+            cmtRecord.label    = 'Gmail OAuth';
+
+            Metadata.CustomMetadataValue cmtRefreshToken = new Metadata.CustomMetadataValue();
+            cmtRefreshToken.field = 'Refresh_Token__c';
+            cmtRefreshToken.value = null;
+            cmtRecord.values.add(cmtRefreshToken);
+
+            Metadata.CustomMetadataValue cmtAccessToken = new Metadata.CustomMetadataValue();
+            cmtAccessToken.field = 'Access_Token__c';
+            cmtAccessToken.value = null;
+            cmtRecord.values.add(cmtAccessToken);
+
+            Metadata.CustomMetadataValue cmtEmail = new Metadata.CustomMetadataValue();
+            cmtEmail.field = 'Email__c';
+            cmtEmail.value = null;
+            cmtRecord.values.add(cmtEmail);
+
+            Metadata.CustomMetadataValue cmtConnectedDate = new Metadata.CustomMetadataValue();
+            cmtConnectedDate.field = 'Connected_Date__c';
+            cmtConnectedDate.value = null;
+            cmtRecord.values.add(cmtConnectedDate);
+
+            Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
+            mdContainer.addMetadata(cmtRecord);
+            Metadata.Operations.enqueueDeployment(mdContainer, null);
+
             return 'success';
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'deleteGmailConfig', 'Error while deleting gmail config.');
+            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'deleteGmailConfig', 'Error while clearing Gmail OAuth config.');
             return e.getMessage();
         }
     }
@@ -353,9 +493,36 @@ public with sharing class IntegrationPopupController {
     }
 
     @AuraEnabled
-    public static string revokeInstagramAccess(String recordId){
+    public static String revokeInstagramAccess(String recordId) {
         try {
-            delete as user new MVEX__IG_Configuration__c(Id = recordId);
+            Metadata.CustomMetadata cmtRecord = new Metadata.CustomMetadata();
+            cmtRecord.fullName = 'OAuth_Configuration__mdt.Instagram_OAuth';
+            cmtRecord.label    = 'Instagram OAuth';
+
+            Metadata.CustomMetadataValue cmtAccessToken = new Metadata.CustomMetadataValue();
+            cmtAccessToken.field = 'Access_Token__c';
+            cmtAccessToken.value = null;
+            cmtRecord.values.add(cmtAccessToken);
+
+            Metadata.CustomMetadataValue cmtUserId = new Metadata.CustomMetadataValue();
+            cmtUserId.field = 'User_Id__c';
+            cmtUserId.value = null;
+            cmtRecord.values.add(cmtUserId);
+
+            Metadata.CustomMetadataValue cmtUsername = new Metadata.CustomMetadataValue();
+            cmtUsername.field = 'Username__c';
+            cmtUsername.value = null;
+            cmtRecord.values.add(cmtUsername);
+
+            Metadata.CustomMetadataValue cmtConnectedDate = new Metadata.CustomMetadataValue();
+            cmtConnectedDate.field = 'Connected_Date__c';
+            cmtConnectedDate.value = null;
+            cmtRecord.values.add(cmtConnectedDate);
+
+            Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
+            mdContainer.addMetadata(cmtRecord);
+            Metadata.Operations.enqueueDeployment(mdContainer, null);
+
             return 'success';
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'revokeInstagramAccess', 'Error while revoking Instagram access.');
@@ -383,31 +550,32 @@ public with sharing class IntegrationPopupController {
         FieldWrapper result = new FieldWrapper();
         try {
             if (integrationType == 'Gmail') {
-                MVEX__GmailConfig__c gmailSettings = MVEX__GmailConfig__c.getOrgDefaults();
+                List<OAuth_Configuration__mdt> gmailOAuth = [
+                    SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c, Refresh_Token__c, Email__c
+                    FROM OAuth_Configuration__mdt
+                    WHERE DeveloperName = 'Gmail_OAuth'
+                    WITH USER_MODE
+                    LIMIT 1
+                ];
 
-                List<OAuth_Configuration__mdt> gmailOAuth = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Gmail_OAuth' WITH USER_MODE LIMIT 1];
-                
-                if(!gmailOAuth.isEmpty()) {
-                    gmailSettings.MVEX__Client_ID__c = gmailOAuth[0].Client_Id__c;
-                    gmailSettings.MVEX__Client_Secret__c = gmailOAuth[0].Client_Secret__c;
-                    gmailSettings.MVEX__Redirect_URI__c = gmailOAuth[0].Redirect_URI__c;
+                if (!gmailOAuth.isEmpty()) {
+                    result.objectData = gmailOAuth[0];
+                    result.siteUrl    = gmailOAuth[0].Redirect_URI__c;
                 }
-                
-                result.objectData = gmailSettings;
-                result.siteUrl = gmailSettings.MVEX__Redirect_URI__c;
             } else if (integrationType == 'Instagram') {
-                MVEX__IG_Configuration__c instaSettings = MVEX__IG_Configuration__c.getOrgDefaults();
+                List<OAuth_Configuration__mdt> instaOAuth = [
+                    SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c,
+                           Access_Token__c, User_Id__c, Username__c
+                    FROM OAuth_Configuration__mdt
+                    WHERE DeveloperName = 'Instagram_OAuth'
+                    WITH USER_MODE
+                    LIMIT 1
+                ];
 
-                List<OAuth_Configuration__mdt> instaOAuth = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Instagram_OAuth' WITH USER_MODE LIMIT 1];
-                
-                if(!instaOAuth.isEmpty()) {
-                    instaSettings.MVEX__ClientId__c = instaOAuth[0].Client_Id__c;
-                    instaSettings.MVEX__ClientSecret__c = instaOAuth[0].Client_Secret__c;
-                    instaSettings.MVEX__Redirect_URI__c = instaOAuth[0].Redirect_URI__c;
+                if (!instaOAuth.isEmpty()) {
+                    result.objectData = instaOAuth[0];
+                    result.siteUrl    = instaOAuth[0].Redirect_URI__c;
                 }
-
-                result.objectData = instaSettings;
-                result.siteUrl = instaSettings.MVEX__Redirect_URI__c;
             }
             return result;
         } catch (Exception e) {
@@ -468,17 +636,19 @@ public with sharing class IntegrationPopupController {
         }
 
         String graphApiVersion = 'v24.0';
-        MVEX__IG_Configuration__c igConfig = MVEX__IG_Configuration__c.getOrgDefaults();
-        if (igConfig != null) {
-            String configVersion;
-            try {
-                configVersion = (String) igConfig.get('APIVersion__c');
-            } catch (Exception e1) {
-                configVersion = null;
+        try {
+            List<OAuth_Configuration__mdt> instaConfigs = [
+                SELECT API_Version__c
+                FROM OAuth_Configuration__mdt
+                WHERE DeveloperName = 'Instagram_OAuth'
+                WITH USER_MODE
+                LIMIT 1
+            ];
+            if (!instaConfigs.isEmpty() && String.isNotBlank(instaConfigs[0].API_Version__c)) {
+                graphApiVersion = instaConfigs[0].API_Version__c.trim();
             }
-            if (String.isNotBlank(configVersion)) {
-                graphApiVersion = configVersion.trim();
-            }
+        } catch (Exception e1) {
+            graphApiVersion = 'v24.0';
         }
         if (String.isBlank(graphApiVersion)) {
             graphApiVersion = 'v24.0';

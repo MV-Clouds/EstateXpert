@@ -10,17 +10,17 @@
                 </svg>
             </div>
 
-            <div class="slds-modal__header blue-header">
+            <div class="slds-modal__header exp-pop-up-header-css">
                 <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Manage Your Checklist
                 </h1>
             </div>
-            <div class="slds-modal__content background_css" id="modal-content-id-1">
-                <div class="header_container_css">
-                    <div class="object_name_css">
+            <div class="slds-modal__content background-css" id="modal-content-id-1">
+                <div class="header-container-css">
+                    <div class="object-name-css">
                         Selected Object : {selectedObjectName}
                     </div>
                     <div class="header_title_css">
-                        <button class="add-new-btn" onclick={addNewRow}>
+                        <button class="exp-blue-btn-css" onclick={addNewRow}>
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                                 <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="white"/>
                             </svg>                                
@@ -53,7 +53,7 @@
                                             <div class="slds-truncate">Description</div>
                                         </th>
                                         <th scope="col" class="action">
-                                            <div class="slds-truncate order_btn_grp">Action</div>
+                                            <div class="slds-truncate order-btn-grp">Action</div>
                                         </th>
                                     </tr>
                                 </thead>
@@ -149,7 +149,7 @@
                                                 <lightning-input type="text" value={item.MVEX__Description__c} data-index={index} data-field="MVEX__Description__c" onchange={handleInputChange} variant="label-hidden"></lightning-input>
                                             </td>
                                             <td data-label="action">
-                                                <div class="order_btn_grp">
+                                                <div class="order-btn-grp">
                                                     <button class="exp-delete-icon-css" onclick={handleDelete} data-index={index}>
                                                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                                                             xmlns="http://www.w3.org/2000/svg">

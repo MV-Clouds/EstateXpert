@@ -7,7 +7,7 @@
             <div class="header-new-btn">
                 <!-- Email Notification compact toggle -->
                 <div class="email-notif-toggle-inline">
-                    <svg viewBox="0 0 16 16" height="15" width="15" fill="#000000" xmlns="http://www.w3.org/2000/svg">
+                    <svg viewBox="0 0 16 16" height="15" width="20" fill="#000000" xmlns="http://www.w3.org/2000/svg">
                         <path d="M2 2h12c0.36819999999999997 0 0.6666666666666666 0.29847999999999997 0.6666666666666666 0.6666666666666666v10.666666666666666c0 0.36819999999999997 -0.29846666666666666 0.6666666666666666 -0.6666666666666666 0.6666666666666666H2c-0.36818666666666666 0 -0.6666666666666666 -0.29846666666666666 -0.6666666666666666 -0.6666666666666666V2.6666666666666665c0 -0.36818666666666666 0.29847999999999997 -0.6666666666666666 0.6666666666666666 -0.6666666666666666Zm11.333333333333332 2.82528L8.047866666666666 9.558666666666666 2.6666666666666665 4.810626666666666V12.666666666666666h10.666666666666666V4.825279999999999ZM3.0076399999999994 3.333333333333333l5.033626666666667 4.441333333333333L13.000666666666667 3.333333333333333H3.0076399999999994Z" stroke-width="0.6667"></path>
                     </svg>
                     <span class="email-notif-label">Email Notify</span>
@@ -21,10 +21,15 @@
                     </label>
                 </div>
                 <template if:true={hasUnsavedChanges}>
-                    <button class="exp-blue-btn-css" onclick={saveOrderChanges}>Save Order</button>
+                    <button class="exp-blue-btn-css" onclick={saveOrderChanges}>
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" lwc-7de60ikrj="">
+                            <path d="M13.5 0H1.5C0.671573 0 0 0.671573 0 1.5V14.5C0 15.3284 0.671573 16 1.5 16H14.5C15.3284 16 16 15.3284 16 14.5V2.5L13.5 0ZM8 14C6.34315 14 5 12.6569 5 11C5 9.34315 6.34315 8 8 8C9.65685 8 11 9.34315 11 11C11 12.6569 9.65685 14 8 14ZM11 3H2V1H11V3Z" fill="white" lwc-7de60ikrj="" cursorshover="true"></path>
+                        </svg>
+                        Save Order
+                    </button>
                 </template>
                 <button class="exp-blue-btn-css" onclick={openNewRulePopup}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="currentColor" />
                     </svg>
                     New Rule

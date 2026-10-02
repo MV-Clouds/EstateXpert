@@ -2,6 +2,8 @@ import { LightningElement, wire } from "lwc";
 import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
+import FORM_FACTOR from "@salesforce/client/formFactor";
+import checkConnectionStatus from '@salesforce/apex/MetaAdsTokenController.checkConnectionStatus';
 
 export default class EstateXpertControlCenter extends NavigationMixin(LightningElement) {
     currentView = 'controlCenter';
@@ -33,6 +35,8 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             const target = currentPageReference.state.c__openComponent;
             if (target === 'storageIntegration') {
                 this.generalIntegrationMethod();
+            } else if (target === 'metaAdsMapping') {
+                this.metaAdsMethod();
             }
         }
     }
@@ -107,6 +111,15 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      */
     get isStorageIntegrationComponent() {
         return this.selectedComponent === 'storageIntegration';
+    }
+
+    /**
+     * Method Name: isMetaAdsMappingComponent
+     * @description: Checks if MetaAdsFormMapping component is selected
+     * Date: 23/09/2026
+     */
+    get isMetaAdsMappingComponent() {
+        return this.selectedComponent === 'metaAdsMapping';
     }
 
     /**
@@ -283,6 +296,74 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             'Integration Hub',
             'The "Integration Hub" modal simplifies storage, email, instagram integration by providing seamless connectivity with various third-party services, enhancing overall functionality and user experience. Connect your favorite tools and platforms in one centralized location.'
         );
+    }
+
+    /**
+     * Method Name: metaAdsMethod
+     * @description: Used to handle Meta Ads card click. Checks connection and redirects appropriately.
+     */
+    async metaAdsMethod(event) {
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
+        
+        try {
+            const result = await checkConnectionStatus();
+            if (result && result.success) {
+                // If connected, open mapping component
+                this.openComponent(
+                    'metaAdsMapping', 
+                    'Meta Ads Mapping',
+                    'Configure form field mapping for Meta Ads to automatically capture leads.'
+                );
+            } else {
+                // If not connected, navigate to SDK page
+                this.handleMetaAdsDeactivated();
+            }
+        } catch (error) {
+            console.error('Error checking Meta Ads connection:', error);
+            // Fallback to SDK page
+            this.handleMetaAdsDeactivated();
+        }
+    }
+
+    /**
+     * Method Name: handleMetaAdsDeactivated
+     * @description: Triggered when user deactivates Meta Ads from the mapping component
+     */
+    handleMetaAdsDeactivated() {
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: '/apex/metaAdsSDK'
+            }
+        });
+    }
+
+    /**
+     * Method Name: handleLeadCaptureNavigation
+     * @description: Handles navigation from leadCaptureCmp to googleLeadFieldMapping
+     * Date: 17/02/2026
+     * Created By: Karan Singh
+     */
+    handleLeadCaptureNavigation(event) {
+        const { integrationType } = event.detail;
+        
+        // Store integration type
+        this.integrationType = integrationType;
+        
+        // Set parent component for breadcrumb
+        this.parentComponentTitle = 'Lead Capture';
+        
+        // Set description for sidebar based on integration type
+        const integrationLabel = integrationType === 'Meta' ? 'Meta Ads' : 'Google Ads';
+        const description = `Map ${integrationLabel} form fields to Salesforce Contact fields. This ensures seamless data integration from ${integrationLabel} leads into Salesforce, reducing manual data entry and errors. Configure field mappings to automatically sync lead information.`;
+        
+        // Navigate to field mapping page
+        this.selectedComponent = 'googleLeadFieldMapping';
+        this.selectedComponentTitle = `Map ${integrationLabel} Fields`;
+        this.selectedComponentDescription = description;
+        this.currentView = 'childComponent';
     }
 
     /**

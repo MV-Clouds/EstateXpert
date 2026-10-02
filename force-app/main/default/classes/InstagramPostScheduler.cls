@@ -100,7 +100,7 @@ public class InstagramPostScheduler implements Schedulable {
             Http http = new Http();
 
             HttpRequest albumReq = new HttpRequest();
-            albumReq.setEndpoint('https://graph.instagram.com/v21.0/' + userId + '/media');
+            albumReq.setEndpoint('https://graph.instagram.com/v25.0/' + userId + '/media');
             albumReq.setMethod('POST');
             albumReq.setHeader('Content-Type', 'application/json');
 

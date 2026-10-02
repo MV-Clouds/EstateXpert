@@ -651,7 +651,7 @@ public with sharing class IntegrationPopupController {
             graphApiVersion = 'v24.0';
         }
         if (String.isBlank(graphApiVersion)) {
-            graphApiVersion = 'v24.0';
+            graphApiVersion = 'v25.0';
         }
         if (!graphApiVersion.toLowerCase().startsWith('v')) {
             graphApiVersion = 'v' + graphApiVersion;

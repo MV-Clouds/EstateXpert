@@ -668,11 +668,6 @@
   border-bottom-right-radius: 5px;
 }
 
-.slds-col {
-  width: 90%;
-  word-break: break-word;
-}
-
 .view_input {
   color: black;
   display: flex;
@@ -869,8 +864,7 @@
   text-align: left !important;
 }
 
-lightning-combobox .slds-dropdown,
-.slds-dropdown {
+.position_css lightning-combobox .slds-dropdown {
   text-align: left !important;
   left: 0 !important;
   right: auto !important;
@@ -1143,15 +1137,6 @@ lightning-combobox .slds-dropdown,
     padding: 1rem 1.25rem;
 }
 
-.slds-form-element {
-    display: flex;
-    align-items: center;
-}
-
-.slds-form-element__control {
-    flex: 1 1 auto;
-}
-
 .section_css {
     display: flex;
     justify-content: center;
@@ -1326,15 +1311,6 @@ input[type=number] {
     border-top-left-radius: 8px !important;
     border-top-right-radius: 8px !important;
     padding: 1rem 1.25rem;
-}
-
-.slds-form-element {
-    display: flex;
-    align-items: center;
-}
-
-.slds-form-element__control {
-    flex: 1 1 auto;
 }
 
 .section_css {

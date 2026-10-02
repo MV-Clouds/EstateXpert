@@ -20,6 +20,7 @@ export default class CheckListStatus extends LightningElement {
     @track isSpinner = true;
     @track screenWidth = 0;
     @track checklistEditable = false;
+    @track searchValue = '';
 
     get isMobileOrTablet() {
         return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
@@ -78,6 +79,21 @@ export default class CheckListStatus extends LightningElement {
 
     get buttonLabel() {
         return this.checklistItems?.length > 0 ? 'Manage Checklist' : 'Create Checklist';
+    }
+
+    get progressPercentage() {
+        if (!this.totalCount || this.totalCount === 0) {
+            return 0;
+        }
+        return Math.round((this.completedCount / this.totalCount) * 100);
+    }
+
+    get progressDashArray() {
+        return `${this.progressPercentage}, 100`;
+    }
+
+    get progressBarStyle() {
+        return `width: ${this.progressPercentage}%;`;
     }
 
     /**
@@ -196,9 +212,15 @@ export default class CheckListStatus extends LightningElement {
                         : '-';
                 }
 
+                const toPart = item.isToRequired ? ' to ' : ' ';
+                const conditionTooltip = item.fieldName
+                    ? `Condition: ${item.fieldLabel || ''} should ${item.operator || ''}${toPart}${value}`
+                    : 'There is no condition defined for completion.';
+
                 return {
                     ...item,
-                    displayValueToShow: value
+                    displayValueToShow: value,
+                    conditionTooltip: conditionTooltip
                 };
             });
             this.isSpinner = false;
@@ -280,6 +302,7 @@ export default class CheckListStatus extends LightningElement {
         try {
             this.showEditModal = event.details;
             this.addMainDiv();
+            this.searchValue = '';
             const inputElement = this.template.querySelector('.search_Input');
             if (inputElement) inputElement.value = '';
             this.checklistItems = [];
@@ -321,6 +344,7 @@ export default class CheckListStatus extends LightningElement {
     */
     refreshTable() {
         try {
+            this.searchValue = '';
             const inputElement = this.template.querySelector('.search_Input');
             if (inputElement) inputElement.value = '';
             this.checklistItems = [];
@@ -410,6 +434,7 @@ export default class CheckListStatus extends LightningElement {
     */
     handleSearch(event) {
         try {
+            this.searchValue = event.target.value;
             const searchTerm = event.target.value.toLowerCase();
 
             this.checklistItems = this.originChecklistItems.filter(template =>

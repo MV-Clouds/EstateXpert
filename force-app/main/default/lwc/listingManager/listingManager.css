@@ -60,8 +60,8 @@
 
 .filter-toggle-btn {
     position: relative;
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -121,8 +121,8 @@
 }
 
 .tab-btns ul .tab-div {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     display: flex;
     justify-content: center;
     align-items: center;

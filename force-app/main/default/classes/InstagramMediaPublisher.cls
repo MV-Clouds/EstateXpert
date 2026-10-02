@@ -21,9 +21,30 @@ public class InstagramMediaPublisher implements Schedulable {
 
     @future(callout=true)
     public static void publishMedia(String userId, String creationId, String accessToken, List<String> awsObjectKeys, List<String> awsObjectKeysToPreserve) {
+        String graphApiVersion = 'v24.0';
+        try {
+            List<OAuth_Configuration__mdt> instaConfigs = [
+                SELECT API_Version__c
+                FROM OAuth_Configuration__mdt
+                WHERE DeveloperName = 'Instagram_OAuth'
+                WITH USER_MODE
+                LIMIT 1
+            ];
+            if (!instaConfigs.isEmpty() && String.isNotBlank(instaConfigs[0].API_Version__c)) {
+                graphApiVersion = instaConfigs[0].API_Version__c.trim();
+            }
+        } catch (Exception e1) {
+            graphApiVersion = 'v24.0';
+        }
+        if (String.isBlank(graphApiVersion)) {
+            graphApiVersion = 'v24.0';
+        }
+        if (!graphApiVersion.toLowerCase().startsWith('v')) {
+            graphApiVersion = 'v' + graphApiVersion;
+        }
         Http http = new Http();
         HttpRequest publishReq = new HttpRequest();
-        publishReq.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media_publish');
+        publishReq.setEndpoint(INSTAGRAM_ENDPOINT + graphApiVersion + '/' + userId + '/media_publish');
         publishReq.setMethod('POST');
         publishReq.setHeader('Content-Type', 'application/json');
 

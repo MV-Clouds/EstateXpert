@@ -26,6 +26,10 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     @track hasChanges = false;
     @track originalDropDownPairs = [];
 
+    // ── Pagination state ─────────────────────────────────────────
+    @track currentPage = 1;
+    @track pageSize = 10;
+
     /**
     * Method Name: dropDownPairsWithIndex
     * @description: Enriches each dropdown pair with computed display labels, search-
@@ -35,7 +39,9 @@ export default class MapFields extends NavigationMixin(LightningElement) {
     * Created By: Karan Singh
     */
     get dropDownPairsWithIndex() {
-        return this.dropDownPairs.map((pair, index) => {
+        const pageOffset = (this.currentPage - 1) * this.pageSize;
+        return this._pagedPairs.map((pair, index) => {
+            const globalIndex = pageOffset + index;
             const listingSearch = pair.listingSearch || '';
             const propertySearch = pair.propertySearch || '';
 
@@ -78,8 +84,8 @@ export default class MapFields extends NavigationMixin(LightningElement) {
 
             return {
                 ...pair,
-                _index: index,
-                displayIndex: index + 1,
+                _index: globalIndex,
+                displayIndex: globalIndex + 1,
                 listingFiltered,
                 propertyFiltered,
                 listingHasNoResults: listingFiltered.length === 0,
@@ -98,6 +104,61 @@ export default class MapFields extends NavigationMixin(LightningElement) {
 
     get isDropDownpairAvailable() {
         return this.dropDownPairs.length > 0;
+    }
+
+    // ── Pagination getters ────────────────────────────────────────
+    get pageSizeOptions() {
+        return [5, 10, 20, 50].map(n => ({
+            label: String(n),
+            value: String(n),
+            isSelected: n === this.pageSize
+        }));
+    }
+
+    get totalPages() {
+        return Math.max(1, Math.ceil(this.dropDownPairs.length / this.pageSize));
+    }
+
+    get isFirstPage() {
+        return this.currentPage <= 1;
+    }
+
+    get isLastPage() {
+        return this.currentPage >= this.totalPages;
+    }
+
+    get recordCountInfo() {
+        const total = this.dropDownPairs.length;
+        const start = (this.currentPage - 1) * this.pageSize + 1;
+        const end = Math.min(this.currentPage * this.pageSize, total);
+        return total > 0 ? `${start}–${end} of ${total}` : '0 records';
+    }
+
+    get pageNumbers() {
+        const total = this.totalPages;
+        const current = this.currentPage;
+        const pages = [];
+        if (total <= 7) {
+            for (let i = 1; i <= total; i++) {
+                pages.push({ number: i, className: i === current ? 'exp-pagination-btn-css active' : 'exp-pagination-btn-css', isEllipsis: false });
+            }
+        } else {
+            const add = (n) => pages.push({ number: n, className: n === current ? 'exp-pagination-btn-css active' : 'exp-pagination-btn-css', isEllipsis: false });
+            const ellipsis = (n) => pages.push({ number: n, isEllipsis: true });
+            add(1);
+            if (current > 3) ellipsis('..l');
+            const rangeStart = Math.max(2, current - 1);
+            const rangeEnd = Math.min(total - 1, current + 1);
+            for (let i = rangeStart; i <= rangeEnd; i++) add(i);
+            if (current < total - 2) ellipsis('..r');
+            add(total);
+        }
+        return pages;
+    }
+
+    get _pagedPairs() {
+        const start = (this.currentPage - 1) * this.pageSize;
+        return this.dropDownPairs.slice(start, start + this.pageSize);
     }
 
     /**
@@ -575,11 +636,34 @@ export default class MapFields extends NavigationMixin(LightningElement) {
             if (isListingValid && isPropertyValid) {
                 this.savebutton = false;
             }
+            // Navigate to last page so new row is visible
+            this.currentPage = Math.max(1, Math.ceil(this.dropDownPairs.length / this.pageSize));
             this.isScroll = true;
             this.checkForChanges();
         } catch (error) {
             errorDebugger('MapFields', 'addNewPair', error, 'warn', 'Error in addNewPair');
         }
+    }
+
+    /**
+    * Method Name: handlePrevious / handleNext / handlePageChange / handlePageSizeChange
+    * @description: Pagination event handlers
+    */
+    handlePrevious() {
+        if (!this.isFirstPage) this.currentPage -= 1;
+    }
+
+    handleNext() {
+        if (!this.isLastPage) this.currentPage += 1;
+    }
+
+    handlePageChange(event) {
+        this.currentPage = parseInt(event.currentTarget.dataset.id, 10);
+    }
+
+    handlePageSizeChange(event) {
+        this.pageSize = parseInt(event.target.value, 10);
+        this.currentPage = 1;
     }
 
     /**

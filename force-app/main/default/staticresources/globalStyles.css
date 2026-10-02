@@ -609,7 +609,7 @@
 }
 
 .exp-table-content th span {
-  margin: 0 5px;
+  margin: 0 5px;
 }
 
 /* TABLE RELATED CSS END HERE */
@@ -872,3 +872,81 @@
 }
 
 /* MULISH FONT CSS END HERE*/
+
+/* ===== ACCORDION STYLES ===== */
+@keyframes expAccordionReveal {
+    0% {
+        opacity: 0;
+        clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+        transform: translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        transform: translateY(0);
+    }
+}
+
+.exp-accordion-wrapper {
+    margin: 12px;
+    padding: 16px;
+    background-color: #f6f9fc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    animation: expAccordionReveal 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: top;
+}
+
+.exp-accordion-wrapper .exp-table-tr-cls .exp-sort-cover:hover{
+    background-color: #d4e8fb;
+    cursor: default;
+}
+
+.exp-accordion-header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.exp-accordion-title-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.exp-accordion-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0;
+}
+
+.exp-accordion-badge {
+    background-color: #dbeafe;
+    color: #1e3a8a;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.exp-accordion-table-content {
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #e5e9f2;
+}
+
+.exp-accordion-table-content .slds-table th {
+    background: rgb(211 232 251 / 1) !important;
+    color: #1e3a8a !important;
+    text-transform: uppercase;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    height: 40px !important;
+}
+
+.exp-accordion-table-content .slds-table td {
+    background: #ffffff !important;
+}

@@ -121,11 +121,32 @@ public with sharing class InstagramController {
 
     public static Boolean getUserId(String accessToken, String longRefreshToken){
         try {
+            String graphApiVersion = 'v24.0';
+            try {
+                List<OAuth_Configuration__mdt> instaConfigs = [
+                    SELECT API_Version__c
+                    FROM OAuth_Configuration__mdt
+                    WHERE DeveloperName = 'Instagram_OAuth'
+                    WITH USER_MODE
+                    LIMIT 1
+                ];
+                if (!instaConfigs.isEmpty() && String.isNotBlank(instaConfigs[0].API_Version__c)) {
+                    graphApiVersion = instaConfigs[0].API_Version__c.trim();
+                }
+            } catch (Exception e1) {
+                graphApiVersion = 'v24.0';
+            }
+            if (String.isBlank(graphApiVersion)) {
+                graphApiVersion = 'v24.0';
+            }
+            if (!graphApiVersion.toLowerCase().startsWith('v')) {
+                graphApiVersion = 'v' + graphApiVersion;
+            }
             Http http = new Http();
             HttpRequest request = new HttpRequest();
             
             request.setMethod('GET');
-            request.setEndpoint(instagramEndpoint + 'me?fields=user_id,username&access_token=' + longRefreshToken);
+            request.setEndpoint(instagramEndpoint + graphApiVersion + '/me?fields=user_id,username&access_token=' + longRefreshToken);
             
             HttpResponse response = http.send(request);
             

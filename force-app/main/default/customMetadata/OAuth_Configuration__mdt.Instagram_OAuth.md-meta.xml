@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Instagram OAuth</label>
+    <protected>false</protected>
+    <values>
+        <field>Client_Id__c</field>
+        <value xsi:type="xsd:string">EXP_CLIENT_ID</value>
+    </values>
+    <values>
+        <field>Client_Secret__c</field>
+        <value xsi:type="xsd:string">EXP_CLIENT_SECRET</value>
+    </values>
+    <values>
+        <field>Redirect_URI__c</field>
+        <value xsi:type="xsd:string">https://estatexpert-dev-ed.develop.my.salesforce-sites.com/MVEX__InstagramAccessToken</value>
+    </values>
+    <values>
+        <field>Token_Endpoint__c</field>
+        <value xsi:type="xsd:string">https://api.instagram.com/oauth/access_token</value>
+    </values>
+    <values>
+        <field>Authorization_Endpoint__c</field>
+        <value xsi:type="xsd:string">https://www.instagram.com/oauth/authorize</value>
+    </values>
+    <values>
+        <field>Scope__c</field>
+        <value xsi:type="xsd:string">business_basic,business_manage_messages,business_manage_comments,business_content_publish</value>
+    </values>
+    <values>
+        <field>Access_Token__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Refresh_Token__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>User_Id__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Username__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Connected_Date__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Email__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>API_Version__c</field>
+        <value xsi:type="xsd:string">v24.0</value>
+    </values>
+</CustomMetadata>

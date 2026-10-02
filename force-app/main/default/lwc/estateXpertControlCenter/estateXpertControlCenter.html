@@ -137,6 +137,15 @@
                                             <span class="card-tag integration">Ads</span>
                                         </div>
                                     </div>
+
+                                    <div class="feature-card" onclick={googleAdsMethod} data-title="Google Ads" data-desc="The &quot;Google Ads&quot; integration allows you to automatically capture leads from Google advertising accounts directly into Salesforce." onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
+                                        <img src="/resource/MVEX__controlcenterimg/google.png" alt="Google Ads" class="card-icon" draggable="false" />
+                                        <div class="card-content">
+                                            <h3 class="card-title">Google Ads</h3>
+                                            <p class="card-description">Google Lead Forms</p>
+                                            <span class="card-tag integration">Ads</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -163,6 +172,9 @@
                                     portal-name={portalName} portal-icon-url={portalIconUrl}
                                     portal-status={portalStatus} is-x-m-l-for-p-f={isXMLForPF}>
                                 </c-portal-mapping-landing-page>
+                            </template>
+                            <template if:true={isGoogleAdsMappingComponent}>
+                                <c-google-ads-form-mapping></c-google-ads-form-mapping>
                             </template>
                         </div>
                     </template>

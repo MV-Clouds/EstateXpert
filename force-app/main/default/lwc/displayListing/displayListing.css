@@ -3,31 +3,57 @@
 }
 
 .listing-main-card {
-    min-height: 550px;
-    gap: 1rem;
-    display: flex;
-    flex-direction: column;
     background: #f5f7fa;
     padding: 1rem;
     border-radius: 8px;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-.filter-search-container {
+.sub-main-header-css {
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    background-color: white;
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-    border-left: 4px solid #0176D3;
-    gap: 10px;
+}
+
+.header-block-css {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+    font-size: 18px;
+    font-weight: 500;
+    text-align: left;
+    color: #0f1419;
+    letter-spacing: 0.3px;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.listing-main-card .exp-main-content-cls {
+    min-height: 350px;
+    max-height: 580px;
 }
 
 .btn-container {
     display: flex;
     gap: 1rem;
+}
+
+.exp-results-info {
+    margin-left: 15px;
+    color: #666;
+}
+
+.open-mapping-div {
+    position: relative;
 }
 
 .main-map {
@@ -121,8 +147,8 @@
 }
 
 .tab-btns ul .tab-div {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 22px;
+    height: 22px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -149,7 +175,6 @@
 }
 
 .tab-btns ul .tab-div svg {
-    width: 1rem;
     fill: black;
 }
 
@@ -440,10 +465,44 @@
         box-shadow: 2px -2px 4px rgba(0, 0, 0, 0.05);
     }
 
+    .sub-main-header-css {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .header-buttons {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
     .header-actions {
         display: flex;
-        gap: 10px;
+        gap: 16px;
         width: 100%;
+    }
+
+    .open-mapping-div {
+        justify-content: space-around;
+        display: flex;
+    }
+
+    .exp-pagination-div {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .exp-pagination-right {
+        margin-left: 0;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .exp-page-size-container {
+        justify-content: center;
     }
 
     .add-condition-icon-btn {
@@ -557,5 +616,12 @@
 }
 
 .exp-table-content .slds-table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     max-width: 12rem;
+}
+
+.exp-table-content .slds-table_resizable-cols thead th {
+    width: 12rem;
 }

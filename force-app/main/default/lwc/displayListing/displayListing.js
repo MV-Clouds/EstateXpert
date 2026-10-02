@@ -26,7 +26,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
     @track currentPage = 1;
     @track searchTerm = '';
     @track isLoading = false;
-    @track pageSize = 9;
+    @track pageSize = 20;
     @track bathroom_icon = propertyIcons + '/PropertyIcons/Bathroom.png';
     @track bedroom_icon = propertyIcons + '/PropertyIcons/Bedroom.png';
     @track filteredListingData = [];
@@ -306,6 +306,22 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         return Math.min(this.currentPage * this.pageSize, this.totalItems);
     }
 
+    get recordCountInfo() {
+        if (this.totalItems === 0) {
+            return 'Showing 0 records';
+        }
+        return `Showing ${this.startIndex} - ${this.endIndex} of ${this.totalItems}`;
+    }
+
+    get pageSizeOptions() {
+        const sizes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+        return sizes.map(size => ({
+            label: String(size),
+            value: size,
+            isSelected: this.pageSize === size
+        }));
+    }
+
     /**
     * Method Name : pageNumbers
     * @description : set the list for page number in pagination.
@@ -326,7 +342,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                     pages.push({
                         number: i,
                         isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
                     });
                 }
             } else {
@@ -334,7 +350,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 pages.push({
                     number: 1,
                     isEllipsis: false,
-                    className: `pagination-button ${currentPage === 1 ? 'active' : ''}`
+                    className: `exp-pagination-button ${currentPage === 1 ? 'active' : ''}`
                 });
 
                 if (currentPage > 3) {
@@ -350,7 +366,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                     pages.push({
                         number: i,
                         isEllipsis: false,
-                        className: `pagination-button ${i === currentPage ? 'active' : ''}`
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
                     });
                 }
 
@@ -363,7 +379,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                 pages.push({
                     number: totalPages,
                     isEllipsis: false,
-                    className: `pagination-button ${currentPage === totalPages ? 'active' : ''}`
+                    className: `exp-pagination-button ${currentPage === totalPages ? 'active' : ''}`
                 });
             }
 
@@ -527,7 +543,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                                 sortable: true
                             })),
                         ];
-                        this.pageSize = parseInt(result.metadataRecords[1], 10) || this.pageSize;
                     } catch (e) {
                         console.error('Error parsing listing configuration:', e);
                         this.listingColumns = this.defaultColumns;
@@ -1208,6 +1223,24 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         }
     }
 
+    scrollToTop() {
+        try {
+            const tableContainer = this.template.querySelector('.exp-table-content');
+            if (tableContainer) {
+                tableContainer.scrollTop = 0;
+            }
+        } catch (error) {
+            console.error('Error scrolling to top:', error);
+        }
+    }
+
+    handlePageSizeChange(event) {
+        this.pageSize = parseInt(event.target.value, 10);
+        this.currentPage = 1;
+        this.updateMapMarkers();
+        this.scrollToTop();
+    }
+
     /**
     * Method Name : handlePrevious
     * @description : handle the previous button click in the pagination.
@@ -1218,6 +1251,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         if (this.currentPage > 1) {
             this.currentPage--;
             this.updateMapMarkers();
+            this.scrollToTop();
         }
     }
 
@@ -1231,6 +1265,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         if (this.currentPage < this.totalPages) {
             this.currentPage++;
             this.updateMapMarkers();
+            this.scrollToTop();
         }
     }
 
@@ -1288,6 +1323,7 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
         if (selectedPage !== this.currentPage) {
             this.currentPage = selectedPage;
             this.updateMapMarkers();
+            this.scrollToTop();
         }
     }
 
@@ -2134,7 +2170,6 @@ export default class DisplayListing extends NavigationMixin(LightningElement) {
                                 sortable: true
                             })),
                         ];
-                        this.pageSize = parseInt(result.metadataRecords[1], 10) || this.pageSize;
                     } catch (e) {
                         console.error('Error parsing listing configuration:', e);
                         this.listingColumns = this.defaultColumns;

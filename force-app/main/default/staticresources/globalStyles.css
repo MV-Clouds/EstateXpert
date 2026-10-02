@@ -757,7 +757,6 @@
 .exp-accordion-wrapper {
     margin: 12px;
     padding: 16px;
-    background-color: #f6f9fc;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
     animation: expAccordionReveal 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -806,11 +805,11 @@
 }
 
 .exp-accordion-table-content .slds-table th {
-    background: rgb(211 232 251 / 1) !important;
+    background:#f0f8ff !important;
     color: #1e3a8a !important;
     text-transform: uppercase;
     font-size: 12px !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     height: 40px !important;
 }
 

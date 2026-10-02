@@ -61,6 +61,7 @@ export default class MetaAdsFormMapping extends LightningElement {
     @track failedLeads = [];
     @track isRetrying = false;
     selectedFailedLeadsFormId = '';
+    pendingRetryIds = [];  // IDs pending retry after mapping edit
     
     // ─── GETTERS ─────────────────────────────────────────────────────────────
 
@@ -231,7 +232,7 @@ export default class MetaAdsFormMapping extends LightningElement {
         try {
             if (!this.failedLeads) return true;
             const selectedCount = this.failedLeads.filter(l => l.selected).length;
-            return selectedCount !== 1 || this.isRetrying;
+            return selectedCount === 0 || this.isRetrying;
         } catch (e) { console.error(e); return true; }
     }
 
@@ -247,6 +248,42 @@ export default class MetaAdsFormMapping extends LightningElement {
      */
     get isCopyWebhookDisabled() {
         try { return !this.selectedSite; } catch (e) { console.error(e); return true; }
+    }
+
+    /** 
+     * @description Gets the label for the failed summary 
+     */
+    get failedSummary() {
+        try {
+            const total = this.failedLeads.length;
+            const selected = this.failedLeads.filter(l => l.selected).length;
+            return `${total} failed lead(s), ${selected} selected`;
+        } catch (e) { console.error(e); return ''; }
+    }
+
+    /** 
+     * @description Checks if there is a pending retry (after edit mapping) 
+     */
+    get hasPendingRetry() {
+        try { return this.pendingRetryIds.length > 0; } catch (e) { return false; }
+    }
+
+    /** 
+     * @description Gets the save button label depending on pending retry state 
+     */
+    get saveButtonLabel() {
+        try {
+            return this.hasPendingRetry ? `Save & Retry (${this.pendingRetryIds.length})` : 'Save Mapping';
+        } catch (e) { return 'Save Mapping'; }
+    }
+
+    /** 
+     * @description Gets the retry banner text 
+     */
+    get retryBannerText() {
+        try {
+            return `Fixing mapping for this form. After saving, ${this.pendingRetryIds.length} selected failed lead(s) will be retried automatically.`;
+        } catch (e) { return ''; }
     }
 
     /** 
@@ -421,10 +458,16 @@ export default class MetaAdsFormMapping extends LightningElement {
     }
 
     /**
-     * @description Closes the mapping modal
+     * @description Closes the mapping modal. If a pending retry was in progress, reopen the failed leads modal.
      */
     closeModal() {
         this.isModalOpen = false;
+        this.isEditingMode = false;
+        // If user cancels out of edit-mapping-and-retry, go back to failed leads modal
+        if (this.pendingRetryIds.length > 0) {
+            this.pendingRetryIds = [];
+            this.isFailedLeadsModalOpen = true;
+        }
     }
 
     async handlePageSelection(event) {
@@ -931,9 +974,38 @@ export default class MetaAdsFormMapping extends LightningElement {
                 const result = await saveMappingApex({ mappingJson: jsonStr, pageId: this.selectedPageId });
                 
                 if (result && result.success) {
-                    this.showToast('Success', 'Form mapping saved and webhook subscribed successfully.', 'success');
                     this.buildTableData();
-                    this.closeModal();
+                    this.isModalOpen = false;
+                    this.isEditingMode = false;
+
+                    if (this.pendingRetryIds.length > 0) {
+                        // Bulk retry the selected leads with the updated mapping
+                        const retryIds = [...this.pendingRetryIds];
+                        this.pendingRetryIds = [];
+                        this.isFailedLeadsModalOpen = true;
+                        this.isRetrying = true;
+                        try {
+                            const results = await retryMultipleFailedLeads({ errorRecordIds: retryIds });
+                            let successCount = 0;
+                            let errorCount = 0;
+                            for (let id in results) {
+                                if (results[id] === 'Success') successCount++;
+                                else errorCount++;
+                            }
+                            await this.loadFailedLeads();
+                            if (errorCount === 0) {
+                                this.showToast('Success', `Mapping saved & ${successCount} lead(s) retried successfully.`, 'success');
+                            } else {
+                                this.showToast('Retry Completed', `${successCount} success(es), ${errorCount} failure(s). Check the list for details.`, 'warning');
+                            }
+                        } catch (err) {
+                            this.showToast('Error', err.body ? err.body.message : err.message, 'error');
+                        } finally {
+                            this.isRetrying = false;
+                        }
+                    } else {
+                        this.showToast('Success', 'Form mapping saved and webhook subscribed successfully.', 'success');
+                    }
                 } else {
                     this.showToast('Error', result.message || 'Error saving mapping.', 'error');
                 }
@@ -1195,6 +1267,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             this.failedWizardStep = 1;
             this.activeFailedLeadId = null;
             this.failedLeadDataMap = {};
+            this.pendingRetryIds = [];
             this.isFailedLeadsModalOpen = true;
             await this.loadFailedLeads();
         } catch (e) {
@@ -1212,6 +1285,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             this.failedWizardStep = 1;
             this.activeFailedLeadId = null;
             this.failedLeadDataMap = {};
+            this.pendingRetryIds = [];
         } catch (e) {
             console.error('Error in closeFailedLeadsModal', e);
         }
@@ -1346,33 +1420,20 @@ export default class MetaAdsFormMapping extends LightningElement {
     }
 
     /**
-     * @description Transitions to the second step of the failed leads wizard to review its data.
-     * @param {Event} event 
+     * @description Transitions to the edit mapping step to fix and retry multiple selected failed leads.
      */
-    async reviewSelectedFailedLead(event) {
+    async reviewSelectedFailedLead() {
         try {
-            const selected = this.failedLeads.find(l => l.selected);
-            if (!selected) return;
+            const selectedIds = this.failedLeads.filter(l => l.selected).map(l => l.Id);
+            if (!selectedIds.length) return;
 
-            const leadId = selected.Id;
-            this.activeFailedLeadId = leadId;
-            this.failedWizardStep = 2;
-            
+            this.pendingRetryIds = selectedIds;
+            this.isFailedLeadsModalOpen = false;
+
+            // Use first selected lead's payload to determine pageId / formId context
+            const firstLead = this.failedLeads.find(l => l.selected);
             let payload = {};
-            try {
-                payload = JSON.parse(selected.Body);
-            } catch (e) {
-                console.error('Failed to parse error body', e);
-            }
-
-            this.failedLeadDataMap = {};
-            if (payload.leadData && payload.leadData.field_data) {
-                payload.leadData.field_data.forEach(field => {
-                    if (field.name && field.values && field.values.length > 0) {
-                        this.failedLeadDataMap[field.name] = field.values[0];
-                    }
-                });
-            }
+            try { payload = JSON.parse(firstLead.Body); } catch (e) {}
 
             let pageId = payload.pageId;
             if (!pageId) {
@@ -1383,7 +1444,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                     }
                 }
             }
-            
+
             this.selectedPageId = pageId;
             this.selectedFormId = this.selectedFailedLeadsFormId;
 
@@ -1402,17 +1463,10 @@ export default class MetaAdsFormMapping extends LightningElement {
             }
 
             this.handleFormSelection({ detail: { value: this.selectedFormId } });
-            
-            this.currentFormFields = this.currentFormFields.map(f => {
-                let leadValue = '';
-                if (f.sourceType === SOURCE_META && f.metaField) {
-                    leadValue = this.failedLeadDataMap[f.metaField] || '';
-                }
-                return {
-                    ...f,
-                    failedLeadValue: leadValue
-                };
-            });
+
+            // Open the main mapping modal with edit mode
+            this.isEditingMode = true;
+            this.isModalOpen = true;
         } catch (e) {
             console.error('Error in reviewSelectedFailedLead', e);
         }

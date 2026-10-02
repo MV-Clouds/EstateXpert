@@ -139,25 +139,13 @@
                                                                         </td>
                                                                         <td class="slds-cell_action-mode align-center" role="gridcell">
                                                                             <div class="slds-truncate center-trancate-text action-buttons-wrapper">
-                                                                                <div class="action-icon-container" data-id={form.id} onclick={handleEditRow} title="Edit Mapping">
-                                                                                    <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                <button class="action-menu-btn" data-form-id={form.formId} data-id={form.id} onclick={openActionDropdown} title="More Actions">
+                                                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                                        <circle cx="12" cy="5" r="2"></circle>
+                                                                                        <circle cx="12" cy="12" r="2"></circle>
+                                                                                        <circle cx="12" cy="19" r="2"></circle>
                                                                                     </svg>
-                                                                                </div>
-                                                                                <div class="action-icon-container" data-id={form.id} onclick={handleDeleteRow} title="Delete Mapping">
-                                                                                    <svg class="action-arrow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                                        <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                                                                                    </svg>
-                                                                                </div>
-                                                                                <div class="action-icon-container" data-id={form.formId} onclick={openFailedLeadsModal} title="Failed Leads">
-                                                                                    <svg class="action-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                                                        <circle cx="12" cy="12" r="10"></circle>
-                                                                                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                                                                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                                                                                    </svg>
-                                                                                </div>
+                                                                                </button>
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -457,10 +445,10 @@
 
                         <template if:true={isFailedWizardStep1}>
                         <template if:true={failedLeads.length}>
-                            <div class="table-content">
+                            <div class="exp-table-content table-content">
                                 <table class="slds-table full-width">
                                     <thead>
-                                        <tr class="table_tr_cls">
+                                        <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
                                             <th class="col-checkbox header-cell-padding align-center">
                                                 <lightning-input type="checkbox" variant="label-hidden" label="Select all" onchange={handleSelectAllFailedLeads} checked={isAllFailedLeadsSelected}></lightning-input>
                                             </th>
@@ -536,7 +524,7 @@
                             <template if:true={hasSiteOptions}>
                                 <lightning-combobox name="webhookSite" label="" value={selectedSite} placeholder="-- Choose a Site --" options={siteOptions} onchange={handleSiteChange} variant="label-hidden" class="custom-combobox"></lightning-combobox>
                                 <template if:true={selectedSite}>
-                                    <div class="webhook-endpoint" style="margin-top: 10px; font-weight: bold; word-break: break-all;">
+                                    <div class="webhook-endpoint">
                                         {webhookEndpointPreview}
                                     </div>
                                 </template>
@@ -547,13 +535,31 @@
                         </div>
                     </div>
                     <div class="footerbtns">
-                        <button class="exp-white-btn-css blue-btn-css" style="background-color: transparent; color: #1877F2; border: 1px solid #1877F2;" onclick={closeWebhookModal}>Cancel</button>
+                        <button class="exp-white-btn-css blue-btn-css" onclick={closeWebhookModal}>Cancel</button>
                         <button class="blue-btn-css" disabled={isCopyWebhookDisabled} onclick={handleCopyWebhook}>Copy Webhook URL</button>
                     </div>
                 </div>
             </div>
         </section>
         <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
+
+    <!-- Custom Action Dropdown Menu -->
+    <template if:true={actionDropdown.isOpen}>
+        <div class="custom-action-dropdown slds-fade-in-open" style={actionDropdownStyle} onclick={stopPropagation}>
+            <div class="custom-dropdown-item" onclick={handleEditFromDropdown}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                Edit Mapping
+            </div>
+            <div class="custom-dropdown-item" onclick={handleFailedLeadsFromDropdown}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                Failed Leads
+            </div>
+            <div class="custom-dropdown-item custom-dropdown-delete-item" onclick={handleDeleteFromDropdown}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" height="16" width="16"><path d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z" stroke-width="0.0625"></path></svg>
+                Delete Mapping
+            </div>
+        </div>
     </template>
 
 </template>

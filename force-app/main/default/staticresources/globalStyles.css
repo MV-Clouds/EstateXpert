@@ -816,3 +816,16 @@
 .exp-accordion-table-content .slds-table td {
     background: #ffffff !important;
 }
+
+/* Hovering anywhere inside the accordion must not tint the nested table; only the hovered inner row. */
+.exp-table-content table tbody tr.accordion-row:hover td.no-padding-td {
+    background-color: transparent !important;
+}
+
+.exp-table-content table tbody tr.accordion-row:hover .exp-accordion-table-content td {
+    background-color: #ffffff !important;
+}
+
+.exp-table-content table tbody tr.accordion-row .exp-accordion-table-content tbody tr:hover > td {
+    background-color: #ebf3f6 !important;
+}

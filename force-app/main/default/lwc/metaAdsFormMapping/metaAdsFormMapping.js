@@ -48,6 +48,14 @@ export default class MetaAdsFormMapping extends LightningElement {
     @track currentFormFields = [];   // [{ key, label, value, options }]
     @track formsLoaded = false;      // true once forms have been fetched for selected page
     @track availableSalesforceFields = [];
+
+    @track actionDropdown = {
+        isOpen: false,
+        id: null,
+        formId: null,
+        top: 0,
+        left: 0
+    };
     @track showAddField = false;
     @track selectedAdditionalField = '';
 
@@ -295,6 +303,10 @@ export default class MetaAdsFormMapping extends LightningElement {
             let base = this.selectedSite.replace(/\/+$/, '');
             return `${base}/services/apexrest/MVEX/PAGE/webhooks/`;
         } catch (e) { console.error(e); return ''; }
+    }
+
+    get actionDropdownStyle() {
+        return `position: fixed; top: ${this.actionDropdown.top}px; left: ${this.actionDropdown.left}px; z-index: 9999;`;
     }
 
     // ─── LIFECYCLE HOOKS ─────────────────────────────────────────────────────
@@ -1035,6 +1047,54 @@ export default class MetaAdsFormMapping extends LightningElement {
         } catch (e) {
             console.error('Error in handleToggleRow', e);
         }
+    }
+
+    stopPropagation(event) {
+        event.stopPropagation();
+    }
+
+    openActionDropdown(event) {
+        event.stopPropagation();
+        
+        const id = event.currentTarget.dataset.id;
+        const formId = event.currentTarget.dataset.formId;
+        const rect = event.currentTarget.getBoundingClientRect();
+        
+        this.actionDropdown = {
+            isOpen: true,
+            id: id,
+            formId: formId,
+            top: rect.bottom + 4,
+            left: rect.left - 130 
+        };
+        
+        setTimeout(() => {
+            this.dropdownCloseHandler = this.closeActionDropdown.bind(this);
+            document.addEventListener('click', this.dropdownCloseHandler);
+        }, 0);
+    }
+
+    closeActionDropdown() {
+        this.actionDropdown.isOpen = false;
+        document.removeEventListener('click', this.dropdownCloseHandler);
+    }
+
+    handleEditFromDropdown(event) {
+        this.closeActionDropdown();
+        const fakeEvent = { currentTarget: { dataset: { id: this.actionDropdown.id } } };
+        this.handleEditRow(fakeEvent);
+    }
+
+    handleDeleteFromDropdown(event) {
+        this.closeActionDropdown();
+        const fakeEvent = { currentTarget: { dataset: { id: this.actionDropdown.id } } };
+        this.handleDeleteRow(fakeEvent);
+    }
+
+    handleFailedLeadsFromDropdown(event) {
+        this.closeActionDropdown();
+        const fakeEvent = { currentTarget: { dataset: { id: this.actionDropdown.formId } } };
+        this.openFailedLeadsModal(fakeEvent);
     }
 
     /**

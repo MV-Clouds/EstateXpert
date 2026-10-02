@@ -130,6 +130,32 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     }
 
     /**
+     * Method Name: isGoogleAdsMappingComponent
+     * @description: Checks if GoogleAdsMapping component is selected
+     * Date: 1/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get isGoogleAdsMappingComponent() {
+        return this.selectedComponent === 'googleAdsMapping';
+    }
+
+    /**
+     * Method Name: googleAdsMethod
+     * @description: Opens the Google Ads Mapping component
+     * Date: 1/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    
+    googleAdsMethod(event) {
+        event.preventDefault();
+        this.openComponent(
+            'googleAdsMapping', 
+            'Google Ads Mapping',
+            'Configure form field mapping for Google Ads to automatically capture leads.'
+        );
+    }
+
+    /**
      * Method Name: hasParentComponent
      * @description: Checks if there is a parent component set for breadcrumbs
      * Date: 23/09/2026

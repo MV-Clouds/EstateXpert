@@ -12,24 +12,24 @@ public with sharing class MetaAdsTokenController {
 
     public Boolean isConnected { 
         get { 
-            MVEX__OAuth_Configuration__mdt config = getConfig();
-            return config != null && String.isNotBlank(config.MVEX__Access_Token__c); 
+            OAuth_Configuration__mdt config = getConfig();
+            return config != null && String.isNotBlank(config.Access_Token__c); 
         } 
     }
 
-    public String metaAppId    { get { return getConfig()?.MVEX__Client_Id__c; } }
-    public String metaConfigId { get { return getConfig()?.MVEX__Config_Id__c; } }
-    public String apiVersion   { get { return getConfig()?.MVEX__API_Version__c; } }
-    public String apiEndpoint  { get { return getConfig()?.MVEX__Base_URL__c; } }
+    public String metaAppId    { get { return getConfig()?.Client_Id__c; } }
+    public String metaConfigId { get { return getConfig()?.Config_Id__c; } }
+    public String apiVersion   { get { return getConfig()?.API_Version__c; } }
+    public String apiEndpoint  { get { return getConfig()?.Base_URL__c; } }
 
     /**
     * Method Name : getConfig
     * @description : Gets the OAuth Configuration metadata for Meta Ads.
-    * @return MVEX__OAuth_Configuration__mdt
+    * @return OAuth_Configuration__mdt
     */
-    public static MVEX__OAuth_Configuration__mdt getConfig() {
+    public static OAuth_Configuration__mdt getConfig() {
         try {
-            List<MVEX__OAuth_Configuration__mdt> configs = [SELECT MVEX__Access_Token__c, MVEX__Client_Id__c, MVEX__Client_Secret__c, MVEX__Config_Id__c, MVEX__Base_URL__c, MVEX__API_Version__c, MVEX__Authorization_Endpoint__c, MVEX__Client_App_Id__c FROM MVEX__OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1];
+            List<OAuth_Configuration__mdt> configs = [SELECT Access_Token__c, Client_Id__c, Client_Secret__c, Config_Id__c, Base_URL__c, API_Version__c, Authorization_Endpoint__c, Client_App_Id__c, Account_Name__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1];
             return configs.isEmpty() ? null : configs[0];
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'MetaAdsTokenController', 'getConfig', e.getMessage());
@@ -68,12 +68,14 @@ public with sharing class MetaAdsTokenController {
                 return resultMap;
             }
 
-            saveTokenSettings(sysUserToken, clientAppId);
+            String accountName = fetchAccountName(sysUserToken, config.API_Version__c, config.Base_URL__c);
+
+            saveTokenSettings(sysUserToken, clientAppId, accountName);
 
             resultMap.put('system_user_token', sysUserToken);
             resultMap.put('client_app_id', clientAppId);
             resultMap.put('success', true);
-            resultMap.put('account_name', 'System User Account');
+            resultMap.put('account_name', accountName);
             return resultMap;
 
         } catch (Exception e) {
@@ -91,12 +93,12 @@ public with sharing class MetaAdsTokenController {
     * @param config : OAuth config
     * @return String
     */
-    private static String fetchTokenFromMeta(String authCode, MVEX__OAuth_Configuration__mdt config) {
+    private static String fetchTokenFromMeta(String authCode, OAuth_Configuration__mdt config) {
         try {
-            String appId = config.MVEX__Client_Id__c;
-            String appSecret = config.MVEX__Client_Secret__c;
-            String apiVer = config.MVEX__API_Version__c;
-            String baseUrl = config.MVEX__Base_URL__c;
+            String appId = config.Client_Id__c;
+            String appSecret = config.Client_Secret__c;
+            String apiVer = config.API_Version__c;
+            String baseUrl = config.Base_URL__c;
 
             String tokenUrl = baseUrl + '/' + apiVer + '/oauth/access_token'
                 + '?client_id='     + EncodingUtil.urlEncode(appId, 'UTF-8')
@@ -135,22 +137,29 @@ public with sharing class MetaAdsTokenController {
     * @param systemUserToken : System user token
     * @param clientAppId : Client Meta App ID
     */
-    private static void saveTokenSettings(String systemUserToken, String clientAppId) {
+    private static void saveTokenSettings(String systemUserToken, String clientAppId, String accountName) {
         try {
             Metadata.CustomMetadata customMetadata = new Metadata.CustomMetadata();
-            customMetadata.fullName = 'MVEX__OAuth_Configuration__mdt.MVEX__Meta_Ads_Config';
+            customMetadata.fullName = 'OAuth_Configuration__mdt.Meta_Ads_Config';
             customMetadata.label = 'Meta Ads Config';
 
             Metadata.CustomMetadataValue tokenField = new Metadata.CustomMetadataValue();
-            tokenField.field = 'MVEX__Access_Token__c';
+            tokenField.field = 'Access_Token__c';
             tokenField.value = systemUserToken;
             customMetadata.values.add(tokenField);
             
             if (clientAppId != null) {
                 Metadata.CustomMetadataValue appField = new Metadata.CustomMetadataValue();
-                appField.field = 'MVEX__Client_App_Id__c';
+                appField.field = 'Client_App_Id__c';
                 appField.value = clientAppId;
                 customMetadata.values.add(appField);
+            }
+            
+            if (accountName != null) {
+                Metadata.CustomMetadataValue nameField = new Metadata.CustomMetadataValue();
+                nameField.field = 'Account_Name__c';
+                nameField.value = accountName;
+                customMetadata.values.add(nameField);
             }
             
             Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
@@ -174,16 +183,16 @@ public with sharing class MetaAdsTokenController {
     public static Map<String, Object> checkConnectionStatus() {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            MVEX__OAuth_Configuration__mdt config = getConfig();
-            if (config == null || String.isBlank(config.MVEX__Access_Token__c)) {
+            OAuth_Configuration__mdt config = getConfig();
+            if (config == null || String.isBlank(config.Access_Token__c)) {
                 resultMap.put('success', false);
                 resultMap.put('message', 'Not connected.');
                 return resultMap;
             }
 
-            String clientAppId = config.MVEX__Client_App_Id__c;
+            String clientAppId = config.Client_App_Id__c;
 
-            resultMap.put('account_name', 'System User Account');
+            resultMap.put('account_name', String.isNotBlank(config.Account_Name__c) ? config.Account_Name__c : 'System User Account');
             resultMap.put('client_app_id', clientAppId);
             resultMap.put('success', true);
             
@@ -205,9 +214,9 @@ public with sharing class MetaAdsTokenController {
     public static Map<String, Object> deactivateConnection() {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            MVEX__OAuth_Configuration__mdt config = getConfig();
-            if (config != null && String.isNotBlank(config.MVEX__Access_Token__c)) {
-                saveTokenSettings(null, null); // Clear the token via Metadata API
+            OAuth_Configuration__mdt config = getConfig();
+            if (config != null && String.isNotBlank(config.Access_Token__c)) {
+                saveTokenSettings(null, null, null); // Clear the token via Metadata API
             }
             resultMap.put('success', true);
         } catch (Exception e) {
@@ -216,5 +225,35 @@ public with sharing class MetaAdsTokenController {
             resultMap.put('message', e.getMessage());
         }
         return resultMap;
+    }
+
+    /**
+    * Method Name : fetchAccountName
+    * @description : Fetches the account name from Meta API.
+    * @param token : System user token
+    * @param apiVer : API version
+    * @param baseUrl : Base URL
+    * @return String
+    */
+    private static String fetchAccountName(String token, String apiVer, String baseUrl) {
+        try {
+            Http http = new Http();
+            HttpRequest req = new HttpRequest();
+            req.setEndpoint(baseUrl + '/' + apiVer + '/me?access_token=' + token);
+            req.setMethod('GET');
+            req.setHeader('Content-Type', 'application/json');
+            req.setTimeout(10000);
+
+            HttpResponse res = http.send(req);
+            if (res.getStatusCode() == 200) {
+                Map<String, Object> body = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+                if (body.containsKey('name')) {
+                    return (String) body.get('name');
+                }
+            }
+        } catch (Exception e) {
+            System.debug('Error fetching account name: ' + e.getMessage());
+        }
+        return 'System User Account';
     }
 }

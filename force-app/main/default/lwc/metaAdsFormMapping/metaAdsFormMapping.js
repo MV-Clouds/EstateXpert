@@ -30,14 +30,20 @@ export default class MetaAdsFormMapping extends LightningElement {
     
     @track isLoading = true;
     @track tableData = [];
-    @track connectedAccountName = '';
+    @track shownTableData = [];
+    @track currentPage = 1;
+    @track pageSize = 20;
+    @track visiblePages = 5;
+    @track connectedAccountName = 'Connected';
+    @track connectedAppId = '';
+    @track actualAccountName = '';
 
     @track isModalOpen = false;
     @track isModalLoading = false;
     @track isEditingMode = false;
     @track spinnerLabel = 'Loading forms...';
 
-    @track isWebhookModalOpen = false;
+    @track isWebhookPopoverOpen = false;
     @track siteOptions = [];
     @track selectedSite = '';
 
@@ -307,8 +313,118 @@ export default class MetaAdsFormMapping extends LightningElement {
         } catch (e) { console.error(e); return ''; }
     }
 
+    /** 
+     * @description Gets the action dropdown style string
+     */
     get actionDropdownStyle() {
-        return `position: fixed; top: ${this.actionDropdown.top}px; left: ${this.actionDropdown.left}px; z-index: 9999;`;
+        try {
+            return `position: fixed; top: ${this.actionDropdown.top}px; left: ${this.actionDropdown.left}px; z-index: 9999;`;
+        } catch (e) { console.error(e); return ''; }
+    }
+
+    /** 
+     * @description Gets the total number of items for pagination 
+     */
+    get totalItems() {
+        try { return this.tableData ? this.tableData.length : 0; } catch (e) { console.error(e); return 0; }
+    }
+
+    /** 
+     * @description Gets the total number of pages for pagination 
+     */
+    get totalPages() {
+        try { return Math.ceil(this.totalItems / this.pageSize); } catch (e) { console.error(e); return 0; }
+    }
+
+    /** 
+     * @description Determines whether to show ellipsis in pagination 
+     */
+    get showEllipsis() {
+        try { return Math.ceil(this.totalItems / this.pageSize) > this.visiblePages; } catch (e) { console.error(e); return false; }
+    }
+
+    /** 
+     * @description Checks if the current page is the first page 
+     */
+    get isFirstPage() {
+        try { return this.currentPage === 1; } catch (e) { console.error(e); return true; }
+    }
+
+    /** 
+     * @description Checks if the current page is the last page 
+     */
+    get isLastPage() {
+        try { return this.currentPage === Math.ceil(this.totalItems / this.pageSize) || this.totalItems === 0; } catch (e) { console.error(e); return true; }
+    }
+
+    /** 
+     * @description Gets the start index for the current page 
+     */
+    get startIndex() {
+        try { return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1; } catch (e) { console.error(e); return 0; }
+    }
+
+    /** 
+     * @description Gets the end index for the current page 
+     */
+    get endIndex() {
+        try { return Math.min(this.currentPage * this.pageSize, this.totalItems); } catch (e) { console.error(e); return 0; }
+    }
+    
+    /** 
+     * @description Gets the record count info text to display 
+     */
+    get recordCountInfo() {
+        try {
+            if (this.totalItems === 0) return 'Showing 0 records';
+            return `Showing ${this.startIndex} - ${this.endIndex} of ${this.totalItems}`;
+        } catch (e) { console.error(e); return ''; }
+    }
+
+    /** 
+     * @description Calculates and returns the page numbers array for pagination 
+     */
+    get pageNumbers() {
+        try {
+            const totalPages = this.totalPages;
+            const currentPage = this.currentPage;
+            const visiblePages = this.visiblePages;
+            let pages = [];
+            if (totalPages <= visiblePages) {
+                for (let i = 1; i <= totalPages; i++) {
+                    pages.push({
+                        number: i,
+                        isEllipsis: false,
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
+                    });
+                }
+            } else {
+                pages.push({ number: 1, isEllipsis: false, className: `exp-pagination-button ${currentPage === 1 ? 'active' : ''}` });
+                if (currentPage > 3) pages.push({ isEllipsis: true });
+                let start = Math.max(2, currentPage - 1);
+                let end = Math.min(currentPage + 1, totalPages - 1);
+                for (let i = start; i <= end; i++) {
+                    pages.push({ number: i, isEllipsis: false, className: `exp-pagination-button ${i === currentPage ? 'active' : ''}` });
+                }
+                if (currentPage < totalPages - 2) pages.push({ isEllipsis: true });
+                pages.push({ number: totalPages, isEllipsis: false, className: `exp-pagination-button ${currentPage === totalPages ? 'active' : ''}` });
+            }
+            return pages;
+        } catch (e) { console.error(e); return []; }
+    }
+
+    /** 
+     * @description Gets the options for the page size dropdown 
+     */
+    get pageSizeOptions() {
+        try {
+            const sizes = [10, 25, 50, 100];
+            return sizes.map(size => ({
+                label: String(size),
+                value: size,
+                isSelected: this.pageSize === size
+            }));
+        } catch (e) { console.error(e); return []; }
     }
 
     // ─── LIFECYCLE HOOKS ─────────────────────────────────────────────────────
@@ -381,7 +497,9 @@ export default class MetaAdsFormMapping extends LightningElement {
 
             const statusRes = await checkConnectionStatus();
             if (statusRes && statusRes.success) {
-                this.connectedAccountName = `Connected - ${statusRes.client_app_id}`;
+                this.connectedAccountName = 'Connected';
+                this.connectedAppId = statusRes.client_app_id;
+                this.actualAccountName = statusRes.account_name;
             }
 
             this.buildTableData();
@@ -450,6 +568,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             data.push(pageRow);
         }
         this.tableData = data;
+        this.updateShownData();
     }
 
 
@@ -1051,6 +1170,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             if (row) {
                 row.isExpanded = !row.isExpanded;
             }
+            this.updateShownData();
         } catch (e) {
             console.error('Error in handleToggleRow', e);
         }
@@ -1623,31 +1743,30 @@ export default class MetaAdsFormMapping extends LightningElement {
     // --- Webhook Modal ---
 
     /**
-     * @description Opens the modal displaying webhook info and active sites.
+     * @description Toggles the webhook popover and fetches sites if needed.
      */
-    async openWebhookModal() {
+    async toggleWebhookPopover() {
+        if (this.isWebhookPopoverOpen) {
+            this.isWebhookPopoverOpen = false;
+            return;
+        }
+
         try {
-            this.isLoading = true;
-            try {
+            if (!this.siteOptions || this.siteOptions.length === 0) {
+                this.isLoading = true;
                 const sites = await getActiveSites();
                 this.siteOptions = (sites || []).map(s => ({ label: s.label, value: s.value }));
-                this.selectedSite = '';
-                this.isWebhookModalOpen = true;
-            } catch (e) {
-                this.showToast('Error', 'Failed to fetch Force.com sites.', 'error');
-            } finally {
-                this.isLoading = false;
+                if (this.siteOptions.length > 0) {
+                    this.selectedSite = this.siteOptions[0].value;
+                }
             }
+            this.isWebhookPopoverOpen = true;
         } catch (e) {
-            console.error('Error in openWebhookModal', e);
+            console.error('Error in toggleWebhookPopover', e);
+            this.showToast('Error', 'Failed to fetch Force.com sites.', 'error');
+        } finally {
+            this.isLoading = false;
         }
-    }
-
-    /**
-     * @description Closes the webhook modal.
-     */
-    closeWebhookModal() {
-        this.isWebhookModalOpen = false;
     }
 
     /**
@@ -1669,12 +1788,15 @@ export default class MetaAdsFormMapping extends LightningElement {
                 navigator.clipboard.writeText(this.webhookEndpointPreview)
                     .then(() => {
                         this.showToast('Success', 'Webhook URL copied to clipboard!', 'success');
+                        this.isWebhookPopoverOpen = false;
                     })
                     .catch(err => {
                         this.fallbackCopyTextToClipboard(this.webhookEndpointPreview);
+                        this.isWebhookPopoverOpen = false;
                     });
             } else {
                 this.fallbackCopyTextToClipboard(this.webhookEndpointPreview);
+                this.isWebhookPopoverOpen = false;
             }
         } catch (e) {
             console.error('Error in handleCopyWebhook', e);
@@ -1702,6 +1824,98 @@ export default class MetaAdsFormMapping extends LightningElement {
             document.body.removeChild(textArea);
         } catch (e) {
             console.error('Error in fallbackCopyTextToClipboard', e);
+        }
+    }
+
+    // --- Pagination Logic ---
+
+    /**
+     * @description Updates the shown data in the table based on the current page and page size
+     */
+    updateShownData() {
+        try {
+            const startIndex = (this.currentPage - 1) * this.pageSize;
+            const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
+            this.shownTableData = this.tableData.slice(startIndex, endIndex);
+        } catch (e) {
+            console.error('Error in updateShownData', e);
+        }
+    }
+
+    /**
+     * @description Scrolls to the top of the table div
+     */
+    scrollToTop() {
+        try {
+            const tableDiv = this.template.querySelector('.meta-table-content') || this.template.querySelector('.exp-table-content');
+            if (tableDiv) {
+                tableDiv.scrollTop = 0;
+            }
+        } catch (error) {
+            console.error('Error in scrollToTop', error);
+        }
+    }
+
+    /**
+     * @description Handles clicking the previous page button
+     */
+    handlePrevious() {
+        try {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+                this.updateShownData();
+                this.scrollToTop();
+            }
+        } catch (e) {
+            console.error('Error in handlePrevious', e);
+        }
+    }
+
+    /**
+     * @description Handles clicking the next page button
+     */
+    handleNext() {
+        try {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+                this.updateShownData();
+                this.scrollToTop();
+            }
+        } catch (e) {
+            console.error('Error in handleNext', e);
+        }
+    }
+
+    /**
+     * @description Handles direct clicking on a page number
+     */
+    handlePageChange(event) {
+        try {
+            const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
+            if (selectedPage !== this.currentPage) {
+                this.currentPage = selectedPage;
+                this.updateShownData();
+                this.scrollToTop();
+            }
+        } catch (e) {
+            console.error('Error in handlePageChange', e);
+        }
+    }
+
+    /**
+     * @description Handles changing the page size limit
+     */
+    handlePageSizeChange(event) {
+        try {
+            const value = parseInt(event.target.value, 10);
+            if (!isNaN(value) && this.pageSize !== value) {
+                this.pageSize = value;
+                this.currentPage = 1;
+                this.updateShownData();
+                this.scrollToTop();
+            }
+        } catch (e) {
+            console.error('Error in handlePageSizeChange', e);
         }
     }
 }

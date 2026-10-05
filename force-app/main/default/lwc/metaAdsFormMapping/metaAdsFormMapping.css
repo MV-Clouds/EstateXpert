@@ -913,3 +913,290 @@
     background-color: #10b981;
     border-radius: 50%;
 }
+
+/* Meta Account Card CSS */
+.meta-account-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.meta-account-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+}
+
+.meta-account-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.meta-icon-container {
+    width: 48px;
+    height: 48px;
+    background: #eef2ff;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.meta-account-titles {
+    display: flex;
+    flex-direction: column;
+}
+
+.meta-account-name-row {
+    display: flex;
+    align-items: center;
+}
+
+.meta-account-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.meta-account-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.meta-account-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.disconnect-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    color: #dc2626;
+    border: 1px solid #dc2626;
+    border-radius: 6px;
+    padding: 0 16px;
+    height: 30px;
+    min-height: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.disconnect-btn:hover {
+    background: #fef2f2;
+}
+
+.action-outline-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 0 16px;
+    height: 30px;
+    min-height: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.action-outline-btn:hover {
+    background: #f9fafb;
+    color: #111827;
+}
+
+.meta-account-details {
+    display: flex;
+    padding: 0 16px 16px 16px;
+    gap: 16px;
+}
+
+.meta-detail-col {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 12px 16px;
+    flex: 1;
+}
+
+.meta-detail-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.meta-detail-value {
+    font-size: 15px;
+    color: #111827;
+    font-weight: 500;
+}
+
+/* Webhook Popover Styles */
+.webhook-popover {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 340px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    padding: 16px;
+    z-index: 100;
+    text-align: left;
+}
+
+.webhook-popover::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 48px;
+    width: 10px;
+    height: 10px;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    border-left: 1px solid #e5e7eb;
+    transform: rotate(45deg);
+}
+
+.webhook-endpoint-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.webhook-endpoint-box {
+    display: flex;
+    align-items: center;
+    background-color: #f0fdf4; /* A light grayish blue is in the image, maybe #f0fdf4 or #eff6ff */
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.webhook-endpoint-url {
+    font-family: monospace;
+    font-size: 13px;
+    color: #374151;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.copy-url-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    background-color: #0176D3;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.copy-url-btn:hover {
+    background-color: #015ba7;
+}
+
+.copy-url-btn:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.popover-combobox {
+    margin-bottom: 12px;
+}
+
+
+/* Webhook Popover CSS */
+.webhook-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 320px;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    padding: 16px;
+    z-index: 100;
+}
+
+.webhook-popover-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.webhook-url-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #f0f9ff;
+    border: 1px solid #e0f2fe;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+}
+
+.webhook-url-text {
+    font-size: 13px;
+    color: #374151;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    white-space: nowrap;
+}
+
+.webhook-copy-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #0176D3;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    height: 30px;
+}
+
+.webhook-copy-btn:hover {
+    background-color: #015ba7;
+}
+
+.webhook-copy-btn:active {
+    background-color: #014486;
+}

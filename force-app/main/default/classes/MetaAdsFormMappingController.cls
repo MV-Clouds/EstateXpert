@@ -17,18 +17,18 @@ public with sharing class MetaAdsFormMappingController {
     public static Map<String, Object> getConnectedPages() {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            List<MVEX__OAuth_Configuration__mdt> tokenConfigs = [SELECT MVEX__Access_Token__c, MVEX__API_Version__c, MVEX__Base_URL__c, MVEX__Client_App_Id__c FROM MVEX__OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' WITH USER_MODE LIMIT 1];
-            MVEX__OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
-            if (tokenConfig == null || String.isBlank(tokenConfig.MVEX__Access_Token__c)) {
+            List<OAuth_Configuration__mdt> tokenConfigs = [SELECT Access_Token__c, API_Version__c, Base_URL__c, Client_App_Id__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' WITH USER_MODE LIMIT 1];
+            OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
+            if (tokenConfig == null || String.isBlank(tokenConfig.Access_Token__c)) {
                 resultMap.put('success', false);
                 resultMap.put('message', 'Meta Ads is not connected.');
                 return resultMap;
             }
 
             // Read directly from metadata — no manipulation
-            String accessToken     = tokenConfig.MVEX__Access_Token__c;
-            String graphApiVersion = tokenConfig.MVEX__API_Version__c;
-            String graphBaseUrl    = tokenConfig.MVEX__Base_URL__c;
+            String accessToken     = tokenConfig.Access_Token__c;
+            String graphApiVersion = tokenConfig.API_Version__c;
+            String graphBaseUrl    = tokenConfig.Base_URL__c;
 
             Http http = new Http();
             HttpRequest pageReq = new HttpRequest();
@@ -80,19 +80,19 @@ public with sharing class MetaAdsFormMappingController {
     public static Map<String, Object> getLeadForms(String pageId) {
         Map<String, Object> resultMap = new Map<String, Object>();
         try {
-            List<MVEX__OAuth_Configuration__mdt> tokenConfigs = [SELECT MVEX__Access_Token__c, MVEX__API_Version__c, MVEX__Base_URL__c, MVEX__Client_App_Id__c FROM MVEX__OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' WITH USER_MODE LIMIT 1];
-            MVEX__OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
-            if (tokenConfig == null || String.isBlank(tokenConfig.MVEX__Access_Token__c)) {
+            List<OAuth_Configuration__mdt> tokenConfigs = [SELECT Access_Token__c, API_Version__c, Base_URL__c, Client_App_Id__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' WITH USER_MODE LIMIT 1];
+            OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
+            if (tokenConfig == null || String.isBlank(tokenConfig.Access_Token__c)) {
                 resultMap.put('success', false);
                 resultMap.put('message', 'Meta Ads is not connected.');
                 return resultMap;
             }
 
             // Read directly from metadata — no manipulation
-            String accessToken     = tokenConfig.MVEX__Access_Token__c;
-            String clientAppId     = tokenConfig.MVEX__Client_App_Id__c;
-            String graphApiVersion = tokenConfig.MVEX__API_Version__c;
-            String graphBaseUrl    = tokenConfig.MVEX__Base_URL__c;
+            String accessToken     = tokenConfig.Access_Token__c;
+            String clientAppId     = tokenConfig.Client_App_Id__c;
+            String graphApiVersion = tokenConfig.API_Version__c;
+            String graphBaseUrl    = tokenConfig.Base_URL__c;
 
 
             Http http = new Http();
@@ -272,15 +272,15 @@ public with sharing class MetaAdsFormMappingController {
     private static String subscribeWebhookOnTheFly(String pageId) {
         try{
 
-            List<MVEX__OAuth_Configuration__mdt> tokenConfigs = [SELECT MVEX__Access_Token__c, MVEX__API_Version__c, MVEX__Base_URL__c, MVEX__Client_App_Id__c FROM MVEX__OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1];
-            MVEX__OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
-            if (tokenConfig == null || String.isBlank(tokenConfig.MVEX__Access_Token__c)) {
+            List<OAuth_Configuration__mdt> tokenConfigs = [SELECT Access_Token__c, API_Version__c, Base_URL__c, Client_App_Id__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1];
+            OAuth_Configuration__mdt tokenConfig = tokenConfigs.isEmpty() ? null : tokenConfigs[0];
+            if (tokenConfig == null || String.isBlank(tokenConfig.Access_Token__c)) {
                     return null;
                 }
-            String systemUserToken = tokenConfig.MVEX__Access_Token__c;
+            String systemUserToken = tokenConfig.Access_Token__c;
                 
-            String graphApiVersion = tokenConfig.MVEX__API_Version__c;
-            String graphBaseUrl = tokenConfig.MVEX__Base_URL__c;
+            String graphApiVersion = tokenConfig.API_Version__c;
+            String graphBaseUrl = tokenConfig.Base_URL__c;
             
             Http http = new Http();
             
@@ -315,6 +315,38 @@ public with sharing class MetaAdsFormMappingController {
             ErrorHandler.insertErrorData(e, 'MetaAdsFormMappingController', 'subscribeWebhookOnTheFly', e.getMessage());
             return 'Webhook Subscription Error: ' + e.getMessage();
         }
+    }
+
+    /**
+    * Method Name : getFailedLeadsCountMap
+    * @description : Retrieves a map of form IDs to their failed leads count.
+    * @return Map<String, Integer>
+    */
+    @AuraEnabled
+    public static Map<String, Integer> getFailedLeadsCountMap() {
+        Map<String, Integer> countMap = new Map<String, Integer>();
+        try {
+            List<MVEX__Error_Handling__c> allLeads = [SELECT MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE MVEX__Source_of_Error__c = 'MetaFailedLeads' WITH USER_MODE LIMIT 5000];
+            for (MVEX__Error_Handling__c err : allLeads) {
+                if (String.isNotBlank(err.MVEX__Error_Body__c)) {
+                    try {
+                        Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(err.MVEX__Error_Body__c);
+                        if (payload != null && payload.containsKey('formId')) {
+                            String fId = String.valueOf(payload.get('formId'));
+                            if (String.isNotBlank(fId)) {
+                                Integer currentCount = countMap.containsKey(fId) ? countMap.get(fId) : 0;
+                                countMap.put(fId, currentCount + 1);
+                            }
+                        }
+                    } catch(Exception e) {
+                        // Ignore parsing errors for individual records
+                    }
+                }
+            }
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaAdsFormMappingController', 'getFailedLeadsCountMap', e.getMessage());
+        }
+        return countMap;
     }
 
     /**

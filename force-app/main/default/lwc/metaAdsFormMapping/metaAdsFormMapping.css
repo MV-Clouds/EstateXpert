@@ -227,6 +227,7 @@
     scrollbar-width: thin;
     scrollbar-color: #0170d27d transparent;
     padding: 1rem;
+    background: white;
 }
 
 .footerbtns {
@@ -1199,4 +1200,175 @@
 
 .webhook-copy-btn:active {
     background-color: #014486;
+}
+
+/* ── New Mapping UI Styles ──────────────────────────────────────────────── */
+.mapping-header-new {
+    display: flex;
+    background-color: #f0f8ff;
+    padding: 6px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.mapping-header-col {
+    flex: 1;
+}
+.mapping-header-col.right-col {
+    flex: 1;
+    padding-left: 20px;
+}
+
+.mapping-row-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+.mapping-col.left-col {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.sf-field-combobox {
+    width: 100%;
+}
+.required-badge {
+    background-color: #ffe4e6;
+    color: #e11d48;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.mapping-icon-swap {
+    color: #94a3b8;
+    font-size: 18px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+.mapping-col.right-col {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+.mapping-input-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+.mapping-type-pill {
+    display: inline-flex;
+    background-color: #f1f5f9;
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+}
+.mapping-pill-btn {
+    padding: 6px 16px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    color: #475569;
+    transition: all 0.2s ease;
+}
+.mapping-pill-btn.active {
+    background-color: #0076d3;
+    color: #ffffff;
+}
+.mapping-input-container {
+    width: 100%;
+}
+.mapping-action-delete {
+    margin-left: 8px;
+}
+.delete-mapping-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+.delete-mapping-btn:hover {
+    background-color: #f1f5f9;
+}
+.delete-mapping-btn svg {
+    stroke: #64748b;
+}
+.delete-mapping-btn:hover svg {
+    stroke: #e11d48;
+}
+
+.mapping-row-card--required {
+    background: #fffbeb;
+    border-color: #fbbf24;
+}
+
+.mapping-row-card--error {
+    background: #fee2e2;
+    border-color: #f87171;
+}
+
+/* Pill Styles */
+.mapped-forms-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f0f8ff;
+    border: 1px solid #0176D3;
+    color: #0176D3;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.mapped-forms-pill svg {
+    stroke: currentColor;
+}
+.failed-leads-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.failed-leads-pill:hover {
+    background: #fecaca;
+}
+.failed-leads-pill svg {
+    stroke: currentColor;
+}
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.gap-8 {
+    gap: 8px;
 }

@@ -7,6 +7,7 @@ import getExistingMappings from '@salesforce/apex/MetaAdsFormMappingController.g
 import saveMappingApex from '@salesforce/apex/MetaAdsFormMappingController.saveMapping';
 import deactivateConnection from '@salesforce/apex/MetaAdsTokenController.deactivateConnection';
 import checkConnectionStatus from '@salesforce/apex/MetaAdsTokenController.checkConnectionStatus';
+import getFailedLeadsCountMap from '@salesforce/apex/MetaAdsFormMappingController.getFailedLeadsCountMap';
 import getFailedLeads from '@salesforce/apex/MetaAdsFormMappingController.getFailedLeads';
 import retryFailedLead from '@salesforce/apex/MetaAdsFormMappingController.retryFailedLead';
 import retryMultipleFailedLeads from '@salesforce/apex/MetaAdsFormMappingController.retryMultipleFailedLeads';
@@ -32,11 +33,12 @@ export default class MetaAdsFormMapping extends LightningElement {
     @track tableData = [];
     @track shownTableData = [];
     @track currentPage = 1;
-    @track pageSize = 20;
+    @track pageSize = 10;
     @track visiblePages = 5;
     @track connectedAccountName = 'Connected';
     @track connectedAppId = '';
     @track actualAccountName = '';
+    @track connectedDateStr = '';
 
     @track isModalOpen = false;
     @track isModalLoading = false;
@@ -500,9 +502,15 @@ export default class MetaAdsFormMapping extends LightningElement {
                 this.connectedAccountName = 'Connected';
                 this.connectedAppId = statusRes.client_app_id;
                 this.actualAccountName = statusRes.account_name;
+                if (statusRes.connected_date) {
+                    const d = new Date(statusRes.connected_date);
+                    this.connectedDateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                }
             }
 
-            this.buildTableData();
+            const failedCountRes = await getFailedLeadsCountMap();
+            
+            this.buildTableData(failedCountRes || {});
             
         } catch (error) {
             console.error('Error loading data', error);
@@ -512,7 +520,7 @@ export default class MetaAdsFormMapping extends LightningElement {
         }
     }
 
-    buildTableData() {
+    buildTableData(failedCountMap = {}) {
         let data = [];
         let pageIndex = 1;
         // traverse fullMappingJson
@@ -555,6 +563,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                     if (fData) formName = fData.name;
                 }
                 
+                let fFailedCount = failedCountMap[fId] || 0;
+                
                 pageRow.forms.push({
                     index: formIndex++,
                     id: fId + '_' + pId,
@@ -562,7 +572,10 @@ export default class MetaAdsFormMapping extends LightningElement {
                     pageId: pId,
                     formName: formName,
                     mappedCount: Object.keys(mappings).length,
-                    mappings: mappings
+                    mappings: mappings,
+                    failedCount: fFailedCount,
+                    hasFailedLeads: fFailedCount > 0,
+                    failedPillLabel: fFailedCount + ' Failed'
                 });
             }
             data.push(pageRow);
@@ -712,6 +725,9 @@ export default class MetaAdsFormMapping extends LightningElement {
                         key: key,
                         label: sf.label.split(' (')[0],
                         sourceType: sourceType,
+                        metaTabClass: sourceType === SOURCE_META ? 'mapping-pill-btn active' : 'mapping-pill-btn',
+                        customTabClass: sourceType === SOURCE_CUSTOM ? 'mapping-pill-btn active' : 'mapping-pill-btn',
+                        sfOptions: [{ label: sf.label.split(' (')[0], value: key }],
                         sourceOptions: [
                             { label: 'Do Not Map', value: '' },
                             { label: SOURCE_META, value: SOURCE_META },
@@ -727,8 +743,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                         required: required,
                         showRequiredError: required && !sourceType,
                         rowClass: required && !sourceType
-                            ? 'mapping-row mapping-row--required mapping-row--error'
-                            : (required ? 'mapping-row mapping-row--required' : 'mapping-row')
+                            ? 'mapping-row-card mapping-row-card--required mapping-row-card--error'
+                            : (required ? 'mapping-row-card mapping-row-card--required' : 'mapping-row-card')
                     };
                 });
 
@@ -865,8 +881,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                         isCustomValue: type === SOURCE_CUSTOM,
                         showRequiredError: f.required && !isMapped,
                         rowClass: (f.required && !isMapped)
-                            ? 'mapping-row mapping-row--required mapping-row--error'
-                            : (f.required ? 'mapping-row mapping-row--required' : 'mapping-row')
+                            ? 'mapping-row-card mapping-row-card--required mapping-row-card--error'
+                            : (f.required ? 'mapping-row-card mapping-row-card--required' : 'mapping-row-card')
                     });
                 }
                 return f;
@@ -897,8 +913,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                         failedLeadValue: leadVal,
                         showRequiredError: f.required && !isMapped,
                         rowClass: (f.required && !isMapped)
-                            ? 'mapping-row mapping-row--required mapping-row--error'
-                            : (f.required ? 'mapping-row mapping-row--required' : 'mapping-row')
+                            ? 'mapping-row-card mapping-row-card--required mapping-row-card--error'
+                            : (f.required ? 'mapping-row-card mapping-row-card--required' : 'mapping-row-card')
                     });
                 }
                 return f;
@@ -924,8 +940,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                         customValue: customValue,
                         showRequiredError: f.required && !isMapped,
                         rowClass: (f.required && !isMapped)
-                            ? 'mapping-row mapping-row--required mapping-row--error'
-                            : (f.required ? 'mapping-row mapping-row--required' : 'mapping-row')
+                            ? 'mapping-row-card mapping-row-card--required mapping-row-card--error'
+                            : (f.required ? 'mapping-row-card mapping-row-card--required' : 'mapping-row-card')
                     });
                 }
                 return f;
@@ -933,6 +949,58 @@ export default class MetaAdsFormMapping extends LightningElement {
         } catch (e) {
             console.error('Error in handleCustomValueChange', e);
         }
+    }
+
+    /**
+     * @description Handles clicking pill toggle to switch between Meta and Custom
+     * @param {Event} event 
+     */
+    handleSourceTypeChangeFromTab(event) {
+        try {
+            const sfKey = event.target.dataset.key;
+            const type = event.target.dataset.type;
+
+            this.currentFormFields = this.currentFormFields.map(f => {
+                if (f.key === sfKey) {
+                    let isMapped = (type === SOURCE_META && f.metaField) || (type === SOURCE_CUSTOM && f.customValue?.trim());
+                    return Object.assign({}, f, {
+                        sourceType: type,
+                        isMetaField: type === SOURCE_META,
+                        isCustomValue: type === SOURCE_CUSTOM,
+                        metaTabClass: type === SOURCE_META ? 'mapping-pill-btn active' : 'mapping-pill-btn',
+                        customTabClass: type === SOURCE_CUSTOM ? 'mapping-pill-btn active' : 'mapping-pill-btn',
+                        showRequiredError: f.required && !isMapped,
+                        rowClass: (f.required && !isMapped)
+                            ? 'mapping-row-card mapping-row-card--required mapping-row-card--error'
+                            : (f.required ? 'mapping-row-card mapping-row-card--required' : 'mapping-row-card')
+                    });
+                }
+                return f;
+            });
+        } catch (e) {
+            console.error('Error in handleSourceTypeChangeFromTab', e);
+        }
+    }
+
+    /**
+     * @description Removes a mapping row
+     * @param {Event} event 
+     */
+    handleRemoveField(event) {
+        try {
+            const sfKey = event.currentTarget.dataset.key;
+            this.currentFormFields = this.currentFormFields.filter(f => f.key !== sfKey);
+        } catch (e) {
+            console.error('Error in handleRemoveField', e);
+        }
+    }
+
+    /**
+     * @description Placeholder for sf combobox change
+     * @param {Event} event 
+     */
+    handleSfFieldChange(event) {
+        // Just keeping it as placeholder if we need it
     }
 
     /**
@@ -953,8 +1021,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                     customValue: recordId,
                     showRequiredError: field.required && !isMapped,
                     rowClass: (field.required && !isMapped)
-                        ? 'mapping-row mapping-row--required mapping-row--error'
-                        : (field.required ? 'mapping-row mapping-row--required' : 'mapping-row')
+                        ? 'mapping-row-card mapping-row-card--required mapping-row-card--error'
+                        : (field.required ? 'mapping-row-card mapping-row-card--required' : 'mapping-row-card')
                 });
             });
         } catch (e) {
@@ -1015,6 +1083,9 @@ export default class MetaAdsFormMapping extends LightningElement {
                 label: salesforceField.label,
                 required: false,
                 sourceType: '',
+                metaTabClass: 'mapping-pill-btn',
+                customTabClass: 'mapping-pill-btn',
+                sfOptions: [{ label: salesforceField.label.split(' (')[0], value: salesforceField.value }],
                 googleField: '',
                 customValue: '',
                 metaField: '',
@@ -1029,8 +1100,9 @@ export default class MetaAdsFormMapping extends LightningElement {
                 isReferenceField: this.isReferenceField(salesforceField),
                 referenceTo: salesforceField.referenceTo || '',
                 showRequiredError: false,
-                rowClass: 'mapping-row'
+                rowClass: 'mapping-row-card'
             };
+
 
             this.currentFormFields = [...this.currentFormFields, newField];
             this.handleCancelAddField();
@@ -1891,7 +1963,7 @@ export default class MetaAdsFormMapping extends LightningElement {
      */
     handlePageChange(event) {
         try {
-            const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
+            const selectedPage = parseInt(event.currentTarget.dataset.id, 10);
             if (selectedPage !== this.currentPage) {
                 this.currentPage = selectedPage;
                 this.updateShownData();

@@ -29,7 +29,7 @@ public with sharing class MetaAdsTokenController {
     */
     public static OAuth_Configuration__mdt getConfig() {
         try {
-            List<OAuth_Configuration__mdt> configs = [SELECT Access_Token__c, Client_Id__c, Client_Secret__c, Config_Id__c, Base_URL__c, API_Version__c, Authorization_Endpoint__c, Client_App_Id__c, Account_Name__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1];
+            List<OAuth_Configuration__mdt> configs = [SELECT Access_Token__c, Client_Id__c, Client_Secret__c, Config_Id__c, Base_URL__c, API_Version__c, Authorization_Endpoint__c, Client_App_Id__c, Account_Name__c, SystemModstamp FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1];
             return configs.isEmpty() ? null : configs[0];
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'MetaAdsTokenController', 'getConfig', e.getMessage());
@@ -194,6 +194,7 @@ public with sharing class MetaAdsTokenController {
 
             resultMap.put('account_name', String.isNotBlank(config.Account_Name__c) ? config.Account_Name__c : 'System User Account');
             resultMap.put('client_app_id', clientAppId);
+            resultMap.put('connected_date', config.SystemModstamp);
             resultMap.put('success', true);
             
         } catch (Exception e) {

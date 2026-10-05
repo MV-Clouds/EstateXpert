@@ -1297,26 +1297,7 @@
 .mapping-action-delete {
     margin-left: 8px;
 }
-.delete-mapping-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s ease;
-}
-.delete-mapping-btn:hover {
-    background-color: #f1f5f9;
-}
-.delete-mapping-btn svg {
-    stroke: #64748b;
-}
-.delete-mapping-btn:hover svg {
-    stroke: #e11d48;
-}
+
 
 .mapping-row-card--required {
     background: #fffbeb;

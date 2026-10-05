@@ -6,6 +6,7 @@ import getSalesforceLeadFields from '@salesforce/apex/MetaAdsFormMappingControll
 import getExistingMappings from '@salesforce/apex/MetaAdsFormMappingController.getExistingMappings';
 import saveMappingApex from '@salesforce/apex/MetaAdsFormMappingController.saveMapping';
 import deactivateConnection from '@salesforce/apex/MetaAdsTokenController.deactivateConnection';
+import checkConnectionStatus from '@salesforce/apex/MetaAdsTokenController.checkConnectionStatus';
 import getFailedLeads from '@salesforce/apex/MetaAdsFormMappingController.getFailedLeads';
 import retryFailedLead from '@salesforce/apex/MetaAdsFormMappingController.retryFailedLead';
 import retryMultipleFailedLeads from '@salesforce/apex/MetaAdsFormMappingController.retryMultipleFailedLeads';
@@ -29,6 +30,7 @@ export default class MetaAdsFormMapping extends LightningElement {
     
     @track isLoading = true;
     @track tableData = [];
+    @track connectedAccountName = '';
 
     @track isModalOpen = false;
     @track isModalLoading = false;
@@ -376,6 +378,11 @@ export default class MetaAdsFormMapping extends LightningElement {
             // Client App ID logic isn't tied to a specific page anymore, but we can extract it if needed
             // For now we assume a single client app id environment
             this.currentClientAppId = 'default_app_id'; // We can adapt this if multi-app is needed
+
+            const statusRes = await checkConnectionStatus();
+            if (statusRes && statusRes.success) {
+                this.connectedAccountName = `Connected - ${statusRes.client_app_id}`;
+            }
 
             this.buildTableData();
             

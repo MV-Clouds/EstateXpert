@@ -534,7 +534,7 @@
 }
 
 .exp-table-content tbody tr:nth-child(odd) {
-  background-color: aliceblue;
+  background-color: #f0f8ff;
 }
 
 .exp-table-content table tbody tr:hover td {
@@ -791,7 +791,7 @@
 .exp-accordion-badge {
     background-color: #dbeafe;
     color: #1e3a8a;
-    padding: 2px 8px;
+    padding: 5px 8px;
     border-radius: 12px;
     font-size: 12px;
     font-weight: 600;

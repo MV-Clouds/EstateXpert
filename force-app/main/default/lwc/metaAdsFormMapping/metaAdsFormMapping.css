@@ -426,7 +426,7 @@
     align-items: center;
     gap: 8px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 700;
     color: #374151;
     margin-bottom: 10px;
     letter-spacing: 0.2px;
@@ -890,4 +890,26 @@
     color: #111827;
     border-color: #e5e7eb;
     outline: none;
+}
+
+/* Connected Pill */
+.connected-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #ecfdf5;
+    border: 1px solid #10b981;
+    color: #065f46;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 12px;
+}
+
+.connected-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #10b981;
+    border-radius: 50%;
 }

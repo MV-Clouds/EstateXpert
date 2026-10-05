@@ -10,6 +10,9 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    container-type: inline-size;
 }
 
 .sub-main-header-css {
@@ -201,9 +204,10 @@
 }
 
 .cards-grid {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
+    width: 100%;
 }
 
 .checklist-card {
@@ -214,7 +218,7 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    width: 320px;
+    width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -427,6 +431,20 @@
     gap: 1rem;
 }
 
+/* Responsive Grid: Greater than Mac screen size (> 1550px) -> 3 cards in a row */
+@media only screen and (min-width: 1550px) {
+    .cards-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* Responsive Grid: Smaller screens (tablets & mobile <= 900px) -> 1 card in a row */
+@media only screen and (max-width: 900px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media only screen and (max-width: 768px) {
     .sub-main-header-css {
         flex-direction: row;
@@ -442,7 +460,23 @@
         align-items: flex-start;
         padding: 16px;
     }
-    .checklist-card {
-        width: 100%;
+}
+
+/* Container Queries: ensures optimal card columns if placed inside narrower or wider flexipage regions */
+@container (max-width: 720px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@container (min-width: 721px) and (max-width: 1200px) {
+    .cards-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@container (min-width: 1201px) {
+    .cards-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }

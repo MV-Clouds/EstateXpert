@@ -1,4 +1,4 @@
-public without sharing class SinglePropertyViewCmpController {
+public with sharing class SinglePropertyViewCmpController {
     public class Wrapper {
         @AuraEnabled
         public List<MVEX__Listing__c> listingData;

@@ -5,8 +5,8 @@
   align-items: center;
   background-color: #0176D3;
   color: white;
-  gap: 8px;
-  padding: 0 16px;
+  gap: 4px;
+  padding: 0 12px;
   height: 30px;
   min-height: 30px;
   font-size: 14px;
@@ -40,8 +40,8 @@
   align-items: center;
   background: #ffffff;
   color: #0176D3;
-  gap: 8px;
-  padding: 0 16px;
+  gap: 4px;
+  padding: 0 12px;
   height: 30px;
   min-height: 30px;
   font-size: 14px;
@@ -56,6 +56,16 @@
   transform: translateY(-1px);
 }
 
+.exp-white-btn-css svg[fill],
+.exp-white-btn-css svg path[fill] {
+  fill: #0176d3 !important;
+}
+
+.exp-white-btn-css svg[stroke],
+.exp-white-btn-css svg path[stroke] {
+  stroke: #0176d3 !important;
+}
+
 .exp-white-btn-css:disabled {
   background-color: #b2aeae;
   color: white;
@@ -68,10 +78,12 @@
   transform: unset;
 }
 
+.exp-white-btn-css:disabled svg[fill],
 .exp-white-btn-css:disabled svg path[fill] {
   fill: #fff !important;
 }
 
+.exp-white-btn-css:disabled svg[stroke],
 .exp-white-btn-css:disabled svg path[stroke] {
   stroke: #fff !important;
 }
@@ -85,8 +97,8 @@
   align-items: center;
   background-color: #B3261E;
   color: white;
-  gap: 8px;
-  padding: 0 16px;
+  gap: 4px;
+  padding: 0 12px;
   height: 30px;
   min-height: 30px;
   font-size: 14px;
@@ -341,15 +353,15 @@
 .exp-delete-icon-css,
 .exp-clone-icon-css {
   padding: 6px;
-  border: 1.5px solid #8a8c8e;
+  border: none;
   border-radius: 6px;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+  background: transparent;
   transition: all 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  box-shadow: none;
 }
 
 .exp-delete-icon-css:hover {
@@ -357,14 +369,13 @@
   border-color: #ef4444;
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+  color: #dc2626;
 }
 
-.exp-delete-icon-css:hover svg {
-  fill: #dc2626;
-}
-
+.exp-delete-icon-css:hover svg,
 .exp-delete-icon-css:hover svg path {
   stroke: #dc2626;
+  fill: #dc2626;
 }
 
 .exp-edit-icon-css:hover,
@@ -373,11 +384,6 @@
   border-color: #0176D3;
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(1, 118, 211, 0.2);
-}
-
-.exp-edit-icon-css:hover svg,
-.exp-preview-icon-css:hover svg {
-  fill: #0176d3;
 }
 
 .exp-edit-icon-css:hover svg path,
@@ -705,16 +711,16 @@
     width: 30px;
     height: 30px;
     padding: 0;
-    border: 1.5px solid #8a8c8e;
+    border: none;
     border-radius: 6px;
     display: inline-flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    background: #ffffff;
-    color: #4b5563;
+    background: transparent;
+    /* color: #4b5563; */
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: none;
 }
 
 .exp-action-dots-btn:hover,
@@ -819,8 +825,10 @@
     color: #dc2626;
 }
 
-.exp-action-menu-item.exp-action-menu-item-delete:hover .exp-menu-icon-delete svg {
+.exp-action-menu-item.exp-action-menu-item-delete:hover .exp-menu-icon-delete svg,
+.exp-action-menu-item.exp-action-menu-item-delete:hover .exp-menu-icon-delete svg path {
     fill: #dc2626;
+    stroke: #dc2626;
 }
 
 /* DROPDOWN ICON CSS ENDS HERE */

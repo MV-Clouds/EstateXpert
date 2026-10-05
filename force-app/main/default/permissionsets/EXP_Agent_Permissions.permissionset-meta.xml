@@ -258,14 +258,6 @@
     </customSettingAccesses>
     <customSettingAccesses>
         <enabled>true</enabled>
-        <name>GmailConfig__c</name>
-    </customSettingAccesses>
-    <customSettingAccesses>
-        <enabled>true</enabled>
-        <name>IG_Configuration__c</name>
-    </customSettingAccesses>
-    <customSettingAccesses>
-        <enabled>true</enabled>
         <name>Lead_Notification__c</name>
     </customSettingAccesses>
     <fieldPermissions>

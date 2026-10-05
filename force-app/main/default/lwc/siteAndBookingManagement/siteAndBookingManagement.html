@@ -9,7 +9,8 @@
                 Related Inquiries
             </div>
             <div class="header-buttons">
-                <button class="exp-blue-btn-css" onclick={handleRefreshData} title="Refresh Data" aria-label="Refresh Data">
+                <button class="exp-blue-btn-css" onclick={handleRefreshData} title="Refresh Data"
+                    aria-label="Refresh Data">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M21.5 2V8.5M21.5 8.5H15M21.5 8.5L18 5C16.6 3.5 14.8 2.5 12.6 2.1C8.9 1.5 5.4 3.1 3.5 6.1M2.5 22V15.5M2.5 15.5H9M2.5 15.5L6 19C7.4 20.5 9.2 21.5 11.4 21.9C15.1 22.5 18.6 20.9 20.5 17.9"
@@ -83,8 +84,8 @@
                                         <div class="slds-has-flexi-truncate">
                                             <span class="slds-truncate" title="Phone">Phone</span>
                                             <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                <svg data-index="MobilePhone" class="exp-arrow-icon" viewBox="0 0 384 512"
-                                                    xmlns="http://www.w3.org/2000/svg">
+                                                <svg data-index="MobilePhone" class="exp-arrow-icon"
+                                                    viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
                                                     <path
                                                         d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                 </svg>
@@ -100,8 +101,8 @@
                                         <div class="slds-has-flexi-truncate">
                                             <span class="slds-truncate" title="Showing Status">Showing Status</span>
                                             <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                <svg data-index="ShowingStatus" class="exp-arrow-icon" viewBox="0 0 384 512"
-                                                    xmlns="http://www.w3.org/2000/svg">
+                                                <svg data-index="ShowingStatus" class="exp-arrow-icon"
+                                                    viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
                                                     <path
                                                         d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                 </svg>
@@ -117,8 +118,8 @@
                                         <div class="slds-has-flexi-truncate">
                                             <span class="slds-truncate" title="Schedule Date">Schedule Date</span>
                                             <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                <svg data-index="FormattedScheduleDate" class="exp-arrow-icon" viewBox="0 0 384 512"
-                                                    xmlns="http://www.w3.org/2000/svg">
+                                                <svg data-index="FormattedScheduleDate" class="exp-arrow-icon"
+                                                    viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
                                                     <path
                                                         d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
                                                 </svg>
@@ -136,15 +137,22 @@
                                 <tr key={contact.Id} aria-selected="false" class="table-tr">
                                     <td class="slds-cell_action-mode listing-cls" scope="row" title={contact.Name}>
                                         <div class="slds-truncate center-trancate-text" title={contact.Name}>
-                                            <a href="javascript:void(0);" onclick={navigateToContact}
-                                                data-id={contact.Id} tabindex="0">{contact.Name}</a>
+                                            <template if:true={contact.hasName}>
+                                                <a href="javascript:void(0);" onclick={navigateToContact}
+                                                    data-id={contact.Id} tabindex="0">{contact.Name}</a>
+                                            </template>
+                                            <template if:false={contact.hasName}>
+                                                -
+                                            </template>
                                         </div>
                                     </td>
                                     <td class="slds-cell_action-mode" role="gridcell" title={contact.Email}>
-                                        <div class="slds-truncate center-trancate-text" title={contact.Email}>{contact.Email}</div>
+                                        <div class="slds-truncate center-trancate-text" title={contact.Email}>
+                                            {contact.Email}</div>
                                     </td>
                                     <td class="slds-cell_action-mode" role="gridcell" title={contact.MobilePhone}>
-                                        <div class="slds-truncate center-trancate-text" title={contact.MobilePhone}>{contact.MobilePhone}</div>
+                                        <div class="slds-truncate center-trancate-text" title={contact.MobilePhone}>
+                                            {contact.MobilePhone}</div>
                                     </td>
                                     <td class="slds-cell_action-mode" role="gridcell" title={contact.ShowingStatus}>
                                         <div class="slds-truncate center-trancate-text" title={contact.ShowingStatus}>
@@ -152,34 +160,37 @@
                                                 value={contact.ShowingStatus}></lightning-formatted-text>
                                         </div>
                                     </td>
-                                    <td class="slds-cell_action-mode" role="gridcell" title={contact.FormattedScheduleDate}>
-                                        <div class="slds-truncate center-trancate-text" title={contact.FormattedScheduleDate}>{contact.FormattedScheduleDate}</div>
+                                    <td class="slds-cell_action-mode" role="gridcell"
+                                        title={contact.FormattedScheduleDate}>
+                                        <div class="slds-truncate center-trancate-text"
+                                            title={contact.FormattedScheduleDate}>{contact.FormattedScheduleDate}</div>
                                     </td>
                                     <td class="slds-cell_action-mode" role="gridcell">
                                         <div class="center-trancate-text action-btn">
                                             <template if:false={isMobileOrTablet}>
-                                                <button class="exp-edit-icon-css" onclick={openManageModal} data-contact={contact.Json}
-                                                    title="Send Email">
-                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z"
-                                                            stroke="#212529" stroke-width="1.5" stroke-linecap="round"
-                                                            stroke-linejoin="round" />
-                                                        <path d="M8 10L12 12L16 10" stroke="#212529" stroke-width="1.5"
-                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                <button class="exp-edit-icon-css" onclick={openManageModal}
+                                                    data-contact={contact.Json} title="Send Email">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                                        width="22" height="22" fill="none" stroke="currentColor"
+                                                        stroke-width="1.8" stroke-linecap="round"
+                                                        stroke-linejoin="round" aria-hidden="true">
+                                                        <rect x="3" y="4" width="18" height="17" rx="2" />
+                                                        <path d="M3 9h18M8 2v4M16 2v4" />
+                                                        <path d="M8.5 15l3.5-3 3.5 3" />
+                                                        <path d="M9.5 14.2V18h5v-3.8" />
                                                     </svg>
                                                 </button>
                                             </template>
                                             <button class="exp-preview-icon-css" onclick={openShowingInNewTab}
                                                 data-showing-id={contact.ShowingId} disabled={contact.isShowingDisabled}
                                                 title="View Showing Record">
-                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22"
+                                                    height="22" fill="none" stroke="currentColor" stroke-width="1.8"
+                                                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                    <path d="M14 4h6v6" />
+                                                    <path d="M20 4l-9 9" />
                                                     <path
-                                                        d="M13 11L22 2M22 2H16M22 2V8M11 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15V13"
-                                                        stroke="#212529" stroke-width="2" stroke-linecap="round"
-                                                        stroke-linejoin="round" />
+                                                        d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" />
                                                 </svg>
                                             </button>
                                         </div>
@@ -208,10 +219,9 @@
 
                         <div class="exp-btn-cover">
                             <div class="exp-pagination-container">
-                                <button class="exp-pagination-btn-css" disabled={isFirstPage}
-                                    onclick={handlePrevious}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
-                                        viewBox="0 0 520 520" fill="#fff">
+                                <button class="exp-pagination-btn-css" disabled={isFirstPage} onclick={handlePrevious}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                        fill="#fff">
                                         <path
                                             d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
                                     </svg>
@@ -219,8 +229,8 @@
 
                                 <template for:each={pageNumbers} for:item="page">
                                     <template if:false={page.isEllipsis}>
-                                        <button key={page.number} data-id={page.number}
-                                            class={page.className} onclick={handlePageChange}>
+                                        <button key={page.number} data-id={page.number} class={page.className}
+                                            onclick={handlePageChange}>
                                             {page.number}
                                         </button>
                                     </template>
@@ -229,10 +239,9 @@
                                     </template>
                                 </template>
 
-                                <button class="exp-pagination-btn-css" disabled={isLastPage}
-                                    onclick={handleNext}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
-                                        viewBox="0 0 520 520" fill="#fff">
+                                <button class="exp-pagination-btn-css" disabled={isLastPage} onclick={handleNext}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
+                                        fill="#fff">
                                         <path
                                             d="M178 477l208-205c6-6 6-16 0-22L178 45c-6-6-16-6-22 0l-22 22c-6 6-6 16 0 22l163 161c6 6 6 16 0 22L134 433c-6 6-6 16 0 22l22 22c6 6 16 6 22 0z" />
                                     </svg>
@@ -301,7 +310,7 @@
                         <div class="slds-col slds-size_2-of-8 slds-p-around_medium modal-controls">
 
                             <div class="slds-text-heading_medium slds-m-bottom_medium">
-                                Contact: {currentContact.Name}
+                                Contact: {currentContactName}
                             </div>
 
                             <lightning-combobox name="action" label="Select Action" value={selectedAction}
@@ -323,7 +332,8 @@
                                 </lightning-input>
 
                                 <lightning-combobox name="duration" label="Showing Duration" value={selectedDuration}
-                                    options={durationOptions} onchange={handleDurationChange} required class="slds-m-bottom_medium">
+                                    options={durationOptions} onchange={handleDurationChange} required
+                                    class="slds-m-bottom_medium">
                                 </lightning-combobox>
                             </template>
 
@@ -373,7 +383,7 @@
                     </div>
                     <div class="footerbtns">
                         <button class="exp-white-btn-css" aria-label="Cancel and close" onclick={closeManageModal}>
-                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                            <svg width="12" height="12" viewBox="0 0 20 20" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"

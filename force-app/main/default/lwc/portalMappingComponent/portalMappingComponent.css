@@ -369,40 +369,9 @@
     gap: 0.5rem;
 }
 
-.delete-div {
-    padding: 5px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
-    color: #212529;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-
-.delete-div:hover svg {
-    fill: currentColor;
-}
-
-.delete-div:hover svg path {
-    fill: currentColor;
-    stroke: currentColor;
-}
-
-.delete-div:hover {
-    color: #dc2626;
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    border-color: #ef4444;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
-}
-
 .action-div {
     padding: 5px;
-    border: 1px solid #e5e7eb;
+    border: 1.5px solid #8a8c8e;
     border-radius: 6px;
     display: flex;
     justify-content: center;
@@ -500,40 +469,6 @@
     text-align: left;
     padding-left: 10px;
     color: #06C270;
-}
-
-.delete_btn_css {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
-    text-align: center;
-    border: 1px solid #bf0a00;
-    padding: 0px 20px;
-    background: #B3261E;
-    color: white;
-    border-radius: 5px;
-}
-
-.cancel_btn_css {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 34px;
-    text-align: center;
-    padding: 0px 20px;
-    background: #FFFFFF;
-    border: 1px solid #0176D3;
-    color: #0176D3;
-    border-radius: 5px;
-}
-
-.closs_icon_css {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    right: -2rem;
-    bottom: 0rem;
-    background: transparent;
 }
 
 .blue-header {
@@ -1170,18 +1105,6 @@
     font-size: 15px;
 }
 
-.closs_icon_css {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    background: #F3F6F9;
-    transition: all 0.2s ease;
-}
-
 .modalbody {
     background-color: #F9FAFB !important;
     border-bottom-left-radius: 8px !important;
@@ -1203,68 +1126,12 @@
     flex-shrink: 0;
 }
 
-.cancel_btn_css {
-    font-size: 14px;
-    font-weight: 500;
-    padding: 0.5rem 1.5rem;
-    background: #FFFFFF;
-    border: 1.5px solid #0176D3;
-    color: #0176D3;
-    border-radius: 5px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.cancel_btn_css:hover {
-    background: #F3F6F9;
-    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
-}
-
-.save_btn_css {
-    font-size: 14px;
-    font-weight: 500;
-    border: none;
-    padding: 0.5rem 1.5rem;
-    background: #0176D3;
-    color: white;
-    border-radius: 5px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.save_btn_css:hover {
-    background: #0156A3;
-    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
-    transform: translateY(-1px);
-}
-
 .content_body {
     flex: 1;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #0170d27d transparent;
     padding: 1.5rem;
-}
-
-/* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-/* Firefox */
-input[type=number] {
-    -moz-appearance: textfield;
-    appearance: textfield;
 }
 
 @media only screen and (max-width: 1500px) {
@@ -1346,18 +1213,6 @@ input[type=number] {
     font-size: 15px;
 }
 
-.closs_icon_css {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    background: #F3F6F9;
-    transition: all 0.2s ease;
-}
-
 .modalbody {
     background-color: #F9FAFB !important;
     border-bottom-left-radius: 8px !important;
@@ -1377,49 +1232,6 @@ input[type=number] {
     flex-shrink: 0;
 }
 
-.cancel_btn_css {
-    font-size: 14px;
-    font-weight: 500;
-    padding: 0.5rem 1.5rem;
-    background: #FFFFFF;
-    border: 1.5px solid #0176D3;
-    color: #0176D3;
-    border-radius: 5px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.cancel_btn_css:hover {
-    background: #F3F6F9;
-    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
-}
-
-.save_btn_css {
-    font-size: 14px;
-    font-weight: 500;
-    border: none;
-    padding: 0.5rem 1.5rem;
-    background: #0176D3;
-    color: white;
-    border-radius: 5px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.save_btn_css:hover {
-    background: #0156A3;
-    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
-    transform: translateY(-1px);
-}
-
 .content_body {
     flex: 1;
     overflow-y: auto;
@@ -1428,17 +1240,10 @@ input[type=number] {
     padding: 1.5rem;
 }
 
-/* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Firefox */
-input[type=number] {
-  -moz-appearance: textfield;
-  appearance: textfield;
+.delete-div svg[fill],
+.delete-div svg[stroke] {
+    fill: #000000;
+    stroke: #000000;
 }
 
 @media only screen and (max-width: 1500px) {

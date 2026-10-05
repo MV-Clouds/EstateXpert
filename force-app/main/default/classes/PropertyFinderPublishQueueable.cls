@@ -6,6 +6,10 @@ public class PropertyFinderPublishQueueable implements Queueable, Database.Allow
     private String pfListingId;
 
     // Constructor to accept parameters
+    public PropertyFinderPublishQueueable(String listingId, String portalId, String pfListingId) {
+        this(listingId, portalId, null, null, pfListingId);
+    }
+
     public PropertyFinderPublishQueueable(String listingId, String portalId, String apiKey, String apiSecret, String pfListingId) {
         this.listingId = listingId;
         this.portalId = portalId;
@@ -16,6 +20,16 @@ public class PropertyFinderPublishQueueable implements Queueable, Database.Allow
 
     private static String getAccesstoken(String apiKey, String apiSecret) {
         try {
+            if (String.isBlank(apiKey) || String.isBlank(apiSecret)) {
+                Map<String, String> creds = PropertyFinderIntegration.getPFCredentials(null);
+                if (String.isBlank(apiKey)) apiKey = creds.get('apiKey');
+                if (String.isBlank(apiSecret)) apiSecret = creds.get('apiSecret');
+            }
+            if (String.isBlank(apiKey) || String.isBlank(apiSecret)) {
+                ErrorHandler.insertErrorData(null, 'PropertyFinderPublishQueueable', 'getAccesstoken', 'Property Finder credentials are missing.');
+                return 'Property Finder credentials are missing.';
+            }
+
             String propertyFinderProductionEndpoint = System.label.PropertyFinder_Endpoint_Production;
             String endpoint = propertyFinderProductionEndpoint + 'auth/token';
             Http h3 = new Http();
@@ -45,6 +59,19 @@ public class PropertyFinderPublishQueueable implements Queueable, Database.Allow
             if (pfListingId == null) {
                 PropertyFinderIntegration.updatePortalListingRecord(listingId, portalId, 'Property Finder Listing ID is missing.', 'Exception');
                 return;
+            }
+            if ((String.isBlank(apiKey) || String.isBlank(apiSecret)) && String.isNotBlank(portalId)) {
+                List<MVEX__Portal__c> portals = [SELECT Id, Name, MVEX__Portal_Configuration__c FROM MVEX__Portal__c WHERE Id = :portalId WITH USER_MODE LIMIT 1];
+                if (!portals.isEmpty()) {
+                    Map<String, String> creds = PropertyFinderIntegration.getPFCredentials(portals[0].Name, portals[0].MVEX__Portal_Configuration__c);
+                    if (String.isBlank(apiKey)) apiKey = creds.get('apiKey');
+                    if (String.isBlank(apiSecret)) apiSecret = creds.get('apiSecret');
+                }
+            }
+            if (String.isBlank(apiKey) || String.isBlank(apiSecret)) {
+                Map<String, String> creds = PropertyFinderIntegration.getPFCredentials(null);
+                if (String.isBlank(apiKey)) apiKey = creds.get('apiKey');
+                if (String.isBlank(apiSecret)) apiSecret = creds.get('apiSecret');
             }
             String propertyFinderProductionEndpoint = System.label.PropertyFinder_Endpoint_Production;
             String endpoint = propertyFinderProductionEndpoint + 'listings/' + pfListingId + '/publish';

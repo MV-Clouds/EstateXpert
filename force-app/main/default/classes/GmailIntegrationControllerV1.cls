@@ -20,18 +20,11 @@ public with sharing class GmailIntegrationControllerV1 {
                 return;
             }
 
-            String clientId = '';
-            String clientSecret = '';
-            String redirectUrl = '';
-            String tokenUrl = '';
-            
-            List<OAuth_Configuration__mdt> mdtList = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Gmail_OAuth' WITH USER_MODE LIMIT 1];
-            if(!mdtList.isEmpty()) {
-                clientId = mdtList[0].Client_Id__c;
-                clientSecret = mdtList[0].Client_Secret__c;
-                redirectUrl = mdtList[0].Redirect_URI__c;
-                tokenUrl = mdtList[0].Token_Endpoint__c;
-            }
+            OAuth_Configuration__mdt googleAdsConfig = OAuth_Configuration__mdt.getInstance('Google_Ads_Config');
+
+            String clientId = googleAdsConfig.Client_Id__c;
+            String clientSecret = googleAdsConfig.Client_Secret__c;
+            String redirectUrl = googleAdsConfig.Redirect_URI__c;
 
             if(String.isBlank(clientId) || String.isBlank(clientSecret) || String.isBlank(redirectUrl)){
                 isFailed = true;
@@ -39,15 +32,17 @@ public with sharing class GmailIntegrationControllerV1 {
                 return;
             }
             
+            String endPoint = googleAdsConfig.Token_Endpoint__c;
+            
             HttpRequest req = new HttpRequest();
-            req.setEndpoint(tokenUrl);
+            req.setEndpoint(endPoint);
             req.setMethod('POST');
             req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
             req.setBody('code=' + authCode +
                 '&client_id=' + clientId +
                 '&client_secret=' + clientSecret +
                 '&redirect_uri=' + redirectUrl +
-                '&scope=' + gmailSendingEndpoint + 'auth/gmail.send&access_type=offline&grant_type=authorization_code');
+                '&scope=' + googleAdsConfig.Scope__c + '&access_type=offline&grant_type=authorization_code');
             
             Http http = new Http();
             HttpResponse res = http.send(req);

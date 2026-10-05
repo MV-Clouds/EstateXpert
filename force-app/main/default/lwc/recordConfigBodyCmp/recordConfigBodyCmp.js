@@ -39,6 +39,22 @@ export default class RecordConfigBodyCmp extends LightningElement {
         { label: 'YYYY-MM-DD (12 hour)', value: 'yyyymmdd12' }
     ];
 
+    // Computed Property to get Title based on Feature
+    get featureTitle() {
+        switch (this.featureName) {
+            case 'Marketing_List_Fields':
+                return 'Marketing List Columns';
+            case 'Listing_Manager_Fields':
+                return 'Listing Manager Columns';
+            case 'Suggested_Inquiry_Fields':
+                return 'Suggested Inquiries Columns';
+            case 'Suggested_Listing_Fields':
+                return 'Suggested Listings Columns';
+            default:
+                return 'Configure Columns';
+        }
+    }
+
     // Computed Property to get Object Name based on Feature
     get selectedTabObject() {
         switch (this.featureName) {

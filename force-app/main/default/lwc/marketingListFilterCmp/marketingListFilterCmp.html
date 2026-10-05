@@ -3,28 +3,35 @@
         <div class="filter-text">Filters</div>
         <div class="header-buttons">
             <template if:false={isFilterLimitReached}>
-                <div class="add-btn-cover" onclick={openModal} title="Add Filters: Select and add more filter fields to refine the contact list">
+                <div class="add-btn-cover" onclick={openModal}
+                    title="Add Filters: Select and add more filter fields to refine the contact list">
                     <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
                     </svg>
                 </div>
             </template>
-            <div class="reset-text" onclick={handleReset} title="Reset All: Clear all applied filters and restore the default view">
-                <svg width="16" height="16" fill="#ffffff" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
+            <div class="reset-text" onclick={handleReset}
+                title="Reset All: Clear all applied filters and restore the default view">
+                <svg width="16" height="16" fill="#ffffff" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"
+                    stroke="#ffffff">
                     <path
                         d="M960 0v213.333c411.627 0 746.667 334.934 746.667 746.667S1371.627 1706.667 960 1706.667 213.333 1371.733 213.333 960c0-197.013 78.4-382.507 213.334-520.747v254.08H640V106.667H53.333V320h191.04C88.64 494.08 0 720.96 0 960c0 529.28 430.613 960 960 960s960-430.72 960-960S1489.387 0 960 0"
                         fill-rule="evenodd"></path>
                 </svg>
             </div>
             <template if:true={filterFields.length}>
-                <div class={customLogicToggleClass} onclick={handleCustomLogicToggle} title="Custom Logic: Apply custom condition logic (e.g. 1 AND (2 OR 3)) between filter fields">
+                <div class={customLogicToggleClass} onclick={handleCustomLogicToggle}
+                    title="Custom Logic: Apply custom condition logic (e.g. 1 AND (2 OR 3)) between filter fields">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" fill="white"/>
+                        <path
+                            d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"
+                            fill="white" />
                     </svg>
                 </div>
             </template>
             <template if:true={isFilterChanged}>
-                <div class="save-btn-cover" onclick={saveFilterPermanent} title="Save Filter: Save currently configured filters as your default view">
+                <div class="save-btn-cover" onclick={saveFilterPermanent}
+                    title="Save Filter: Save currently configured filters as your default view">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M13.5 0H1.5C0.671573 0 0 0.671573 0 1.5V14.5C0 15.3284 0.671573 16 1.5 16H14.5C15.3284 16 16 15.3284 16 14.5V2.5L13.5 0ZM8 14C6.34315 14 5 12.6569 5 11C5 9.34315 6.34315 8 8 8C9.65685 8 11 9.34315 11 11C11 12.6569 9.65685 14 8 14ZM11 3H2V1H11V3Z"
@@ -49,59 +56,83 @@
                                     <label class="custom-field-lable">{option.label}</label>
                                     <span>
                                         <template if:true={option.isNot}>
-                                            <label class="slds-form-element__label operator-div">not  </label>
+                                            <label class="slds-form-element__label operator-div">not </label>
                                         </template>
                                     </span>
                                     <span>
-                                        <label class="slds-form-element__label operator-div">{option.operatorName} </label>
+                                        <label class="slds-form-element__label operator-div">{option.operatorName}
+                                        </label>
                                     </span>
                                 </div>
                                 <div class="slds-form-element__control">
                                     <div class="slds-combobox_container slds-has-selection">
-                                        <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                        <div
+                                            class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
                                             <div class="input-delete-cover picklist-search">
                                                 <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right"
                                                     role="none">
-                                                    <input type="text" class="slds-input slds-combobox__input picklist-input"
-                                                        placeholder={option.label} data-id={index} value={option.searchTerm}
-                                                        onkeyup={handleSearchChange1} onfocus={handleFocus1} onblur={handleBlur1} minlength="0" maxlength="25"/>
+                                                    <input type="text"
+                                                        class="slds-input slds-combobox__input picklist-input"
+                                                        placeholder={option.label} data-id={index}
+                                                        value={option.searchTerm} onkeyup={handleSearchChange1}
+                                                        onfocus={handleFocus1} onblur={handleBlur1} minlength="0"
+                                                        maxlength="25" />
                                                     <span
                                                         class="slds-icon_container slds-icon-utility-search slds-input__icon slds-input__icon_right">
-                                                        <svg class="chev-down" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>                                                  
+                                                        <svg class="chev-down" xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                                                            <path
+                                                                d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z" />
+                                                        </svg>
                                                     </span>
                                                     <template if:true={option.isFocused}>
                                                         <div class="options-box" onmousedown={handlePreventDefault}>
                                                             <ul class="options-cover">
-                                                                <template for:each={option.picklistValue} for:item="option1">
+                                                                <template for:each={option.picklistValue}
+                                                                    for:item="option1">
                                                                     <template if:false={option1.showRightIcon}>
-                                                                        <li key={option1.value} data-index={index} data-id={option1.value} onclick={selectOption1}
+                                                                        <li key={option1.value} data-index={index}
+                                                                            data-id={option1.value}
+                                                                            onclick={selectOption1}
                                                                             class="options-value">
                                                                             <span class="slds-media__body">
-                                                                                <span class="_entity">{option1.label}</span>
+                                                                                <span
+                                                                                    class="_entity">{option1.label}</span>
                                                                             </span>
                                                                         </li>
                                                                     </template>
                                                                     <template if:true={option1.showRightIcon}>
-                                                                        <li  data-index={index} key={option1.value} data-id={option1.value} onclick={selectOption1} class="slds-listbox__item">
-                                                                            <div class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center picklist-option">
+                                                                        <li data-index={index} key={option1.value}
+                                                                            data-id={option1.value}
+                                                                            onclick={selectOption1}
+                                                                            class="slds-listbox__item">
+                                                                            <div
+                                                                                class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center picklist-option">
                                                                                 <span class="slds-media__body">
-                                                                                    <span class="slds-truncate" title={option1.label}>{option1.label}</span>
+                                                                                    <span class="slds-truncate"
+                                                                                        title={option1.label}>{option1.label}</span>
                                                                                 </span>
-                                                                                <span class="slds-media__figure slds-media__figure_reverse">
-                                                                                    <lightning-icon icon-name="utility:check" alternative-text="Lookup Field" size="x-small"></lightning-icon>
+                                                                                <span
+                                                                                    class="slds-media__figure slds-media__figure_reverse">
+                                                                                    <lightning-icon
+                                                                                        icon-name="utility:check"
+                                                                                        alternative-text="Lookup Field"
+                                                                                        size="x-small"></lightning-icon>
                                                                                 </span>
                                                                             </div>
                                                                         </li>
-                                                                    </template>  
+                                                                    </template>
                                                                 </template>
                                                             </ul>
                                                         </div>
                                                     </template>
                                                 </div>
                                                 <template if:false={option.isMandatory}>
-                                                    <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
-                                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16" fill="#000000" width="14" height="14">
+                                                    <div class="delete-icon-cover" data-id={index}
+                                                        onclick={clearSearch}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                            fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                            stroke-linejoin="round" width="15" height="15">
                                                             <path
                                                                 d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
                                                                 stroke-width="0.0625"></path>
@@ -113,25 +144,30 @@
                                     </div>
                                     <template if:true={option.selectedOptions}>
                                         <div class="pill-section">
-                                            <ul class="slds-listbox slds-listbox_horizontal" aria-label="Selected Options:">
+                                            <ul class="slds-listbox slds-listbox_horizontal"
+                                                aria-label="Selected Options:">
                                                 <template for:each={option.selectedOptions} for:item="option2">
-                                                    <li key={option2.value} class="slds-listbox-item pill-body custom-pill">
+                                                    <li key={option2.value}
+                                                        class="slds-listbox-item pill-body custom-pill">
                                                         <span class="slds-pill">
                                                             <span class="slds-pill__label"
                                                                 title="Burlington Textiles Corp of America">{option2.label}</span>
                                                             <!-- <template if:false={option.isMandatory}> -->
-                                                                <span class="slds-icon_container slds-pill__remove" title="Remove">
-                                                                    <button
-                                                                        class="slds-button slds-button_icon slds-button_icon slds-pill__remove pill-remove"
-                                                                        title="Remove" data-index={index} onclick={removeOptionMethod} data-id={option2.value}>
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
-                                                                            viewBox="0 0 520 520" fill="#fff">
-                                                                            <path
-                                                                                d="m310 254 130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 0 1-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0 1 14 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 0 1 0-14z" />
-                                                                        </svg>
-                                                                        <span class="slds-assistive-text">Remove</span>
-                                                                    </button>
-                                                                </span>
+                                                            <span class="slds-icon_container slds-pill__remove"
+                                                                title="Remove">
+                                                                <button
+                                                                    class="slds-button slds-button_icon slds-button_icon slds-pill__remove pill-remove"
+                                                                    title="Remove" data-index={index}
+                                                                    onclick={removeOptionMethod}
+                                                                    data-id={option2.value}>
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                        width="52" viewBox="0 0 520 520" fill="#fff">
+                                                                        <path
+                                                                            d="m310 254 130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 0 1-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0 1 14 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 0 1 0-14z" />
+                                                                    </svg>
+                                                                    <span class="slds-assistive-text">Remove</span>
+                                                                </button>
+                                                            </span>
                                                             <!-- </template> -->
                                                         </span>
                                                     </li>
@@ -154,32 +190,38 @@
                                     <label class="custom-field-lable">{option.label}</label>
                                     <span>
                                         <template if:true={option.isNot}>
-                                            <label class="slds-form-element__label operator-div">not  </label>
+                                            <label class="slds-form-element__label operator-div">not </label>
                                         </template>
                                     </span>
                                     <span>
-                                        <label class="slds-form-element__label operator-div">{option.operatorName} </label>
+                                        <label class="slds-form-element__label operator-div">{option.operatorName}
+                                        </label>
                                     </span>
                                 </div>
                                 <div class="slds-form-element__control">
                                     <div class="slds-form-element__control">
                                         <div class="slds-combobox_container slds-has-selection">
-                                            <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                            <div
+                                                class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
                                                 <div class="input-delete-cover">
                                                     <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
                                                         role="none">
                                                         <input type="text" class="slds-input slds-combobox__input"
-                                                            placeholder={option.label}  data-id={index} value={option.searchTerm}
-                                                            onkeyup={handleSearchChangeString} minlength="0" maxlength="25"/>
+                                                            placeholder={option.label} data-id={index}
+                                                            value={option.searchTerm} onkeyup={handleSearchChangeString}
+                                                            minlength="0" maxlength="25" />
                                                     </div>
-                                                    <div class="plus" data-id={index} onclick={addTheString}><svg xmlns="http://www.w3.org/2000/svg"
-                                                            height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                                    <div class="plus" data-id={index} onclick={addTheString}><svg
+                                                            xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                            viewBox="0 0 520 520" fill="#fff">
                                                             <path
                                                                 d="M300 290h165c8 0 15-7 15-15v-30c0-8-7-15-15-15H300c-6 0-10-4-10-10V55c0-8-7-15-15-15h-30c-8 0-15 7-15 15v165c0 6-4 10-10 10H55c-8 0-15 7-15 15v30c0 8 7 15 15 15h165c6 0 10 4 10 10v165c0 8 7 15 15 15h30c8 0 15-7 15-15V300c0-6 4-10 10-10z" />
                                                         </svg></div>
-                                                    <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
-                                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16" fill="#000000" width="14" height="14">
+                                                    <div class="delete-icon-cover" data-id={index}
+                                                        onclick={clearSearch}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                            fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                            stroke-linejoin="round" width="15" height="15">
                                                             <path
                                                                 d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
                                                                 stroke-width="0.0625"></path>
@@ -191,19 +233,24 @@
                                     </div>
                                     <template if:true={option.selectedOptions}>
                                         <div class="pill-section">
-                                            <ul class="slds-listbox slds-listbox_horizontal" aria-label="Selected Options:">
+                                            <ul class="slds-listbox slds-listbox_horizontal"
+                                                aria-label="Selected Options:">
                                                 <template for:each={option.selectedOptions} for:item="option2">
                                                     <li key={option2.value} class="slds-listbox-item pill-body">
                                                         <span class="slds-pill">
                                                             <span class="slds-pill__label"
                                                                 title="Burlington Textiles Corp of America">{option2.label}</span>
                                                             <template if:false={option.isMandatory}>
-                                                                <span class="slds-icon_container slds-pill__remove" title="Remove">
+                                                                <span class="slds-icon_container slds-pill__remove"
+                                                                    title="Remove">
                                                                     <button
                                                                         class="slds-button slds-button_icon slds-button_icon slds-pill__remove pill-remove"
-                                                                        title="Remove" data-index={index} onclick={removeOptionMethodString} data-id={option2.value}>
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
-                                                                            viewBox="0 0 520 520" fill="#fff">
+                                                                        title="Remove" data-index={index}
+                                                                        onclick={removeOptionMethodString}
+                                                                        data-id={option2.value}>
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            height="52" width="52" viewBox="0 0 520 520"
+                                                                            fill="#fff">
                                                                             <path
                                                                                 d="m310 254 130-131c6-6 6-15 0-21l-20-21c-6-6-15-6-21 0L268 212a10 10 0 0 1-14 0L123 80c-6-6-15-6-21 0l-21 21c-6 6-6 15 0 21l131 131c4 4 4 10 0 14L80 399c-6 6-6 15 0 21l21 21c6 6 15 6 21 0l131-131a10 10 0 0 1 14 0l131 131c6 6 15 6 21 0l21-21c6-6 6-15 0-21L310 268a10 10 0 0 1 0-14z" />
                                                                         </svg>
@@ -221,7 +268,7 @@
                                 <template if:true={option.message}>
                                     <label class="error-message">{option.message}</label>
                                 </template>
-                            </div>  
+                            </div>
                         </template>
                         <template if:true={option.currency}>
                             <template if:true={option.isRange}>
@@ -233,35 +280,47 @@
                                         <label class="custom-field-lable">{option.label}</label>
                                         <span>
                                             <template if:true={option.isNot}>
-                                                <label class="slds-form-element__label operator-div">not  </label>
+                                                <label class="slds-form-element__label operator-div">not </label>
                                             </template>
                                         </span>
                                         <span>
-                                            <label class="slds-form-element__label operator-div">{option.operatorName} </label>
+                                            <label class="slds-form-element__label operator-div">{option.operatorName}
+                                            </label>
                                         </span>
                                     </div>
                                     <div class="slds-form-element__control">
                                         <div class="slds-combobox_container slds-has-selection">
-                                            <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                            <div
+                                                class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
                                                 <div class="input-delete-cover">
                                                     <div class="min-max-input-cover">
                                                         <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div "
                                                             role="none">
-                                                            <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                                placeholder="Min.." data-index={index} data-id={option.minValue} value={option.minValue} onkeyup={handleMinValueChange} min="0" minlength="0" maxlength="25"/>
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Min.." data-index={index}
+                                                                data-id={option.minValue} value={option.minValue}
+                                                                onkeyup={handleMinValueChange} min="0" minlength="0"
+                                                                maxlength="25" />
                                                         </div>
                                                         <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
                                                             role="none">
-                                                            <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                                placeholder="Max.." data-index={index} data-id={option.maxValue} value={option.maxValue} onkeyup={handleMaxValueChange} min="0" minlength="0" maxlength="25"/>
-                                                            </div>
-                                                            <template if:true={option.message}>
-                                                                <label class="error-message">{option.message}</label>
-                                                            </template>
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Max.." data-index={index}
+                                                                data-id={option.maxValue} value={option.maxValue}
+                                                                onkeyup={handleMaxValueChange} min="0" minlength="0"
+                                                                maxlength="25" />
+                                                        </div>
+                                                        <template if:true={option.message}>
+                                                            <label class="error-message">{option.message}</label>
+                                                        </template>
                                                     </div>
-                                                    <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
-                                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16" fill="#000000" width="14" height="14">
+                                                    <div class="delete-icon-cover" data-id={index}
+                                                        onclick={clearSearch}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                            fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                            stroke-linejoin="round" width="15" height="15">
                                                             <path
                                                                 d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
                                                                 stroke-width="0.0625"></path>
@@ -271,7 +330,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>    
+                                </div>
                             </template>
                             <template if:true={option.isMin}>
                                 <div key={option.apiName} class="slds-form-element combobox min-max-field">
@@ -281,26 +340,34 @@
                                         </template>
                                         <label class="custom-field-lable">{option.label}</label>
                                         <span>
-                                            <label class="slds-form-element__label operator-div">{option.operatorName} </label>
+                                            <label class="slds-form-element__label operator-div">{option.operatorName}
+                                            </label>
                                         </span>
                                     </div>
                                     <div class="slds-form-element__control">
                                         <div class="slds-combobox_container slds-has-selection">
-                                            <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                            <div
+                                                class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
                                                 <div class="input-delete-cover">
                                                     <div class="min-max-input-cover">
                                                         <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div "
                                                             role="none">
-                                                            <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                            placeholder="Min.." data-index={index} data-id={option.minValue} value={option.minValue} onkeyup={handleMinValueChange} min="0" minlength="0" maxlength="25"/>
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Min.." data-index={index}
+                                                                data-id={option.minValue} value={option.minValue}
+                                                                onkeyup={handleMinValueChange} min="0" minlength="0"
+                                                                maxlength="25" />
                                                         </div>
                                                         <template if:true={option.message}>
                                                             <label class="error-message">{option.message}</label>
                                                         </template>
                                                     </div>
-                                                    <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
-                                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16" fill="#000000" width="14" height="14">
+                                                    <div class="delete-icon-cover" data-id={index}
+                                                        onclick={clearSearch}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                            fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                            stroke-linejoin="round" width="15" height="15">
                                                             <path
                                                                 d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
                                                                 stroke-width="0.0625"></path>
@@ -310,32 +377,40 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>  
-                                
+                                </div>
+
                             </template>
                             <template if:true={option.isMax}>
                                 <div key={option.apiName} class="slds-form-element combobox min-max-field">
                                     <label class="custom-field-lable">{option.label}</label>
                                     <span>
-                                        <label class="slds-form-element__label operator-div">{option.operatorName} </label>
+                                        <label class="slds-form-element__label operator-div">{option.operatorName}
+                                        </label>
                                     </span>
                                     <div class="slds-form-element__control">
                                         <div class="slds-combobox_container slds-has-selection">
-                                            <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                            <div
+                                                class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
                                                 <div class="input-delete-cover">
                                                     <div class="min-max-input-cover">
                                                         <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
                                                             role="none">
-                                                            <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                                placeholder="Max.." data-index={index} data-id={option.maxValue} value={option.maxValue} onkeyup={handleMaxValueChange} min="0" minlength="0" maxlength="25"/>
-                                                            </div>
-                                                            <template if:true={option.message}>
-                                                                <label class="error-message">{option.message}</label>
-                                                            </template>
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Max.." data-index={index}
+                                                                data-id={option.maxValue} value={option.maxValue}
+                                                                onkeyup={handleMaxValueChange} min="0" minlength="0"
+                                                                maxlength="25" />
+                                                        </div>
+                                                        <template if:true={option.message}>
+                                                            <label class="error-message">{option.message}</label>
+                                                        </template>
                                                     </div>
-                                                    <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
-                                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16" fill="#000000" width="14" height="14">
+                                                    <div class="delete-icon-cover" data-id={index}
+                                                        onclick={clearSearch}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                            fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                            stroke-linejoin="round" width="15" height="15">
                                                             <path
                                                                 d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
                                                                 stroke-width="0.0625"></path>
@@ -345,7 +420,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>  
+                                </div>
                             </template>
                         </template>
                         <template if:true={option.double}>
@@ -358,44 +433,66 @@
                                         <label class="custom-field-lable">{option.label}</label>
                                         <span>
                                             <template if:true={option.isNot}>
-                                                <label class="slds-form-element__label operator-div">not  </label>
+                                                <label class="slds-form-element__label operator-div">not </label>
                                             </template>
                                         </span>
                                         <span>
-                                            <label class="slds-form-element__label operator-div">{option.operatorName} </label>
-                                        </span>  
+                                            <label class="slds-form-element__label operator-div">{option.operatorName}
+                                            </label>
+                                        </span>
                                     </div>
                                     <div class="slds-form-element__control">
                                         <div class="slds-combobox_container slds-has-selection">
-                                            <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                            <div
+                                                class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
                                                 <div class="input-delete-cover">
                                                     <div class="min-max-input-cover">
                                                         <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div "
                                                             role="none">
-                                                            <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                            placeholder="Min.." data-index={index} data-id={option.minValue} value={option.minValue} onkeyup={handleMinValueChange} min="0" minlength="0" maxlength="25"/>
-                                                            <svg class="up-btn-max-min min-max" xmlns="http://www.w3.org/2000/svg" height="52"
-                                                                width="52" viewBox="0 0 520 520" fill="#fff" data-index={index} data-id={option.minValue} onclick={incrementMinValue}>
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Min.." data-index={index}
+                                                                data-id={option.minValue} value={option.minValue}
+                                                                onkeyup={handleMinValueChange} min="0" minlength="0"
+                                                                maxlength="25" />
+                                                            <svg class="up-btn-max-min min-max"
+                                                                xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                width="52" viewBox="0 0 520 520" fill="#fff"
+                                                                data-index={index} data-id={option.minValue}
+                                                                onclick={incrementMinValue}>
                                                                 <path
                                                                     d="M437 380H83c-10 0-17-13-9-22l173-212c6-8 19-8 25 0l175 212c7 9 1 22-10 22z" />
                                                             </svg>
-                                                            <svg class="down-btn-max-min min-max" xmlns="http://www.w3.org/2000/svg" height="52"
-                                                                width="52" viewBox="0 0 520 520" fill="#fff" data-index={index} data-id={option.minValue} onclick={decrementMinValue}>
+                                                            <svg class="down-btn-max-min min-max"
+                                                                xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                width="52" viewBox="0 0 520 520" fill="#fff"
+                                                                data-index={index} data-id={option.minValue}
+                                                                onclick={decrementMinValue}>
                                                                 <path
                                                                     d="M83 140h354c10 0 17 13 9 22L273 374c-6 8-19 8-25 0L73 162c-7-9-1-22 10-22z" />
                                                             </svg>
                                                         </div>
                                                         <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
                                                             role="none">
-                                                            <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                            placeholder="Max.." data-index={index} data-id={option.maxValue} value={option.maxValue} onkeyup={handleMaxValueChange} min="0" minlength="0" maxlength="25"/>
-                                                            <svg class="up-btn-max-min min-max" xmlns="http://www.w3.org/2000/svg" height="52"
-                                                                width="52" viewBox="0 0 520 520" fill="#fff"  data-index={index} data-id={option.maxValue} onclick={incrementMaxValue}>
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Max.." data-index={index}
+                                                                data-id={option.maxValue} value={option.maxValue}
+                                                                onkeyup={handleMaxValueChange} min="0" minlength="0"
+                                                                maxlength="25" />
+                                                            <svg class="up-btn-max-min min-max"
+                                                                xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                width="52" viewBox="0 0 520 520" fill="#fff"
+                                                                data-index={index} data-id={option.maxValue}
+                                                                onclick={incrementMaxValue}>
                                                                 <path
                                                                     d="M437 380H83c-10 0-17-13-9-22l173-212c6-8 19-8 25 0l175 212c7 9 1 22-10 22z" />
                                                             </svg>
-                                                            <svg class="down-btn-max-min min-max" xmlns="http://www.w3.org/2000/svg" height="52"
-                                                                width="52" viewBox="0 0 520 520" fill="#fff"  data-index={index} data-id={option.maxValue} onclick={decrementMaxValue}>
+                                                            <svg class="down-btn-max-min min-max"
+                                                                xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                width="52" viewBox="0 0 520 520" fill="#fff"
+                                                                data-index={index} data-id={option.maxValue}
+                                                                onclick={decrementMaxValue}>
                                                                 <path
                                                                     d="M83 140h354c10 0 17 13 9 22L273 374c-6 8-19 8-25 0L73 162c-7-9-1-22 10-22z" />
                                                             </svg>
@@ -404,9 +501,11 @@
                                                             <label class="error-message">{option.message}</label>
                                                         </template>
                                                     </div>
-                                                    <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
-                                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16" fill="#000000" width="14" height="14">
+                                                    <div class="delete-icon-cover" data-id={index}
+                                                        onclick={clearSearch}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                            fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                            stroke-linejoin="round" width="15" height="15">
                                                             <path
                                                                 d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
                                                                 stroke-width="0.0625"></path>
@@ -424,25 +523,37 @@
                                         </template>
                                         <label class="custom-field-lable">{option.label}</label>
                                         <span>
-                                            <label class="slds-form-element__label operator-div">{option.operatorName} </label>
+                                            <label class="slds-form-element__label operator-div">{option.operatorName}
+                                            </label>
                                         </span>
                                     </div>
                                     <div class="slds-form-element__control">
                                         <div class="slds-combobox_container slds-has-selection">
-                                            <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
+                                            <div
+                                                class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click combobox-cover">
                                                 <div class="input-delete-cover">
                                                     <div class="min-max-input-cover">
                                                         <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
                                                             role="none">
-                                                            <input type="number" class="slds-input slds-combobox__input min-max-input-div no-spinner"
-                                                                placeholder="Max.." data-index={index} data-id={option.maxValue} value={option.maxValue} onkeyup={handleMaxValueChange} min="0" minlength="0" maxlength="25"/>
-                                                            <svg class="up-btn-max-min min-max" xmlns="http://www.w3.org/2000/svg" height="52"
-                                                                width="52" viewBox="0 0 520 520" fill="#fff"  data-index={index} data-id={option.maxValue} onclick={incrementMaxValue}>
+                                                            <input type="number"
+                                                                class="slds-input slds-combobox__input min-max-input-div no-spinner"
+                                                                placeholder="Max.." data-index={index}
+                                                                data-id={option.maxValue} value={option.maxValue}
+                                                                onkeyup={handleMaxValueChange} min="0" minlength="0"
+                                                                maxlength="25" />
+                                                            <svg class="up-btn-max-min min-max"
+                                                                xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                width="52" viewBox="0 0 520 520" fill="#fff"
+                                                                data-index={index} data-id={option.maxValue}
+                                                                onclick={incrementMaxValue}>
                                                                 <path
                                                                     d="M437 380H83c-10 0-17-13-9-22l173-212c6-8 19-8 25 0l175 212c7 9 1 22-10 22z" />
                                                             </svg>
-                                                            <svg class="down-btn-max-min min-max" xmlns="http://www.w3.org/2000/svg" height="52"
-                                                                width="52" viewBox="0 0 520 520" fill="#fff"  data-index={index} data-id={option.maxValue} onclick={decrementMaxValue}>
+                                                            <svg class="down-btn-max-min min-max"
+                                                                xmlns="http://www.w3.org/2000/svg" height="52"
+                                                                width="52" viewBox="0 0 520 520" fill="#fff"
+                                                                data-index={index} data-id={option.maxValue}
+                                                                onclick={decrementMaxValue}>
                                                                 <path
                                                                     d="M83 140h354c10 0 17 13 9 22L273 374c-6 8-19 8-25 0L73 162c-7-9-1-22 10-22z" />
                                                             </svg>
@@ -451,9 +562,11 @@
                                                             <label class="error-message">{option.message}</label>
                                                         </template>
                                                     </div>
-                                                    <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
-                                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16" fill="#000000" width="14" height="14">
+                                                    <div class="delete-icon-cover" data-id={index}
+                                                        onclick={clearSearch}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                            fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                            stroke-linejoin="round" width="15" height="15">
                                                             <path
                                                                 d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
                                                                 stroke-width="0.0625"></path>
@@ -478,50 +591,45 @@
                                                 <label class="custom-field-lable">{option.label}</label>
                                                 <span>
                                                     <template if:true={option.isNot}>
-                                                        <label class="slds-form-element__label operator-div">not  </label>
+                                                        <label class="slds-form-element__label operator-div">not
+                                                        </label>
                                                     </template>
                                                 </span>
                                                 <span>
                                                     <template if:true={option.isNot}>
-                                                        <label class="slds-form-element__label operator-div">not  </label>
+                                                        <label class="slds-form-element__label operator-div">not
+                                                        </label>
                                                     </template>
                                                 </span>
                                                 <span>
-                                                    <label class="slds-form-element__label operator-div">{option.operatorName} </label>
+                                                    <label
+                                                        class="slds-form-element__label operator-div">{option.operatorName}
+                                                    </label>
                                                 </span>
                                             </div>
                                             <div class="date-input-cover">
                                                 <div class="min-max-text">Min. </div>
-                                                <lightning-input
-                                                data-id={index}
-                                                class="input-tag"
-                                                type="datetime"
-                                                variant="label-hidden"
-                                                value={option.minDate}
-                                                onchange={handleMinDate}
-                                            ></lightning-input>
+                                                <lightning-input data-id={index} class="input-tag" type="datetime"
+                                                    variant="label-hidden" value={option.minDate}
+                                                    onchange={handleMinDate}></lightning-input>
                                             </div>
                                             <div class="date-input-cover">
                                                 <div class="min-max-text">Max. </div>
-                                                <lightning-input
-                                                data-id={index}
-                                                class="input-tag"
-                                                type="datetime"
-                                                variant="label-hidden"
-                                                value={option.maxDate}
-                                                onchange={handleMaxDate}
-                                            ></lightning-input>
+                                                <lightning-input data-id={index} class="input-tag" type="datetime"
+                                                    variant="label-hidden" value={option.maxDate}
+                                                    onchange={handleMaxDate}></lightning-input>
                                             </div>
                                         </div>
-                
-                                    <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16 16" fill="#000000" width="14" height="14">
-                                            <path
-                                                d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
-                                                stroke-width="0.0625"></path>
-                                        </svg>
-                                    </div>
+
+                                        <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
+                                                stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15"
+                                                height="15">
+                                                <path
+                                                    d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                    stroke-width="0.0625"></path>
+                                            </svg>
+                                        </div>
                                     </div>
                                     <template if:true={option.message}>
                                         <label class="error-message">{option.message}</label>
@@ -529,8 +637,8 @@
                                 </div>
                             </template>
                             <template if:true={option.isDateMax}>
-                                <div class="date-time-div-cover combobox" key={option.apiName}>     
-                                    <div class="date-time-div" >
+                                <div class="date-time-div-cover combobox" key={option.apiName}>
+                                    <div class="date-time-div">
                                         <div class="input-wrapper">
                                             <div class="filter-index-label">
                                                 <template if:true={isCustomLogicEnabled}>
@@ -538,7 +646,9 @@
                                                 </template>
                                                 <label class="custom-field-lable">{option.label}</label>
                                                 <span>
-                                                    <label class="slds-form-element__label operator-div">{option.operatorName} </label>
+                                                    <label
+                                                        class="slds-form-element__label operator-div">{option.operatorName}
+                                                    </label>
                                                 </span>
                                             </div>
                                             <!-- <lightning-input
@@ -549,27 +659,23 @@
                                             value={option.maxDate}
                                             onchange={handleMaxDate}
                                         ></lightning-input> -->
-                                        <div class="date-input-cover">
-                                            <div class="min-max-text">Max. </div>
-                                            <lightning-input
-                                            data-id={index}
-                                            class="input-tag"
-                                            type="datetime"
-                                            variant="label-hidden"
-                                            value={option.maxDate}
-                                            onchange={handleMaxDate}
-                                        ></lightning-input>
+                                            <div class="date-input-cover">
+                                                <div class="min-max-text">Max. </div>
+                                                <lightning-input data-id={index} class="input-tag" type="datetime"
+                                                    variant="label-hidden" value={option.maxDate}
+                                                    onchange={handleMaxDate}></lightning-input>
+                                            </div>
                                         </div>
+
+                                        <div class="delete-icon-cover single" data-id={index} onclick={clearSearch}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
+                                                stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15"
+                                                height="15">
+                                                <path
+                                                    d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                    stroke-width="0.0625"></path>
+                                            </svg>
                                         </div>
-                
-                                    <div class="delete-icon-cover single" data-id={index} onclick={clearSearch}>
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16 16" fill="#000000" width="14" height="14">
-                                            <path
-                                                d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
-                                                stroke-width="0.0625"></path>
-                                        </svg>
-                                    </div>
                                     </div>
                                     <template if:true={option.message}>
                                         <label class="error-message">{option.message}</label>
@@ -578,7 +684,7 @@
                             </template>
                             <template if:true={option.isDateMin}>
                                 <div class="date-time-div-cover combobox" key={option.apiName}>
-                                    <div class="date-time-div" >
+                                    <div class="date-time-div">
                                         <div class="input-wrapper">
                                             <div class="filter-index-label">
                                                 <template if:true={isCustomLogicEnabled}>
@@ -586,7 +692,9 @@
                                                 </template>
                                                 <label class="custom-field-lable">{option.label}</label>
                                                 <span>
-                                                    <label class="slds-form-element__label operator-div">{option.operatorName} </label>
+                                                    <label
+                                                        class="slds-form-element__label operator-div">{option.operatorName}
+                                                    </label>
                                                 </span>
                                             </div>
                                             <!-- <lightning-input
@@ -597,39 +705,35 @@
                                             value={option.minDate}
                                             onchange={handleMinDate}
                                         ></lightning-input> -->
-                                        <div class="date-input-cover">
-                                            <div class="min-max-text">Min. </div>
-                                            <lightning-input
-                                            data-id={index}
-                                            class="input-tag"
-                                            type="datetime"
-                                            variant="label-hidden"
-                                            value={option.minDate}
-                                            onchange={handleMinDate}
-                                        ></lightning-input>
+                                            <div class="date-input-cover">
+                                                <div class="min-max-text">Min. </div>
+                                                <lightning-input data-id={index} class="input-tag" type="datetime"
+                                                    variant="label-hidden" value={option.minDate}
+                                                    onchange={handleMinDate}></lightning-input>
+                                            </div>
                                         </div>
+
+                                        <div class="delete-icon-cover single" data-id={index} onclick={clearSearch}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
+                                                stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15"
+                                                height="15">
+                                                <path
+                                                    d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                    stroke-width="0.0625"></path>
+                                            </svg>
                                         </div>
-                
-                                    <div class="delete-icon-cover single" data-id={index} onclick={clearSearch}>
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16 16" fill="#000000" width="14" height="14">
-                                            <path
-                                                d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
-                                                stroke-width="0.0625"></path>
-                                        </svg>
-                                    </div>
                                     </div>
                                     <template if:true={option.message}>
                                         <label class="error-message">{option.message}</label>
                                     </template>
                                 </div>
                             </template>
-                        
+
                         </template>
                         <template if:true={option.date}>
                             <template if:true={option.isDateMax}>
-                                <div class="date-time-div-cover combobox" key={option.apiName}>     
-                                    <div class="date-time-div" >
+                                <div class="date-time-div-cover combobox" key={option.apiName}>
+                                    <div class="date-time-div">
                                         <div class="input-wrapper">
                                             <div class="filter-index-label">
                                                 <template if:true={isCustomLogicEnabled}>
@@ -637,32 +741,30 @@
                                                 </template>
                                                 <label class="custom-field-lable">{option.label}</label>
                                                 <span>
-                                                    <label class="slds-form-element__label operator-div">{option.operatorName} </label>
+                                                    <label
+                                                        class="slds-form-element__label operator-div">{option.operatorName}
+                                                    </label>
                                                 </span>
                                             </div>
                                             <div class="date-input-cover">
                                                 <div class="min-max-text">Max. </div>
-                                                <div class="date-input-flex">     
-                                                    <lightning-input
-                                                    data-id={index}
-                                                    class="input-tag"
-                                                    type="date"
-                                                    variant="label-hidden"
-                                                    value={option.maxDate}
-                                                    onchange={handleMaxDate}
-                                                ></lightning-input>
+                                                <div class="date-input-flex">
+                                                    <lightning-input data-id={index} class="input-tag" type="date"
+                                                        variant="label-hidden" value={option.maxDate}
+                                                        onchange={handleMaxDate}></lightning-input>
                                                 </div>
                                             </div>
                                         </div>
-                
-                                    <div class="delete-icon-cover single" data-id={index} onclick={clearSearch}>
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16 16" fill="#000000" width="14" height="14">
-                                            <path
-                                                d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
-                                                stroke-width="0.0625"></path>
-                                        </svg>
-                                    </div>
+
+                                        <div class="delete-icon-cover single" data-id={index} onclick={clearSearch}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
+                                                stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15"
+                                                height="15">
+                                                <path
+                                                    d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                    stroke-width="0.0625"></path>
+                                            </svg>
+                                        </div>
                                     </div>
                                     <template if:true={option.message}>
                                         <label class="error-message">{option.message}</label>
@@ -671,7 +773,7 @@
                             </template>
                             <template if:true={option.isDateMin}>
                                 <div class="date-time-div-cover combobox" key={option.apiName}>
-                                    <div class="date-time-div" >
+                                    <div class="date-time-div">
                                         <div class="input-wrapper">
                                             <div class="filter-index-label">
                                                 <template if:true={isCustomLogicEnabled}>
@@ -679,32 +781,30 @@
                                                 </template>
                                                 <label class="custom-field-lable">{option.label}</label>
                                                 <span>
-                                                    <label class="slds-form-element__label operator-div">{option.operatorName} </label>
+                                                    <label
+                                                        class="slds-form-element__label operator-div">{option.operatorName}
+                                                    </label>
                                                 </span>
                                             </div>
                                             <div class="date-input-cover">
                                                 <div class="min-max-text">Min. </div>
                                                 <div class="date-input-flex">
-                                                    <lightning-input
-                                                    data-id={index}
-                                                    class="input-tag"
-                                                    type="date"
-                                                    variant="label-hidden"
-                                                    value={option.minDate}
-                                                    onchange={handleMinDate}
-                                                ></lightning-input>
+                                                    <lightning-input data-id={index} class="input-tag" type="date"
+                                                        variant="label-hidden" value={option.minDate}
+                                                        onchange={handleMinDate}></lightning-input>
                                                 </div>
                                             </div>
                                         </div>
-                
-                                    <div class="delete-icon-cover single" data-id={index} onclick={clearSearch}>
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16 16" fill="#000000" width="14" height="14">
-                                            <path
-                                                d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
-                                                stroke-width="0.0625"></path>
-                                        </svg>
-                                    </div>
+
+                                        <div class="delete-icon-cover single" data-id={index} onclick={clearSearch}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
+                                                stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15"
+                                                height="15">
+                                                <path
+                                                    d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                    stroke-width="0.0625"></path>
+                                            </svg>
+                                        </div>
                                     </div>
                                     <template if:true={option.message}>
                                         <label class="error-message">{option.message}</label>
@@ -722,7 +822,8 @@
                                                 <label class="custom-field-lable">{option.label}</label>
                                                 <span>
                                                     <template if:true={option.isNot}>
-                                                        <label class="slds-form-element__label operator-div">not  </label>
+                                                        <label class="slds-form-element__label operator-div">not
+                                                        </label>
                                                     </template>
                                                 </span>
                                                 <!-- <span>
@@ -731,45 +832,38 @@
                                                     </template>
                                                 </span> -->
                                                 <span>
-                                                    <label class="slds-form-element__label operator-div">{option.operatorName} </label>
+                                                    <label
+                                                        class="slds-form-element__label operator-div">{option.operatorName}
+                                                    </label>
                                                 </span>
                                             </div>
                                             <div class="date-input-cover">
                                                 <div class="min-max-text">Min. </div>
                                                 <div class="date-input-flex">
-                                                    <lightning-input
-                                                    data-id={index}
-                                                    class="input-tag"
-                                                    type="date"
-                                                    variant="label-hidden"
-                                                    value={option.minDate}
-                                                    onchange={handleMinDate}
-                                                ></lightning-input>
+                                                    <lightning-input data-id={index} class="input-tag" type="date"
+                                                        variant="label-hidden" value={option.minDate}
+                                                        onchange={handleMinDate}></lightning-input>
                                                 </div>
                                             </div>
                                             <div class="date-input-cover">
                                                 <div class="min-max-text">Max. </div>
-                                                <div class="date-input-flex">     
-                                                    <lightning-input
-                                                    data-id={index}
-                                                    class="input-tag"
-                                                    type="date"
-                                                    variant="label-hidden"
-                                                    value={option.maxDate}
-                                                    onchange={handleMaxDate}
-                                                ></lightning-input>
+                                                <div class="date-input-flex">
+                                                    <lightning-input data-id={index} class="input-tag" type="date"
+                                                        variant="label-hidden" value={option.maxDate}
+                                                        onchange={handleMaxDate}></lightning-input>
                                                 </div>
                                             </div>
                                         </div>
-                
-                                    <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16 16" fill="#000000" width="14" height="14">
-                                            <path
-                                                d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
-                                                stroke-width="0.0625"></path>
-                                        </svg>
-                                    </div>
+
+                                        <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
+                                                stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15"
+                                                height="15">
+                                                <path
+                                                    d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                    stroke-width="0.0625"></path>
+                                            </svg>
+                                        </div>
                                     </div>
                                     <template if:true={option.message}>
                                         <label class="error-message">{option.message}</label>
@@ -787,27 +881,30 @@
                                         <label class="custom-field-lable">{option.label}</label>
                                         <span>
                                             <template if:true={option.isNot}>
-                                                <label class="slds-form-element__label operator-div">not  </label>
+                                                <label class="slds-form-element__label operator-div">not </label>
                                             </template>
                                         </span>
                                         <span>
-                                            <label class="slds-form-element__label operator-div">{option.operatorName} </label>
+                                            <label class="slds-form-element__label operator-div">{option.operatorName}
+                                            </label>
                                         </span>
                                     </div>
-                        
+
                                     <div class="slds-form-element__control">
-                                        <lightning-input type="checkbox" value={option.fieldChecked} data-index={index} onclick={checkboxFieldChange}></lightning-input>
+                                        <lightning-input type="checkbox" value={option.fieldChecked} data-index={index}
+                                            onclick={checkboxFieldChange}></lightning-input>
                                     </div>
                                 </div>
                                 <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 16 16" fill="#000000" width="14" height="14">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
+                                        stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15"
+                                        height="15">
                                         <path
                                             d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
                                             stroke-width="0.0625"></path>
                                     </svg>
                                 </div>
-                            </div>  
+                            </div>
                         </template>
                     </template>
                 </template>
@@ -818,7 +915,9 @@
                 <div class="custom-logic-section">
                     <div class="custom-logic-header">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" fill="#0176D3"/>
+                            <path
+                                d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"
+                                fill="#0176D3" />
                         </svg>
                         <span class="custom-logic-title">Custom Logic Expression</span>
                     </div>
@@ -865,7 +964,8 @@
                                 <div class="bread-crumb-cover">
                                     <label class="contact-label">Contact</label>
                                     <span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520" fill="#fff">
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                            viewBox="0 0 520 520" fill="#fff">
                                             <path
                                                 d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
                                         </svg>
@@ -876,8 +976,8 @@
                                         <lightning-breadcrumb label={breadcrumb.label} data-index={index}
                                             onclick={handleBreadcrumbClick}></lightning-breadcrumb>
                                         <span>
-                                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 520 520"
-                                                fill="#fff">
+                                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                viewBox="0 0 520 520" fill="#fff">
                                                 <path
                                                     d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
                                             </svg>
@@ -892,9 +992,11 @@
                                             <div class="input-delete-cover">
                                                 <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
                                                     role="none">
-                                                    <input type="text" class="slds-input slds-combobox__input" placeholder="Select Field"
-                                                        value={searchTerm1} onkeyup={handleModalFieldSearchChange} onfocus={handleModalFieldFocus}
-                                                        onblur={handleModalFieldBlur} disabled={isDisabled} />
+                                                    <input type="text" class="slds-input slds-combobox__input"
+                                                        placeholder="Select Field" value={searchTerm1}
+                                                        onkeyup={handleModalFieldSearchChange}
+                                                        onfocus={handleModalFieldFocus} onblur={handleModalFieldBlur}
+                                                        disabled={isDisabled} />
                                                     <span
                                                         class="slds-icon_container slds-icon-utility-search slds-input__icon slds-input__icon_right">
                                                         <!-- <lightning-icon icon-name="utility:search" alternative-text="Search"></lightning-icon> -->
@@ -902,12 +1004,13 @@
                                                 </div>
                                             </div>
                                             <template if:true={showOptions1}>
-                                                <div class="slds-dropdown slds-dropdown_length-5" onmousedown={handlePreventDefault}>
+                                                <div class="slds-dropdown slds-dropdown_length-5"
+                                                    onmousedown={handlePreventDefault}>
                                                     <ul class="slds-listbox slds-listbox_vertical ul-div">
                                                         <template for:each={filteredOptions1} for:item="option">
                                                             <template if:false={option.showRightIcon}>
-                                                                <li key={option.value} data-id={option.value} onclick={changeFields}
-                                                                    class="slds-listbox__item">
+                                                                <li key={option.value} data-id={option.value}
+                                                                    onclick={changeFields} class="slds-listbox__item">
                                                                     <div
                                                                         class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center slds-p-horizontal_small">
                                                                         <span class="slds-media__body">
@@ -919,15 +1022,18 @@
                                                             </template>
                                                             <template if:true={option.showRightIcon}>
                                                                 <li key={option.value} data-id={option.value}
-                                                                    onclick={changeTheCheckboxValue} class="slds-listbox__item">
+                                                                    onclick={changeTheCheckboxValue}
+                                                                    class="slds-listbox__item">
                                                                     <div
                                                                         class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center slds-p-horizontal_small">
                                                                         <span class="slds-media__body">
                                                                             <span class="slds-truncate"
                                                                                 title={option.label}>{option.label}</span>
                                                                         </span>
-                                                                        <span class="slds-media__figure slds-media__figure_reverse">
-                                                                            <lightning-icon icon-name="utility:chevronright"
+                                                                        <span
+                                                                            class="slds-media__figure slds-media__figure_reverse">
+                                                                            <lightning-icon
+                                                                                icon-name="utility:chevronright"
                                                                                 alternative-text="Lookup Field"
                                                                                 size="x-small"></lightning-icon>
                                                                         </span>
@@ -956,12 +1062,14 @@
                                         </div>
                                         <div class="not-operation-cover">
                                             <div class="not-cover">
-                                                <lightning-input type="checkbox" label="Not" data-index={index} checked={notCheckboxValue}
+                                                <lightning-input type="checkbox" label="Not" data-index={index}
+                                                    checked={notCheckboxValue}
                                                     onchange={handleNotCheckboxChange}></lightning-input>
                                             </div>
                                             <div>
-                                                <lightning-combobox class="operator-combobox" data-index={index} value={field.operation}
-                                                    options={currentFieldOptions} onchange={operationSelect}></lightning-combobox>
+                                                <lightning-combobox class="operator-combobox" data-index={index}
+                                                    value={field.operation} options={currentFieldOptions}
+                                                    onchange={operationSelect}></lightning-combobox>
                                             </div>
                                         </div>
                                     </div>
@@ -971,7 +1079,8 @@
                     </div>
                     <div class="slds-modal__footer add-modal-footer">
                         <button class="exp-white-btn-css" onclick={handleClose}>
-                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
                                     fill="currentColor" />
@@ -979,7 +1088,8 @@
                             Cancel
                         </button>
                         <button class="exp-blue-btn-css" disabled={isAddButtonDisabled} onclick={handleSave}>
-                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
                                 <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round" />
                             </svg>
@@ -1008,23 +1118,27 @@
                     </div>
 
                     <div class="slds-modal__content slds-p-around_medium confirmation-modal-body">
-                            <p class="confirmation-message">Are you sure you want to save these filter settings? This will update your default filter configuration.</p>
+                        <p class="confirmation-message">Are you sure you want to save these filter settings? This will
+                            update your default filter configuration.</p>
 
                         <div class="confirmation-modal-footer">
-                        <button class="exp-white-btn-css" onclick={handleCancelSave}>
-                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                    fill="currentColor" />
-                            </svg>
-                            Cancel
-                        </button>
-                        <button class="exp-blue-btn-css" onclick={handleConfirmSave}>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
-                            </svg>
-                            Yes, Save
-                        </button>
+                            <button class="exp-white-btn-css" onclick={handleCancelSave}>
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                        fill="currentColor" />
+                                </svg>
+                                Cancel
+                            </button>
+                            <button class="exp-blue-btn-css" onclick={handleConfirmSave}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
+                                        fill="currentColor" />
+                                </svg>
+                                Yes, Save
+                            </button>
                         </div>
                     </div>
                 </div>

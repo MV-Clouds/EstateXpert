@@ -181,9 +181,15 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         }
     }
 
+    get currentContactName() {
+        return (this.currentContact && this.currentContact.Name && String(this.currentContact.Name).trim())
+            ? this.currentContact.Name
+            : '-';
+    }
+
     // Options for the new action-driving combobox
     get actionOptions() {
-        const status = this.currentContact.ShowingStatus || 'Not Scheduled';
+        const status = (this.currentContact.ShowingStatus && this.currentContact.ShowingStatus !== '-') ? this.currentContact.ShowingStatus : 'Not Scheduled';
         let options = [];
 
         if (status === 'Not Scheduled' || status === 'Cancelled') {
@@ -305,12 +311,29 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                     // Create a copy for JSON.stringify to avoid circular refs
                     const contactData = { ...contact };
 
+                    const hasName = Boolean(contact.Name && String(contact.Name).trim());
+                    const nameVal = hasName ? String(contact.Name).trim() : '-';
+                    const emailVal = contact.Email && String(contact.Email).trim() ? String(contact.Email).trim() : '-';
+                    const phoneVal = contact.MobilePhone && String(contact.MobilePhone).trim() ? String(contact.MobilePhone).trim() : '-';
+                    const statusVal = contact.ShowingStatus && String(contact.ShowingStatus).trim() ? String(contact.ShowingStatus).trim() : '-';
+                    const formattedDate = scheduleDate ? scheduleDate.toLocaleString('en-US', {
+                        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: this.userTimeZone
+                    }) : '-';
+
                     const contactObj = {
                         ...contact,
                         Json: JSON.stringify(contactData), // Stringify the contact data for the button
-                        FormattedScheduleDate: scheduleDate ? scheduleDate.toLocaleString('en-US', {
-                            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: this.userTimeZone
-                        }) : '',
+                        hasName: hasName,
+                        Name: nameVal,
+                        displayName: nameVal,
+                        Email: emailVal,
+                        displayEmail: emailVal,
+                        MobilePhone: phoneVal,
+                        displayPhone: phoneVal,
+                        ShowingStatus: statusVal,
+                        displayShowingStatus: statusVal,
+                        FormattedScheduleDate: formattedDate,
+                        displayFormattedScheduleDate: formattedDate,
                         isShowingDisabled: !contact.ShowingId
                     };
                     return contactObj;
@@ -351,12 +374,12 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             .then(result => {
                 this.calendarEvents = result.map(showing => ({
                     id: showing.Id,
-                    name: showing.ContactName,
+                    name: showing.ContactName || '-',
                     date: new Date(showing.MVEX__Scheduled_Date__c || showing.MVEX__Reschedule_Date__c).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: this.userTimeZone }),
                     description:
                         `<div data-id="${showing.Id}" class="showing-link" ><div class="event-desc-line">Time: ${new Date(showing.MVEX__Scheduled_Date__c || showing.MVEX__Reschedule_Date__c).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: this.userTimeZone })}</div>
-                            <div class="event-desc-line">Status: ${showing.MVEX__Status__c}</div>
-                            <div class="event-desc-line">Listing: ${showing.ListingName}</div>
+                            <div class="event-desc-line">Status: ${showing.MVEX__Status__c || '-'}</div>
+                            <div class="event-desc-line">Listing: ${showing.ListingName || '-'}</div>
                         </div>`,
                     type: 'event',
                     color: showing.MVEX__Status__c === 'Waiting For Confirmation' ? 'rgb(2 118 211);' : showing.MVEX__Status__c === 'Scheduled' ? '#4CAF50' : showing.MVEX__Status__c === 'Rescheduled' ? 'rgb(255 180 180 / 40%)' : 'rgb(2 118 211 / 40%)'
@@ -381,14 +404,23 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
             // Handle FormattedScheduleDate as date for proper sorting
             if (this.sortField === 'FormattedScheduleDate') {
-                aValue = a.ScheduleDate || a.RescheduleDate || '';
-                bValue = b.ScheduleDate || b.RescheduleDate || '';
-                const aDate = new Date(aValue);
-                const bDate = new Date(bValue);
+                const aDateVal = a.ScheduleDate || a.RescheduleDate || '';
+                const bDateVal = b.ScheduleDate || b.RescheduleDate || '';
+                if (!aDateVal && !bDateVal) return 0;
+                if (!aDateVal) return 1;
+                if (!bDateVal) return -1;
+                const aDate = new Date(aDateVal);
+                const bDate = new Date(bDateVal);
                 return this.sortOrder === 'asc' ?
                     (aDate > bDate ? 1 : (aDate < bDate ? -1 : 0)) :
                     (aDate < bDate ? 1 : (aDate > bDate ? -1 : 0));
             }
+
+            const aIsEmpty = !aValue || aValue === '-';
+            const bIsEmpty = !bValue || bValue === '-';
+            if (aIsEmpty && bIsEmpty) return 0;
+            if (aIsEmpty) return 1;
+            if (bIsEmpty) return -1;
 
             if (typeof aValue === 'string' && typeof bValue === 'string') {
                 aValue = aValue.toLowerCase();
@@ -611,7 +643,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             this.currentContactId = this.currentContact.Id;
 
             // Set initial action
-            const status = this.currentContact.ShowingStatus || 'Not Scheduled';
+            const status = (this.currentContact.ShowingStatus && this.currentContact.ShowingStatus !== '-') ? this.currentContact.ShowingStatus : 'Not Scheduled';
             if (status === 'Not Scheduled' || status === 'Cancelled') {
                 this.selectedAction = 'Schedule';
             } else if (status === 'Waiting For Confirmation') {
@@ -763,7 +795,9 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     validateInputs() {
         if (this.showDateTimeInputs) {
-            if (!this.currentContact.Email || !this.currentContact.Name) {
+            const hasValidEmail = this.currentContact.Email && this.currentContact.Email !== '-' && String(this.currentContact.Email).trim() !== '';
+            const hasValidName = this.currentContact.Name && this.currentContact.Name !== '-' && String(this.currentContact.Name).trim() !== '';
+            if (!hasValidEmail || !hasValidName) {
                 this.showToast('Error', 'The selected inquiry does not have a name or email address.', 'error');
                 return false;
             }

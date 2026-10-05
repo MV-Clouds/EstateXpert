@@ -1,5 +1,16 @@
+/**
+* Class Name : GoogleAdsFormMappingController
+* Test Class : GoogleAdsFormMappingControllerTest
+* Created By : Salmanhaider Aghariya
+* Last Modified Date : 05/10/2026
+* Last Modified By : Salmanhaider Aghariya
+* @description : Used to manage Google Ads integration, OAuth authentication,
+* Google Lead Forms, field mappings, webhook subscriptions, failed lead
+* processing, Salesforce field mappings and Google Ads disconnection.
+*/
 public with sharing class GoogleAdsFormMappingController {
 
+    private static final String CLASS_NAME = 'GoogleAdsFormMappingController';
     private static final String GOOGLE_CONFIG_DEV_NAME = 'Google_Ads_Config';
     private static final String GOOGLE_MAPPING_NAME = GoogleLeadsWebhook.GOOGLE_MAPPING_NAME;
     private static final String GOOGLE_FAILED_SOURCE = GoogleLeadsWebhook.FAILED_SOURCE;
@@ -10,225 +21,461 @@ public with sharing class GoogleAdsFormMappingController {
         'ownerid', 'recordtypeid', 'currencyisocode', 'createdbyid', 'lastmodifiedbyid', 'masterrecordid'
     };
 
-    // AuraHandledException.getMessage() returns "Script-thrown exception" unless setMessage() is called.
+    /**
+    * Method Name : auraError
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param message to store the error message
+    * @return AuraHandledException
+    * @description : Used to create an AuraHandledException with a custom error message.
+    */
     private static AuraHandledException auraError(String message) {
         AuraHandledException e = new AuraHandledException(message);
         e.setMessage(message);
         return e;
     }
 
+    /**
+    * Method Name : response
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param success to store the operation status
+    * @param message to store the response message
+    * @return Map containing success status and message
+    * @description : Used to create a standard response for Aura-enabled methods.
+    */
     private static Map<String, Object> response(Boolean success, String message) {
         return new Map<String, Object>{ 'success' => success, 'message' => message };
     }
 
-    private static String enc(String value) {
-        return EncodingUtil.urlEncode(value, 'UTF-8');
+    /**
+    * Method Name : logError
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param e to store the exception
+    * @param methodName to store the name of the failing method
+    * @description : Used to log an exception without letting a logging failure hide the original error.
+    */
+    private static void logError(Exception e, String methodName) {
+        try {
+            ErrorHandler.insertErrorData(e, CLASS_NAME, methodName, e.getStackTraceString());
+        } catch (Exception logException) {
+            System.debug(LoggingLevel.ERROR, 'Error logging failed in ' + methodName + ': ' + logException.getMessage());
+        }
     }
 
+    /**
+    * Method Name : encode
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param value to store the value that needs to be encoded
+    * @return URL encoded String
+    * @description : Used to URL encode the supplied value.
+    */
+    private static String encode(String value) {
+        try {
+            return value == null ? '' : EncodingUtil.urlEncode(value, 'UTF-8');
+        } catch (Exception e) {
+            throw auraError('Failed to encode value. ' + e.getMessage());
+        }
+    }
+
+    /**
+    * Method Name : str
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param value to store the value that needs to be converted to String
+    * @return String value
+    * @description : Used to safely convert an Object value to String.
+    */
     private static String str(Object value) {
         return value == null ? null : String.valueOf(value);
     }
 
+    /**
+    * Method Name : getGoogleOAuthConfiguration
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @return OAuth_Configuration__mdt configuration record
+    * @description : Used to retrieve the Google Ads OAuth configuration.
+    */
     private static OAuth_Configuration__mdt getGoogleOAuthConfiguration() {
-        OAuth_Configuration__mdt config = OAuth_Configuration__mdt.getInstance(GOOGLE_CONFIG_DEV_NAME);
-        if (config == null) {
-            throw auraError('Google Ads OAuth configuration was not found.');
+        try {
+            OAuth_Configuration__mdt config = OAuth_Configuration__mdt.getInstance(GOOGLE_CONFIG_DEV_NAME);
+            if (config == null) {
+                throw auraError('Google Ads OAuth configuration was not found.');
+            }
+            return config;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw auraError('Failed to read Google Ads OAuth configuration. ' + e.getMessage());
         }
-        return config;
     }
 
+    /**
+    * Method Name : getBaseUrl
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param config to store the Google OAuth configuration
+    * @return Google Ads API base URL
+    * @description : Used to generate the Google Ads API base URL.
+    */
     private static String getBaseUrl(OAuth_Configuration__mdt config) {
+        if (config == null || String.isBlank(config.Base_URL__c) || String.isBlank(config.API_Version__c)) {
+            throw auraError('Google Ads API base URL or version is not configured.');
+        }
         return config.Base_URL__c + config.API_Version__c;
     }
 
+    /**
+    * Method Name : getMappingSetting
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @return MVEX__Configuration_Settings__c mapping record
+    * @description : Used to retrieve the Google Ads mapping configuration.
+    */
     private static MVEX__Configuration_Settings__c getMappingSetting() {
-        List<MVEX__Configuration_Settings__c> settings = [SELECT Id, MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = :GOOGLE_MAPPING_NAME WITH USER_MODE LIMIT 1];
-        return settings.isEmpty() ? null : settings[0];
+        try {
+            List<MVEX__Configuration_Settings__c> settings = [SELECT Id, MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = :GOOGLE_MAPPING_NAME WITH USER_MODE LIMIT 1];
+            return settings.isEmpty() ? null : settings[0];
+        } catch (Exception e) {
+            throw auraError('Failed to read the Google Ads mapping configuration. ' + e.getMessage());
+        }
     }
 
+    /**
+    * Method Name : getMappingData
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param setting to store the mapping configuration record
+    * @return Mapping data
+    * @description : Used to deserialize the saved Google Ads mapping configuration.
+    */
     private static Map<String, Object> getMappingData(MVEX__Configuration_Settings__c setting) {
         if (setting == null || String.isBlank(setting.MVEX__Fields_Data__c)) {
             return new Map<String, Object>();
         }
-        return (Map<String, Object>)JSON.deserializeUntyped(setting.MVEX__Fields_Data__c);
+        try {
+            return (Map<String, Object>)JSON.deserializeUntyped(setting.MVEX__Fields_Data__c);
+        } catch (Exception e) {
+            throw auraError('The saved Google Ads mapping is invalid. ' + e.getMessage());
+        }
     }
 
-    // Updates one field of the Google OAuth custom metadata record (async deployment).
+    /**
+    * Method Name : updateConfigField
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param fieldName to store the custom metadata field name
+    * @param value to store the field value
+    * @description : Used to update a Google OAuth custom metadata field asynchronously.
+    */
     private static void updateConfigField(String fieldName, String value) {
-        OAuth_Configuration__mdt config = getGoogleOAuthConfiguration();
+        try {
+            OAuth_Configuration__mdt config = getGoogleOAuthConfiguration();
 
-        Metadata.CustomMetadata record = new Metadata.CustomMetadata();
-        record.fullName = 'OAuth_Configuration__mdt.' + config.DeveloperName;
-        record.label = config.MasterLabel;
+            Metadata.CustomMetadata record = new Metadata.CustomMetadata();
+            record.fullName = 'OAuth_Configuration__mdt.' + config.DeveloperName;
+            record.label = config.MasterLabel;
 
-        Metadata.CustomMetadataValue fieldValue = new Metadata.CustomMetadataValue();
-        fieldValue.field = fieldName;
-        fieldValue.value = value;
-        record.values.add(fieldValue);
+            Metadata.CustomMetadataValue fieldValue = new Metadata.CustomMetadataValue();
+            fieldValue.field = fieldName;
+            fieldValue.value = value;
+            record.values.add(fieldValue);
 
-        Metadata.DeployContainer container = new Metadata.DeployContainer();
-        container.addMetadata(record);
-        Metadata.Operations.enqueueDeployment(container, null);
+            Metadata.DeployContainer container = new Metadata.DeployContainer();
+            container.addMetadata(record);
+            Metadata.Operations.enqueueDeployment(container, null);
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw auraError('Failed to update ' + fieldName + '. ' + e.getMessage());
+        }
     }
 
+    /**
+    * Method Name : getFailedLeads
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param formId to store the Google Lead Form Id
+    * @return List of FailedLead records for the form
+    * @description : Used to retrieve failed leads logged for the given form.
+    */
     @AuraEnabled
     public static List<FailedLead> getFailedLeads(String formId) {
-        if (String.isBlank(formId)) {
-            throw auraError('Form Id is required.');
-        }
-        List<FailedLead> result = new List<FailedLead>();
-
-        for (MVEX__Error_Handling__c err : [SELECT Id, CreatedDate, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE MVEX__Source_of_Error__c = :GOOGLE_FAILED_SOURCE WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 2000]) {
-            if (String.isBlank(err.MVEX__Error_Body__c)) {
-                continue;
+        try {
+            if (String.isBlank(formId)) {
+                throw auraError('Form Id is required.');
             }
-            try {
-                Map<String, Object> parsed = (Map<String, Object>)JSON.deserializeUntyped(err.MVEX__Error_Body__c);
-                if (formId != getFormIdFromBody(parsed)) {
+            List<FailedLead> result = new List<FailedLead>();
+
+            for (MVEX__Error_Handling__c err : [SELECT Id, CreatedDate, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE MVEX__Source_of_Error__c = :GOOGLE_FAILED_SOURCE WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 2000]) {
+                if (String.isBlank(err.MVEX__Error_Body__c)) {
                     continue;
                 }
-                FailedLead fl = new FailedLead();
-                fl.id = err.Id;
-                fl.receivedOn = err.CreatedDate;
-                fl.leadId = getLeadIdFromBody(parsed);
-                fl.reason = parsed.containsKey('reason') ? String.valueOf(parsed.get('reason')) : 'Unknown error (older record)';
-                result.add(fl);
-            } catch (Exception e) {
-                // skip records that cannot be parsed
+                try {
+                    Map<String, Object> parsed = (Map<String, Object>)JSON.deserializeUntyped(err.MVEX__Error_Body__c);
+                    if (formId != getFormIdFromBody(parsed)) {
+                        continue;
+                    }
+                    FailedLead fl = new FailedLead();
+                    fl.id = err.Id;
+                    fl.receivedOn = err.CreatedDate;
+                    fl.leadId = getLeadIdFromBody(parsed);
+                    fl.reason = parsed.containsKey('reason') ? String.valueOf(parsed.get('reason')) : 'Unknown error (older record)';
+                    result.add(fl);
+                } catch (Exception e) {
+                    System.debug(LoggingLevel.WARN, 'Skipped unparsable failed lead ' + err.Id + ': ' + e.getMessage());
+                }
             }
+            return result;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            logError(e, 'getFailedLeads');
+            throw auraError('Failed to retrieve failed leads.');
         }
-        return result;
     }
 
-    // Uses the SAVED mapping, so save the mapping first when it was changed.
+    /**
+    * Method Name : retryFailedLeads
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param errorIds to store the failed lead error record Ids
+    * @return List of RetryResult for each selected record
+    * @description : Used to retry failed leads using the saved mapping (save the mapping first if it was changed).
+    */
     @AuraEnabled
     public static List<RetryResult> retryFailedLeads(List<String> errorIds) {
-        if (errorIds == null || errorIds.isEmpty()) {
-            throw auraError('Select at least one failed lead to retry.');
-        }
-        if (errorIds.size() > MAX_RETRY_BATCH) {
-            throw auraError('You can retry up to ' + MAX_RETRY_BATCH + ' leads at a time.');
-        }
-
-        List<MVEX__Error_Handling__c> errors = [SELECT Id, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE Id IN :errorIds AND MVEX__Source_of_Error__c = :GOOGLE_FAILED_SOURCE WITH USER_MODE];
-
-        List<RetryResult> results = new List<RetryResult>();
-        List<Contact> contacts = new List<Contact>();
-        List<MVEX__Error_Handling__c> pendingErrors = new List<MVEX__Error_Handling__c>();
-        List<RetryResult> pendingResults = new List<RetryResult>();
-        Map<String, Map<String, Object>> parsedById = new Map<String, Map<String, Object>>();
-        Map<String, GoogleLeadsWebhook.FormConfiguration> configCache = new Map<String, GoogleLeadsWebhook.FormConfiguration>();
-        List<MVEX__Error_Handling__c> toUpdate = new List<MVEX__Error_Handling__c>();
-
-        for (MVEX__Error_Handling__c err : errors) {
-            RetryResult r = new RetryResult();
-            r.id = err.Id;
-            r.success = false;
-            results.add(r);
-            try {
-                Map<String, Object> parsed = (Map<String, Object>)JSON.deserializeUntyped(err.MVEX__Error_Body__c);
-                parsedById.put(err.Id, parsed);
-
-                GoogleLeadsWebhook.LeadData lead = toLeadData(parsed);
-                String formId = getFormIdFromBody(parsed);
-
-                if (!configCache.containsKey(formId)) {
-                    configCache.put(formId, GoogleLeadsWebhook.getFormConfiguration(formId));
-                }
-                GoogleLeadsWebhook.FormConfiguration cfg = configCache.get(formId);
-                if (cfg == null || cfg.mappings == null || cfg.mappings.isEmpty()) {
-                    throw new GoogleLeadsWebhook.LeadProcessingException('No field mapping found for Form Id: ' + formId);
-                }
-
-                contacts.add(GoogleLeadsWebhook.buildContact(lead, cfg));
-                pendingErrors.add(err);
-                pendingResults.add(r);
-            } catch (Exception e) {
-                r.message = e.getMessage();
-                err.MVEX__Error_Body__c = withReason(parsedById.get(err.Id), err.MVEX__Error_Body__c, r.message);
-                toUpdate.add(err);
+        try {
+            if (errorIds == null || errorIds.isEmpty()) {
+                throw auraError('Select at least one failed lead to retry.');
             }
-        }
+            if (errorIds.size() > MAX_RETRY_BATCH) {
+                throw auraError('You can retry up to ' + MAX_RETRY_BATCH + ' leads at a time.');
+            }
 
-        if (!contacts.isEmpty()) {
-            List<Database.SaveResult> saveResults = Database.insert(contacts, false);
-            List<Id> toDelete = new List<Id>();
+            List<MVEX__Error_Handling__c> errors = [SELECT Id, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE Id IN :errorIds AND MVEX__Source_of_Error__c = :GOOGLE_FAILED_SOURCE WITH USER_MODE];
 
-            for (Integer i = 0; i < saveResults.size(); i++) {
-                if (saveResults[i].isSuccess()) {
-                    pendingResults[i].success = true;
-                    pendingResults[i].message = 'Processed';
-                    toDelete.add(pendingErrors[i].Id);
-                } else {
-                    String msg = saveResults[i].getErrors()[0].getMessage();
-                    pendingResults[i].message = msg;
-                    pendingErrors[i].MVEX__Error_Body__c = withReason(parsedById.get(pendingErrors[i].Id), pendingErrors[i].MVEX__Error_Body__c, msg);
-                    toUpdate.add(pendingErrors[i]);
+            List<RetryResult> results = new List<RetryResult>();
+            List<Contact> contacts = new List<Contact>();
+            List<MVEX__Error_Handling__c> pendingErrors = new List<MVEX__Error_Handling__c>();
+            List<RetryResult> pendingResults = new List<RetryResult>();
+            Map<String, Map<String, Object>> parsedById = new Map<String, Map<String, Object>>();
+            Map<String, GoogleLeadsWebhook.FormConfiguration> configCache = new Map<String, GoogleLeadsWebhook.FormConfiguration>();
+            List<MVEX__Error_Handling__c> toUpdate = new List<MVEX__Error_Handling__c>();
+
+            for (MVEX__Error_Handling__c err : errors) {
+                RetryResult r = new RetryResult();
+                r.id = err.Id;
+                r.success = false;
+                results.add(r);
+                try {
+                    Map<String, Object> parsed = (Map<String, Object>)JSON.deserializeUntyped(err.MVEX__Error_Body__c);
+                    parsedById.put(err.Id, parsed);
+
+                    GoogleLeadsWebhook.LeadData lead = toLeadData(parsed);
+                    String formId = getFormIdFromBody(parsed);
+
+                    if (!configCache.containsKey(formId)) {
+                        configCache.put(formId, GoogleLeadsWebhook.getFormConfiguration(formId));
+                    }
+                    GoogleLeadsWebhook.FormConfiguration cfg = configCache.get(formId);
+                    if (cfg == null || cfg.mappings == null || cfg.mappings.isEmpty()) {
+                        throw new GoogleLeadsWebhook.LeadProcessingException('No field mapping found for Form Id: ' + formId);
+                    }
+
+                    contacts.add(GoogleLeadsWebhook.buildContact(lead, cfg));
+                    pendingErrors.add(err);
+                    pendingResults.add(r);
+                } catch (Exception e) {
+                    r.message = e.getMessage();
+                    err.MVEX__Error_Body__c = withReason(parsedById.get(err.Id), err.MVEX__Error_Body__c, r.message);
+                    toUpdate.add(err);
                 }
             }
-            if (!toDelete.isEmpty()) {
-                Database.delete(toDelete, false);
+
+            if (!contacts.isEmpty()) {
+                List<Database.SaveResult> saveResults = Database.insert(contacts, false);
+                List<Id> toDelete = new List<Id>();
+
+                for (Integer i = 0; i < saveResults.size(); i++) {
+                    if (saveResults[i].isSuccess()) {
+                        pendingResults[i].success = true;
+                        pendingResults[i].message = 'Processed';
+                        toDelete.add(pendingErrors[i].Id);
+                    } else {
+                        String msg = saveResults[i].getErrors()[0].getMessage();
+                        pendingResults[i].message = msg;
+                        pendingErrors[i].MVEX__Error_Body__c = withReason(parsedById.get(pendingErrors[i].Id), pendingErrors[i].MVEX__Error_Body__c, msg);
+                        toUpdate.add(pendingErrors[i]);
+                    }
+                }
+                if (!toDelete.isEmpty()) {
+                    Database.delete(toDelete, false);
+                }
             }
+            if (!toUpdate.isEmpty()) {
+                Database.update(toUpdate, false);
+            }
+            return results;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            logError(e, 'retryFailedLeads');
+            throw auraError('Failed to retry the selected leads.');
         }
-        if (!toUpdate.isEmpty()) {
-            Database.update(toUpdate, false);
-        }
-        return results;
     }
 
+    /**
+    * Method Name : discardFailedLeads
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param errorIds to store the failed lead error record Ids
+    * @return Number of discarded records
+    * @description : Used to delete the selected failed lead records.
+    */
     @AuraEnabled
     public static Integer discardFailedLeads(List<String> errorIds) {
-        if (errorIds == null || errorIds.isEmpty()) {
-            throw auraError('Select at least one failed lead.');
+        try {
+            if (errorIds == null || errorIds.isEmpty()) {
+                throw auraError('Select at least one failed lead.');
+            }
+            List<MVEX__Error_Handling__c> records = [SELECT Id FROM MVEX__Error_Handling__c WHERE Id IN :errorIds AND MVEX__Source_of_Error__c = :GOOGLE_FAILED_SOURCE WITH USER_MODE];
+            delete as user records;
+            return records.size();
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            logError(e, 'discardFailedLeads');
+            throw auraError('Failed to discard the selected leads.');
         }
-        List<MVEX__Error_Handling__c> records = [SELECT Id FROM MVEX__Error_Handling__c WHERE Id IN :errorIds AND MVEX__Source_of_Error__c = :GOOGLE_FAILED_SOURCE WITH USER_MODE];
-        delete as user records;
-        return records.size();
     }
 
-    // New records: {formId, leadId, reason, payload:{...}}. Older records: the raw Google payload.
+    /**
+    * Method Name : getFormIdFromBody
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param parsed to store the parsed error body
+    * @return Google Lead Form Id
+    * @description : Used to read the form Id from a new ({formId, payload}) or older (raw Google payload) record.
+    */
     private static String getFormIdFromBody(Map<String, Object> parsed) {
         return str(parsed.containsKey('payload') ? parsed.get('formId') : parsed.get('form_id'));
     }
 
+    /**
+    * Method Name : getLeadIdFromBody
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param parsed to store the parsed error body
+    * @return Google Lead Id
+    * @description : Used to read the lead Id from a new ({leadId, payload}) or older (raw Google payload) record.
+    */
     private static String getLeadIdFromBody(Map<String, Object> parsed) {
         return str(parsed.containsKey('payload') ? parsed.get('leadId') : parsed.get('lead_id'));
     }
 
+    /**
+    * Method Name : toLeadData
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param parsed to store the parsed error body
+    * @return GoogleLeadsWebhook.LeadData
+    * @description : Used to convert a stored error body into lead data.
+    */
     private static GoogleLeadsWebhook.LeadData toLeadData(Map<String, Object> parsed) {
-        Object payload = parsed.containsKey('payload') ? parsed.get('payload') : parsed;
-        return (GoogleLeadsWebhook.LeadData)JSON.deserialize(JSON.serialize(payload), GoogleLeadsWebhook.LeadData.class);
+        try {
+            Object payload = parsed.containsKey('payload') ? parsed.get('payload') : parsed;
+            return (GoogleLeadsWebhook.LeadData)JSON.deserialize(JSON.serialize(payload), GoogleLeadsWebhook.LeadData.class);
+        } catch (Exception e) {
+            throw auraError('Invalid lead payload. ' + e.getMessage());
+        }
     }
 
+    /**
+    * Method Name : withReason
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param parsed to store the parsed error body
+    * @param originalBody to store the original error body
+    * @param reason to store the failure reason
+    * @return Serialized error body including the reason
+    * @description : Used to add a failure reason to a stored error body.
+    */
     private static String withReason(Map<String, Object> parsed, String originalBody, String reason) {
         if (parsed == null) {
             return originalBody;
         }
-        Map<String, Object> envelope = parsed.containsKey('payload')
-            ? parsed
-            : new Map<String, Object>{ 'formId' => getFormIdFromBody(parsed), 'leadId' => getLeadIdFromBody(parsed), 'payload' => parsed };
-        envelope.put('reason', String.isBlank(reason) ? 'Unknown error' : reason.left(1000));
-        return JSON.serialize(envelope);
+        try {
+            Map<String, Object> envelope = parsed.containsKey('payload') ? parsed : new Map<String, Object>{ 'formId' => getFormIdFromBody(parsed), 'leadId' => getLeadIdFromBody(parsed), 'payload' => parsed };
+            envelope.put('reason', String.isBlank(reason) ? 'Unknown error' : reason);
+            return JSON.serialize(envelope);
+        } catch (Exception e) {
+            return originalBody;
+        }
     }
 
+    /**
+    * Method Name : getGoogleAuthUrl
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @return Google OAuth authorization URL
+    * @description : Used to build the Google OAuth authorization URL.
+    */
     @AuraEnabled(cacheable=false)
     public static String getGoogleAuthUrl() {
-        OAuth_Configuration__mdt config = getGoogleOAuthConfiguration();
+        try {
+            OAuth_Configuration__mdt config = getGoogleOAuthConfiguration();
 
-        if (String.isBlank(config.Client_Id__c) || String.isBlank(config.Authorization_Endpoint__c) || String.isBlank(config.Scope__c)) {
-            throw auraError('Google Ads OAuth configuration is incomplete.');
+            if (String.isBlank(config.Client_Id__c) || String.isBlank(config.Authorization_Endpoint__c) || String.isBlank(config.Scope__c) || String.isBlank(config.Redirect_URI__c)) {
+                throw auraError('Google Ads OAuth configuration is incomplete.');
+            }
+
+            return config.Authorization_Endpoint__c
+                + '?client_id=' + encode(config.Client_Id__c)
+                + '&redirect_uri=' + encode(config.Redirect_URI__c)
+                + '&response_type=code'
+                + '&scope=' + encode(config.Scope__c)
+                + '&access_type=offline'
+                + '&prompt=consent'
+                + '&state=' + encode(UserInfo.getUserId());
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            logError(e, 'getGoogleAuthUrl');
+            throw auraError('Failed to generate the Google authorization URL.');
         }
-
-        return config.Authorization_Endpoint__c
-            + '?client_id=' + enc(config.Client_Id__c)
-            + '&redirect_uri=' + enc(config.Redirect_URI__c)
-            + '&response_type=code'
-            + '&scope=' + enc(config.Scope__c)
-            + '&access_type=offline'
-            + '&prompt=consent'
-            + '&state=' + enc(UserInfo.getUserId());
     }
 
+    /**
+    * Method Name : saveRefreshToken
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param refreshToken to store the Google refresh token
+    * @return success String
+    * @description : Used to save the Google refresh token in the OAuth configuration.
+    */
     @AuraEnabled
     public static String saveRefreshToken(String refreshToken) {
         try {
@@ -240,201 +487,351 @@ public with sharing class GoogleAdsFormMappingController {
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'GoogleAdsFormMappingController', 'saveRefreshToken', e.getStackTraceString());
+            logError(e, 'saveRefreshToken');
             throw auraError('Failed to save Google Ads refresh token.');
         }
     }
 
+    /**
+    * Method Name : getConnection
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @return List of accessible Google Ads accounts
+    * @description : Used to retrieve the connected Google Ads accounts.
+    */
     @AuraEnabled(cacheable=false)
     public static List<GoogleAdsAccount> getConnection() {
-        OAuth_Configuration__mdt config = getGoogleOAuthConfiguration();
+        try {
+            OAuth_Configuration__mdt config = getGoogleOAuthConfiguration();
 
-        if (String.isBlank(config.Refresh_Token__c)) {
-            return new List<GoogleAdsAccount>();
-        }
-        return getAllAccounts(getAccessToken(), getBaseUrl(config));
-    }
-
-    private static String getAccessToken() {
-        OAuth_Configuration__mdt config = getGoogleOAuthConfiguration();
-
-        if (String.isBlank(config.Client_Id__c) || String.isBlank(config.Client_Secret__c) || String.isBlank(config.Token_Endpoint__c)) {
-            throw auraError('Google Ads OAuth configuration is incomplete.');
-        }
-        if (String.isBlank(config.Refresh_Token__c)) {
-            throw auraError('Google Ads is not connected.');
-        }
-
-        HttpRequest request = new HttpRequest();
-        request.setEndpoint(config.Token_Endpoint__c);
-        request.setMethod('POST');
-        request.setHeader('Content-Type', 'application/x-www-form-urlencoded');
-        request.setBody(
-            'client_id=' + enc(config.Client_Id__c) +
-            '&client_secret=' + enc(config.Client_Secret__c) +
-            '&refresh_token=' + enc(config.Refresh_Token__c) +
-            '&grant_type=refresh_token'
-        );
-
-        HttpResponse response = new Http().send(request);
-        if (response.getStatusCode() != 200) {
-            throw auraError('Failed to obtain Google Ads access token. ' + response.getBody());
-        }
-
-        String accessToken = (String)((Map<String, Object>)JSON.deserializeUntyped(response.getBody())).get('access_token');
-        if (String.isBlank(accessToken)) {
-            throw auraError('Google did not return an access token.');
-        }
-        return accessToken;
-    }
-
-    // One place that builds every Google Ads API call.
-    private static HttpResponse callGoogleAds(String method, String endpoint, String accessToken, String loginCustomerId, Map<String, Object> body) {
-        HttpRequest request = new HttpRequest();
-        request.setEndpoint(endpoint);
-        request.setMethod(method);
-        request.setHeader('Authorization', 'Bearer ' + accessToken);
-        if (String.isNotBlank(loginCustomerId)) {
-            request.setHeader('login-customer-id', loginCustomerId);
-        }
-        if (body != null) {
-            request.setHeader('Content-Type', 'application/json');
-            request.setBody(JSON.serialize(body));
-        }
-        return new Http().send(request);
-    }
-
-    // Runs a GAQL query and returns the parsed response; throws with errorPrefix on failure.
-    private static Map<String, Object> searchGoogleAds(String accessToken, String baseUrl, String customerId, String loginCustomerId, String query, String errorPrefix) {
-        HttpResponse response = callGoogleAds('POST', baseUrl + '/customers/' + customerId + '/googleAds:search', accessToken, loginCustomerId, new Map<String, Object>{ 'query' => query });
-        if (response.getStatusCode() != 200) {
-            throw auraError(errorPrefix + ' ' + response.getBody());
-        }
-        return (Map<String, Object>)JSON.deserializeUntyped(response.getBody());
-    }
-
-    private static List<GoogleAdsAccount> getAllAccounts(String accessToken, String baseUrl) {
-        List<GoogleAdsAccount> accounts = new List<GoogleAdsAccount>();
-
-        HttpResponse response = callGoogleAds('GET', baseUrl + '/customers:listAccessibleCustomers', accessToken, null, null);
-        if (response.getStatusCode() != 200) {
-            throw auraError('Failed to retrieve Google Ads accounts. ' + response.getBody());
-        }
-
-        List<Object> resourceNames = (List<Object>)((Map<String, Object>)JSON.deserializeUntyped(response.getBody())).get('resourceNames');
-        if (resourceNames == null) {
-            return accounts;
-        }
-
-        for (Object resourceName : resourceNames) {
-            accounts.addAll(getCustomerAccounts(accessToken, String.valueOf(resourceName).replace('customers/', ''), baseUrl));
-        }
-        return accounts;
-    }
-
-    private static List<GoogleAdsAccount> getCustomerAccounts(String accessToken, String customerId, String baseUrl) {
-        List<GoogleAdsAccount> accounts = new List<GoogleAdsAccount>();
-
-        Map<String, Object> data = searchGoogleAds(
-            accessToken, baseUrl, customerId, null,
-            'SELECT customer_client.id, customer_client.descriptive_name, customer_client.manager FROM customer_client',
-            'Failed to retrieve Google Ads customer accounts.'
-        );
-
-        List<Object> results = (List<Object>)data.get('results');
-        if (results == null) {
-            return accounts;
-        }
-
-        for (Object resultObject : results) {
-            Map<String, Object> customer = (Map<String, Object>)((Map<String, Object>)resultObject).get('customerClient');
-            if (customer == null) {
-                continue;
+            if (String.isBlank(config.Refresh_Token__c)) {
+                return new List<GoogleAdsAccount>();
             }
-            GoogleAdsAccount account = new GoogleAdsAccount();
-            account.id = str(customer.get('id'));
-            account.descriptiveName = str(customer.get('descriptiveName'));
-            account.manager = customer.get('manager') == null ? false : (Boolean)customer.get('manager');
-            account.loginCustomerId = customerId;
-            accounts.add(account);
+            return getAllAccounts(getAccessToken(), getBaseUrl(config));
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            logError(e, 'getConnection');
+            throw auraError('Failed to retrieve the Google Ads connection.');
         }
-        return accounts;
     }
 
+    /**
+    * Method Name : getAccessToken
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @return Google access token
+    * @description : Used to exchange the refresh token for a new access token.
+    */
+    private static String getAccessToken() {
+        try {
+            OAuth_Configuration__mdt config = getGoogleOAuthConfiguration();
+
+            if (String.isBlank(config.Client_Id__c) || String.isBlank(config.Client_Secret__c) || String.isBlank(config.Token_Endpoint__c)) {
+                throw auraError('Google Ads OAuth configuration is incomplete.');
+            }
+            if (String.isBlank(config.Refresh_Token__c)) {
+                throw auraError('Google Ads is not connected.');
+            }
+
+            HttpRequest request = new HttpRequest();
+            request.setEndpoint(config.Token_Endpoint__c);
+            request.setMethod('POST');
+            request.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+            request.setBody(
+                'client_id=' + encode(config.Client_Id__c) +
+                '&client_secret=' + encode(config.Client_Secret__c) +
+                '&refresh_token=' + encode(config.Refresh_Token__c) +
+                '&grant_type=refresh_token'
+            );
+
+            HttpResponse response = new Http().send(request);
+            if (response.getStatusCode() != 200) {
+                throw auraError('Failed to obtain Google Ads access token. ' + response.getBody());
+            }
+
+            String accessToken = (String)((Map<String, Object>)JSON.deserializeUntyped(response.getBody())).get('access_token');
+            if (String.isBlank(accessToken)) {
+                throw auraError('Google did not return an access token.');
+            }
+            return accessToken;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw auraError('Failed to obtain Google Ads access token. ' + e.getMessage());
+        }
+    }
+
+    /**
+    * Method Name : callGoogleAds
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param method to store the HTTP method
+    * @param endpoint to store the API endpoint
+    * @param accessToken to store the Google access token
+    * @param loginCustomerId to store the manager account Id
+    * @param body to store the request body
+    * @return HttpResponse
+    * @description : Used to build and send every Google Ads API call.
+    */
+    private static HttpResponse callGoogleAds(String method, String endpoint, String accessToken, String loginCustomerId, Map<String, Object> body) {
+        try {
+            HttpRequest request = new HttpRequest();
+            request.setEndpoint(endpoint);
+            request.setMethod(method);
+            request.setHeader('Authorization', 'Bearer ' + accessToken);
+            if (String.isNotBlank(loginCustomerId)) {
+                request.setHeader('login-customer-id', loginCustomerId);
+            }
+            if (body != null) {
+                request.setHeader('Content-Type', 'application/json');
+                request.setBody(JSON.serialize(body));
+            }
+            return new Http().send(request);
+        } catch (Exception e) {
+            throw auraError('Google Ads API call failed. ' + e.getMessage());
+        }
+    }
+
+    /**
+    * Method Name : searchGoogleAds
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param accessToken to store the Google access token
+    * @param baseUrl to store the Google Ads API base URL
+    * @param customerId to store the customer Id
+    * @param loginCustomerId to store the manager account Id
+    * @param query to store the GAQL query
+    * @param errorPrefix to store the error message prefix
+    * @return Parsed API response
+    * @description : Used to run a GAQL query; throws with errorPrefix on failure.
+    */
+    private static Map<String, Object> searchGoogleAds(String accessToken, String baseUrl, String customerId, String loginCustomerId, String query, String errorPrefix) {
+        try {
+            HttpResponse response = callGoogleAds('POST', baseUrl + '/customers/' + customerId + '/googleAds:search', accessToken, loginCustomerId, new Map<String, Object>{ 'query' => query });
+            if (response.getStatusCode() != 200) {
+                throw auraError(errorPrefix + ' ' + response.getBody());
+            }
+            return (Map<String, Object>)JSON.deserializeUntyped(response.getBody());
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw auraError(errorPrefix + ' ' + e.getMessage());
+        }
+    }
+
+    /**
+    * Method Name : getAllAccounts
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param accessToken to store the Google access token
+    * @param baseUrl to store the Google Ads API base URL
+    * @return List of Google Ads accounts
+    * @description : Used to list every accessible customer and its client accounts.
+    */
+    private static List<GoogleAdsAccount> getAllAccounts(String accessToken, String baseUrl) {
+        try {
+            List<GoogleAdsAccount> accounts = new List<GoogleAdsAccount>();
+
+            HttpResponse response = callGoogleAds('GET', baseUrl + '/customers:listAccessibleCustomers', accessToken, null, null);
+            if (response.getStatusCode() != 200) {
+                throw auraError('Failed to retrieve Google Ads accounts. ' + response.getBody());
+            }
+
+            List<Object> resourceNames = (List<Object>)((Map<String, Object>)JSON.deserializeUntyped(response.getBody())).get('resourceNames');
+            if (resourceNames == null) {
+                return accounts;
+            }
+
+            for (Object resourceName : resourceNames) {
+                accounts.addAll(getCustomerAccounts(accessToken, String.valueOf(resourceName).replace('customers/', ''), baseUrl));
+            }
+            return accounts;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw auraError('Failed to retrieve Google Ads accounts. ' + e.getMessage());
+        }
+    }
+
+    /**
+    * Method Name : getCustomerAccounts
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param accessToken to store the Google access token
+    * @param customerId to store the customer Id
+    * @param baseUrl to store the Google Ads API base URL
+    * @return List of client accounts for the customer
+    * @description : Used to retrieve the client accounts under a customer.
+    */
+    private static List<GoogleAdsAccount> getCustomerAccounts(String accessToken, String customerId, String baseUrl) {
+        try {
+            List<GoogleAdsAccount> accounts = new List<GoogleAdsAccount>();
+
+            Map<String, Object> data = searchGoogleAds(
+                accessToken, baseUrl, customerId, null,
+                'SELECT customer_client.id, customer_client.descriptive_name, customer_client.manager FROM customer_client',
+                'Failed to retrieve Google Ads customer accounts.'
+            );
+
+            List<Object> results = (List<Object>)data.get('results');
+            if (results == null) {
+                return accounts;
+            }
+
+            for (Object resultObject : results) {
+                Map<String, Object> customer = (Map<String, Object>)((Map<String, Object>)resultObject).get('customerClient');
+                if (customer == null) {
+                    continue;
+                }
+                GoogleAdsAccount account = new GoogleAdsAccount();
+                account.id = str(customer.get('id'));
+                account.descriptiveName = str(customer.get('descriptiveName'));
+                account.manager = customer.get('manager') == null ? false : (Boolean)customer.get('manager');
+                account.loginCustomerId = customerId;
+                accounts.add(account);
+            }
+            return accounts;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw auraError('Failed to retrieve Google Ads customer accounts. ' + e.getMessage());
+        }
+    }
+
+    /**
+    * Method Name : getFormsForAccount
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param accountString to store the serialized GoogleAdsAccount
+    * @return List of Google Lead Forms
+    * @description : Used to retrieve the lead forms of the selected Google Ads account.
+    */
     @AuraEnabled(cacheable=false)
     public static List<GoogleLeadForm> getFormsForAccount(String accountString) {
-        if (String.isBlank(accountString)) {
-            throw auraError('Google Ads account is required.');
-        }
-
-        GoogleAdsAccount account;
         try {
-            account = (GoogleAdsAccount)JSON.deserialize(accountString, GoogleAdsAccount.class);
-        } catch (Exception e) {
-            throw auraError('Invalid Google Ads account data.');
-        }
-        if (account == null || String.isBlank(account.id) || String.isBlank(account.loginCustomerId)) {
-            throw auraError('Google Ads account information is incomplete.');
-        }
+            if (String.isBlank(accountString)) {
+                throw auraError('Google Ads account is required.');
+            }
 
-        Map<String, Object> data = searchGoogleAds(
-            getAccessToken(), getBaseUrl(getGoogleOAuthConfiguration()), account.id, account.loginCustomerId,
-            'SELECT asset.id, asset.resource_name, asset.name, asset.lead_form_asset.headline, asset.lead_form_asset.fields, asset.lead_form_asset.custom_question_fields FROM asset WHERE asset.type = \'LEAD_FORM\'',
-            'Failed to retrieve Google Lead Forms.'
-        );
+            GoogleAdsAccount account;
+            try {
+                account = (GoogleAdsAccount)JSON.deserialize(accountString, GoogleAdsAccount.class);
+            } catch (Exception e) {
+                throw auraError('Invalid Google Ads account data.');
+            }
+            if (account == null || String.isBlank(account.id) || String.isBlank(account.loginCustomerId)) {
+                throw auraError('Google Ads account information is incomplete.');
+            }
 
-        List<GoogleLeadForm> forms = new List<GoogleLeadForm>();
-        List<Object> results = (List<Object>)data.get('results');
-        if (results == null) {
+            Map<String, Object> data = searchGoogleAds(
+                getAccessToken(), getBaseUrl(getGoogleOAuthConfiguration()), account.id, account.loginCustomerId,
+                'SELECT asset.id, asset.resource_name, asset.name, asset.lead_form_asset.headline, asset.lead_form_asset.fields, asset.lead_form_asset.custom_question_fields FROM asset WHERE asset.type = \'LEAD_FORM\'',
+                'Failed to retrieve Google Lead Forms.'
+            );
+
+            List<GoogleLeadForm> forms = new List<GoogleLeadForm>();
+            List<Object> results = (List<Object>)data.get('results');
+            if (results == null) {
+                return forms;
+            }
+
+            for (Object resultObject : results) {
+                Map<String, Object> asset = (Map<String, Object>)((Map<String, Object>)resultObject).get('asset');
+                if (asset == null) {
+                    continue;
+                }
+
+                GoogleLeadForm form = new GoogleLeadForm();
+                form.id = str(asset.get('id'));
+                form.name = String.isBlank(str(asset.get('name'))) ? str(asset.get('resourceName')) : str(asset.get('name'));
+                form.fields = new List<String>();
+                form.customQuestions = new List<String>();
+                forms.add(form);
+
+                Map<String, Object> leadForm = (Map<String, Object>)asset.get('leadFormAsset');
+                if (leadForm == null) {
+                    continue;
+                }
+
+                form.headline = str(leadForm.get('headline'));
+                form.fields = collectStrings(leadForm.get('fields'), 'inputType');
+                form.customQuestions = collectStrings(leadForm.get('customQuestionFields'), 'customQuestionText');
+            }
             return forms;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            logError(e, 'getFormsForAccount');
+            throw auraError('Failed to retrieve Google Lead Forms.');
         }
-
-        for (Object resultObject : results) {
-            Map<String, Object> asset = (Map<String, Object>)((Map<String, Object>)resultObject).get('asset');
-            if (asset == null) {
-                continue;
-            }
-
-            GoogleLeadForm form = new GoogleLeadForm();
-            form.id = str(asset.get('id'));
-            form.name = String.isBlank(str(asset.get('name'))) ? str(asset.get('resourceName')) : str(asset.get('name'));
-            form.fields = new List<String>();
-            form.customQuestions = new List<String>();
-            forms.add(form);
-
-            Map<String, Object> leadForm = (Map<String, Object>)asset.get('leadFormAsset');
-            if (leadForm == null) {
-                continue;
-            }
-
-            form.headline = str(leadForm.get('headline'));
-            form.fields = collectStrings(leadForm.get('fields'), 'inputType');
-            form.customQuestions = collectStrings(leadForm.get('customQuestionFields'), 'customQuestionText');
-        }
-        return forms;
     }
 
-    // Pulls one key out of each map in a JSON array.
+    /**
+    * Method Name : collectStrings
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param items to store the JSON array
+    * @param key to store the key to read from each item
+    * @return List of values
+    * @description : Used to pull one key out of each map in a JSON array.
+    */
     private static List<String> collectStrings(Object items, String key) {
         List<String> values = new List<String>();
         if (items == null) {
             return values;
         }
-        for (Object item : (List<Object>)items) {
-            Object value = item == null ? null : ((Map<String, Object>)item).get(key);
-            if (value != null) {
-                values.add(String.valueOf(value));
+        try {
+            for (Object item : (List<Object>)items) {
+                Object value = item == null ? null : ((Map<String, Object>)item).get(key);
+                if (value != null) {
+                    values.add(String.valueOf(value));
+                }
             }
+        } catch (Exception e) {
+            throw auraError('Invalid Google Lead Form data. ' + e.getMessage());
         }
         return values;
     }
 
+    /**
+    * Method Name : getExistingMappings
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @return Saved mapping JSON
+    * @description : Used to retrieve the saved Google Ads mapping JSON.
+    */
     @AuraEnabled
     public static String getExistingMappings() {
-        MVEX__Configuration_Settings__c setting = getMappingSetting();
-        return setting == null ? null : setting.MVEX__Fields_Data__c;
+        try {
+            MVEX__Configuration_Settings__c setting = getMappingSetting();
+            return setting == null ? null : setting.MVEX__Fields_Data__c;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            logError(e, 'getExistingMappings');
+            throw auraError('Failed to retrieve the existing mappings.');
+        }
     }
 
+    /**
+    * Method Name : saveMapping
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param mappingJson to store the mapping JSON
+    * @return Map containing success status and message
+    * @description : Used to save the mapping and subscribe the webhook for newly added forms.
+    */
     @AuraEnabled
     public static Map<String, Object> saveMapping(String mappingJson) {
         try {
@@ -474,68 +871,104 @@ public with sharing class GoogleAdsFormMappingController {
 
             return response(true, 'Google Ads mapping saved successfully.');
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'GoogleAdsFormMappingController', 'saveMapping', e.getStackTraceString());
+            logError(e, 'saveMapping');
             return response(false, e.getMessage());
         }
     }
 
+    /**
+    * Method Name : validateMappingStructure
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param mappingData to store the mapping data
+    * @description : Used to validate the {accountId: {loginCustomerId, forms: {formId: {mappings}}}} structure.
+    */
     private static void validateMappingStructure(Map<String, Object> mappingData) {
-        if (mappingData == null || mappingData.isEmpty()) {
-            throw auraError('No mapping data was provided.');
-        }
-
-        for (String accountId : mappingData.keySet()) {
-            Map<String, Object> accountData = (Map<String, Object>)mappingData.get(accountId);
-            if (accountData == null) {
-                throw auraError('Invalid Google Ads account mapping.');
-            }
-            if (!accountData.containsKey('loginCustomerId')) {
-                throw auraError('Login customer ID is required for account ' + accountId + '.');
-            }
-            if (!accountData.containsKey('forms')) {
-                throw auraError('Forms are required for account ' + accountId + '.');
+        try {
+            if (mappingData == null || mappingData.isEmpty()) {
+                throw auraError('No mapping data was provided.');
             }
 
-            Map<String, Object> forms = (Map<String, Object>)accountData.get('forms');
-            if (forms == null) {
-                throw auraError('Invalid forms data for account ' + accountId + '.');
-            }
-
-            for (String formId : forms.keySet()) {
-                Map<String, Object> form = (Map<String, Object>)forms.get(formId);
-                if (form == null) {
-                    throw auraError('Invalid form mapping for form ' + formId + '.');
+            for (String accountId : mappingData.keySet()) {
+                Map<String, Object> accountData = (Map<String, Object>)mappingData.get(accountId);
+                if (accountData == null) {
+                    throw auraError('Invalid Google Ads account mapping.');
                 }
-                if (!form.containsKey('mappings')) {
-                    throw auraError('Mappings are required for form ' + formId + '.');
+                if (!accountData.containsKey('loginCustomerId')) {
+                    throw auraError('Login customer ID is required for account ' + accountId + '.');
+                }
+                if (!accountData.containsKey('forms')) {
+                    throw auraError('Forms are required for account ' + accountId + '.');
+                }
+
+                Map<String, Object> forms = (Map<String, Object>)accountData.get('forms');
+                if (forms == null) {
+                    throw auraError('Invalid forms data for account ' + accountId + '.');
+                }
+
+                for (String formId : forms.keySet()) {
+                    Map<String, Object> form = (Map<String, Object>)forms.get(formId);
+                    if (form == null) {
+                        throw auraError('Invalid form mapping for form ' + formId + '.');
+                    }
+                    if (!form.containsKey('mappings')) {
+                        throw auraError('Mappings are required for form ' + formId + '.');
+                    }
                 }
             }
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw auraError('Invalid mapping structure. ' + e.getMessage());
         }
     }
 
-    // Flattens {accountId: {loginCustomerId, forms: {formId: ...}}} into one entry per form.
+    /**
+    * Method Name : collectForms
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param mappingData to store the mapping data
+    * @return List of maps with accountId, formId and loginCustomerId
+    * @description : Used to flatten the mapping data into one entry per form.
+    */
     private static List<Map<String, String>> collectForms(Map<String, Object> mappingData) {
         List<Map<String, String>> resources = new List<Map<String, String>>();
+        try {
+            for (String accountId : mappingData.keySet()) {
+                Map<String, Object> accountData = (Map<String, Object>)mappingData.get(accountId);
+                Map<String, Object> forms = accountData == null ? null : (Map<String, Object>)accountData.get('forms');
+                if (forms == null) {
+                    continue;
+                }
+                String loginCustomerId = String.valueOf(accountData.get('loginCustomerId'));
 
-        for (String accountId : mappingData.keySet()) {
-            Map<String, Object> accountData = (Map<String, Object>)mappingData.get(accountId);
-            Map<String, Object> forms = accountData == null ? null : (Map<String, Object>)accountData.get('forms');
-            if (forms == null) {
-                continue;
+                for (String formId : forms.keySet()) {
+                    resources.add(new Map<String, String>{
+                        'accountId' => accountId,
+                        'formId' => formId,
+                        'loginCustomerId' => loginCustomerId
+                    });
+                }
             }
-            String loginCustomerId = String.valueOf(accountData.get('loginCustomerId'));
-
-            for (String formId : forms.keySet()) {
-                resources.add(new Map<String, String>{
-                    'accountId' => accountId,
-                    'formId' => formId,
-                    'loginCustomerId' => loginCustomerId
-                });
-            }
+        } catch (Exception e) {
+            throw auraError('Invalid mapping structure. ' + e.getMessage());
         }
         return resources;
     }
 
+    /**
+    * Method Name : deleteMapping
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param accountId to store the Google Ads account Id
+    * @param loginCustomerId to store the manager account Id
+    * @param formId to store the Google Lead Form Id
+    * @return Map containing success status and message
+    * @description : Used to unsubscribe the webhook and delete the mapping of a form.
+    */
     @AuraEnabled
     public static Map<String, Object> deleteMapping(String accountId, String loginCustomerId, String formId) {
         try {
@@ -557,7 +990,7 @@ public with sharing class GoogleAdsFormMappingController {
             }
 
             Map<String, Object> accountData = (Map<String, Object>)mappingData.get(accountId);
-            Map<String, Object> forms = (Map<String, Object>)accountData.get('forms');
+            Map<String, Object> forms = accountData == null ? null : (Map<String, Object>)accountData.get('forms');
             if (forms == null || !forms.containsKey(formId)) {
                 return response(true, 'Form mapping does not exist.');
             }
@@ -579,11 +1012,19 @@ public with sharing class GoogleAdsFormMappingController {
 
             return response(true, 'Mapping deleted successfully.');
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'GoogleAdsFormMappingController', 'deleteMapping', e.getStackTraceString());
+            logError(e, 'deleteMapping');
             return response(false, e.getMessage());
         }
     }
 
+    /**
+    * Method Name : disconnectGoogleAds
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @return Map containing success status and message
+    * @description : Used to unsubscribe all forms, revoke the token and remove the saved mappings.
+    */
     @AuraEnabled
     public static Map<String, Object> disconnectGoogleAds() {
         try {
@@ -613,111 +1054,143 @@ public with sharing class GoogleAdsFormMappingController {
 
             return response(true, 'Google Ads disconnected successfully.');
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'GoogleAdsFormMappingController', 'disconnectGoogleAds', e.getStackTraceString());
+            logError(e, 'disconnectGoogleAds');
             return response(false, e.getMessage());
         }
     }
 
+    /**
+    * Method Name : revokeGoogleRefreshToken
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param refreshToken to store the Google refresh token
+    * @description : Used to revoke the refresh token at Google.
+    */
     private static void revokeGoogleRefreshToken(String refreshToken) {
-        HttpRequest request = new HttpRequest();
-        request.setEndpoint('https://oauth2.googleapis.com/revoke');
-        request.setMethod('POST');
-        request.setHeader('Content-Type', 'application/x-www-form-urlencoded');
-        request.setBody('token=' + enc(refreshToken));
-        HttpResponse response = new Http().send(request);
+        try {
+            HttpRequest request = new HttpRequest();
+            request.setEndpoint('https://oauth2.googleapis.com/revoke');
+            request.setMethod('POST');
+            request.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+            request.setBody('token=' + encode(refreshToken));
+            HttpResponse response = new Http().send(request);
 
-        if (response.getStatusCode() != 200 && response.getStatusCode() != 400) {
-            throw auraError('Failed to revoke Google refresh token. Status: ' + response.getStatusCode() + ' Response: ' + response.getBody());
+            // 400 means the token is already revoked or invalid, which is acceptable here.
+            if (response.getStatusCode() != 200 && response.getStatusCode() != 400) {
+                throw auraError('Failed to revoke Google refresh token. Status: ' + response.getStatusCode() + ' Response: ' + response.getBody());
+            }
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw auraError('Failed to revoke Google refresh token. ' + e.getMessage());
         }
     }
 
+    /**
+    * Method Name : clearStoredRefreshToken
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @description : Used to clear the stored refresh token asynchronously.
+    */
     @future
     private static void clearStoredRefreshToken() {
-        updateConfigField('Refresh_Token__c', '');
+        try {
+            updateConfigField('Refresh_Token__c', '');
+        } catch (Exception e) {
+            logError(e, 'clearStoredRefreshToken');
+        }
     }
 
+    /**
+    * Method Name : subscribeWebhook
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param resources to store the forms that need a webhook subscription
+    * @description : Used to subscribe the webhook delivery method on the given lead forms.
+    */
     private static void subscribeWebhook(List<Map<String, String>> resources) {
         if (resources == null || resources.isEmpty()) {
             return;
         }
+        try {
+            OAuth_Configuration__mdt config = getGoogleOAuthConfiguration();
+            String accessToken = getAccessToken();
 
-        OAuth_Configuration__mdt config = getGoogleOAuthConfiguration();
-        String accessToken = getAccessToken();
-
-        List<Object> deliveryMethods = new List<Object>{
-            new Map<String, Object>{
-                'webhook' => new Map<String, Object>{
-                    'advertiser_webhook_url' => getWebhookEndpoint(),
-                    'google_secret' => GoogleLeadsWebhook.GOOGLE_SECRET,
-                    'payload_schema_version' => 3
+            List<Object> deliveryMethods = new List<Object>{
+                new Map<String, Object>{
+                    'webhook' => new Map<String, Object>{
+                        'advertiser_webhook_url' => getWebhookEndpoint(),
+                        'google_secret' => GoogleLeadsWebhook.GOOGLE_SECRET,
+                        'payload_schema_version' => 3
+                    }
                 }
-            }
-        };
-
-        for (Map<String, String> resource : resources) {
-            if (String.isBlank(resource.get('accountId')) || String.isBlank(resource.get('formId')) || String.isBlank(resource.get('loginCustomerId'))) {
-                throw auraError('Invalid Google Lead Form subscription data.');
-            }
-            mutateDeliveryMethods(accessToken, config, resource, deliveryMethods, 'subscribe');
-        }
-    }
-
-    // Sets the lead form's delivery methods (empty list = unsubscribe).
-    private static void mutateDeliveryMethods(String accessToken, OAuth_Configuration__mdt config, Map<String, String> resource, List<Object> deliveryMethods, String action) {
-        String accountId = resource.get('accountId');
-        String formId = resource.get('formId');
-
-        Map<String, Object> operation = new Map<String, Object>{
-            'update' => new Map<String, Object>{
-                'resourceName' => 'customers/' + accountId + '/assets/' + formId,
-                'leadFormAsset' => new Map<String, Object>{ 'deliveryMethods' => deliveryMethods }
-            },
-            'updateMask' => 'lead_form_asset.delivery_methods'
-        };
-
-        HttpResponse response = callGoogleAds(
-            'POST', getBaseUrl(config) + '/customers/' + accountId + '/assets:mutate',
-            accessToken, resource.get('loginCustomerId'),
-            new Map<String, Object>{ 'operations' => new List<Object>{ operation } }
-        );
-
-        if (response.getStatusCode() != 200 && response.getStatusCode() != 204) {
-            throw auraError('Failed to ' + action + ' Google Ads webhook. Account: ' + accountId + ', Form: ' + formId + ', Status: ' + response.getStatusCode() + ', Response: ' + response.getBody());
-        }
-    }
-
-    @AuraEnabled(cacheable=true)
-    public static List<Map<String, String>> getSalesforceLeadFields() {
-        List<Map<String, String>> fields = new List<Map<String, String>>();
-
-        for (Schema.SObjectField token : Schema.SObjectType.Contact.fields.getMap().values()) {
-            Schema.DescribeFieldResult dfr = token.getDescribe();
-
-            if (SYSTEM_FIELDS.contains(dfr.getName().toLowerCase()) || !dfr.isAccessible() || !dfr.isUpdateable() || dfr.isDeprecatedAndHidden()) {
-                continue;
-            }
-
-            Boolean isRequired = dfr.isCreateable() && !dfr.isNillable() && dfr.getDefaultValue() == null && !dfr.isDefaultedOnCreate();
-
-            Map<String, String> f = new Map<String, String>{
-                'label' => dfr.getLabel() + ' (' + dfr.getName() + ')',
-                'value' => dfr.getName(),
-                'apiName' => dfr.getName(),
-                'type' => String.valueOf(dfr.getType()),
-                'required' => String.valueOf(isRequired)
             };
 
-            if (dfr.getType() == Schema.DisplayType.REFERENCE) {
-                List<Schema.SObjectType> referenceObjects = dfr.getReferenceTo();
-                if (referenceObjects != null && !referenceObjects.isEmpty()) {
-                    f.put('referenceTo', referenceObjects[0].getDescribe().getName());
+            for (Map<String, String> resource : resources) {
+                if (String.isBlank(resource.get('accountId')) || String.isBlank(resource.get('formId')) || String.isBlank(resource.get('loginCustomerId'))) {
+                    throw auraError('Invalid Google Lead Form subscription data.');
                 }
+                mutateDeliveryMethods(accessToken, config, resource, deliveryMethods, 'subscribe');
             }
-            fields.add(f);
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw auraError('Failed to subscribe Google Ads webhook. ' + e.getMessage());
         }
-        return fields;
     }
 
+    /**
+    * Method Name : mutateDeliveryMethods
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param accessToken to store the Google access token
+    * @param config to store the Google OAuth configuration
+    * @param resource to store the account, form and login customer Ids
+    * @param deliveryMethods to store the delivery methods (empty list = unsubscribe)
+    * @param action to store the action name used in error messages
+    * @description : Used to set the delivery methods of a lead form.
+    */
+    private static void mutateDeliveryMethods(String accessToken, OAuth_Configuration__mdt config, Map<String, String> resource, List<Object> deliveryMethods, String action) {
+        try {
+            String accountId = resource.get('accountId');
+            String formId = resource.get('formId');
+
+            Map<String, Object> operation = new Map<String, Object>{
+                'update' => new Map<String, Object>{
+                    'resourceName' => 'customers/' + accountId + '/assets/' + formId,
+                    'leadFormAsset' => new Map<String, Object>{ 'deliveryMethods' => deliveryMethods }
+                },
+                'updateMask' => 'lead_form_asset.delivery_methods'
+            };
+
+            HttpResponse response = callGoogleAds(
+                'POST', getBaseUrl(config) + '/customers/' + accountId + '/assets:mutate',
+                accessToken, resource.get('loginCustomerId'),
+                new Map<String, Object>{ 'operations' => new List<Object>{ operation } }
+            );
+
+            if (response.getStatusCode() != 200 && response.getStatusCode() != 204) {
+                throw auraError('Failed to ' + action + ' Google Ads webhook. Account: ' + accountId + ', Form: ' + formId + ', Status: ' + response.getStatusCode() + ', Response: ' + response.getBody());
+            }
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw auraError('Failed to ' + action + ' Google Ads webhook. ' + e.getMessage());
+        }
+    }
+
+    /**
+    * Method Name : getWebhookEndpoint
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @return Full webhook endpoint URL
+    * @description : Used to build the webhook endpoint from the configured site URL.
+    */
     private static String getWebhookEndpoint() {
         String siteUrl = getGoogleOAuthConfiguration().Webhook_URL__c;
         if (String.isBlank(siteUrl)) {
@@ -726,38 +1199,82 @@ public with sharing class GoogleAdsFormMappingController {
         return siteUrl.trim().removeEnd('/') + WEBHOOK_PATH;
     }
 
+    /**
+    * Method Name : hasExistingMappings
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @return True if at least one mapping exists
+    * @description : Used to check whether any Google Ads mapping is saved.
+    */
     private static Boolean hasExistingMappings() {
         return !getMappingData(getMappingSetting()).isEmpty();
     }
 
+    /**
+    * Method Name : getWebhookUrl
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @return Configured webhook site URL
+    * @description : Used to retrieve the configured webhook site URL.
+    */
     @AuraEnabled(cacheable=false)
     public static String getWebhookUrl() {
-        return getGoogleOAuthConfiguration().Webhook_URL__c;
+        try {
+            return getGoogleOAuthConfiguration().Webhook_URL__c;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            logError(e, 'getWebhookUrl');
+            throw auraError('Failed to retrieve the webhook URL.');
+        }
     }
 
+    /**
+    * Method Name : getActiveSites
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @return List of active Force.com site options
+    * @description : Used to retrieve active sites (setup objects, so USER_MODE is not used).
+    */
     @AuraEnabled(cacheable=false)
     public static List<SiteOption> getActiveSites() {
-        List<SiteOption> options = new List<SiteOption>();
-        // Site / SiteDetail are setup objects, so USER_MODE is intentionally not used here.
-        for (Site s : [SELECT Id, MasterLabel FROM Site WHERE Status = 'Active' AND SiteType = 'Visualforce' ORDER BY MasterLabel LIMIT 50]) {
-            try {
-                String siteKey = String.valueOf(s.Id).left(15);
-                List<SiteDetail> details = [SELECT SecureUrl FROM SiteDetail WHERE DurableId = :siteKey LIMIT 1];
-                if (details.isEmpty() || String.isBlank(details[0].SecureUrl)) {
-                    continue;
+        try {
+            List<SiteOption> options = new List<SiteOption>();
+            for (Site s : [SELECT Id, MasterLabel FROM Site WHERE Status = 'Active' AND SiteType = 'Visualforce' ORDER BY MasterLabel LIMIT 50]) {
+                try {
+                    String siteKey = String.valueOf(s.Id).left(15);
+                    List<SiteDetail> details = [SELECT SecureUrl FROM SiteDetail WHERE DurableId = :siteKey LIMIT 1];
+                    if (details.isEmpty() || String.isBlank(details[0].SecureUrl)) {
+                        continue;
+                    }
+                    String url = details[0].SecureUrl.trim().removeEnd('/');
+                    SiteOption option = new SiteOption();
+                    option.value = url;
+                    option.label = s.MasterLabel + ' (' + url + ')';
+                    options.add(option);
+                } catch (Exception e) {
+                    System.debug(LoggingLevel.WARN, 'Skipped site ' + s.Id + ': ' + e.getMessage());
                 }
-                String url = details[0].SecureUrl.trim().removeEnd('/');
-                SiteOption option = new SiteOption();
-                option.value = url;
-                option.label = s.MasterLabel + ' (' + url + ')';
-                options.add(option);
-            } catch (Exception e) {
-                // skip sites whose details cannot be read
             }
+            return options;
+        } catch (Exception e) {
+            logError(e, 'getActiveSites');
+            throw auraError('Failed to retrieve active sites.');
         }
-        return options;
     }
 
+    /**
+    * Method Name : saveWebhookUrl
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param siteUrl to store the selected site URL
+    * @return success String
+    * @description : Used to save the webhook site; blocked while mappings exist for a different site.
+    */
     @AuraEnabled
     public static String saveWebhookUrl(String siteUrl) {
         try {
@@ -788,11 +1305,61 @@ public with sharing class GoogleAdsFormMappingController {
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'GoogleAdsFormMappingController', 'saveWebhookUrl', e.getStackTraceString());
+            logError(e, 'saveWebhookUrl');
             throw auraError('Failed to save the webhook site.');
         }
     }
 
+    /**
+    * Method Name : getSalesforceLeadFields
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @return List of Contact field details
+    * @description : Used to retrieve mappable Contact fields. Cacheable, so errors are not logged via DML.
+    */
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getSalesforceLeadFields() {
+        try {
+            List<Map<String, String>> fields = new List<Map<String, String>>();
+
+            for (Schema.SObjectField token : Schema.SObjectType.Contact.fields.getMap().values()) {
+                Schema.DescribeFieldResult dfr = token.getDescribe();
+
+                if (SYSTEM_FIELDS.contains(dfr.getName().toLowerCase()) || !dfr.isAccessible() || !dfr.isUpdateable() || dfr.isDeprecatedAndHidden()) {
+                    continue;
+                }
+
+                Boolean isRequired = dfr.isCreateable() && !dfr.isNillable() && dfr.getDefaultValue() == null && !dfr.isDefaultedOnCreate();
+
+                Map<String, String> f = new Map<String, String>{
+                    'label' => dfr.getLabel() + ' (' + dfr.getName() + ')',
+                    'value' => dfr.getName(),
+                    'apiName' => dfr.getName(),
+                    'type' => String.valueOf(dfr.getType()),
+                    'required' => String.valueOf(isRequired)
+                };
+
+                if (dfr.getType() == Schema.DisplayType.REFERENCE) {
+                    List<Schema.SObjectType> referenceObjects = dfr.getReferenceTo();
+                    if (referenceObjects != null && !referenceObjects.isEmpty()) {
+                        f.put('referenceTo', referenceObjects[0].getDescribe().getName());
+                    }
+                }
+                fields.add(f);
+            }
+            return fields;
+        } catch (Exception e) {
+            throw auraError('Failed to retrieve Salesforce fields. ' + e.getMessage());
+        }
+    }
+
+    /**
+    * @description : Wrapper for a Google Ads account.
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    */
     public class GoogleAdsAccount {
         @AuraEnabled public String id;
         @AuraEnabled public String descriptiveName;
@@ -800,6 +1367,12 @@ public with sharing class GoogleAdsFormMappingController {
         @AuraEnabled public String loginCustomerId;
     }
 
+    /**
+    * @description : Wrapper for a Google Lead Form.
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    */
     public class GoogleLeadForm {
         @AuraEnabled public String id;
         @AuraEnabled public String name;
@@ -808,6 +1381,12 @@ public with sharing class GoogleAdsFormMappingController {
         @AuraEnabled public List<String> customQuestions;
     }
 
+    /**
+    * @description : Wrapper for a failed lead record.
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    */
     public class FailedLead {
         @AuraEnabled public String id;
         @AuraEnabled public String leadId;
@@ -815,12 +1394,24 @@ public with sharing class GoogleAdsFormMappingController {
         @AuraEnabled public String reason;
     }
 
+    /**
+    * @description : Wrapper for the result of a failed lead retry.
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    */
     public class RetryResult {
         @AuraEnabled public String id;
         @AuraEnabled public Boolean success;
         @AuraEnabled public String message;
     }
 
+    /**
+    * @description : Wrapper for an active site option.
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    */
     public class SiteOption {
         @AuraEnabled public String label;
         @AuraEnabled public String value;

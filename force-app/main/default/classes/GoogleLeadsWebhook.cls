@@ -114,7 +114,7 @@ global with sharing class GoogleLeadsWebhook {
             error.MVEX__Error_Body__c = JSON.serialize(new Map<String, Object>{
                 'formId' => formId,
                 'leadId' => leadId,
-                'reason' => String.isBlank(reason) ? 'Unknown error' : reason.left(1000),
+                'reason' => String.isBlank(reason) ? 'Unknown error' : reason,
                 'payload' => payload
             });
             insert error;

@@ -1196,6 +1196,9 @@
     border: 1px solid #e2e8f0;
     border-radius: 8px;
 }
+
+/* Removed redundant z-index */
+
 .mapping-col.left-col {
     flex: 1;
     display: flex;
@@ -1249,7 +1252,7 @@
     background-color: #f1f5f9;
     border-radius: 14px;
     padding: 4px;
-    position: relative;
+    
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 .mapping-pill-btn {
@@ -1262,8 +1265,8 @@
     background: transparent;
     color: #475569;
     transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    z-index: 1;
+    
+    
 }
 .mapping-pill-btn.active {
     background-color: #0076d3;
@@ -1278,7 +1281,7 @@
 }
 .mapping-input-container > * {
     width: 100%;
-    animation: fadeSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    
 }
 @keyframes fadeSlideIn {
     from {

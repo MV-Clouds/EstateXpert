@@ -39,7 +39,7 @@
                                 <div class="webhook-popover-header">WEBHOOK ENDPOINT</div>
                                 <template if:true={hasSiteOptions}>
                                     <div class="webhook-site-selector">
-                                        <lightning-combobox
+                                        <lightning-combobox dropdown-alignment="auto"
                                             name="siteSelect"
                                             label="Select Site"
                                             value={selectedSite}
@@ -359,7 +359,7 @@
                                         <span class="wizard-step-badge">Step 1</span>
                                         Select Meta Page
                                     </div>
-                                    <lightning-combobox
+                                    <lightning-combobox dropdown-alignment="auto"
                                         name="pageSelect"
                                         label=""
                                         value={selectedPageId}
@@ -386,7 +386,7 @@
                                             <span class="wizard-hint-muted">&nbsp;— Select a page first</span>
                                         </template>
                                     </div>
-                                    <lightning-combobox
+                                    <lightning-combobox dropdown-alignment="auto"
                                         name="formSelect"
                                         label=""
                                         value={selectedFormId}
@@ -454,7 +454,7 @@
                                                         
                                                         <div class="mapping-input-container">
                                                             <template if:true={field.isMetaField}>
-                                                                <lightning-combobox
+                                                                <lightning-combobox dropdown-alignment="auto"
                                                                     data-key={field.key}
                                                                     value={field.metaField}
                                                                     options={field.metaOptions}
@@ -517,7 +517,7 @@
                                                 <div class="add-field-box">
                                                     <div class="add-field-title">Add Salesforce Lead Field</div>
                                                     <div class="add-field-controls">
-                                                        <lightning-combobox value={selectedAdditionalField} options={additionalFieldOptions} onchange={handleAdditionalFieldChange} placeholder="-- Select Salesforce Field --" variant="label-hidden" class="custom-combobox add-field-combobox"></lightning-combobox>
+                                                        <lightning-combobox dropdown-alignment="auto" value={selectedAdditionalField} options={additionalFieldOptions} onchange={handleAdditionalFieldChange} placeholder="-- Select Salesforce Field --" variant="label-hidden" class="custom-combobox add-field-combobox"></lightning-combobox>
                                                         <button type="button" class="save_btn_css" onclick={handleAddField} disabled={isAddFieldDisabled}>
                                                             Add
                                                         </button>

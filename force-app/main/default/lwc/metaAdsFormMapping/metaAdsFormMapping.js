@@ -578,11 +578,6 @@ export default class MetaAdsFormMapping extends LightningElement {
             let formIndex = 1;
             for (let fId in formsObj) {
                 let formVal = formsObj[fId];
-                // Check if old format (formVal is a string/object mapping instead of having 'mappings')
-                // Wait, if it's the old format but nested under clientAppId, pId would be the clientAppId!
-                // Let's migrate clientAppId logic in loadInitialData, or handle it gracefully.
-                // If the root key is NOT a numeric Page ID but rather 'default_app_id', this might break.
-                // I will add a migration step in loadInitialData to flatten it if it has a clientAppId.
                 
                 let isFormNewFormat = formVal.mappings !== undefined;
                 let formName = isFormNewFormat ? formVal.formName : 'Form ID: ' + fId;

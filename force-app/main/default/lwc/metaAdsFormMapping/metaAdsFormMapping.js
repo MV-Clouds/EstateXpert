@@ -613,7 +613,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             this.tableData = data;
             this.updateShownData();
         } catch (e) {
-            console.error(\'Error in buildTableData\', e);
+            console.error('Error in buildTableData', e);
         }
     }
 

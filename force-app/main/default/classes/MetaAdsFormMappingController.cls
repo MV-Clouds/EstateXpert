@@ -419,7 +419,7 @@ public with sharing class MetaAdsFormMappingController {
 
     /**
     * Method Name : retryMultipleFailedLeads
-    * @description : Retries multiple failed leads.
+    * @description : Retries multiple failed leads in bulk (no SOQL/DML in loops).
     * @param errorRecordIds : A list of error record IDs.
     * @return Map<String, String>
     */
@@ -427,8 +427,64 @@ public with sharing class MetaAdsFormMappingController {
     public static Map<String, String> retryMultipleFailedLeads(List<String> errorRecordIds) {
         Map<String, String> results = new Map<String, String>();
         try {
-            for (String recordId : errorRecordIds) {
-                results.put(recordId, retryFailedLead(recordId, null));
+            // 1. Bulk query error records
+            List<MVEX__Error_Handling__c> errs = [SELECT Id, MVEX__Error_Body__c, MVEX__Error_Message__c FROM MVEX__Error_Handling__c WHERE Id IN :errorRecordIds WITH USER_MODE];
+            
+            Map<String, MetaLeadWebhook.ContactContext> ctxMap = new Map<String, MetaLeadWebhook.ContactContext>();
+            Map<String, MVEX__Error_Handling__c> errMap = new Map<String, MVEX__Error_Handling__c>();
+
+            // 2. Build contexts (NO queries, NO DML here)
+            for (MVEX__Error_Handling__c err : errs) {
+                if (String.isBlank(err.MVEX__Error_Body__c)) {
+                    results.put(err.Id, 'Error record body is empty.');
+                    continue;
+                }
+                
+                try {
+                    Map<String, Object> retryPayload = (Map<String, Object>) JSON.deserializeUntyped(err.MVEX__Error_Body__c);
+                    String lId = (String) retryPayload.get('leadId');
+                    String pId = (String) retryPayload.get('pageId');
+                    String fId = (String) retryPayload.get('formId');
+                    String fName = (String) retryPayload.get('formName');
+                    Map<String, Object> lData = (Map<String, Object>) retryPayload.get('leadData');
+                    
+                    MetaLeadWebhook.ContactContext ctx = new MetaLeadWebhook.ContactContext(lData, fName, pId, fId, lId);
+                    ctx.isRetry = true;
+                    // No override in bulk
+                    ctxMap.put(err.Id, ctx);
+                    errMap.put(err.Id, err);
+                } catch (Exception e) {
+                    results.put(err.Id, 'Retry Error: ' + e.getMessage());
+                }
+            }
+
+            // 3. Process all contacts in BULK
+            if (!ctxMap.isEmpty()) {
+                Map<String, String> processResults = MetaLeadWebhook.processMultipleContacts(ctxMap);
+                
+                List<MVEX__Error_Handling__c> toDelete = new List<MVEX__Error_Handling__c>();
+                List<MVEX__Error_Handling__c> toUpdate = new List<MVEX__Error_Handling__c>();
+                
+                for (String errId : processResults.keySet()) {
+                    String res = processResults.get(errId);
+                    results.put(errId, res);
+                    
+                    MVEX__Error_Handling__c err = errMap.get(errId);
+                    if (res == 'Success') {
+                        toDelete.add(err);
+                    } else {
+                        err.MVEX__Error_Message__c = res;
+                        toUpdate.add(err);
+                    }
+                }
+                
+                // 4. Bulk DML on Error Records
+                if (!toDelete.isEmpty()) {
+                    delete as user toDelete;
+                }
+                if (!toUpdate.isEmpty()) {
+                    update as user toUpdate;
+                }
             }
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'MetaAdsFormMappingController', 'retryMultipleFailedLeads', e.getMessage());

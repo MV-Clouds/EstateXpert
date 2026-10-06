@@ -571,7 +571,18 @@ export default class MetaAdsFormMapping extends LightningElement {
         this.updateShownData();
     }
 
-
+    /**
+     * @description Re-fetches the failed leads count and rebuilds the table data
+     */
+    async refreshTableData() {
+        try {
+            const failedCountRes = await getFailedLeadsCountMap();
+            this.buildTableData(failedCountRes || {});
+        } catch (error) {
+            console.error('Error refreshing table data', error);
+            this.buildTableData({});
+        }
+    }
 
     // --- Modal Logic ---
 
@@ -1170,7 +1181,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                 const result = await saveMappingApex({ mappingJson: jsonStr, pageId: this.selectedPageId });
                 
                 if (result && result.success) {
-                    this.buildTableData();
+                    await this.refreshTableData();
                     this.isModalOpen = false;
                     this.isEditingMode = false;
 
@@ -1344,7 +1355,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                 
                 if (result && result.success) {
                     this.showToast('Success', 'Mapping deleted.', 'success');
-                    this.buildTableData();
+                    await this.refreshTableData();
                 } else {
                     this.showToast('Error', 'Failed to delete mapping.', 'error');
                 }
@@ -1380,7 +1391,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                     this.showToast('Success', 'Integration deactivated successfully.', 'success');
                     this.fullMappingJson = {};
                     this.availablePages = [];
-                    this.buildTableData();
+                    await this.refreshTableData();
                     this.dispatchEvent(new CustomEvent('mvexdeactivated'));
                 } else {
                     this.showToast('Error', result?.message || 'Failed to deactivate integration.', 'error');
@@ -1485,6 +1496,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             this.activeFailedLeadId = null;
             this.failedLeadDataMap = {};
             this.pendingRetryIds = [];
+            this.refreshTableData();
         } catch (e) {
             console.error('Error in closeFailedLeadsModal', e);
         }

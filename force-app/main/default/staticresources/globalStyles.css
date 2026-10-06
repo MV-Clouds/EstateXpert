@@ -830,3 +830,8 @@
 .exp-table-content table tbody tr.accordion-row .exp-accordion-table-content tbody tr:hover > td {
     background-color: #ebf3f6 !important;
 }
+
+.exp-table-content tbody tr.accordion-row, 
+.exp-table-content tbody tr.accordion-row:nth-child(odd) {
+    background-color: #ffffff !important;
+}

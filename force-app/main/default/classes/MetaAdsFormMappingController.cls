@@ -388,7 +388,7 @@ public with sharing class MetaAdsFormMappingController {
     @AuraEnabled
     public static String retryFailedLead(String errorRecordId, String mappingJsonOverride) {
         try {
-            MVEX__Error_Handling__c err = [SELECT Id, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE Id = :errorRecordId WITH USER_MODE LIMIT 1];
+            MVEX__Error_Handling__c err = [SELECT Id, MVEX__Error_Body__c, MVEX__Error_Message__c FROM MVEX__Error_Handling__c WHERE Id = :errorRecordId WITH USER_MODE LIMIT 1];
             if (err == null || String.isBlank(err.MVEX__Error_Body__c)) {
                 return 'Error record not found or body is empty.';
             }
@@ -406,6 +406,9 @@ public with sharing class MetaAdsFormMappingController {
             String result = MetaLeadWebhook.createSalesforceContact(ctx);
             if (result == 'Success') {
                 delete as user err;
+            } else {
+                err.MVEX__Error_Message__c = result;
+                update as user err;
             }
             return result;
         } catch (Exception e) {

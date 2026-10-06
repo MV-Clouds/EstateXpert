@@ -2,7 +2,7 @@
     <div class="wrapper">
         <!-- Full-area loading spinner while fetching mappings and pages on init -->
         <template if:true={isLoading}>
-            <c-spinner-component is-absolute="true"></c-spinner-component>
+            <c-spinner-component></c-spinner-component>
         </template>
         
         <template if:false={isIntegrationError}>
@@ -330,6 +330,7 @@
             <div class="exp-no-data-message">Please reconnect Meta Ads or contact Admin.</div>
         </div>
     </template>
+
     
 
     <!-- ─── Single-Page Mapping Wizard Modal ──────────────────────────────── -->
@@ -350,11 +351,6 @@
 
                     <div class="slds-modal__content modalbody" id="modal-content-id-1">
                         <div class="content_body relative-position">
-
-                            <!-- Spinner Overlay (covers entire screen while loading) -->
-                            <template if:true={isModalLoading}>
-                                <c-spinner-component></c-spinner-component>
-                            </template>
 
                             <template if:false={isEditingMode}>
                                 <!-- Section 1: Select Page (always visible) -->
@@ -602,11 +598,6 @@
                 <div class="slds-modal__content modalbody" id="modal-content-id-2">
                     <div class="content_body relative-position min-height-200">
                         
-                        <!-- Spinner Overlay -->
-                        <template if:true={isRetrying}>
-                            <c-spinner-component></c-spinner-component>
-                        </template>
-
                         <template if:true={isFailedWizardStep1}>
                         <template if:true={failedLeads.length}>
                             <div class="exp-table-content table-content">

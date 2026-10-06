@@ -45,7 +45,6 @@ export default class MetaAdsFormMapping extends LightningElement {
     @track isIntegrationError = false;
 
     @track isModalOpen = false;
-    @track isModalLoading = false;
     @track isEditingMode = false;
     @track spinnerLabel = 'Loading forms...';
 
@@ -75,7 +74,6 @@ export default class MetaAdsFormMapping extends LightningElement {
     @track activeFailedLeadId = null;
     failedLeadDataMap = {};
     @track failedLeads = [];
-    @track isRetrying = false;
     selectedFailedLeadsFormId = '';
     pendingRetryIds = [];  // IDs pending retry after mapping edit
     
@@ -127,14 +125,14 @@ export default class MetaAdsFormMapping extends LightningElement {
      * @description Page selection is disabled while loading or in edit mode 
      */
     get isPageSelectionDisabled() {
-        try { return this.isModalLoading || this.isEditingMode; } catch (e) { console.error(e); return true; }
+        try { return this.isLoading || this.isEditingMode; } catch (e) { console.error(e); return true; }
     }
 
     /** 
      * @description Form dropdown is disabled while loading OR no page selected OR in edit mode 
      */
     get isFormDropdownDisabled() {
-        try { return this.isModalLoading || !this.selectedPageId || this.isEditingMode; } catch (e) { console.error(e); return true; }
+        try { return this.isLoading || !this.selectedPageId || this.isEditingMode; } catch (e) { console.error(e); return true; }
     }
 
     /** 
@@ -155,7 +153,7 @@ export default class MetaAdsFormMapping extends LightningElement {
      * @description Save is enabled only when a form is selected 
      */
     get isSaveDisabled() {
-        try { return !this.selectedFormId || this.isModalLoading; } catch (e) { console.error(e); return true; }
+        try { return !this.selectedFormId || this.isLoading; } catch (e) { console.error(e); return true; }
     }
 
     /** 
@@ -238,7 +236,7 @@ export default class MetaAdsFormMapping extends LightningElement {
      * @description Checks if action buttons for failed leads should be disabled 
      */
     get isFailedActionDisabled() {
-        try { return !this.hasSelectedFailedLeads || this.isRetrying; } catch (e) { console.error(e); return true; }
+        try { return !this.hasSelectedFailedLeads || this.isLoading; } catch (e) { console.error(e); return true; }
     }
 
     /** 
@@ -248,7 +246,7 @@ export default class MetaAdsFormMapping extends LightningElement {
         try {
             if (!this.failedLeads) return true;
             const selectedCount = this.failedLeads.filter(l => l.selected).length;
-            return selectedCount === 0 || this.isRetrying;
+            return selectedCount === 0 || this.isLoading;
         } catch (e) { console.error(e); return true; }
     }
 
@@ -445,8 +443,16 @@ export default class MetaAdsFormMapping extends LightningElement {
         }
     }
 
-    async loadInitialData() {
+    showSpinner() {
         this.isLoading = true;
+    }
+    
+    hideSpinner() {
+        this.isLoading = false;
+    }
+
+    async loadInitialData() {
+        this.showSpinner();
         try {
             // 1. Get SF Fields
             this.salesforceLeadFields = await getSalesforceLeadFields();
@@ -515,7 +521,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             this.isIntegrationError = true;
             this.showToast('Error', 'Failed to load initial data.', 'error');
         } finally {
-            this.isLoading = false;
+            this.hideSpinner();
         }
     }
 
@@ -641,7 +647,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                 return;
             }
 
-            this.isModalLoading = true;
+            this.showSpinner();
             this.spinnerLabel   = 'Loading forms...';
             this.formsLoaded    = false;
             const formsRes = await getLeadForms({ pageId: this.selectedPageId });
@@ -657,7 +663,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             this.showToast('Error', 'Error fetching forms.', 'error');
             this.formsLoaded = true;
         } finally {
-            this.isModalLoading = false;
+            this.hideSpinner();
         }
     }
 
@@ -1187,7 +1193,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                 mappings: formMapping
             };
 
-            this.isModalLoading = true;
+            this.showSpinner();
             try {
                 const jsonStr = JSON.stringify(this.fullMappingJson);
                 const result = await saveMappingApex({ mappingJson: jsonStr, pageId: this.selectedPageId });
@@ -1202,7 +1208,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                         const retryIds = [...this.pendingRetryIds];
                         this.pendingRetryIds = [];
                         this.isFailedLeadsModalOpen = true;
-                        this.isRetrying = true;
+                        this.showSpinner();
                         try {
                             const results = await retryMultipleFailedLeads({ errorRecordIds: retryIds });
                             let successCount = 0;
@@ -1220,7 +1226,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                         } catch (err) {
                             this.showToast('Error', err.body ? err.body.message : err.message, 'error');
                         } finally {
-                            this.isRetrying = false;
+                            this.hideSpinner();
                         }
                     } else {
                         this.showToast('Success', 'Form mapping saved and webhook subscribed successfully.', 'success');
@@ -1231,7 +1237,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             } catch (error) {
                 this.showToast('Error', error.body ? error.body.message : error.message, 'error');
             } finally {
-                this.isModalLoading = false;
+                this.hideSpinner();
             }
         } catch (e) {
             console.error('Error in saveMapping', e);
@@ -1320,7 +1326,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             this.formsLoaded       = false;
             this.isEditingMode     = true;
             this.isModalOpen       = true;
-            this.isModalLoading    = true;
+            this.showSpinner();
             this.spinnerLabel      = 'Loading form fields...';
 
             try {
@@ -1335,7 +1341,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                 this.showToast('Error', 'Failed to load form details for editing.', 'error');
                 this.closeModal();
             } finally {
-                this.isModalLoading = false;
+                this.hideSpinner();
             }
         } catch (e) {
             console.error('Error in editRow', e);
@@ -1348,7 +1354,7 @@ export default class MetaAdsFormMapping extends LightningElement {
      */
     async deleteRow(row) {
         try {
-            this.isLoading = true;
+            this.showSpinner();
             if (this.fullMappingJson[row.pageId]) {
                 let pageObj = this.fullMappingJson[row.pageId];
                 let isNewFormat = pageObj.forms !== undefined;
@@ -1375,7 +1381,7 @@ export default class MetaAdsFormMapping extends LightningElement {
         } catch (e) {
             this.showToast('Error', e.message, 'error');
         } finally {
-            this.isLoading = false;
+            this.hideSpinner();
         }
     }
 
@@ -1396,7 +1402,7 @@ export default class MetaAdsFormMapping extends LightningElement {
      */
     async confirmDeactivate() {
         try {
-            this.isLoading = true;
+            this.showSpinner();
             try {
                 const result = await deactivateConnection();
                 if (result && result.success) {
@@ -1411,7 +1417,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             } catch (error) {
                 this.showToast('Error', error.body ? error.body.message : error.message, 'error');
             } finally {
-                this.isLoading = false;
+                this.hideSpinner();
             }
         } catch (e) {
             console.error('Error in confirmDeactivate', e);
@@ -1519,7 +1525,7 @@ export default class MetaAdsFormMapping extends LightningElement {
      */
     async loadFailedLeads() {
         try {
-            this.isRetrying = true;
+            this.showSpinner();
             try {
                 const results = await getFailedLeads({ formId: this.selectedFailedLeadsFormId });
                 this.failedLeads = results.map((r, index) => {
@@ -1543,7 +1549,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             } catch (error) {
                 this.showToast('Error', 'Failed to load error records', 'error');
             } finally {
-                this.isRetrying = false;
+                this.hideSpinner();
             }
         } catch (e) {
             console.error('Error in loadFailedLeads', e);
@@ -1590,7 +1596,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             const selectedIds = this.failedLeads.filter(l => l.selected).map(l => l.Id);
             if (selectedIds.length === 0) return;
 
-            this.isRetrying = true;
+            this.showSpinner();
             try {
                 const results = await retryMultipleFailedLeads({ errorRecordIds: selectedIds });
                 let successCount = 0;
@@ -1608,7 +1614,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             } catch (error) {
                 this.showToast('Error', error.body ? error.body.message : error.message, 'error');
             } finally {
-                this.isRetrying = false;
+                this.hideSpinner();
             }
         } catch (e) {
             console.error('Error in retrySelectedFailedLeads', e);
@@ -1623,7 +1629,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             const selectedIds = this.failedLeads.filter(l => l.selected).map(l => l.Id);
             if (selectedIds.length === 0) return;
 
-            this.isRetrying = true;
+            this.showSpinner();
             try {
                 const success = await deleteFailedLeads({ errorRecordIds: selectedIds });
                 if (success) {
@@ -1635,7 +1641,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             } catch (error) {
                 this.showToast('Error', error.body ? error.body.message : error.message, 'error');
             } finally {
-                this.isRetrying = false;
+                this.hideSpinner();
             }
         } catch (e) {
             console.error('Error in discardSelectedFailedLeads', e);
@@ -1673,7 +1679,7 @@ export default class MetaAdsFormMapping extends LightningElement {
 
             if (!this.availableForms || !this.availableForms.some(f => String(f.id) === String(this.selectedFormId))) {
                 try {
-                    this.isRetrying = true;
+                    this.showSpinner();
                     const formsRes = await getLeadForms({ pageId: this.selectedPageId });
                     if (formsRes && formsRes.success && formsRes.forms) {
                         this.availableForms = formsRes.forms;
@@ -1681,7 +1687,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                 } catch (e) {
                     console.error(e);
                 } finally {
-                    this.isRetrying = false;
+                    this.hideSpinner();
                 }
             }
 
@@ -1754,7 +1760,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             
             tempMappingJson[this.selectedPageId].forms[this.selectedFormId] = { formName: formName, mappings: formMapping };
 
-            this.isRetrying = true;
+            this.showSpinner();
             try {
                 const jsonStr = JSON.stringify(tempMappingJson);
                 
@@ -1769,7 +1775,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             } catch (error) {
                 this.showToast('Error', error.body ? error.body.message : error.message, 'error');
             } finally {
-                this.isRetrying = false;
+                this.hideSpinner();
             }
         } catch (e) {
             console.error('Error in saveAndRetryFailedLead', e);
@@ -1789,7 +1795,7 @@ export default class MetaAdsFormMapping extends LightningElement {
 
         try {
             if (!this.siteOptions || this.siteOptions.length === 0) {
-                this.isLoading = true;
+                this.showSpinner();
                 const sites = await getActiveSites();
                 this.siteOptions = (sites || []).map(s => ({ label: s.label, value: s.value }));
                 if (this.siteOptions.length > 0) {
@@ -1801,7 +1807,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             console.error('Error in toggleWebhookPopover', e);
             this.showToast('Error', 'Failed to fetch Force.com sites.', 'error');
         } finally {
-            this.isLoading = false;
+            this.hideSpinner();
         }
     }
 

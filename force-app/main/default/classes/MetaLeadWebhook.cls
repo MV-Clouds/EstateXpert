@@ -42,11 +42,16 @@ global with sharing class MetaLeadWebhook {
      * This is the CORRECT token source — the old MVEX__MetaLeadConfig__c is legacy.
      */
     private static String getSystemUserToken() {
-        OAuth_Configuration__mdt cfg = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
-        if (cfg == null || String.isBlank(cfg.Access_Token__c)) {
+        try {
+            List<OAuth_Configuration__mdt> cfgs = [SELECT Access_Token__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' WITH USER_MODE LIMIT 1];
+            if (cfgs.isEmpty() || String.isBlank(cfgs[0].Access_Token__c)) {
+                return null;
+            }
+            return cfgs[0].Access_Token__c;
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'getSystemUserToken', e.getMessage());
             return null;
         }
-        return cfg.Access_Token__c;
     }
 
     /**
@@ -112,7 +117,8 @@ global with sharing class MetaLeadWebhook {
                 return;
             }
 
-            OAuth_Configuration__mdt oauthConfig = OAuth_Configuration__mdt.getInstance('Meta_Ads_Config');
+            List<OAuth_Configuration__mdt> oauthConfigs = [SELECT API_Version__c, Base_URL__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' WITH USER_MODE LIMIT 1];
+            OAuth_Configuration__mdt oauthConfig = !oauthConfigs.isEmpty() ? oauthConfigs[0] : null;
             String apiVersion = oauthConfig != null ? oauthConfig.API_Version__c : 'v19.0';
             String baseUrl    = oauthConfig != null ? oauthConfig.Base_URL__c : 'https://graph.facebook.com';
 
@@ -134,10 +140,15 @@ global with sharing class MetaLeadWebhook {
 
     // ─── Graph API: fetch lead field data ─────────────────────────────────────────
     public static Map<String, Object> fetchLeadData(String leadgenId, ApiContext apiCtx) {
-        String url = apiCtx.baseUrl + '/' + apiCtx.apiVersion + '/' + leadgenId
-                   + '?fields=field_data,platform,created_time,campaign_id,campaign_name'
-                   + '&access_token=' + EncodingUtil.urlEncode(apiCtx.token, 'UTF-8');
-        return makeGetRequest(url);
+        try {
+            String url = apiCtx.baseUrl + '/' + apiCtx.apiVersion + '/' + leadgenId
+                       + '?fields=field_data,platform,created_time,campaign_id,campaign_name'
+                       + '&access_token=' + EncodingUtil.urlEncode(apiCtx.token, 'UTF-8');
+            return makeGetRequest(url);
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'fetchLeadData', e.getMessage());
+            return new Map<String, Object>();
+        }
     }
 
     // ─── Graph API: fetch form name ───────────────────────────────────────────────
@@ -169,112 +180,124 @@ global with sharing class MetaLeadWebhook {
         }
     }
 
+    /**
+     * Method Name : buildContact
+     * @description : Builds a Salesforce Contact record from Meta Lead Data.
+     * @param ctx ContactContext
+     * @param mappingJsonData String JSON mappings
+     * @return Contact
+     */
     private static Contact buildContact(ContactContext ctx, String mappingJsonData) {
-        if (!ctx.leadData.containsKey('id') && String.isBlank(ctx.leadId)) {
-            return null;
-        }
-        
-        Contact newContact = new Contact();
-        String platform = ctx.leadData.containsKey('platform') ? (String) ctx.leadData.get('platform') : 'facebook';
-        newContact.LeadSource = (platform == 'ig') ? 'Instagram' : 'Facebook';
-        newContact.MVEX__Meta_Form_Name__c = ctx.formName;
-        newContact.MVEX__Contact_Type__c = 'Buyer';
-
-        if (ctx.leadData.containsKey('campaign_id')) {
-            newContact.MVEX__MetaCampaignId__c = (String) ctx.leadData.get('campaign_id');
-        }
-        if (ctx.leadData.containsKey('campaign_name')) {
-            newContact.MVEX__Meta_Campaign_Name__c = (String) ctx.leadData.get('campaign_name');
-        }
-
-        Map<String, List<String>> metaToSfFields = new Map<String, List<String>>();
-        Map<String, String> sfToCustomValue = new Map<String, String>();
-        
         try {
-            if (String.isNotBlank(mappingJsonData)) {
-                Map<String, Object> rootJson = (Map<String, Object>) JSON.deserializeUntyped(mappingJsonData);
-                if (rootJson.containsKey(ctx.pageId)) {
-                    Map<String, Object> pageObj = (Map<String, Object>) rootJson.get(ctx.pageId);
-                    Map<String, Object> formsObj = pageObj.containsKey('forms') ? (Map<String, Object>) pageObj.get('forms') : pageObj;
-                    
-                    if (formsObj.containsKey(ctx.formId)) {
-                        Map<String, Object> formObj = (Map<String, Object>) formsObj.get(ctx.formId);
-                        Map<String, Object> mappingsObj = formObj.containsKey('mappings') ? (Map<String, Object>) formObj.get('mappings') : formObj;
+            if (!ctx.leadData.containsKey('id') && String.isBlank(ctx.leadId)) {
+                return null;
+            }
+            
+            Contact newContact = new Contact();
+            String platform = ctx.leadData.containsKey('platform') ? (String) ctx.leadData.get('platform') : 'facebook';
+            newContact.LeadSource = (platform == 'ig') ? 'Instagram' : 'Facebook';
+            newContact.MVEX__Meta_Form_Name__c = ctx.formName;
+            newContact.MVEX__Contact_Type__c = 'Buyer';
+
+            if (ctx.leadData.containsKey('campaign_id')) {
+                newContact.MVEX__MetaCampaignId__c = (String) ctx.leadData.get('campaign_id');
+            }
+            if (ctx.leadData.containsKey('campaign_name')) {
+                newContact.MVEX__Meta_Campaign_Name__c = (String) ctx.leadData.get('campaign_name');
+            }
+
+            Map<String, List<String>> metaToSfFields = new Map<String, List<String>>();
+            Map<String, String> sfToCustomValue = new Map<String, String>();
+            
+            try {
+                if (String.isNotBlank(mappingJsonData)) {
+                    Map<String, Object> rootJson = (Map<String, Object>) JSON.deserializeUntyped(mappingJsonData);
+                    if (rootJson.containsKey(ctx.pageId)) {
+                        Map<String, Object> pageObj = (Map<String, Object>) rootJson.get(ctx.pageId);
+                        Map<String, Object> formsObj = pageObj.containsKey('forms') ? (Map<String, Object>) pageObj.get('forms') : pageObj;
                         
-                        for (String key : mappingsObj.keySet()) {
-                            Object val = mappingsObj.get(key);
-                            if (val instanceof Map<String, Object>) {
-                                Map<String, Object> fieldObj = (Map<String, Object>) val;
-                                String sType = (String) fieldObj.get('sourceType');
-                                if (sType == 'Meta Form Field') {
-                                    String mField = (String) fieldObj.get('metaField');
-                                    if (String.isNotBlank(mField)) {
-                                        if (!metaToSfFields.containsKey(mField)) metaToSfFields.put(mField, new List<String>());
-                                        metaToSfFields.get(mField).add(key);
+                        if (formsObj.containsKey(ctx.formId)) {
+                            Map<String, Object> formObj = (Map<String, Object>) formsObj.get(ctx.formId);
+                            Map<String, Object> mappingsObj = formObj.containsKey('mappings') ? (Map<String, Object>) formObj.get('mappings') : formObj;
+                            
+                            for (String key : mappingsObj.keySet()) {
+                                Object val = mappingsObj.get(key);
+                                if (val instanceof Map<String, Object>) {
+                                    Map<String, Object> fieldObj = (Map<String, Object>) val;
+                                    String sType = (String) fieldObj.get('sourceType');
+                                    if (sType == 'Meta Form Field') {
+                                        String mField = (String) fieldObj.get('metaField');
+                                        if (String.isNotBlank(mField)) {
+                                            if (!metaToSfFields.containsKey(mField)) metaToSfFields.put(mField, new List<String>());
+                                            metaToSfFields.get(mField).add(key);
+                                        }
+                                    } else if (sType == 'Custom Value') {
+                                        String cVal = (String) fieldObj.get('customValue');
+                                        if (String.isNotBlank(cVal)) {
+                                            sfToCustomValue.put(key, cVal);
+                                        }
                                     }
-                                } else if (sType == 'Custom Value') {
-                                    String cVal = (String) fieldObj.get('customValue');
-                                    if (String.isNotBlank(cVal)) {
-                                        sfToCustomValue.put(key, cVal);
-                                    }
-                                }
-                            } else {
-                                String sfField = String.valueOf(val);
-                                if (key.startsWith('"') && key.endsWith('"')) {
-                                    sfToCustomValue.put(sfField, key.substring(1, key.length() - 1));
                                 } else {
-                                    if (!metaToSfFields.containsKey(key)) metaToSfFields.put(key, new List<String>());
-                                    metaToSfFields.get(key).add(sfField);
+                                    String sfField = String.valueOf(val);
+                                    if (key.startsWith('"') && key.endsWith('"')) {
+                                        sfToCustomValue.put(sfField, key.substring(1, key.length() - 1));
+                                    } else {
+                                        if (!metaToSfFields.containsKey(key)) metaToSfFields.put(key, new List<String>());
+                                        metaToSfFields.get(key).add(sfField);
+                                    }
                                 }
                             }
                         }
                     }
                 }
+            } catch (Exception e) {
+                ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'buildContact_fetchMappings', e.getMessage());
             }
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'buildContact_fetchMappings', e.getMessage());
-        }
 
-        String unmappedData = '';
-        if (ctx.leadData.containsKey('field_data')) {
-            List<Object> fieldData = (List<Object>) ctx.leadData.get('field_data');
-            for (Object field : fieldData) {
-                Map<String, Object> fieldMap = (Map<String, Object>) field;
-                String fieldName = (String) fieldMap.get('name');
-                List<Object> values = (List<Object>) fieldMap.get('values');
-                String fieldValue = values != null && !values.isEmpty() ? String.valueOf(values[0]) : '';
-                
-                if (String.isBlank(fieldValue)) continue;
-                
-                if (metaToSfFields.containsKey(fieldName)) {
-                    for (String sfField : metaToSfFields.get(fieldName)) {
-                        try {
-                            newContact.put(sfField, fieldValue);
-                        } catch (Exception e) {
-                            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'buildContact_mapField', e.getMessage());
-                            unmappedData += fieldName + ' (' + sfField + '): ' + fieldValue + '\n';
+            String unmappedData = '';
+            if (ctx.leadData.containsKey('field_data')) {
+                List<Object> fieldData = (List<Object>) ctx.leadData.get('field_data');
+                for (Object field : fieldData) {
+                    Map<String, Object> fieldMap = (Map<String, Object>) field;
+                    String fieldName = (String) fieldMap.get('name');
+                    List<Object> values = (List<Object>) fieldMap.get('values');
+                    String fieldValue = values != null && !values.isEmpty() ? String.valueOf(values[0]) : '';
+                    
+                    if (String.isBlank(fieldValue)) continue;
+                    
+                    if (metaToSfFields.containsKey(fieldName)) {
+                        for (String sfField : metaToSfFields.get(fieldName)) {
+                            try {
+                                newContact.put(sfField, fieldValue);
+                            } catch (Exception e) {
+                                ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'buildContact_mapField', e.getMessage());
+                                unmappedData += fieldName + ' (' + sfField + '): ' + fieldValue + '\n';
+                            }
                         }
+                    } else {
+                        unmappedData += fieldName + ': ' + fieldValue + '\n';
                     }
-                } else {
-                    unmappedData += fieldName + ': ' + fieldValue + '\n';
                 }
             }
-        }
 
-        for (String sfField : sfToCustomValue.keySet()) {
-            try {
-                newContact.put(sfField, sfToCustomValue.get(sfField));
-            } catch (Exception e) {
-                ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'buildContact_customValue', e.getMessage());
+            for (String sfField : sfToCustomValue.keySet()) {
+                try {
+                    newContact.put(sfField, sfToCustomValue.get(sfField));
+                } catch (Exception e) {
+                    ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'buildContact_customValue', e.getMessage());
+                }
             }
-        }
 
-        if (String.isNotBlank(unmappedData)) {
-            String existingDesc = String.isNotBlank(newContact.Description) ? newContact.Description + '\n\n' : '';
-            newContact.Description = existingDesc + '--- Unmapped Meta Lead Data ---\n' + unmappedData;
-        }
+            if (String.isNotBlank(unmappedData)) {
+                String existingDesc = String.isNotBlank(newContact.Description) ? newContact.Description + '\n\n' : '';
+                newContact.Description = existingDesc + '--- Unmapped Meta Lead Data ---\n' + unmappedData;
+            }
 
-        return newContact;
+            return newContact;
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'buildContact', e.getMessage());
+            return null;
+        }
     }
 
     /**
@@ -284,90 +307,95 @@ global with sharing class MetaLeadWebhook {
      * @return Map of unique identifier to result string
      */
     public static Map<String, String> processMultipleContacts(Map<String, ContactContext> ctxMap) {
-        Map<String, String> results = new Map<String, String>();
-        List<Contact> contactsToInsert = new List<Contact>();
-        List<String> orderedCtxKeys = new List<String>();
-        List<ContactContext> orderedCtxs = new List<ContactContext>();
-        
-        // 1. Fetch Mapping ONCE
-        String bulkMappingJsonData = '';
         try {
-            List<MVEX__Configuration_Settings__c> settings = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Meta Ads Mappings' WITH USER_MODE LIMIT 1];
-            if (!settings.isEmpty()) {
-                bulkMappingJsonData = settings[0].MVEX__Fields_Data__c;
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'processMultipleContacts_fetchMappings', e.getMessage());
-        }
-
-        // 2. Build Contacts
-        for (String ctxId : ctxMap.keySet()) {
-            ContactContext ctx = ctxMap.get(ctxId);
-            String mappingToUse = String.isNotBlank(ctx.mappingJsonOverride) ? ctx.mappingJsonOverride : bulkMappingJsonData;
+            Map<String, String> results = new Map<String, String>();
+            List<Contact> contactsToInsert = new List<Contact>();
+            List<String> orderedCtxKeys = new List<String>();
+            List<ContactContext> orderedCtxs = new List<ContactContext>();
             
-            Contact c = buildContact(ctx, mappingToUse);
-            if (c != null) {
-                contactsToInsert.add(c);
-                orderedCtxKeys.add(ctxId);
-                orderedCtxs.add(ctx);
-            } else {
-                results.put(ctxId, 'Invalid Lead Data');
-            }
-        }
-
-        // 3. Insert Bulk
-        if (!contactsToInsert.isEmpty()) {
+            // 1. Fetch Mapping ONCE
+            String bulkMappingJsonData = '';
             try {
-                Database.DMLOptions dml = new Database.DMLOptions();
-                dml.DuplicateRuleHeader.allowSave = true;
-                dml.DuplicateRuleHeader.runAsCurrentUser = true;
-                List<Database.SaveResult> srs = Database.insert(contactsToInsert, dml);
+                List<MVEX__Configuration_Settings__c> settings = [SELECT MVEX__Fields_Data__c FROM MVEX__Configuration_Settings__c WHERE Name = 'Meta Ads Mappings' WITH USER_MODE LIMIT 1];
+                if (!settings.isEmpty()) {
+                    bulkMappingJsonData = settings[0].MVEX__Fields_Data__c;
+                }
+            } catch (Exception e) {
+                ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'processMultipleContacts_fetchMappings', e.getMessage());
+            }
+
+            // 2. Build Contacts
+            for (String ctxId : ctxMap.keySet()) {
+                ContactContext ctx = ctxMap.get(ctxId);
+                String mappingToUse = String.isNotBlank(ctx.mappingJsonOverride) ? ctx.mappingJsonOverride : bulkMappingJsonData;
                 
-                List<MVEX__Error_Handling__c> errsToInsert = new List<MVEX__Error_Handling__c>();
+                Contact c = buildContact(ctx, mappingToUse);
+                if (c != null) {
+                    contactsToInsert.add(c);
+                    orderedCtxKeys.add(ctxId);
+                    orderedCtxs.add(ctx);
+                } else {
+                    results.put(ctxId, 'Invalid Lead Data');
+                }
+            }
 
-                for (Integer i = 0; i < srs.size(); i++) {
-                    Database.SaveResult sr = srs[i];
-                    String ctxId = orderedCtxKeys[i];
-                    ContactContext ctx = orderedCtxs[i];
+            // 3. Insert Bulk
+            if (!contactsToInsert.isEmpty()) {
+                try {
+                    Database.DMLOptions dml = new Database.DMLOptions();
+                    dml.DuplicateRuleHeader.allowSave = true;
+                    dml.DuplicateRuleHeader.runAsCurrentUser = true;
+                    List<Database.SaveResult> srs = Database.insert(contactsToInsert, dml);
                     
-                    if (sr.isSuccess()) {
-                        results.put(ctxId, 'Success');
-                    } else {
-                        String errorMsg = sr.getErrors()[0].getMessage();
-                        results.put(ctxId, errorMsg);
-                        
-                        if (!ctx.isRetry) {
-                            Map<String, Object> retryPayload = new Map<String, Object>();
-                            retryPayload.put('leadId', ctx.leadId);
-                            retryPayload.put('pageId', ctx.pageId);
-                            retryPayload.put('formId', ctx.formId);
-                            retryPayload.put('formName', ctx.formName);
-                            retryPayload.put('leadData', ctx.leadData);
+                    List<MVEX__Error_Handling__c> errsToInsert = new List<MVEX__Error_Handling__c>();
 
-                            MVEX__Error_Handling__c errRec = new MVEX__Error_Handling__c();
-                            errRec.MVEX__Error_Body__c = JSON.serializePretty(retryPayload);
-                            errRec.MVEX__Source_of_Error__c = 'MetaFailedLeads';
-                            errRec.MVEX__Error_Message__c = errorMsg;
-                            errsToInsert.add(errRec);
+                    for (Integer i = 0; i < srs.size(); i++) {
+                        Database.SaveResult sr = srs[i];
+                        String ctxId = orderedCtxKeys[i];
+                        ContactContext ctx = orderedCtxs[i];
+                        
+                        if (sr.isSuccess()) {
+                            results.put(ctxId, 'Success');
+                        } else {
+                            String errorMsg = sr.getErrors()[0].getMessage();
+                            results.put(ctxId, errorMsg);
+                            
+                            if (!ctx.isRetry) {
+                                Map<String, Object> retryPayload = new Map<String, Object>();
+                                retryPayload.put('leadId', ctx.leadId);
+                                retryPayload.put('pageId', ctx.pageId);
+                                retryPayload.put('formId', ctx.formId);
+                                retryPayload.put('formName', ctx.formName);
+                                retryPayload.put('leadData', ctx.leadData);
+
+                                MVEX__Error_Handling__c errRec = new MVEX__Error_Handling__c();
+                                errRec.MVEX__Error_Body__c = JSON.serializePretty(retryPayload);
+                                errRec.MVEX__Source_of_Error__c = 'MetaFailedLeads';
+                                errRec.MVEX__Error_Message__c = errorMsg;
+                                errsToInsert.add(errRec);
+                            }
+                        }
+                    }
+                    
+                    if (!errsToInsert.isEmpty()) {
+                        insert errsToInsert;
+                    }
+
+                } catch (Exception e) {
+                    ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'processMultipleContacts_insert', e.getMessage());
+                    // Mark all un-successful as failed due to exception
+                    for (String ctxId : orderedCtxKeys) {
+                        if (!results.containsKey(ctxId)) {
+                            results.put(ctxId, e.getMessage());
                         }
                     }
                 }
-                
-                if (!errsToInsert.isEmpty()) {
-                    insert errsToInsert;
-                }
-
-            } catch (Exception e) {
-                ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'processMultipleContacts_insert', e.getMessage());
-                // Mark all un-successful as failed due to exception
-                for (String ctxId : orderedCtxKeys) {
-                    if (!results.containsKey(ctxId)) {
-                        results.put(ctxId, e.getMessage());
-                    }
-                }
             }
+            return results;
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'processMultipleContacts', e.getMessage());
+            return new Map<String, String>();
         }
-        return results;
     }
 
     /**
@@ -377,9 +405,14 @@ global with sharing class MetaLeadWebhook {
      * @return String
      */
     public static String createSalesforceContact(ContactContext ctx) {
-        Map<String, ContactContext> mapCtx = new Map<String, ContactContext>();
-        mapCtx.put('single', ctx);
-        Map<String, String> res = processMultipleContacts(mapCtx);
-        return res.get('single');
+        try {
+            Map<String, ContactContext> mapCtx = new Map<String, ContactContext>();
+            mapCtx.put('single', ctx);
+            Map<String, String> res = processMultipleContacts(mapCtx);
+            return res.get('single');
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'createSalesforceContact', e.getMessage());
+            return e.getMessage();
+        }
     }
 }

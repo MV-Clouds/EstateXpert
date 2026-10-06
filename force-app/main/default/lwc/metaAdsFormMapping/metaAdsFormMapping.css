@@ -780,12 +780,15 @@
     width: 50%;
 }
 
+.failed-summary-container {
+    margin-bottom: 12px;
+    padding-left: 8px;
+    padding-top: 4px;
+}
+
 .failed-summary-label {
-    font-size: 12px;
-    color: #6b7280;
-    margin-right: auto;
-    display: flex;
-    align-items: center;
+    font-size: 13px;
+    color: #4b5563;
     font-weight: 500;
 }
 

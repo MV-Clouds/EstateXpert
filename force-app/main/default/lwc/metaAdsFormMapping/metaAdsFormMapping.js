@@ -79,15 +79,22 @@ export default class MetaAdsFormMapping extends LightningElement {
     
     // ─── GETTERS ─────────────────────────────────────────────────────────────
 
-    /** 
-     * @description Checks if failed wizard is on step 1 
+    /**
+     * @description Checks if failed wizard is on step 1
      */
-    get isFailedWizardStep1() { return this.failedWizardStep === 1; }
+    get isFailedWizardStep1() {
+        try { return this.failedWizardStep === 1; } catch (e) { console.error(e); return false; }
+    }
     
     /** 
      * @description Checks if failed wizard is on step 2 
      */
-    get isFailedWizardStep2() { return this.failedWizardStep === 2; }
+    /**
+     * @description Checks if failed wizard is on step 2
+     */
+    get isFailedWizardStep2() {
+        try { return this.failedWizardStep === 2; } catch (e) { console.error(e); return false; }
+    }
 
     /** 
      * @description Checks if all failed leads are selected 
@@ -443,14 +450,27 @@ export default class MetaAdsFormMapping extends LightningElement {
         }
     }
 
+    /**
+     * @description Displays the full-page spinner
+     */
     showSpinner() {
-        this.isLoading = true;
+        try {
+            this.isLoading = true;
+        } catch(e) { console.error(e); }
     }
     
+    /**
+     * @description Hides the full-page spinner
+     */
     hideSpinner() {
-        this.isLoading = false;
+        try {
+            this.isLoading = false;
+        } catch(e) { console.error(e); }
     }
 
+    /**
+     * @description Loads initial data including pages, existing mappings, and connection status
+     */
     async loadInitialData() {
         this.showSpinner();
         try {
@@ -525,8 +545,13 @@ export default class MetaAdsFormMapping extends LightningElement {
         }
     }
 
+    /**
+     * @description Builds the data structure for the mapping table, injecting failed lead counts.
+     * @param {Object} failedCountMap - A map of form IDs to failed lead counts.
+     */
     buildTableData(failedCountMap = {}) {
-        let data = [];
+        try {
+            let data = [];
         let pageIndex = 1;
         // traverse fullMappingJson
         for (let pId in this.fullMappingJson) {
@@ -585,8 +610,11 @@ export default class MetaAdsFormMapping extends LightningElement {
             }
             data.push(pageRow);
         }
-        this.tableData = data;
-        this.updateShownData();
+            this.tableData = data;
+            this.updateShownData();
+        } catch (e) {
+            console.error(\'Error in buildTableData\', e);
+        }
     }
 
     /**
@@ -628,15 +656,23 @@ export default class MetaAdsFormMapping extends LightningElement {
      * @description Closes the mapping modal. If a pending retry was in progress, reopen the failed leads modal.
      */
     closeModal() {
-        this.isModalOpen = false;
-        this.isEditingMode = false;
-        // If user cancels out of edit-mapping-and-retry, go back to failed leads modal
-        if (this.pendingRetryIds.length > 0) {
-            this.pendingRetryIds = [];
-            this.isFailedLeadsModalOpen = true;
+        try {
+            this.isModalOpen = false;
+            this.isEditingMode = false;
+            // If user cancels out of edit-mapping-and-retry, go back to failed leads modal
+            if (this.pendingRetryIds.length > 0) {
+                this.pendingRetryIds = [];
+                this.isFailedLeadsModalOpen = true;
+            }
+        } catch (e) {
+            console.error('Error in closeModal', e);
         }
     }
 
+    /**
+     * @description Handles selecting a Meta Page from the wizard.
+     * @param {Event} event 
+     */
     async handlePageSelection(event) {
         try {
             this.selectedPageId = event.detail.value;
@@ -1015,7 +1051,11 @@ export default class MetaAdsFormMapping extends LightningElement {
      * @param {Event} event 
      */
     handleSfFieldChange(event) {
-        // Just keeping it as placeholder if we need it
+        try {
+            // Just keeping it as placeholder if we need it
+        } catch (e) {
+            console.error('Error in handleSfFieldChange', e);
+        }
     }
 
     /**
@@ -1061,15 +1101,23 @@ export default class MetaAdsFormMapping extends LightningElement {
      * @description Shows the add field input section.
      */
     handleShowAddField() {
-        this.showAddField = true;
+        try {
+            this.showAddField = true;
+        } catch (e) {
+            console.error('Error in handleShowAddField', e);
+        }
     }
 
     /**
      * @description Hides the add field input section.
      */
     handleCancelAddField() {
-        this.selectedAdditionalField = '';
-        this.showAddField = false;
+        try {
+            this.selectedAdditionalField = '';
+            this.showAddField = false;
+        } catch (e) {
+            console.error('Error in handleCancelAddField', e);
+        }
     }
 
     /**
@@ -1816,7 +1864,11 @@ export default class MetaAdsFormMapping extends LightningElement {
      * @param {Event} event 
      */
     handleSiteChange(event) {
-        this.selectedSite = event.detail.value;
+        try {
+            this.selectedSite = event.detail.value;
+        } catch (e) {
+            console.error('Error in handleSiteChange', e);
+        }
     }
 
     /**

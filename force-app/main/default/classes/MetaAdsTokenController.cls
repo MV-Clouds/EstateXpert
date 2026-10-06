@@ -29,7 +29,7 @@ public with sharing class MetaAdsTokenController {
     */
     public static OAuth_Configuration__mdt getConfig() {
         try {
-            List<OAuth_Configuration__mdt> configs = [SELECT Access_Token__c, Client_Id__c, Client_Secret__c, Config_Id__c, Base_URL__c, API_Version__c, Authorization_Endpoint__c, Client_App_Id__c, Account_Name__c, SystemModstamp FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1];
+            List<OAuth_Configuration__mdt> configs = [SELECT Access_Token__c, Client_Id__c, Client_Secret__c, Config_Id__c, Base_URL__c, API_Version__c, Authorization_Endpoint__c, Client_App_Id__c, SystemModstamp FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Meta_Ads_Config' LIMIT 1];
             return configs.isEmpty() ? null : configs[0];
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'MetaAdsTokenController', 'getConfig', e.getMessage());
@@ -68,14 +68,16 @@ public with sharing class MetaAdsTokenController {
                 return resultMap;
             }
 
-            String accountName = fetchAccountName(sysUserToken, config.API_Version__c, config.Base_URL__c);
+            Map<String, String> accInfo = fetchAccountInfo(sysUserToken, config.API_Version__c, config.Base_URL__c);
 
-            saveTokenSettings(sysUserToken, clientAppId, accountName);
+            saveTokenSettings(sysUserToken, clientAppId);
 
             resultMap.put('system_user_token', sysUserToken);
             resultMap.put('client_app_id', clientAppId);
             resultMap.put('success', true);
-            resultMap.put('account_name', accountName);
+            resultMap.put('account_name', accInfo.get('system_user'));
+            resultMap.put('business_name', accInfo.get('business_name'));
+            resultMap.put('page_name', accInfo.get('page_name'));
             return resultMap;
 
         } catch (Exception e) {
@@ -137,7 +139,7 @@ public with sharing class MetaAdsTokenController {
     * @param systemUserToken : System user token
     * @param clientAppId : Client Meta App ID
     */
-    private static void saveTokenSettings(String systemUserToken, String clientAppId, String accountName) {
+    private static void saveTokenSettings(String systemUserToken, String clientAppId) {
         try {
             Metadata.CustomMetadata customMetadata = new Metadata.CustomMetadata();
             customMetadata.fullName = 'OAuth_Configuration__mdt.Meta_Ads_Config';
@@ -153,13 +155,6 @@ public with sharing class MetaAdsTokenController {
                 appField.field = 'Client_App_Id__c';
                 appField.value = clientAppId;
                 customMetadata.values.add(appField);
-            }
-            
-            if (accountName != null) {
-                Metadata.CustomMetadataValue nameField = new Metadata.CustomMetadataValue();
-                nameField.field = 'Account_Name__c';
-                nameField.value = accountName;
-                customMetadata.values.add(nameField);
             }
             
             Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
@@ -191,8 +186,17 @@ public with sharing class MetaAdsTokenController {
             }
 
             String clientAppId = config.Client_App_Id__c;
+            
+            // Always fetch live info to get the various names reliably
+            Map<String, String> accInfo = fetchAccountInfo(config.Access_Token__c, config.API_Version__c, config.Base_URL__c);
+            
+            String businessName = accInfo.get('business_name');
+            String accountName = (businessName != null && businessName != 'Business Account') ? businessName : accInfo.get('system_user');
 
-            resultMap.put('account_name', String.isNotBlank(config.Account_Name__c) ? config.Account_Name__c : 'System User Account');
+            resultMap.put('account_name', String.isNotBlank(accountName) ? accountName : 'System User Account');
+            resultMap.put('system_user', accInfo.get('system_user'));
+            resultMap.put('business_name', accInfo.get('business_name'));
+            resultMap.put('page_name', accInfo.get('page_name'));
             resultMap.put('client_app_id', clientAppId);
             resultMap.put('connected_date', config.SystemModstamp);
             resultMap.put('success', true);
@@ -217,7 +221,7 @@ public with sharing class MetaAdsTokenController {
         try {
             OAuth_Configuration__mdt config = getConfig();
             if (config != null && String.isNotBlank(config.Access_Token__c)) {
-                saveTokenSettings(null, null, null); // Clear the token via Metadata API
+                saveTokenSettings(null, null); // Clear the token via Metadata API
             }
             resultMap.put('success', true);
         } catch (Exception e) {
@@ -236,11 +240,16 @@ public with sharing class MetaAdsTokenController {
     * @param baseUrl : Base URL
     * @return String
     */
-    private static String fetchAccountName(String token, String apiVer, String baseUrl) {
+    private static Map<String, String> fetchAccountInfo(String token, String apiVer, String baseUrl) {
+        Map<String, String> info = new Map<String, String>();
+        info.put('system_user', 'System User Account');
+        info.put('business_name', 'Business Account');
+        info.put('page_name', 'Connected Page');
+        
         try {
             Http http = new Http();
             HttpRequest req = new HttpRequest();
-            req.setEndpoint(baseUrl + '/' + apiVer + '/me?access_token=' + token);
+            req.setEndpoint(baseUrl + '/' + apiVer + '/me?fields=name,accounts{name,business}&access_token=' + token);
             req.setMethod('GET');
             req.setHeader('Content-Type', 'application/json');
             req.setTimeout(10000);
@@ -249,12 +258,34 @@ public with sharing class MetaAdsTokenController {
             if (res.getStatusCode() == 200) {
                 Map<String, Object> body = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
                 if (body.containsKey('name')) {
-                    return (String) body.get('name');
+                    info.put('system_user', (String) body.get('name'));
+                }
+                
+                // Try to find a Business Name or Page Name from accounts
+                if (body.containsKey('accounts')) {
+                    Map<String, Object> accounts = (Map<String, Object>) body.get('accounts');
+                    if (accounts != null && accounts.containsKey('data')) {
+                        List<Object> dataList = (List<Object>) accounts.get('data');
+                        if (dataList != null && !dataList.isEmpty()) {
+                            Map<String, Object> firstPage = (Map<String, Object>) dataList[0];
+                            
+                            if (firstPage.containsKey('name')) {
+                                info.put('page_name', (String) firstPage.get('name'));
+                            }
+                            
+                            if (firstPage.containsKey('business')) {
+                                Map<String, Object> business = (Map<String, Object>) firstPage.get('business');
+                                if (business != null && business.containsKey('name')) {
+                                    info.put('business_name', (String) business.get('name'));
+                                }
+                            }
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
-            System.debug('Error fetching account name: ' + e.getMessage());
+            System.debug('Error fetching account info: ' + e.getMessage());
         }
-        return 'System User Account';
+        return info;
     }
 }

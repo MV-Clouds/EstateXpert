@@ -994,7 +994,7 @@
 }
 
 .meta-detail-label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     color: #6b7280;
     text-transform: uppercase;
@@ -1003,7 +1003,7 @@
 }
 
 .meta-detail-value {
-    font-size: 15px;
+    font-size: 14px;
     color: #111827;
     font-weight: 500;
 }
@@ -1037,7 +1037,7 @@
 }
 
 .webhook-endpoint-label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     color: #6b7280;
     text-transform: uppercase;
@@ -1111,7 +1111,7 @@
 }
 
 .webhook-popover-header {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     color: #6b7280;
     text-transform: uppercase;
@@ -1217,7 +1217,7 @@
 .required-badge {
     background-color: #ffe4e6;
     color: #e11d48;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     padding: 4px 8px;
     border-radius: 12px;
@@ -1327,7 +1327,7 @@
     color: #dc2626;
     padding: 2px 8px;
     border-radius: 12px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;

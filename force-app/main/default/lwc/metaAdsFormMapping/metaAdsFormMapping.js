@@ -38,7 +38,11 @@ export default class MetaAdsFormMapping extends LightningElement {
     @track connectedAccountName = 'Connected';
     @track connectedAppId = '';
     @track actualAccountName = '';
+    @track businessName = '';
+    @track systemUserName = '';
+    @track pageName = '';
     @track connectedDateStr = '';
+    @track isIntegrationError = false;
 
     @track isModalOpen = false;
     @track isModalLoading = false;
@@ -486,13 +490,20 @@ export default class MetaAdsFormMapping extends LightningElement {
 
             const statusRes = await checkConnectionStatus();
             if (statusRes && statusRes.success) {
+                this.isIntegrationError = false;
                 this.connectedAccountName = 'Connected';
                 this.connectedAppId = statusRes.client_app_id;
-                this.actualAccountName = statusRes.account_name;
+                this.actualAccountName = statusRes.account_name; // Fallback to whatever was resolved as main
+                this.businessName = statusRes.business_name;
+                this.systemUserName = statusRes.system_user;
+                this.pageName = statusRes.page_name;
+                
                 if (statusRes.connected_date) {
                     const d = new Date(statusRes.connected_date);
                     this.connectedDateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                 }
+            } else {
+                this.isIntegrationError = true;
             }
 
             const failedCountRes = await getFailedLeadsCountMap();
@@ -501,6 +512,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             
         } catch (error) {
             console.error('Error loading data', error);
+            this.isIntegrationError = true;
             this.showToast('Error', 'Failed to load initial data.', 'error');
         } finally {
             this.isLoading = false;

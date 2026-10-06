@@ -4,6 +4,8 @@
         <template if:true={isLoading}>
             <c-spinner-component is-absolute="true"></c-spinner-component>
         </template>
+        
+        <template if:false={isIntegrationError}>
         <div class="meta-account-card">
             <div class="meta-account-header">
                 <div class="meta-account-left">
@@ -91,8 +93,8 @@
                     <div class="meta-detail-value">{connectedAppId}</div>
                 </div>
                 <div class="meta-detail-col">
-                    <div class="meta-detail-label">NAME</div>
-                    <div class="meta-detail-value">{actualAccountName}</div>
+                    <div class="meta-detail-label">SYSTEM USER</div>
+                    <div class="meta-detail-value">{systemUserName}</div>
                 </div>
                 <div class="meta-detail-col">
                     <div class="meta-detail-label">DATE CONNECTED</div>
@@ -318,9 +320,19 @@
                     </div>
                 </div>
             </template>
-        </div>
+        </div> 
+    </template> 
 
-        <!-- ─── Single-Page Mapping Wizard Modal ──────────────────────────────── -->
+    <!-- Integration Error Fallback -->
+    <template if:true={isIntegrationError}>
+        <div class="exp-no-data-container">
+            <img src="/resource/MVEX__emptyState" alt="Error State" draggable="false">
+            <div class="exp-no-data-message">Please reconnect Meta Ads or contact Admin.</div>
+        </div>
+    </template>
+    
+
+    <!-- ─── Single-Page Mapping Wizard Modal ──────────────────────────────── -->
         <template if:true={isModalOpen}>
             <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
                 class="slds-modal slds-fade-in-open slds-modal_medium section_css">

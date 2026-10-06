@@ -50,10 +50,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     background: transparent;
-    border: 1px solid #e5e7eb;
+    border: 1.5px solid #0e78d4;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -442,14 +442,6 @@
 }
 
 .blue-header {
-    display: none;
-}
-
-.slds-modal {
-    display: none;
-}
-
-.slds-modal__container {
     display: none;
 }
 

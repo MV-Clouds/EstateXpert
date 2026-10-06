@@ -4,7 +4,7 @@ import validateAWSCredentials from '@salesforce/apex/IntegrationPopupController.
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 
 const INTEGRATION_FIELDS = {
     AWS: [
@@ -69,9 +69,7 @@ export default class IntegrationPopUp extends NavigationMixin(LightningElement) 
     * @description : Loads font styles
     */
     connectedCallback() {
-        loadStyle(this, MulishFontCss).catch(error => {
-            console.error('Error loading font styles:', error);
-        });
+        loadStyle(this, globalStyles);
     }
 
     /**

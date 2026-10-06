@@ -4,7 +4,7 @@ import { MessageContext, subscribe, unsubscribe } from 'lightning/messageService
 import Refresh_cmp from '@salesforce/messageChannel/refreshImagesChannel__c';
 import { refreshApex } from '@salesforce/apex';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import placeholderImage from '@salesforce/resourceUrl/placeholderImage';
 import { errorDebugger } from 'c/globalProperties';
 
@@ -108,7 +108,7 @@ export default class ListingMediaGallery extends LightningElement {
     */
     connectedCallback() {
         try {
-            loadStyle(this, MulishFontCss);
+            loadStyle(this, globalStyles);
             this.subscription = subscribe(this.messageContext, Refresh_cmp, (message) => {
                 if (message.refresh === true) {
                     this.fetchingdata();

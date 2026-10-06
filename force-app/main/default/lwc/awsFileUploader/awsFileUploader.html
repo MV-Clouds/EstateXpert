@@ -29,141 +29,146 @@
                         </div>
 
                         <div class="tab-content-wrapper">
-                                <div class="tab active-tab-content" data-id="tab1">
-                                    <template if:true={isIntegrated}>
-                                        <div class="fileuploader_container">
-                                            <div class="slds-file-selector slds-file-selector_images" ondrop={handleDrop}
-                                                ondragover={allowDrop}>
-                                                <div class="slds-file-selector__dropzone flex_css">
-                                                    <div class="upload-icon-svg">
-                                                        <svg width="36" height="28" viewBox="0 0 36 28" fill="none"
-                                                            xmlns="http://www.w3.org/2000/svg">
-                                                            <path
-                                                                d="M3.232 28C2.31067 28 1.542 27.692 0.926 27.076C0.31 26.46 0.00133333 25.6907 0 24.768V3.232C0 2.31067 0.308667 1.542 0.926 0.926C1.54333 0.31 2.31133 0.00133333 3.23 0H11.85C12.2807 0 12.6993 0.0866669 13.106 0.26C13.5127 0.436 13.8607 0.668667 14.15 0.958L17.192 4H32.77C33.69 4 34.4587 4.30867 35.076 4.926C35.6933 5.54333 36.0013 6.312 36 7.232V24.77C36 25.69 35.692 26.4587 35.076 27.076C34.46 27.6933 33.6913 28.0013 32.77 28H3.232ZM18 22.46C18.2853 22.46 18.5233 22.3653 18.714 22.176C18.9047 21.9867 19 21.7487 19 21.462V13.062L22.532 16.592C22.7187 16.7787 22.9473 16.8787 23.218 16.892C23.4887 16.9053 23.7313 16.8053 23.946 16.592C24.1607 16.3787 24.2673 16.1427 24.266 15.884C24.2647 15.6253 24.158 15.39 23.946 15.178L19.13 10.362C18.8073 10.0393 18.4307 9.878 18 9.878C17.5693 9.878 17.192 10.0393 16.868 10.362L12.132 15.1C11.944 15.2867 11.844 15.516 11.832 15.788C11.82 16.06 11.92 16.3027 12.132 16.516C12.344 16.7293 12.5793 16.836 12.838 16.836C13.0967 16.836 13.3327 16.7293 13.546 16.516L17 13.06V21.46C17 21.744 17.0953 21.982 17.286 22.174C17.4767 22.366 17.7147 22.4613 18 22.46Z"
-                                                                fill="#0276D3" />
-                                                        </svg>
-                                                    </div>
-                                                    <div class="formbold-drop-file images_upcss">
-                                                        <p>Choose a file or drag & drop it here</p>
-                                                        <p>OR</p>
-                                                        <input type="file" class="slds-file-selector__input slds-assistive-text"
-                                                            onchange={handleSelectedFiles}
-                                                            accept="image/png, image/jpeg, image/jpg, image/heic, image/heif, video/mp4, video/quicktime"
-                                                            id="file-upload-input-107" multiple
-                                                            aria-labelledby="file-selector-primary-label-105 file-selector-secondary-label106" />
-                                                        <label class="slds-file-selector__body" for="file-upload-input-107"
-                                                            id="file-selector-secondary-label106">
-                                                            <span class="formbold-browse">Browse File</span>
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="watermark_container">
-                                            <input type="checkbox" onchange={watermarkValue} checked={isWatermark}
-                                                disabled={checkboxDisabled} />
-                                            <span>Upload image with watermark</span>
-                                            <template if:false={isContentVersionDataIsAvailable}>
-                                                <span class="watermark-not-done-label">(Not configured)</span>
-                                                <button type="button" class="watermark-action-btn" onclick={handleOpenWatermarkModal} title="Configure Watermark">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <div class="tab active-tab-content" data-id="tab1">
+                                <template if:true={isIntegrated}>
+                                    <div class="fileuploader_container">
+                                        <div class="slds-file-selector slds-file-selector_images" ondrop={handleDrop}
+                                            ondragover={allowDrop}>
+                                            <div class="slds-file-selector__dropzone flex_css">
+                                                <div class="upload-icon-svg">
+                                                    <svg width="36" height="28" viewBox="0 0 36 28" fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path
+                                                            d="M3.232 28C2.31067 28 1.542 27.692 0.926 27.076C0.31 26.46 0.00133333 25.6907 0 24.768V3.232C0 2.31067 0.308667 1.542 0.926 0.926C1.54333 0.31 2.31133 0.00133333 3.23 0H11.85C12.2807 0 12.6993 0.0866669 13.106 0.26C13.5127 0.436 13.8607 0.668667 14.15 0.958L17.192 4H32.77C33.69 4 34.4587 4.30867 35.076 4.926C35.6933 5.54333 36.0013 6.312 36 7.232V24.77C36 25.69 35.692 26.4587 35.076 27.076C34.46 27.6933 33.6913 28.0013 32.77 28H3.232ZM18 22.46C18.2853 22.46 18.5233 22.3653 18.714 22.176C18.9047 21.9867 19 21.7487 19 21.462V13.062L22.532 16.592C22.7187 16.7787 22.9473 16.8787 23.218 16.892C23.4887 16.9053 23.7313 16.8053 23.946 16.592C24.1607 16.3787 24.2673 16.1427 24.266 15.884C24.2647 15.6253 24.158 15.39 23.946 15.178L19.13 10.362C18.8073 10.0393 18.4307 9.878 18 9.878C17.5693 9.878 17.192 10.0393 16.868 10.362L12.132 15.1C11.944 15.2867 11.844 15.516 11.832 15.788C11.82 16.06 11.92 16.3027 12.132 16.516C12.344 16.7293 12.5793 16.836 12.838 16.836C13.0967 16.836 13.3327 16.7293 13.546 16.516L17 13.06V21.46C17 21.744 17.0953 21.982 17.286 22.174C17.4767 22.366 17.7147 22.4613 18 22.46Z"
+                                                            fill="#0276D3" />
                                                     </svg>
-                                                    Add Watermark
-                                                </button>
-                                            </template>
-                                        </div>
-                                        <div class="file_view_upload">
-                                            <template if:true={isImageData}>
-                                                <div class="lightningPillCss">
-                                                    <template for:each={imageToShowFiles} for:item="imagedata">
-                                                        <div class="container" key={imagedata.name}>
-                                                            <div class="img_css">
-                                                                <img src={imagedata.preview} alt="Image" class="image-preview"
-                                                                    draggable="false" />
-                                                            </div>
-                                                            <div class="box1">
-                                                                <p class="imgd1">{imagedata.name}</p>
-                                                                <p class="imgd2">{imagedata.formattedSize}</p>
-                                                            </div>
-                                                            <div class="removeImage">
-                                                                <button class="delete-div" data-name={imagedata.name}
-                                                                    onclick={handleRemove}>
-                                                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                                                                        xmlns="http://www.w3.org/2000/svg">
-                                                                        <path
-                                                                            d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                            stroke="#212529" stroke-width="1.25"
-                                                                            stroke-linecap="round" stroke-linejoin="round">
-                                                                        </path>
-                                                                    </svg>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </template>
                                                 </div>
-                                            </template>
-                                            <template if:true={isFileUploading}>
-                                                <div class="slds-p-around_medium lgc-bg progress slds-box">
-                                                    <progress value={uploadProgress} max="100"></progress>
-                                                    <div class="upload_icon_css">
-                                                        <p><lightning-icon icon-name="utility:upload"
-                                                                size="x-small"></lightning-icon>Uploading</p>
-                                                        <p>{uploadProgress}%</p>
-                                                    </div>
+                                                <div class="formbold-drop-file images_upcss">
+                                                    <p>Choose a file or drag & drop it here</p>
+                                                    <p>OR</p>
+                                                    <input type="file"
+                                                        class="slds-file-selector__input slds-assistive-text"
+                                                        onchange={handleSelectedFiles}
+                                                        accept="image/png, image/jpeg, image/jpg, image/heic, image/heif, video/mp4, video/quicktime"
+                                                        id="file-upload-input-107" multiple
+                                                        aria-labelledby="file-selector-primary-label-105 file-selector-secondary-label106" />
+                                                    <label class="slds-file-selector__body" for="file-upload-input-107"
+                                                        id="file-selector-secondary-label106">
+                                                        <span class="formbold-browse">Browse File</span>
+                                                    </label>
                                                 </div>
-                                            </template>
-                                        </div>
-                                    </template>
-                                    <template if:false={isIntegrated}>
-                                        <div class="no-data-container">
-                                            <img src="/resource/MVEX__emptyState" alt="" draggable="false">
-                                            <div class="no-data-message">AWS credentials are required to upload media.</div>
-                                            <div class="no-sub-data-message">
-                                                Please configure your credentials in the <a class="integration-link" onclick={navigateToAwsIntegration}>integration settings</a>.
                                             </div>
                                         </div>
-                                    </template>
-                                </div>
+                                    </div>
+                                    <div class="watermark_container">
+                                        <input type="checkbox" onchange={watermarkValue} checked={isWatermark}
+                                            disabled={checkboxDisabled} />
+                                        <span>Upload image with watermark</span>
+                                        <template if:false={isContentVersionDataIsAvailable}>
+                                            <span class="watermark-not-done-label">(Not configured)</span>
+                                            <button type="button" class="watermark-action-btn"
+                                                onclick={handleOpenWatermarkModal} title="Configure Watermark">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                                Add Watermark
+                                            </button>
+                                        </template>
+                                    </div>
+                                    <div class="file_view_upload">
+                                        <template if:true={isImageData}>
+                                            <div class="lightningPillCss">
+                                                <template for:each={imageToShowFiles} for:item="imagedata">
+                                                    <div class="container" key={imagedata.name}>
+                                                        <div class="img_css">
+                                                            <img src={imagedata.preview} alt="Image"
+                                                                class="image-preview" draggable="false" />
+                                                        </div>
+                                                        <div class="box1">
+                                                            <p class="imgd1">{imagedata.name}</p>
+                                                            <p class="imgd2">{imagedata.formattedSize}</p>
+                                                        </div>
+                                                        <div class="removeImage">
+                                                            <button class="delete-div" data-name={imagedata.name}
+                                                                onclick={handleRemove}>
+                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                    viewBox="0 0 16 16" fill="#212529" stroke="#212529"
+                                                                    stroke-width="0.6" stroke-linejoin="round"
+                                                                    width="15" height="15">
+                                                                    <path
+                                                                        d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                                        stroke-width="0.0625"></path>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                        <template if:true={isFileUploading}>
+                                            <div class="slds-p-around_medium lgc-bg progress slds-box">
+                                                <progress value={uploadProgress} max="100"></progress>
+                                                <div class="upload_icon_css">
+                                                    <p><lightning-icon icon-name="utility:upload"
+                                                            size="x-small"></lightning-icon>Uploading</p>
+                                                    <p>{uploadProgress}%</p>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                                <template if:false={isIntegrated}>
+                                    <div class="no-data-container">
+                                        <img src="/resource/MVEX__emptyState" alt="" draggable="false">
+                                        <div class="no-data-message">AWS credentials are required to upload media.</div>
+                                        <div class="no-sub-data-message">
+                                            Please configure your credentials in the <a class="integration-link"
+                                                onclick={navigateToAwsIntegration}>integration settings</a>.
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
 
-                                <div class="tab" data-id="tab2">
-                                    <label for="title" class="slds-m-bottom_small label_css"><abbr title="required"
-                                            class="slds-required">*</abbr>Title</label>
-                                    <lightning-input onchange={storeUrl} label="Title" variant="label-hidden"
-                                        required></lightning-input>
-                                    <br />
-                                    <label for="link" class="slds-m-bottom_small label_css"><abbr title="required"
-                                            class="slds-required">*</abbr>External Link(URL)</label>
-                                    <lightning-input variant="label-hidden" label="External Link (URL)" onchange={storeUrl}
-                                        required></lightning-input>
-                                    <br />
-                                    <label for="type" class="slds-m-bottom_small label_css"
-                                        style="margin-bottom: 4px;"><abbr title="required"
-                                            class="slds-required">*</abbr>Type</label>
-                                    <lightning-combobox name="Type" variant="label-hidden" value={selectedUrlType}
-                                        options={options} onchange={handleLinkType} required></lightning-combobox>
-                                </div>
+                            <div class="tab" data-id="tab2">
+                                <label for="title" class="slds-m-bottom_small label_css"><abbr title="required"
+                                        class="slds-required">*</abbr>Title</label>
+                                <lightning-input onchange={storeUrl} label="Title" variant="label-hidden"
+                                    required></lightning-input>
+                                <br />
+                                <label for="link" class="slds-m-bottom_small label_css"><abbr title="required"
+                                        class="slds-required">*</abbr>External Link(URL)</label>
+                                <lightning-input variant="label-hidden" label="External Link (URL)" onchange={storeUrl}
+                                    required></lightning-input>
+                                <br />
+                                <label for="type" class="slds-m-bottom_small label_css"
+                                    style="margin-bottom: 4px;"><abbr title="required"
+                                        class="slds-required">*</abbr>Type</label>
+                                <lightning-combobox name="Type" variant="label-hidden" value={selectedUrlType}
+                                    options={options} onchange={handleLinkType} required></lightning-combobox>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="footerbtns">
-                    <button class="exp-white-btn-css" aria-label="Cancel and close" onclick={handleDialogueClose}>
-                        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                fill="currentColor" />
-                        </svg>
-                        Close
-                    </button>
-                    <button class="exp-blue-btn-css" onclick={handleOnSave} disabled={isUploadDisabled}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
-                        </svg>
-                        Upload
-                    </button>
-                </div>
             </div>
+            <div class="footerbtns">
+                <button class="exp-white-btn-css" aria-label="Cancel and close" onclick={handleDialogueClose}>
+                    <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="currentColor" />
+                    </svg>
+                    Close
+                </button>
+                <button class="exp-blue-btn-css" onclick={handleOnSave} disabled={isUploadDisabled}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                    </svg>
+                    Upload
+                </button>
+            </div>
+        </div>
         </div>
     </section>
     <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>

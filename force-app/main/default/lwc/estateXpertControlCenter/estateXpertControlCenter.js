@@ -1,5 +1,5 @@
 import { LightningElement, wire } from "lwc";
-import MulishFontCss from "@salesforce/resourceUrl/MulishFontCss";
+import globalStyles from "@salesforce/resourceUrl/globalStyles";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
 import FORM_FACTOR from "@salesforce/client/formFactor";
@@ -48,7 +48,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Created By: Vyom Soni
      */
     connectedCallback() {
-        loadStyle(this, MulishFontCss);
+        loadStyle(this, globalStyles);
     }
 
     /**
@@ -140,6 +140,32 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      */
     get isPortalMappingLandingPageComponent() {
         return this.selectedComponent === 'portalMappingLandingPage';
+    }
+
+    /**
+     * Method Name: isGoogleAdsMappingComponent
+     * @description: Checks if GoogleAdsMapping component is selected
+     * Date: 1/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get isGoogleAdsMappingComponent() {
+        return this.selectedComponent === 'googleAdsMapping';
+    }
+
+    /**
+     * Method Name: googleAdsMethod
+     * @description: Opens the Google Ads Mapping component
+     * Date: 1/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    
+    googleAdsMethod(event) {
+        event.preventDefault();
+        this.openComponent(
+            'googleAdsMapping', 
+            'Google Ads Mapping',
+            'Configure form field mapping for Google Ads to automatically capture leads.'
+        );
     }
 
     /**

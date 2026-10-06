@@ -68,16 +68,17 @@
                                         aria-label="Example advanced table of Opportunities in actionable mode">
                                         <thead>
                                             <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
-                                                <th class="slds-text-align_right slds-cell_action-mode column-1"
+                                                <th class="slds-cell_action-mode column-1"
                                                     scope="col">
                                                     <span id="column-group-header" class="slds-assistive-text">Choose a
                                                         row</span>
                                                     <div class="header-checkbox-div">
-                                                        <label class="custom-checkbox">
-                                                            <input type="checkbox" onchange={selectAllCheckbox}
-                                                                checked={checkAll}>
-                                                            <span class="checkmark"></span>
-                                                        </label>
+                                                        <lightning-input type="checkbox"
+                                                            variant="label-hidden"
+                                                            label="Select All"
+                                                            checked={checkAll}
+                                                            onchange={selectAllCheckbox}>
+                                                        </lightning-input>
                                                     </div>
                                                 </th>
                                                 <th aria-sort="none" data-id="Name" onclick={sortClick}
@@ -131,14 +132,18 @@
                                             <template for:each={shownProcessedContactData} for:item="contact"
                                                 for:index="index">
                                                 <tr key={contact.Id} aria-selected="false" class="table-tr">
-                                                    <td class="slds-text-align_right slds-cell_action-mode checkbox-cell"
+                                                    <td class="slds-cell_action-mode column-1 checkbox-cell"
                                                         role="gridcell">
-                                                        <label class="custom-checkbox custom-checkbox-body">
-                                                            <input data-id={index} type="checkbox"
-                                                                checked={contact.isChecked} value={contact.isChecked}
+                                                        <div class="row-checkbox-div">
+                                                            <lightning-input type="checkbox"
+                                                                variant="label-hidden"
+                                                                label="Select Contact"
+                                                                data-id={index}
+                                                                data-contact-id={contact.Id}
+                                                                checked={contact.isChecked}
                                                                 onchange={checkBoxValueChange}>
-                                                            <span class="checkmark"></span>
-                                                        </label>
+                                                            </lightning-input>
+                                                        </div>
                                                     </td>
                                                     <td class="slds-cell_action-mode contact-cls" scope="row">
                                                         <div class="slds-truncate">
@@ -252,19 +257,6 @@
                                                         Show less
                                                     </button>
                                                 </template>
-                                            </div>
-                                            <div class="no-data-action-wrapper">
-                                                <button class="exp-blue-btn-css modify-filter-btn"
-                                                    onclick={openFilterPanel}>
-                                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M0 3H16V1H0V3Z" fill="currentColor"></path>
-                                                        <path d="M2 7H14V5H2V7Z" fill="currentColor"></path>
-                                                        <path d="M4 11H12V9H4V11Z" fill="currentColor"></path>
-                                                        <path d="M10 15H6V13H10V15Z" fill="currentColor"></path>
-                                                    </svg>
-                                                    Modify Filters
-                                                </button>
                                             </div>
                                         </template>
 

@@ -1,0 +1,626 @@
+<template>
+    <div class="wrapper">
+        <template if:true={isLoading}>
+            <c-spinner-component is-absolute="true"></c-spinner-component>
+        </template>
+
+        <!-- ===================== Page header ===================== -->
+        <div class="main_header_cls">
+            <div class="sub_main_header_css">
+                <div class="header_block_css">
+                    <div class="broadcast-title">Google Ads Form Mappings</div>
+                    <template if:true={hasConnection}>
+                        <span class="status-pill status-pill--connected"><span class="status-dot"></span>Connected</span>
+                    </template>
+                </div>
+                <template if:true={hasConnection}>
+                    <div class="header-right-info">
+                        <button class="exp-red-btn-css" onclick={handleDisconnectClick}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            Disconnect
+                        </button>
+                        <button class="exp-white-btn-css" onclick={openWebhookModal} disabled={isWebhookLocked} title={webhookButtonTitle}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                            Webhook Site
+                        </button>
+                        <button class="exp-blue-btn-css" onclick={openNewMappingModal}>
+                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                                <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                            New Mapping
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Async-operation notice (webhook save, disconnect) -->
+        <template if:true={hasSyncNotice}>
+            <div class="notice notice--info" role="status">
+                <svg class="notice-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                    <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                </svg>
+                <div class="notice-text">{syncNotice}</div>
+                <button type="button" class="notice-close" aria-label="Dismiss" onclick={dismissSyncNotice}>
+                    <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+                        <path d="M3 3L17 17M17 3L3 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                    </svg>
+                </button>
+            </div>
+        </template>
+
+        <!-- ===================== CONNECTED: mappings ===================== -->
+        <template if:true={hasConnection}>
+            <template if:true={showWebhookHint}>
+                <div class="notice notice--warning" role="status">
+                    <svg class="notice-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                        <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                    </svg>
+                    <div class="notice-text">Choose a Force.com site under <strong>Webhook Site</strong> before creating your first mapping. Google delivers new leads to this site.</div>
+                </div>
+            </template>
+
+            <div class="main_content_cls">
+                <template if:true={hasMappings}>
+                    <div class="exp-table-content exp-main-table-wrapper main-table">
+                        <table class="slds-table slds-table_fixed-layout" role="grid">
+                            <thead>
+                                <tr class="slds-line-height_reset exp-table-tr-cls">
+                                    <th scope="col" class="col-action"><div></div></th>
+                                    <th scope="col" class="col-no"><div class="slds-truncate header-cell-padding" title="No.">No.</div></th>
+                                    <th scope="col"><div class="slds-truncate header-cell-padding" title="Google Ads Account">Google Ads Account</div></th>
+                                    <th scope="col" class="col-id"><div class="slds-truncate header-cell-padding" title="Customer ID">Customer ID</div></th>
+                                    <th scope="col" class="col-count"><div class="slds-truncate header-cell-padding" title="Mapped Forms">Mapped Forms</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={tableData} for:item="row">
+                                    <tr key={row.id} class="parent-row">
+                                        <td class="expand-cell">
+                                            <div class="flex-center">
+                                                <div class="action-icon-container" data-id={row.id} onclick={handleToggleRow} title="Show or hide mapped forms">
+                                                    <svg class="action-arrow" viewBox="0 0 24 24" fill="none">
+                                                        <template if:true={row.isExpanded}>
+                                                            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                        </template>
+                                                        <template if:false={row.isExpanded}>
+                                                            <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                        </template>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><div class="slds-truncate">{row.index}</div></td>
+                                        <td><div class="slds-truncate" title={row.accountName}>{row.accountName}</div></td>
+                                        <td><div class="slds-truncate">{row.accountId}</div></td>
+                                        <td><div class="slds-truncate">{row.forms.length}</div></td>
+                                    </tr>
+                                    <template if:true={row.isExpanded}>
+                                        <tr key={row.accordionId} class="accordion-row">
+                                            <td colspan="5" class="no-padding-td">
+                                                <div class="exp-accordion-wrapper">
+                                                    <template if:true={row.forms.length}>
+                                                        <div class="exp-accordion-header-container">
+                                                            <div class="exp-accordion-title-section">
+                                                                <h3 class="exp-accordion-title">Mapped Forms</h3>
+                                                                <span class="exp-accordion-badge">{row.forms.length}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="exp-table-content exp-accordion-table-content">
+                                                            <table class="slds-table slds-no-row-hover slds-table_fixed-layout no-border" role="grid">
+                                                                <thead>
+                                                                    <tr class="slds-line-height_reset exp-table-tr-cls">
+                                                                        <th scope="col" class="col-no"><div class="slds-truncate header-cell-padding" title="No.">No.</div></th>
+                                                                        <th scope="col"><div class="slds-truncate header-cell-padding" title="Form Name">Form Name</div></th>
+                                                                        <th scope="col" class="col-id"><div class="slds-truncate header-cell-padding" title="Form ID">Form ID</div></th>
+                                                                        <th scope="col" class="col-count"><div class="slds-truncate header-cell-padding" title="Mapped Fields">Mapped Fields</div></th>
+                                                                        <th scope="col" class="col-actions"><div class="slds-truncate header-cell-padding" title="Actions">Actions</div></th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <template for:each={row.forms} for:item="form">
+                                                                        <tr key={form.id}>
+                                                                            <td><div class="slds-truncate">{form.index}</div></td>
+                                                                            <td><div class="slds-truncate" title={form.formName}>{form.formName}</div></td>
+                                                                            <td><div class="slds-truncate">{form.formId}</div></td>
+                                                                            <td><div class="slds-truncate">{form.mappedCount}</div></td>
+                                                                            <td>
+                                                                                <div class="row-actions">
+                                                                                    <div class="exp-preview-icon-css" data-id={form.id} onclick={handleFailedLeadsClick} title="Failed Leads">
+                                                                                        <svg viewBox="0 0 24 24" fill="none">
+                                                                                            <path fill="none" d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                            <path fill="none" d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                        </svg>
+                                                                                    </div>
+                                                                                    <div class="exp-edit-icon-css" data-id={form.id} onclick={handleEditRow} title="Edit Mapping">
+                                                                                        <svg viewBox="0 0 24 24" fill="none">
+                                                                                            <path fill="none" d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                            <path fill="none" d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                        </svg>
+                                                                                    </div>
+                                                                                    <div class="exp-delete-icon-css" data-id={form.id} onclick={handleDeleteRow} title="Delete Mapping">
+                                                                                        <svg viewBox="0 0 24 24" fill="none">
+                                                                                            <path fill="none" d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                            <path fill="none" d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                        </svg>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </template>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </template>
+                                                    <template if:false={row.forms.length}>
+                                                        <div class="inner-empty-state">No forms mapped for this account.</div>
+                                                    </template>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+
+                <template if:false={hasMappings}>
+                    <div class="no-records-message">
+                        <div class="empty-state">
+                            <div class="empty-state__content">
+                                <div class="empty-icon">
+                                    <svg width="42" height="42" viewBox="0 0 24 24" fill="none">
+                                        <path d="M4 4h16v16H4z" stroke="#0176D3" stroke-width="1.5" stroke-linejoin="round"></path>
+                                        <path d="M8 9h8M8 13h5" stroke="#0176D3" stroke-width="1.5" stroke-linecap="round"></path>
+                                    </svg>
+                                </div>
+                                <div class="empty-state__message">No Data Available to Show.</div>
+                                <div class="empty-state__submessage">Click New Mapping to map a Google lead form to Salesforce fields.</div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <!-- ===================== NOT CONNECTED: connection card ===================== -->
+        <template if:true={showConnectionScreen}>
+            <div class="connection-stage">
+                <div class="connection-card">
+                    <div class="connection-card-head">
+                        <div class="connection-logo">
+                            <img src="/resource/MVEX__controlcenterimg/google.png" alt="Google" draggable="false">
+                        </div>
+                        <div>
+                            <div class="connection-name">Google Ads</div>
+                            <div class={connectionStatusClass}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                                    <path d="M8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                </svg>
+                                <span>{connectionStatusLabel}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="connection-description">
+                        Capture leads from Google Ads campaigns automatically. Connect your Lead Form Extensions to sync prospect data into Salesforce with custom field mapping.
+                    </div>
+
+                    <hr class="connection-rule" />
+
+                    <!-- Step 1: Connect -->
+                    <template if:true={showConnectIntro}>
+                        <button class="exp-blue-btn-css conn-btn" onclick={login} disabled={isLoading}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                                <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                            </svg>
+                            Connect
+                        </button>
+                        <button type="button" class="link-btn" onclick={handleShowTokenInput} disabled={isLoading}>I already have a refresh token</button>
+                    </template>
+
+                    <!-- Step 2: Paste token -->
+                    <template if:true={showTokenForm}>
+                        <div class="notice notice--info" role="status">
+                            <svg class="notice-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                                <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                            </svg>
+                            <div class="notice-text">Complete the authorization in the opened tab, then paste the token below. Or paste the token directly if you have it.</div>
+                        </div>
+                        <div class="token-field">
+                            <div class="token-label">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" stroke-width="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                </svg>
+                                Refresh Token
+                            </div>
+                            <lightning-textarea class="token-textarea" label="Refresh Token" variant="label-hidden" placeholder="Paste your Google Ads refresh token here..." value={refreshToken} onchange={handleChange} disabled={isLoading}></lightning-textarea>
+                        </div>
+                        <div class="connection-actions">
+                            <button class="exp-blue-btn-css conn-btn" onclick={saveConnection} disabled={isSaveConnectionDisabled}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    <path d="M22 4L12 14.01l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                                Save
+                            </button>
+                            <button class="exp-white-btn-css conn-btn" onclick={handleCancelConnection} disabled={isLoading}>
+                                <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+                                    <path d="M3 3L17 17M17 3L3 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                </svg>
+                                Cancel
+                            </button>
+                        </div>
+                        <div class="connection-footnote">
+                            <span>After saving, Salesforce applies the connection in the background. It can take up to a minute before your account appears.</span>
+                        </div>
+                    </template>
+
+                    <!-- Step 3: Waiting for the metadata deployment -->
+                    <template if:true={isConnectionPending}>
+                        <div class="notice notice--warning" role="status">
+                            <svg class="notice-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                                <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                            <div class="notice-text">Your token was saved. Salesforce is applying the change in the background, which can take up to a minute. Please wait, then select <strong>Check status</strong>.</div>
+                        </div>
+                        <div class="connection-actions">
+                            <button class="exp-blue-btn-css conn-btn" onclick={checkConnectionStatus} disabled={isLoading}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                                Check status
+                            </button>
+                            <button class="exp-white-btn-css conn-btn" onclick={handleChangeToken} disabled={isLoading}>Use a different token</button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+        <!-- ===================== Mapping wizard modal ===================== -->
+        <template if:true={isModalOpen}>
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="google-wizard-title" class="slds-modal slds-fade-in-open slds-modal_small section_css">
+                <div class="slds-modal__container">
+                    <div class="slds-modal__close exp-close-icon-css close-icon-css" role="button" aria-label="Close" onclick={closeModal}>
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                            <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937"></path>
+                        </svg>
+                    </div>
+                    <div class="slds-modal__header exp-pop-up-header-css popup-header">
+                        <h1 id="google-wizard-title" class="slds-modal__title slds-hyphenate">Google Ads Form Mapping Wizard</h1>
+                    </div>
+                    <div class="slds-modal__content modalbody">
+                        <div class="content_body relative-position">
+                            <!-- <template if:true={isLoading}>
+                                <c-spinner-component is-absolute="true"></c-spinner-component>
+                            </template> -->
+
+                            <template if:true={hasPendingRetry}>
+                                <div class="notice notice--warning notice--spaced" role="status">
+                                    <svg class="notice-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                                        <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                    </svg>
+                                    <div class="notice-text">{retryBannerText}</div>
+                                </div>
+                            </template>
+
+                            <template if:false={isEditMode}>
+                                <div class="wizard-section">
+                                    <div class="wizard-step-label">
+                                        <span class="wizard-step-badge">Step 1</span>
+                                        Select Google Ads Account
+                                    </div>
+                                    <lightning-combobox name="googleAccount" label="" value={selectedAccount} placeholder="-- Choose a Google Ads Account --" options={accountOptions} onchange={handleAccountChange} disabled={isAccountLocked} variant="label-hidden" class="custom-combobox"></lightning-combobox>
+                                </div>
+
+                                <div class="wizard-divider"></div>
+
+                                <div class="wizard-section">
+                                    <div class="wizard-step-label">
+                                        <span class={formStepBadgeClass}>Step 2</span>
+                                        Select Lead Form
+                                        <template if:true={isFormSectionDisabled}>
+                                            <span class="wizard-hint-muted">&nbsp;— Select an account first</span>
+                                        </template>
+                                    </div>
+
+                                    <template if:true={isFormSectionDisabled}>
+                                        <div class="wizard-disabled-box">Select a Google Ads account to load available lead forms.</div>
+                                    </template>
+                                    <template if:false={isFormSectionDisabled}>
+                                        <template if:true={showForms}>
+                                            <template if:true={forms.length}>
+                                                <div class="forms-grid">
+                                                    <template for:each={forms} for:item="form">
+                                                        <div key={form.id} class="google-form-card" role="button" tabindex="0" aria-pressed={form.ariaPressed} data-id={form.id} onclick={selectFormCard} onkeydown={handleFormCardKeydown}>
+                                                            <div class="google-form-card-header">
+                                                                <div>
+                                                                    <div class="google-form-title">{form.headline}</div>
+                                                                    <div class="google-form-name">{form.name}</div>
+                                                                </div>
+                                                                <template if:true={form.isSelected}>
+                                                                    <div class="selected-check">
+                                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                                                                            <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                        </svg>
+                                                                    </div>
+                                                                </template>
+                                                            </div>
+                                                            <div class="google-form-meta">
+                                                                <span>ID: {form.id}</span>
+                                                                <span>Fields: {form.fieldCount}</span>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <template if:false={forms.length}>
+                                                <div class="wizard-disabled-box">No available lead forms. All forms for this account may already be mapped.</div>
+                                            </template>
+                                        </template>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template if:true={isEditMode}>
+                                <div class="edit-context">
+                                    <span>Account: <strong>{editAccountName}</strong></span>
+                                    <span>Form: <strong>{editFormName}</strong></span>
+                                </div>
+                            </template>
+
+                            <template if:true={selectedFormId}>
+                                <template if:false={isEditMode}>
+                                    <div class="wizard-divider"></div>
+                                </template>
+                                <div class="wizard-section">
+                                    <div class="wizard-step-label">
+                                        <template if:false={isEditMode}>
+                                            <span class="wizard-step-badge">Step 3</span>
+                                        </template>
+                                        Map Fields
+                                    </div>
+                                    <template if:true={currentFormFields.length}>
+                                        <div class="mapping-header-row">
+                                            <div class="mapping-header-col">Salesforce Contact Field</div>
+                                            <div class="mapping-header-icon"></div>
+                                            <div class="mapping-header-col">Google Form Field / Custom Value</div>
+                                        </div>
+                                        <template for:each={currentFormFields} for:item="field">
+                                            <div key={field.key} class={field.rowClass}>
+                                                <div class="mapping-col">
+                                                    <div class="meta-field-pill">
+                                                        <span class="pill-label">{field.label}</span>
+                                                        <template if:true={field.required}>
+                                                            <span class="required-badge">Required</span>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                                <div class="mapping-icon">&#10145;</div>
+                                                <div class="mapping-col">
+                                                    <lightning-combobox data-key={field.key} value={field.sourceType} options={sourceOptions} onchange={handleSourceTypeChange} placeholder="-- Do Not Map --" variant="label-hidden" class="custom-combobox"></lightning-combobox>
+                                                    <template if:true={field.isGoogleField}>
+                                                        <lightning-combobox data-key={field.key} value={field.googleField} options={googleOptions} onchange={handleGoogleFieldChange} placeholder="-- Select Google Form Field --" variant="label-hidden" class="custom-combobox mapping-secondary-input"></lightning-combobox>
+                                                    </template>
+                                                    <template if:true={field.isCustomValue}>
+                                                        <template if:true={field.isReferenceField}>
+                                                            <lightning-record-picker data-key={field.key} label={field.label} placeholder="Search and select record" object-api-name={field.referenceTo} value={field.customValue} onchange={handleReferenceChange} class="mapping-secondary-input"></lightning-record-picker>
+                                                        </template>
+                                                        <template if:false={field.isReferenceField}>
+                                                            <lightning-input data-key={field.key} type="text" value={field.customValue} onchange={handleCustomValueChange} placeholder="Enter custom value" variant="label-hidden" class="mapping-secondary-input"></lightning-input>
+                                                        </template>
+                                                    </template>
+                                                    <template if:true={field.showRequiredError}>
+                                                        <div class="wizard-hint-error">This required field must be mapped.</div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <div class="add-field-section">
+                                            <template if:false={showAddField}>
+                                                <button type="button" class="add-field-btn" onclick={handleShowAddField}>
+                                                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                                                        <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                    </svg>
+                                                    Add Field
+                                                </button>
+                                            </template>
+                                            <template if:true={showAddField}>
+                                                <div class="add-field-box">
+                                                    <div class="add-field-title">Add Salesforce Contact Field</div>
+                                                    <div class="add-field-controls">
+                                                        <lightning-combobox value={selectedAdditionalField} options={additionalFieldOptions} onchange={handleAdditionalFieldChange} placeholder="-- Select Salesforce Field --" variant="label-hidden" class="custom-combobox add-field-combobox"></lightning-combobox>
+                                                        <button type="button" class="exp-blue-btn-css" onclick={handleAddField} disabled={isAddFieldDisabled}>Add</button>
+                                                        <button type="button" class="exp-white-btn-css" onclick={handleCancelAddField}>Cancel</button>
+                                                    </div>
+                                                    <template if:false={hasAdditionalFieldOptions}>
+                                                        <div class="wizard-hint-muted">All available Salesforce fields have already been added.</div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <template if:false={currentFormFields.length}>
+                                        <div class="wizard-disabled-box">No Salesforce Contact fields are available for mapping.</div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div class="footerbtns">
+                            <button class="exp-white-btn-css" onclick={closeModal}>
+                                <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+                                    <path d="M3 3L17 17M17 3L3 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                </svg>
+                                Cancel
+                            </button>
+                            <button class="exp-blue-btn-css" disabled={isSaveDisabled} onclick={saveMapping}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"></path>
+                                </svg>
+                                {saveButtonLabel}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+        </template>
+
+        <!-- ===================== Webhook site modal ===================== -->
+        <template if:true={isWebhookModalOpen}>
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="google-webhook-title" class="slds-modal slds-fade-in-open slds-modal_small section_css">
+                <div class="slds-modal__container">
+                    <div class="slds-modal__close exp-close-icon-css close-icon-css" role="button" aria-label="Close" onclick={closeWebhookModal}>
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                            <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937"></path>
+                        </svg>
+                    </div>
+                    <div class="slds-modal__header exp-pop-up-header-css popup-header">
+                        <h1 id="google-webhook-title" class="slds-modal__title slds-hyphenate">Webhook Site</h1>
+                    </div>
+                    <div class="slds-modal__content modalbody">
+                        <div class="content_body relative-position">
+                            <!-- <template if:true={isLoading}>
+                                <c-spinner-component is-absolute="true"></c-spinner-component>
+                            </template> -->
+                            <div class="notice notice--info notice--spaced" role="status">
+                                <svg class="notice-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                                    <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                </svg>
+                                <div class="notice-text">Saving the site updates your Salesforce settings in the background. It can take up to a minute to take effect, so wait before creating a mapping.</div>
+                            </div>
+                            <div class="wizard-section">
+                                <div class="wizard-step-label">Select Active Force.com Site</div>
+                                <template if:true={hasWebhookUrl}>
+                                    <div class="webhook-current">Current: {webhookUrl}</div>
+                                </template>
+                                <template if:true={hasSiteOptions}>
+                                    <lightning-combobox name="webhookSite" label="" value={selectedSite} placeholder="-- Choose a Site --" options={siteOptions} onchange={handleSiteChange} variant="label-hidden" class="custom-combobox"></lightning-combobox>
+                                    <template if:true={selectedSite}>
+                                        <div class="webhook-endpoint">Leads will be received at: {webhookEndpointPreview}</div>
+                                    </template>
+                                </template>
+                                <template if:false={hasSiteOptions}>
+                                    <div class="wizard-disabled-box">No active Force.com sites were found.</div>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="footerbtns">
+                            <button class="exp-white-btn-css" onclick={closeWebhookModal}>Cancel</button>
+                            <button class="exp-blue-btn-css" disabled={isSaveWebhookDisabled} onclick={saveWebhookSite}>Save</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+        </template>
+
+        <!-- ===================== Failed leads modal ===================== -->
+        <template if:true={isFailedModalOpen}>
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="google-failed-title" class="slds-modal slds-fade-in-open slds-modal_large section_css">
+                <div class="slds-modal__container">
+                    <div class="slds-modal__close exp-close-icon-css close-icon-css" role="button" aria-label="Close" onclick={closeFailedModal}>
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                            <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937"></path>
+                        </svg>
+                    </div>
+                    <div class="slds-modal__header exp-pop-up-header-css popup-header">
+                        <h1 id="google-failed-title" class="slds-modal__title slds-hyphenate">{failedModalTitle}</h1>
+                    </div>
+                    <div class="slds-modal__content modalbody failed-body">
+                        <div class="content_body relative-position min-height-200">
+                            <!-- <template if:true={isLoading}>
+                                <c-spinner-component is-absolute="true"></c-spinner-component>
+                            </template> -->
+                            <template if:true={hasFailedLeads}>
+                                <div class="failed-summary">{failedSummary}</div>
+                                <div class="exp-table-content failed-table">
+                                    <table class="slds-table slds-table_fixed-layout" role="grid">
+                                        <thead>
+                                            <tr class="slds-line-height_reset exp-table-tr-cls">
+                                                <th scope="col" class="col-check">
+                                                    <div class="flex-center">
+                                                        <lightning-input type="checkbox" variant="label-hidden" label="Select all" checked={isAllFailedSelected} onchange={handleSelectAllFailed}></lightning-input>
+                                                    </div>
+                                                </th>
+                                                <th scope="col" class="col-no"><div class="slds-truncate header-cell-padding" title="No.">No.</div></th>
+                                                <th scope="col" class="col-lead"><div class="slds-truncate header-cell-padding" title="Lead ID">Lead ID</div></th>
+                                                <th scope="col" class="col-lead"><div class="slds-truncate header-cell-padding" title="Received">Received</div></th>
+                                                <th scope="col"><div class="slds-truncate header-cell-padding" title="Failure Reason">Failure Reason</div></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={failedLeads} for:item="lead">
+                                                <tr key={lead.id}>
+                                                    <td>
+                                                        <div class="flex-center">
+                                                            <lightning-input type="checkbox" variant="label-hidden" label="Select lead" data-id={lead.id} checked={lead.isSelected} onchange={handleFailedLeadSelect}></lightning-input>
+                                                        </div>
+                                                    </td>
+                                                    <td>{lead.index}</td>
+                                                    <td class="lead-id-cell"><div class="slds-truncate" title={lead.leadId}>{lead.leadId}</div></td>
+                                                    <td>{lead.receivedOnLabel}</td>
+                                                    <td class="reason-cell">{lead.reason}</td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:false={hasFailedLeads}>
+                                <div class="wizard-disabled-box">No failed leads for this form.</div>
+                            </template>
+                        </div>
+                        <div class="footerbtns">
+                            <button class="exp-white-btn-css" onclick={closeFailedModal}>Close</button>
+                            <button class="exp-red-btn-css" disabled={isFailedActionDisabled} onclick={handleDiscardSelected}>Discard Selected</button>
+                            <button class="exp-white-btn-css" disabled={isFailedActionDisabled} onclick={handleEditMappingAndRetry}>Edit Mapping &amp; Retry</button>
+                            <button class="exp-blue-btn-css" disabled={isFailedActionDisabled} onclick={handleRetrySelected}>Retry Selected</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+        </template>
+
+        <!-- ===================== Confirmation dialog ===================== -->
+        <template if:true={confirmation.isOpen}>
+            <section role="alertdialog" tabindex="-1" aria-modal="true" aria-labelledby="google-confirm-title" class="slds-modal slds-fade-in-open slds-modal_small section_css confirm-layer">
+                <div class="slds-modal__container">
+                    <div class="slds-modal__header exp-pop-up-header-css popup-header">
+                        <h2 id="google-confirm-title" class="slds-modal__title slds-hyphenate">{confirmation.title}</h2>
+                    </div>
+                    <div class="slds-modal__content modalbody">
+                        <div class="content_body confirm-message">{confirmation.message}</div>
+                        <div class="footerbtns">
+                            <button class="exp-white-btn-css" onclick={cancelConfirmation}>{confirmation.cancelLabel}</button>
+                            <button class={confirmButtonClass} onclick={confirmAction}>{confirmation.confirmLabel}</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open confirm-backdrop" role="presentation"></div>
+        </template>
+    </div>
+</template>

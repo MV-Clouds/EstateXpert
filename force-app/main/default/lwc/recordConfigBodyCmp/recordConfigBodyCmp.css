@@ -52,11 +52,11 @@
     background-color: #F9FAFB !important;
 }
 
-/* Header Action (Page Size + Add Row) */
+/* Header Action (Title + Add Row) */
 .header_container_css {
     display: flex;
     flex-direction: row;
-    justify-content: flex-end;
+    justify-content: space-between;
     padding-bottom: 1rem;
     align-items: center;
     width: 100%;
@@ -69,6 +69,18 @@
     justify-content: space-between;
     gap: 16px;
     width: 100%;
+}
+
+.header-block-css {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+    font-size: 18px;
+    font-weight: 500;
+    text-align: left;
+    color: #0f1419;
+    letter-spacing: 0.3px;
 }
 
 .add-new-btn {
@@ -365,4 +377,19 @@
 .popup__recordValues {
     display: flex;
     flex-direction: column;
+}
+
+.exp-delete-icon-css {
+    color: #212529;
+}
+
+.exp-delete-icon-css:hover {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #dc2626;
+}
+
+.exp-delete-icon-css:hover svg,
+.exp-delete-icon-css:hover svg path {
+    fill: #dc2626 !important;
+    stroke: #dc2626 !important;
 }

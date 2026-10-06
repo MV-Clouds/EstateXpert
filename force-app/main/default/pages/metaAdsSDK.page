@@ -989,7 +989,8 @@
             }
 
             function backToControlCenter() {
-                var basePath = '/lightning/n/MVEX__Control_Center';
+                var basePath = '/lightning/n/Control_Center';
+                // var basePath = '/lightning/n/MVEX__Control_Center';
                 window.top.location.href = basePath;
             }
 
@@ -1088,7 +1089,8 @@
             }
 
             function renderResults(data) {
-                var basePath = '/lightning/n/MVEX__Control_Center';
+                // var basePath = '/lightning/n/MVEX__Control_Center';
+                var basePath = '/lightning/n/Control_Center';
 
                 // Show loading spinner while Metadata API deploys
                 setLoading(true, 'Saving configuration... Please wait');

@@ -281,7 +281,7 @@ public with sharing class PortalMappingController {
     @AuraEnabled
     public static string portalAction(String portalId, String actionName) {
         try {
-            List<MVEX__Portal__c> portalAct = [SELECT Id, MVEX__Is_Active__c FROM MVEX__Portal__c WHERE Id =: portalId WITH USER_MODE];
+            List<MVEX__Portal__c> portalAct = [SELECT Id, Name, MVEX__Generator__c, MVEX__Is_Active__c FROM MVEX__Portal__c WHERE Id =: portalId WITH USER_MODE];
 
             if (portalAct.isEmpty()) {
                 return 'Portal not found.';
@@ -337,6 +337,16 @@ public with sharing class PortalMappingController {
     */
     private static String deletePortal(MVEX__Portal__c portal) {
         try {
+            if (portal != null && (portal.MVEX__Generator__c == 'Propertyfinder' || portal.MVEX__Generator__c == 'Property Finder')) {
+                try {
+                    PF_Credential__c cred = PF_Credential__c.getValues(portal.Name);
+                    if (cred != null) {
+                        delete cred;
+                    }
+                } catch (Exception ex) {
+                    // Non-blocking credential cleanup
+                }
+            }
             delete as user portal;
             return 'deleted';
         } catch (Exception e) {
@@ -365,6 +375,8 @@ public with sharing class PortalMappingController {
         @AuraEnabled public String differentiator_values;
         @AuraEnabled public String xml_site;
         @AuraEnabled public Boolean sync_branch_with_zoopla;
+        @AuraEnabled public String apiKey;
+        @AuraEnabled public String apiSecret;
     }
 
     /**
@@ -384,6 +396,15 @@ public with sharing class PortalMappingController {
             String escapePortalName = String.escapeSingleQuotes(portalName);
 
             PropertyPortalWrapper wrapper = (PropertyPortalWrapper)JSON.deserialize(portalWrapper, PropertyPortalWrapper.class);
+
+            String trimmedName = wrapper.name != null ? wrapper.name.trim() : '';
+            if (String.isBlank(trimmedName)) {
+                return 'Portal title cannot be empty.';
+            }
+            if ([SELECT count() FROM MVEX__Portal__c WHERE Name = :trimmedName WITH USER_MODE] > 0) {
+                return 'A portal with the name \'' + trimmedName + '\' already exists.';
+            }
+
             List<MVEX__Portal_Listing_Mapping__c> portalListingMaps = [SELECT Id, MVEX__Listing_Field_API_Name__c, Name FROM MVEX__Portal_Listing_Mapping__c 
                                                                         WHERE MVEX__Portal_Name__c =: escapePortalName AND MVEX__Listing_Field_API_Name__c != null 
                                                                         WITH USER_MODE LIMIT 50000];
@@ -398,14 +419,20 @@ public with sharing class PortalMappingController {
                 jsonBody = createPortalRecords(portalName);
             }
 
+            String sanitizedPortalWrapper = portalWrapper;
+            String generatorName = wrapper.portalname == 'Property Finder' ? 'Propertyfinder' : wrapper.portalname;
+            if (generatorName == 'Propertyfinder' || portalName == 'Propertyfinder') {
+                sanitizedPortalWrapper = handlePropertyFinderCredentials(portalWrapper, wrapper.name);
+            }
+
             String portalId;
             MVEX__Portal__c newportal = new MVEX__Portal__c();
             newportal.Name = wrapper.name;
             newportal.MVEX__Endpoint__c = wrapper.getPortalIconUrl;
             newportal.MVEX__Is_Active__c = true;
-            newportal.MVEX__Portal_Configuration__c = portalWrapper;
+            newportal.MVEX__Portal_Configuration__c = sanitizedPortalWrapper;
             newportal.MVEX__Field_Mapping__c = jsonBody;
-            newportal.MVEX__Generator__c = wrapper.portalname == 'Property Finder' ? 'Propertyfinder' : wrapper.portalname;
+            newportal.MVEX__Generator__c = generatorName;
             
             insert as user newportal;
             portalId = newportal.Id;
@@ -522,13 +549,27 @@ public with sharing class PortalMappingController {
             }
 
             PropertyPortalWrapper wrapper = (PropertyPortalWrapper)JSON.deserialize(portalWrapper, PropertyPortalWrapper.class);
+
+            String trimmedName = wrapper.name != null ? wrapper.name.trim() : '';
+            if (String.isBlank(trimmedName)) {
+                return 'Portal title cannot be empty.';
+            }
+            if ([SELECT count() FROM MVEX__Portal__c WHERE Name = :trimmedName AND Id != :portalId WITH USER_MODE] > 0) {
+                return 'A portal with the name \'' + trimmedName + '\' already exists.';
+            }
             
+            String sanitizedPortalWrapper = portalWrapper;
+            String generatorName = wrapper.portalname == 'Property Finder' ? 'Propertyfinder' : wrapper.portalname;
+            if (generatorName == 'Propertyfinder' || portalName == 'Propertyfinder') {
+                sanitizedPortalWrapper = handlePropertyFinderCredentials(portalWrapper, wrapper.name);
+            }
+
             MVEX__Portal__c newportal = new MVEX__Portal__c();
             newportal.Id = portalId;
             newportal.Name = wrapper.name;
             newportal.MVEX__Endpoint__c = wrapper.getPortalIconUrl;
-            newportal.MVEX__Portal_Configuration__c = portalWrapper;
-            newportal.MVEX__Generator__c = wrapper.portalname == 'Property Finder' ? 'Propertyfinder' : wrapper.portalname;
+            newportal.MVEX__Portal_Configuration__c = sanitizedPortalWrapper;
+            newportal.MVEX__Generator__c = generatorName;
             
             update as user newportal;
 
@@ -544,6 +585,57 @@ public with sharing class PortalMappingController {
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'PortalMappingController', 'savePropertyPortalRecord', 'Error while saving MVEX__Portal__c record.');
             return e.getMessage();
+        }
+    }
+
+    /**
+    * Method Name : handlePropertyFinderCredentials
+    * @description : Extracts API Key and Secret from portalWrapper, saves them in PF_Credential__c protected custom setting with portal name, and returns sanitized JSON without the credentials.
+    * @param portalWrapper JSON string of portal configuration.
+    * @return String Sanitized JSON string.
+    */
+    public static String handlePropertyFinderCredentials(String portalWrapper) {
+        return handlePropertyFinderCredentials(portalWrapper, null);
+    }
+
+    public static String handlePropertyFinderCredentials(String portalWrapper, String portalTitle) {
+        try {
+            if (String.isBlank(portalWrapper)) {
+                return portalWrapper;
+            }
+            Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(portalWrapper);
+            String apiKey = configMap.containsKey('apiKey') ? String.valueOf(configMap.get('apiKey')) : null;
+            String apiSecret = configMap.containsKey('apiSecret') ? String.valueOf(configMap.get('apiSecret')) : null;
+
+            if (String.isBlank(portalTitle) && configMap.containsKey('name')) {
+                portalTitle = String.valueOf(configMap.get('name'));
+            }
+
+            if (apiKey != null || apiSecret != null) {
+                String recordName = String.isNotBlank(portalTitle) ? portalTitle.trim() : 'Propertyfinder';
+                if (recordName.length() > 80) {
+                    recordName = recordName.substring(0, 80);
+                }
+
+                PF_Credential__c credential = PF_Credential__c.getValues(recordName);
+                if (credential == null) {
+                    credential = new PF_Credential__c(Name = recordName);
+                }
+                if (apiKey != null) {
+                    credential.API_Key__c = apiKey;
+                }
+                if (apiSecret != null) {
+                    credential.API_Secret__c = apiSecret;
+                }
+                upsert credential;
+            }
+
+            configMap.remove('apiKey');
+            configMap.remove('apiSecret');
+            return JSON.serialize(configMap);
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'PortalMappingController', 'handlePropertyFinderCredentials', 'Error while handling Property Finder credentials in PF_Credential__c.');
+            return portalWrapper;
         }
     }
 
@@ -711,11 +803,25 @@ public with sharing class PortalMappingController {
 
             if (!portalData.isEmpty()) {
                 String fieldMappingJson = portalData[0].MVEX__Portal_Configuration__c;
-                Map<String, Object> fieldMappingMap = (Map<String, Object>) JSON.deserializeUntyped(fieldMappingJson);
-                
-                for (String apiName : fieldMappingMap.keySet()) {
-                    String value = String.valueOf(fieldMappingMap.get(apiName));
-                    siteInfoWrapper.fieldsValue.add(new FieldList(apiName, value));
+                if (String.isNotBlank(fieldMappingJson)) {
+                    Map<String, Object> fieldMappingMap = (Map<String, Object>) JSON.deserializeUntyped(fieldMappingJson);
+                    
+                    for (String apiName : fieldMappingMap.keySet()) {
+                        String value = String.valueOf(fieldMappingMap.get(apiName));
+                        siteInfoWrapper.fieldsValue.add(new FieldList(apiName, value));
+                    }
+                }
+
+                if (portalData[0].MVEX__Generator__c == 'Propertyfinder' || portalData[0].MVEX__Generator__c == 'Property Finder') {
+                    PF_Credential__c pfCredential = PF_Credential__c.getOrgDefaults();
+                    if (pfCredential != null) {
+                        if (pfCredential.API_Key__c != null) {
+                            siteInfoWrapper.fieldsValue.add(new FieldList('apiKey', pfCredential.API_Key__c));
+                        }
+                        if (pfCredential.API_Secret__c != null) {
+                            siteInfoWrapper.fieldsValue.add(new FieldList('apiSecret', pfCredential.API_Secret__c));
+                        }
+                    }
                 }
             }
 

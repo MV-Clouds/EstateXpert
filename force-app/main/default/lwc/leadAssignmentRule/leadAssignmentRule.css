@@ -73,7 +73,7 @@
     padding: 1rem;
     border: 1px solid #E5E7EB;
     box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
-    background: #EFF8FF;
+    background: #f5f7fa;
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: #0170d27d transparent;
@@ -640,8 +640,7 @@
     text-align: left !important;
 }
 
-lightning-combobox .slds-dropdown,
-.slds-dropdown {
+.combobox_cls lightning-combobox .slds-dropdown {
     text-align: left !important;
     left: 0 !important;
     right: auto !important;
@@ -805,7 +804,6 @@ lightning-combobox .slds-dropdown,
 
 /* Disable user selection for the whole component */
 .exp-no-data-container {
-    gap: 2rem;
     height: auto;
 }
 

@@ -4,7 +4,7 @@ import getCheckList from '@salesforce/apex/CheckListItemController.getCheckList'
 import createCheckListItem from '@salesforce/apex/CheckListItemController.createCheckListItem';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import { errorDebugger } from 'c/globalProperties';
 
 import USER_CURRENCY from '@salesforce/i18n/currency';
@@ -20,6 +20,7 @@ export default class CheckListStatus extends LightningElement {
     @track isSpinner = true;
     @track screenWidth = 0;
     @track checklistEditable = false;
+    @track searchValue = '';
 
     get isMobileOrTablet() {
         return FORM_FACTOR === 'Small' || FORM_FACTOR === 'Medium';
@@ -80,6 +81,21 @@ export default class CheckListStatus extends LightningElement {
         return this.checklistItems?.length > 0 ? 'Manage Checklist' : 'Create Checklist';
     }
 
+    get progressPercentage() {
+        if (!this.totalCount || this.totalCount === 0) {
+            return 0;
+        }
+        return Math.round((this.completedCount / this.totalCount) * 100);
+    }
+
+    get progressDashArray() {
+        return `${this.progressPercentage}, 100`;
+    }
+
+    get progressBarStyle() {
+        return `width: ${this.progressPercentage}%;`;
+    }
+
     /**
     * Method Name: connectedCallback
     * @description: Used to call checklistValues method.
@@ -90,7 +106,7 @@ export default class CheckListStatus extends LightningElement {
     */
     connectedCallback() {
         try {
-            loadStyle(this, MulishFontCss);
+            loadStyle(this, globalStyles);
             this.screenWidth = window?.globalThis?.innerWidth;
             window?.globalThis?.addEventListener('resize', this.handleResize);
             this.checklistValues();
@@ -196,9 +212,15 @@ export default class CheckListStatus extends LightningElement {
                         : '-';
                 }
 
+                const toPart = item.isToRequired ? ' to ' : ' ';
+                const conditionTooltip = item.fieldName
+                    ? `Condition: ${item.fieldLabel || ''} should ${item.operator || ''}${toPart}${value}`
+                    : 'There is no condition defined for completion.';
+
                 return {
                     ...item,
-                    displayValueToShow: value
+                    displayValueToShow: value,
+                    conditionTooltip: conditionTooltip
                 };
             });
             this.isSpinner = false;
@@ -280,6 +302,7 @@ export default class CheckListStatus extends LightningElement {
         try {
             this.showEditModal = event.details;
             this.addMainDiv();
+            this.searchValue = '';
             const inputElement = this.template.querySelector('.search_Input');
             if (inputElement) inputElement.value = '';
             this.checklistItems = [];
@@ -321,6 +344,7 @@ export default class CheckListStatus extends LightningElement {
     */
     refreshTable() {
         try {
+            this.searchValue = '';
             const inputElement = this.template.querySelector('.search_Input');
             if (inputElement) inputElement.value = '';
             this.checklistItems = [];
@@ -343,7 +367,7 @@ export default class CheckListStatus extends LightningElement {
             if (this.screenWidth <= 1050 && this.isDataAvailable) {
                 const dataContainer = this.template.querySelector('.columns-container');
                 const container = this.template.querySelector('.container');
-                if (dataContainer) dataContainer.classList.add('removeMain');
+                if (dataContainer) dataContainer.classList.add('remove-main');
                 if (container) container.classList.add('adddiv');
             }
         } catch (error) {
@@ -364,7 +388,7 @@ export default class CheckListStatus extends LightningElement {
             if (this.screenWidth <= 1050 && this.isDataAvailable) {
                 const dataContainer = this.template.querySelector('.columns-container');
                 const container = this.template.querySelector('.container');
-                if (dataContainer) dataContainer.classList.remove('removeMain');
+                if (dataContainer) dataContainer.classList.remove('remove-main');
                 if (container) container.classList.remove('adddiv');
             }
         } catch (error) {
@@ -410,6 +434,7 @@ export default class CheckListStatus extends LightningElement {
     */
     handleSearch(event) {
         try {
+            this.searchValue = event.target.value;
             const searchTerm = event.target.value.toLowerCase();
 
             this.checklistItems = this.originChecklistItems.filter(template =>

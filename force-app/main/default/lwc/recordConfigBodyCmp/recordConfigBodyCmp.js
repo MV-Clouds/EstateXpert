@@ -2,7 +2,7 @@ import { LightningElement, track, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getObjectFields from '@salesforce/apex/PropertySearchController.getObjectFieldsByFeature';
 import saveMetadata from '@salesforce/apex/PropertySearchController.saveMappings';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import { loadStyle } from 'lightning/platformResourceLoader';
 
 export default class RecordConfigBodyCmp extends LightningElement {
@@ -38,6 +38,22 @@ export default class RecordConfigBodyCmp extends LightningElement {
         { label: 'MM-DD-YYYY (12 hour)', value: 'mmddyyyy12' },
         { label: 'YYYY-MM-DD (12 hour)', value: 'yyyymmdd12' }
     ];
+
+    // Computed Property to get Title based on Feature
+    get featureTitle() {
+        switch (this.featureName) {
+            case 'Marketing_List_Fields':
+                return 'Marketing List Columns';
+            case 'Listing_Manager_Fields':
+                return 'Listing Manager Columns';
+            case 'Suggested_Inquiry_Fields':
+                return 'Suggested Inquiries Columns';
+            case 'Suggested_Listing_Fields':
+                return 'Suggested Listings Columns';
+            default:
+                return 'Configure Columns';
+        }
+    }
 
     // Computed Property to get Object Name based on Feature
     get selectedTabObject() {
@@ -80,7 +96,7 @@ export default class RecordConfigBodyCmp extends LightningElement {
     }
 
     connectedCallback() {
-        loadStyle(this, MulishFontCss);
+        loadStyle(this, globalStyles);
 
         if (this.selectedTabObject) {
             this.fetchMetadata();

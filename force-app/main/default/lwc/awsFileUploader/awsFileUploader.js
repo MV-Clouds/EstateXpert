@@ -7,7 +7,7 @@ import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import watermarkjs from "@salesforce/resourceUrl/watermarkjs";
 import buffer from 'c/buffer';
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import { errorDebugger } from 'c/globalProperties';
 import thumbnailUrl from '@salesforce/label/c.thumbnail';
 
@@ -93,7 +93,7 @@ export default class AwsFileUploader extends NavigationMixin(LightningElement) {
     */
     connectedCallback() {
         try {
-            loadStyle(this, MulishFontCss);
+            loadStyle(this, globalStyles);
             this.getS3ConfigDataAsync();
             this.timeInString();
         } catch (error) {

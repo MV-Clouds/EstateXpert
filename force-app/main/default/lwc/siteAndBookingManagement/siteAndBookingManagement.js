@@ -1,6 +1,6 @@
 import { LightningElement, api, track } from 'lwc';
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import EvoCalendarZip from '@salesforce/resourceUrl/evoCalender';
 import emptyState from '@salesforce/resourceUrl/emptyState';
 import getPropertyAndContactData from '@salesforce/apex/SiteAndBookingController.getPropertyAndContactData';
@@ -28,9 +28,12 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
     @track images = [];
     @track NoDataImageUrl = emptyState;
     @track contacts = [];
+    @track shownContacts = [];
+    @track currentPage = 1;
+    @track pageSize = 20;
+    @track visiblePages = 5;
     @track currentImageIndex = 0;
     @track mapMarkers = [];
-    @track error;
     @track isLoading = true;
 
     // --- MODAL STATE ---
@@ -83,9 +86,110 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
         return this.contacts && this.contacts.length > 0;
     }
 
+    get totalPages() {
+        return Math.ceil(this.totalItems / this.pageSize);
+    }
+
+    get totalItems() {
+        return this.contacts ? this.contacts.length : 0;
+    }
+
+    get isFirstPage() {
+        return this.currentPage === 1;
+    }
+
+    get isLastPage() {
+        return this.currentPage === Math.ceil(this.totalItems / this.pageSize) || this.totalItems === 0;
+    }
+
+    get startIndex() {
+        return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+    }
+
+    get endIndex() {
+        return Math.min(this.currentPage * this.pageSize, this.totalItems);
+    }
+
+    get recordCountInfo() {
+        if (this.totalItems === 0) {
+            return 'Showing 0 records';
+        }
+        return `Showing ${this.startIndex} - ${this.endIndex} of ${this.totalItems}`;
+    }
+
+    get pageSizeOptions() {
+        const sizes = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+        return sizes.map(size => ({
+            label: String(size),
+            value: size,
+            isSelected: this.pageSize === size
+        }));
+    }
+
+    get pageNumbers() {
+        try {
+            const totalPages = this.totalPages;
+            const currentPage = this.currentPage;
+            const visiblePages = this.visiblePages;
+
+            let pages = [];
+
+            if (totalPages <= visiblePages) {
+                for (let i = 1; i <= totalPages; i++) {
+                    pages.push({
+                        number: i,
+                        isEllipsis: false,
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
+                    });
+                }
+            } else {
+                pages.push({
+                    number: 1,
+                    isEllipsis: false,
+                    className: `exp-pagination-button ${currentPage === 1 ? 'active' : ''}`
+                });
+
+                if (currentPage > 3) {
+                    pages.push({ isEllipsis: true });
+                }
+
+                let start = Math.max(2, currentPage - 1);
+                let end = Math.min(currentPage + 1, totalPages - 1);
+
+                for (let i = start; i <= end; i++) {
+                    pages.push({
+                        number: i,
+                        isEllipsis: false,
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
+                    });
+                }
+
+                if (currentPage < totalPages - 2) {
+                    pages.push({ isEllipsis: true });
+                }
+
+                pages.push({
+                    number: totalPages,
+                    isEllipsis: false,
+                    className: `exp-pagination-button ${currentPage === totalPages ? 'active' : ''}`
+                });
+            }
+
+            return pages;
+        } catch (error) {
+            return [];
+        }
+    }
+
+    get currentContactName() {
+        return (this.currentContact && this.currentContact.Name && String(this.currentContact.Name).trim())
+            ? this.currentContact.Name
+            : '-';
+    }
+
     // Options for the new action-driving combobox
     get actionOptions() {
-        const status = this.currentContact.ShowingStatus || 'Not Scheduled';
+        const status = (this.currentContact.ShowingStatus && this.currentContact.ShowingStatus !== '-') ? this.currentContact.ShowingStatus : 'Not Scheduled';
         let options = [];
 
         if (status === 'Not Scheduled' || status === 'Cancelled') {
@@ -148,6 +252,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     connectedCallback() {
         this.isLoading = true;
+        loadStyle(this, globalStyles);
         loadScript(this, JQUERY_PATH)
             .then(() => {
                 if (!window.jQuery) { throw new Error('jQuery failed to load'); }
@@ -156,7 +261,6 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             .then(() => {
                 if (!window.jQuery.fn.evoCalendar) { throw new Error('EvoCalendar plugin failed to load'); }
                 return Promise.all([
-                    loadStyle(this, MulishFontCss),
                     loadStyle(this, EVO_CALENDAR_CSS_PATH),
                     loadStyle(this, EVO_CALENDAR_NAVY_CSS_PATH)
                 ]);
@@ -178,10 +282,6 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             if (this.showScheduleModal && !this.scheduleCalendarInitialized) {
                 this.initializeScheduleCalendar();
             }
-            // Initialize "Manage Showing" modal calendar
-            // if (this.showManageModal && !this.manageCalendarInitialized && this.showDateTimeInputs) {
-            //     this.initializeManageCalendar();
-            // }
 
             // Update sort icons after DOM is rendered
             if (!this.isLoading && this.contacts.length > 0) {
@@ -211,16 +311,34 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                     // Create a copy for JSON.stringify to avoid circular refs
                     const contactData = { ...contact };
 
+                    const hasName = Boolean(contact.Name && String(contact.Name).trim());
+                    const nameVal = hasName ? String(contact.Name).trim() : '-';
+                    const emailVal = contact.Email && String(contact.Email).trim() ? String(contact.Email).trim() : '-';
+                    const phoneVal = contact.MobilePhone && String(contact.MobilePhone).trim() ? String(contact.MobilePhone).trim() : '-';
+                    const statusVal = contact.ShowingStatus && String(contact.ShowingStatus).trim() ? String(contact.ShowingStatus).trim() : '-';
+                    const formattedDate = scheduleDate ? scheduleDate.toLocaleString('en-US', {
+                        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: this.userTimeZone
+                    }) : '-';
+
                     const contactObj = {
                         ...contact,
                         Json: JSON.stringify(contactData), // Stringify the contact data for the button
-                        FormattedScheduleDate: scheduleDate ? scheduleDate.toLocaleString('en-US', {
-                            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: this.userTimeZone
-                        }) : '',
+                        hasName: hasName,
+                        Name: nameVal,
+                        displayName: nameVal,
+                        Email: emailVal,
+                        displayEmail: emailVal,
+                        MobilePhone: phoneVal,
+                        displayPhone: phoneVal,
+                        ShowingStatus: statusVal,
+                        displayShowingStatus: statusVal,
+                        FormattedScheduleDate: formattedDate,
+                        displayFormattedScheduleDate: formattedDate,
                         isShowingDisabled: !contact.ShowingId
                     };
                     return contactObj;
                 });
+                this.currentPage = 1;
                 this.sortData();
                 this.mapMarkers = [{
                     location: {
@@ -231,13 +349,17 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
                     },
                     title: this.listing?.MVEX__Address__c || ''
                 }];
-                this.error = undefined;
                 this.startCarousel();
             })
             .catch(error => {
-                this.error = error.body?.message || 'Unknown error';
-                this.listing = {}; this.images = []; this.contacts = []; this.mapMarkers = [];
-                this.showToast('Error', 'Failed to load property data: ' + error.body?.message, 'error');
+                this.listing = {};
+                this.images = [];
+                this.contacts = [];
+                this.shownContacts = [];
+                this.mapMarkers = [];
+                const errorMsg = error.body?.message || error.message || 'Unknown error';
+                this.showToast('Error', 'Error loading data: ' + errorMsg, 'error');
+                console.error('Error loading data:', error);
             })
             .finally(() => {
                 this.isLoading = false;
@@ -252,12 +374,12 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             .then(result => {
                 this.calendarEvents = result.map(showing => ({
                     id: showing.Id,
-                    name: showing.ContactName,
+                    name: showing.ContactName || '-',
                     date: new Date(showing.MVEX__Scheduled_Date__c || showing.MVEX__Reschedule_Date__c).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: this.userTimeZone }),
                     description:
                         `<div data-id="${showing.Id}" class="showing-link" ><div class="event-desc-line">Time: ${new Date(showing.MVEX__Scheduled_Date__c || showing.MVEX__Reschedule_Date__c).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: this.userTimeZone })}</div>
-                            <div class="event-desc-line">Status: ${showing.MVEX__Status__c}</div>
-                            <div class="event-desc-line">Listing: ${showing.ListingName}</div>
+                            <div class="event-desc-line">Status: ${showing.MVEX__Status__c || '-'}</div>
+                            <div class="event-desc-line">Listing: ${showing.ListingName || '-'}</div>
                         </div>`,
                     type: 'event',
                     color: showing.MVEX__Status__c === 'Waiting For Confirmation' ? 'rgb(2 118 211);' : showing.MVEX__Status__c === 'Scheduled' ? '#4CAF50' : showing.MVEX__Status__c === 'Rescheduled' ? 'rgb(255 180 180 / 40%)' : 'rgb(2 118 211 / 40%)'
@@ -282,14 +404,23 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
             // Handle FormattedScheduleDate as date for proper sorting
             if (this.sortField === 'FormattedScheduleDate') {
-                aValue = a.ScheduleDate || a.RescheduleDate || '';
-                bValue = b.ScheduleDate || b.RescheduleDate || '';
-                const aDate = new Date(aValue);
-                const bDate = new Date(bValue);
+                const aDateVal = a.ScheduleDate || a.RescheduleDate || '';
+                const bDateVal = b.ScheduleDate || b.RescheduleDate || '';
+                if (!aDateVal && !bDateVal) return 0;
+                if (!aDateVal) return 1;
+                if (!bDateVal) return -1;
+                const aDate = new Date(aDateVal);
+                const bDate = new Date(bDateVal);
                 return this.sortOrder === 'asc' ?
                     (aDate > bDate ? 1 : (aDate < bDate ? -1 : 0)) :
                     (aDate < bDate ? 1 : (aDate > bDate ? -1 : 0));
             }
+
+            const aIsEmpty = !aValue || aValue === '-';
+            const bIsEmpty = !bValue || bValue === '-';
+            if (aIsEmpty && bIsEmpty) return 0;
+            if (aIsEmpty) return 1;
+            if (bIsEmpty) return -1;
 
             if (typeof aValue === 'string' && typeof bValue === 'string') {
                 aValue = aValue.toLowerCase();
@@ -302,6 +433,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
             return this.sortOrder === 'asc' ? compare : -compare;
         });
+        this.updateShownData();
     }
 
     /**
@@ -320,6 +452,58 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             this.updateSortIcons();
         } catch (error) {
             console.error('Error in sortClick:', error);
+        }
+    }
+
+    handlePrevious() {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+            this.updateShownData();
+            this.scrollToTop();
+        }
+    }
+
+    handleNext() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage++;
+            this.updateShownData();
+            this.scrollToTop();
+        }
+    }
+
+    handlePageChange(event) {
+        const selectedPage = parseInt(event.target.getAttribute('data-id'), 10);
+        if (selectedPage !== this.currentPage) {
+            this.currentPage = selectedPage;
+            this.updateShownData();
+            this.scrollToTop();
+        }
+    }
+
+    handlePageSizeChange(event) {
+        const value = parseInt(event.target.value, 10);
+        if (!isNaN(value) && this.pageSize !== value) {
+            this.pageSize = value;
+            this.currentPage = 1;
+            this.updateShownData();
+            this.scrollToTop();
+        }
+    }
+
+    updateShownData() {
+        if (!this.contacts || this.contacts.length === 0) {
+            this.shownContacts = [];
+            return;
+        }
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
+        this.shownContacts = this.contacts.slice(startIndex, endIndex);
+    }
+
+    scrollToTop() {
+        const tableContainer = this.template.querySelector('.exp-table-content');
+        if (tableContainer) {
+            tableContainer.scrollTop = 0;
         }
     }
 
@@ -459,7 +643,7 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
             this.currentContactId = this.currentContact.Id;
 
             // Set initial action
-            const status = this.currentContact.ShowingStatus || 'Not Scheduled';
+            const status = (this.currentContact.ShowingStatus && this.currentContact.ShowingStatus !== '-') ? this.currentContact.ShowingStatus : 'Not Scheduled';
             if (status === 'Not Scheduled' || status === 'Cancelled') {
                 this.selectedAction = 'Schedule';
             } else if (status === 'Waiting For Confirmation') {
@@ -611,7 +795,9 @@ export default class SiteAndBookingManagement extends NavigationMixin(LightningE
 
     validateInputs() {
         if (this.showDateTimeInputs) {
-            if (!this.currentContact.Email || !this.currentContact.Name) {
+            const hasValidEmail = this.currentContact.Email && this.currentContact.Email !== '-' && String(this.currentContact.Email).trim() !== '';
+            const hasValidName = this.currentContact.Name && this.currentContact.Name !== '-' && String(this.currentContact.Name).trim() !== '';
+            if (!hasValidEmail || !hasValidName) {
                 this.showToast('Error', 'The selected inquiry does not have a name or email address.', 'error');
                 return false;
             }

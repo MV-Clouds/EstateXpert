@@ -3,7 +3,7 @@ import fetchPortals from "@salesforce/apex/PortalSyndicationController.fetchPort
 import createPortalListingRecord from "@salesforce/apex/PortalSyndicationController.createPortalListingRecord";
 import getZooplaFieldMappings from "@salesforce/apex/PortalSyndicationController.getZooplaFieldMappings";
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { errorDebugger } from 'c/globalProperties';
@@ -40,7 +40,7 @@ export default class PortalSyndication extends LightningElement {
     */
     connectedCallback() {
         try {
-            loadStyle(this, MulishFontCss);
+            loadStyle(this, globalStyles);
             this.fetchPortalDatas();
             this.registerErrorListener();
             this.handleSubscribeRefresh();

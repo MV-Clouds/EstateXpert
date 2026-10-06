@@ -24,7 +24,7 @@ import updatePropertyPortalRecord from '@salesforce/apex/PortalMappingController
 
 // Resources
 import portalMappingIcon from '@salesforce/resourceUrl/iconimg';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import portalmappingcss from '@salesforce/resourceUrl/portalmappingcss';
 import { errorDebugger } from 'c/globalProperties';
 
@@ -109,7 +109,7 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
     renderedCallback() {
         if (this.isInitalRender) {
             Promise.all([
-                loadStyle(this, MulishFontCss),
+                loadStyle(this, globalStyles),
                 loadStyle(this, portalmappingcss)
             ]).then(() => {
                 this.isInitalRender = false;
@@ -170,7 +170,8 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
                         return {
                             portalName: item.portalName,
                             logoURL: item.logoURL,
-                            Id: item.portalName 
+                            Id: item.portalName,
+                            canAdd: true
                         };
                     });
                 } else {
@@ -180,7 +181,14 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
                 if (result.portalRecords && result.portalRecords.length > 0) {
                     this.isPortalData = true;
                     this.portalRecordList = result.portalRecords.map(element => {
-                        return { val: element };
+                        const isPF = element.MVEX__Generator__c === 'Propertyfinder' || 
+                                     element.MVEX__Generator__c === 'Property Finder' || 
+                                     element.Name === 'Propertyfinder' || 
+                                     element.Name === 'Property Finder';
+                        return { 
+                            val: element,
+                            isPropertyFinder: isPF
+                        };
                     });
                 } else {
                     this.isPortalData = false;
@@ -301,9 +309,13 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
     }
 
     handleEditPortal(event) {
+        const portalGen = event.currentTarget.dataset.portalgen;
+        if (portalGen === 'Propertyfinder' || portalGen === 'Property Finder') {
+            return;
+        }
         this.selectedPortalId = event.currentTarget.dataset.portalId;
         this.portalIconUrl = event.currentTarget.dataset.portaliconurl;
-        this.portalGen = event.currentTarget.dataset.portalgen;
+        this.portalGen = portalGen;
         this.changedPortalName = this.portalGen;
         this.propertyEditModal = true;
         this.setSettingPopupFields();
@@ -667,18 +679,38 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
     }
 
     validateNewPopupFields() {
-        let isValid = true;
+        let hasEmptyRequired = false;
+        let enteredTitle = '';
+
         this.newPopupFields.forEach(field => {
-            if (field.isRequired && (!field.value || field.value.trim() === '')) {
-                isValid = false;
+            if (field.isRequired && (!field.value || field.value.toString().trim() === '')) {
+                hasEmptyRequired = true;
+            }
+            if (field.fieldAPIName === 'name' && field.value) {
+                enteredTitle = field.value.toString().trim();
             }
         });
-        return isValid;
+
+        if (hasEmptyRequired) {
+            this.showToast('Error', 'Please fill all the required fields.', 'error');
+            return false;
+        }
+
+        if (enteredTitle && this.portalRecordList && this.portalRecordList.length > 0) {
+            const isDuplicate = this.portalRecordList.some(record => 
+                record.val && record.val.Name && record.val.Name.trim().toLowerCase() === enteredTitle.toLowerCase()
+            );
+            if (isDuplicate) {
+                this.showToast('Error', `A portal with the name '${enteredTitle}' already exists.`, 'error');
+                return false;
+            }
+        }
+
+        return true;
     }
 
     saveNewPortalRecord() {
         if (!this.validateNewPopupFields()) {
-            this.showToast('Error', 'Please fill all the required fields.', 'error');
             return;
         }
         
@@ -839,18 +871,41 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
     }
 
     validateSettingPopupFields() {
-        let isValid = true;
+        let hasEmptyRequired = false;
+        let enteredTitle = '';
+
         this.editPopupFields.forEach(field => {
             if (field.isRequired && (!field.value || field.value.toString().trim() === '')) {
-                isValid = false;
+                hasEmptyRequired = true;
+            }
+            if (field.fieldAPIName === 'name' && field.value) {
+                enteredTitle = field.value.toString().trim();
             }
         });
-        return isValid;
+
+        if (hasEmptyRequired) {
+            this.showToast('Error', 'Please fill all the required fields.', 'error');
+            return false;
+        }
+
+        if (enteredTitle && this.portalRecordList && this.portalRecordList.length > 0) {
+            const isDuplicate = this.portalRecordList.some(record => 
+                record.val && 
+                record.val.Id !== this.selectedPortalId && 
+                record.val.Name && 
+                record.val.Name.trim().toLowerCase() === enteredTitle.toLowerCase()
+            );
+            if (isDuplicate) {
+                this.showToast('Error', `A portal with the name '${enteredTitle}' already exists.`, 'error');
+                return false;
+            }
+        }
+
+        return true;
     }
 
     updateExistingPortalRecord() {
         if (!this.validateSettingPopupFields()) {
-            this.showToast('Error', 'Please fill all the required fields.', 'error');
             return;
         }
 

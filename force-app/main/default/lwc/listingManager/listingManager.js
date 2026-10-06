@@ -1470,6 +1470,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                 if (this.screenWidth >= 900) {
                     div1.style.width = '22%';
                     div1.style.opacity = '1';
+                    div1.style.marginLeft = '0.75rem';
                     div2.style.width = '78%';
                 } else {
                     div1.style.height = 'fit-content';
@@ -1486,6 +1487,7 @@ export default class ListingManager extends NavigationMixin(LightningElement) {
                 if (this.screenWidth >= 900) {
                     div1.style.width = '0';
                     div1.style.opacity = '0';
+                    div1.style.marginLeft = '0';
                     div2.style.width = '100%';
 
                     // Hide filter content and remove margin after animation starts

@@ -35,9 +35,30 @@ public class InstagramPostScheduler implements Schedulable {
 
     @future(callout=true)
     public static void publishPost(String userId, String creationId, String accessToken, List<String> awsObjectKeys, List<String> awsObjectKeysToPreserve) {
+        String graphApiVersion = 'v24.0';
+        try {
+            List<OAuth_Configuration__mdt> instaConfigs = [
+                SELECT API_Version__c
+                FROM OAuth_Configuration__mdt
+                WHERE DeveloperName = 'Instagram_OAuth'
+                WITH USER_MODE
+                LIMIT 1
+            ];
+            if (!instaConfigs.isEmpty() && String.isNotBlank(instaConfigs[0].API_Version__c)) {
+                graphApiVersion = instaConfigs[0].API_Version__c.trim();
+            }
+        } catch (Exception e1) {
+            graphApiVersion = 'v24.0';
+        }
+        if (String.isBlank(graphApiVersion)) {
+            graphApiVersion = 'v24.0';
+        }
+        if (!graphApiVersion.toLowerCase().startsWith('v')) {
+            graphApiVersion = 'v' + graphApiVersion;
+        }
         Http http = new Http();
         HttpRequest publishReq = new HttpRequest();
-        publishReq.setEndpoint(INSTAGRAM_ENDPOINT + userId + '/media_publish');
+        publishReq.setEndpoint(INSTAGRAM_ENDPOINT + graphApiVersion + '/' + userId + '/media_publish');
         publishReq.setMethod('POST');
         publishReq.setHeader('Content-Type', 'application/json');
 
@@ -100,7 +121,7 @@ public class InstagramPostScheduler implements Schedulable {
             Http http = new Http();
 
             HttpRequest albumReq = new HttpRequest();
-            albumReq.setEndpoint('https://graph.instagram.com/v21.0/' + userId + '/media');
+            albumReq.setEndpoint('https://graph.instagram.com/v25.0/' + userId + '/media');
             albumReq.setMethod('POST');
             albumReq.setHeader('Content-Type', 'application/json');
 

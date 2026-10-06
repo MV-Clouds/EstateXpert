@@ -399,7 +399,7 @@
 
 .date-time-div .delete-icon-cover {
     padding: 6px;
-    border: 1px solid #e5e7eb;
+    border: 1.5px solid #8a8c8e;
     border-radius: 6px;
     display: flex;
     justify-content: center;
@@ -613,12 +613,6 @@
     z-index: 2;
 }
 
-/* Modal Styles */
-.slds-modal__header {
-    padding: 1rem;
-    border-bottom: 1px solid #e5e5e5;
-}
-
 .no-filter {
     font-size: 14px;
     display: flex;
@@ -807,16 +801,6 @@
 
 .bread-crumb-cover:last-of-type svg {
     display: none;
-}
-
-.slds-combobox__option-text.lookup-field::after {
-    content: '';
-    display: inline-block;
-    width: 1rem;
-    height: 1rem;
-    background: url('/path/to/utility/right.svg') no-repeat center center;
-    background-size: contain;
-    margin-left: 0.5rem;
 }
 
 .selected-popup {

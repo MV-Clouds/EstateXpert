@@ -4,28 +4,35 @@
         <div class="filter-text">Filters</div>
         <div class="header-buttons">
             <template if:false={isFilterLimitReached}>
-                <div class="add-btn-cover" onclick={openModal} title="Add Filters: Select and add more filter fields to refine the listing list">
+                <div class="add-btn-cover" onclick={openModal}
+                    title="Add Filters: Select and add more filter fields to refine the listing list">
                     <svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
                     </svg>
                 </div>
             </template>
-            <div class="reset-text" onclick={handleReset} title="Reset All: Clear all applied filters and restore the default view">
-                <svg width="16" height="16" fill="#ffffff" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
+            <div class="reset-text" onclick={handleReset}
+                title="Reset All: Clear all applied filters and restore the default view">
+                <svg width="16" height="16" fill="#ffffff" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg"
+                    stroke="#ffffff">
                     <path
                         d="M960 0v213.333c411.627 0 746.667 334.934 746.667 746.667S1371.627 1706.667 960 1706.667 213.333 1371.733 213.333 960c0-197.013 78.4-382.507 213.334-520.747v254.08H640V106.667H53.333V320h191.04C88.64 494.08 0 720.96 0 960c0 529.28 430.613 960 960 960s960-430.72 960-960S1489.387 0 960 0"
                         fill-rule="evenodd"></path>
                 </svg>
             </div>
             <template if:true={filterFields.length}>
-                <div class={customLogicToggleClass} onclick={handleCustomLogicToggle} title="Custom Logic: Apply custom condition logic (e.g. 1 AND (2 OR 3)) between filter fields">
+                <div class={customLogicToggleClass} onclick={handleCustomLogicToggle}
+                    title="Custom Logic: Apply custom condition logic (e.g. 1 AND (2 OR 3)) between filter fields">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" fill="white"/>
+                        <path
+                            d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"
+                            fill="white" />
                     </svg>
                 </div>
             </template>
             <template if:true={isFilterChanged}>
-                <div class="save-btn-cover" onclick={saveFilterPermanent} title="Save Filter: Save currently configured filters as your default view">
+                <div class="save-btn-cover" onclick={saveFilterPermanent}
+                    title="Save Filter: Save currently configured filters as your default view">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M13.5 0H1.5C0.671573 0 0 0.671573 0 1.5V14.5C0 15.3284 0.671573 16 1.5 16H14.5C15.3284 16 16 15.3284 16 14.5V2.5L13.5 0ZM8 14C6.34315 14 5 12.6569 5 11C5 9.34315 6.34315 8 8 8C9.65685 8 11 9.34315 11 11C11 12.6569 9.65685 14 8 14ZM11 3H2V1H11V3Z"
@@ -121,14 +128,13 @@
                                                         </div>
                                                     </template>
                                                 </div>
-                                                <div class="delete-icon-cover">
-                                                    <svg data-id={index} onclick={clearSearch} width="15" height="15"
-                                                        viewBox="0 0 14 14" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
+                                                <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                        fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                        stroke-linejoin="round" width="15" height="15">
                                                         <path
-                                                            d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                            stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                            stroke-linejoin="round" />
+                                                            d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                            stroke-width="0.0625"></path>
                                                     </svg>
                                                 </div>
                                             </div>
@@ -206,14 +212,14 @@
                                                             <path
                                                                 d="M300 290h165c8 0 15-7 15-15v-30c0-8-7-15-15-15H300c-6 0-10-4-10-10V55c0-8-7-15-15-15h-30c-8 0-15 7-15 15v165c0 6-4 10-10 10H55c-8 0-15 7-15 15v30c0 8 7 15 15 15h165c6 0 10 4 10 10v165c0 8 7 15 15 15h30c8 0 15-7 15-15V300c0-6 4-10 10-10z" />
                                                         </svg></div>
-                                                    <div class="delete-icon-cover">
-                                                        <svg data-id={index} onclick={clearSearch} width="15"
-                                                            height="15" viewBox="0 0 14 14" fill="none"
-                                                            xmlns="http://www.w3.org/2000/svg">
+                                                    <div class="delete-icon-cover" data-id={index}
+                                                        onclick={clearSearch}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                            fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                            stroke-linejoin="round" width="15" height="15">
                                                             <path
-                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                stroke="#212529" stroke-width="1.25"
-                                                                stroke-linecap="round" stroke-linejoin="round" />
+                                                                d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                                stroke-width="0.0625"></path>
                                                         </svg>
                                                     </div>
                                                 </div>
@@ -286,7 +292,8 @@
                                                                 class="slds-input slds-combobox__input min-max-input-div no-spinner"
                                                                 placeholder="Min.." data-index={index}
                                                                 data-id={option.minValue} value={option.minValue}
-                                                                oninput={handleMinValueChange} onkeydown={handleNumberKeyDown} min="0" minlength="0"
+                                                                oninput={handleMinValueChange}
+                                                                onkeydown={handleNumberKeyDown} min="0" minlength="0"
                                                                 maxlength="25" />
                                                         </div>
                                                         <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right combox-div"
@@ -295,21 +302,22 @@
                                                                 class="slds-input slds-combobox__input min-max-input-div no-spinner"
                                                                 placeholder="Max.." data-index={index}
                                                                 data-id={option.maxValue} value={option.maxValue}
-                                                                oninput={handleMaxValueChange} onkeydown={handleNumberKeyDown} min="0" minlength="0"
+                                                                oninput={handleMaxValueChange}
+                                                                onkeydown={handleNumberKeyDown} min="0" minlength="0"
                                                                 maxlength="25" />
                                                         </div>
                                                         <template if:true={option.message}>
                                                             <label class="error-message">{option.message}</label>
                                                         </template>
                                                     </div>
-                                                    <div class="delete-icon-cover">
-                                                        <svg data-id={index} onclick={clearSearch} width="15"
-                                                            height="15" viewBox="0 0 14 14" fill="none"
-                                                            xmlns="http://www.w3.org/2000/svg">
+                                                    <div class="delete-icon-cover" data-id={index}
+                                                        onclick={clearSearch}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                            fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                            stroke-linejoin="round" width="15" height="15">
                                                             <path
-                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                stroke="#212529" stroke-width="1.25"
-                                                                stroke-linecap="round" stroke-linejoin="round" />
+                                                                d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                                stroke-width="0.0625"></path>
                                                         </svg>
                                                     </div>
                                                 </div>
@@ -342,21 +350,22 @@
                                                                 class="slds-input slds-combobox__input min-max-input-div no-spinner"
                                                                 placeholder="Min.." data-index={index}
                                                                 data-id={option.minValue} value={option.minValue}
-                                                                oninput={handleMinValueChange} onkeydown={handleNumberKeyDown} min="0" minlength="0"
+                                                                oninput={handleMinValueChange}
+                                                                onkeydown={handleNumberKeyDown} min="0" minlength="0"
                                                                 maxlength="25" />
                                                         </div>
                                                         <template if:true={option.message}>
                                                             <label class="error-message">{option.message}</label>
                                                         </template>
                                                     </div>
-                                                    <div class="delete-icon-cover">
-                                                        <svg data-id={index} onclick={clearSearch} width="15"
-                                                            height="15" viewBox="0 0 14 14" fill="none"
-                                                            xmlns="http://www.w3.org/2000/svg">
+                                                    <div class="delete-icon-cover" data-id={index}
+                                                        onclick={clearSearch}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                            fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                            stroke-linejoin="round" width="15" height="15">
                                                             <path
-                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                stroke="#212529" stroke-width="1.25"
-                                                                stroke-linecap="round" stroke-linejoin="round" />
+                                                                d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                                stroke-width="0.0625"></path>
                                                         </svg>
                                                     </div>
                                                 </div>
@@ -390,21 +399,22 @@
                                                                 class="slds-input slds-combobox__input min-max-input-div no-spinner"
                                                                 placeholder="Max.." data-index={index}
                                                                 data-id={option.maxValue} value={option.maxValue}
-                                                                oninput={handleMaxValueChange} onkeydown={handleNumberKeyDown} min="0" minlength="0"
+                                                                oninput={handleMaxValueChange}
+                                                                onkeydown={handleNumberKeyDown} min="0" minlength="0"
                                                                 maxlength="25" />
                                                         </div>
                                                         <template if:true={option.message}>
                                                             <label class="error-message">{option.message}</label>
                                                         </template>
                                                     </div>
-                                                    <div class="delete-icon-cover">
-                                                        <svg data-id={index} onclick={clearSearch} width="15"
-                                                            height="15" viewBox="0 0 14 14" fill="none"
-                                                            xmlns="http://www.w3.org/2000/svg">
+                                                    <div class="delete-icon-cover" data-id={index}
+                                                        onclick={clearSearch}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                            fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                            stroke-linejoin="round" width="15" height="15">
                                                             <path
-                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                stroke="#212529" stroke-width="1.25"
-                                                                stroke-linecap="round" stroke-linejoin="round" />
+                                                                d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                                stroke-width="0.0625"></path>
                                                         </svg>
                                                     </div>
                                                 </div>
@@ -444,7 +454,8 @@
                                                                 class="slds-input slds-combobox__input min-max-input-div no-spinner"
                                                                 placeholder="Min.." data-index={index}
                                                                 data-id={option.minValue} value={option.minValue}
-                                                                oninput={handleMinValueChange} onkeydown={handleNumberKeyDown} min="0" minlength="0"
+                                                                oninput={handleMinValueChange}
+                                                                onkeydown={handleNumberKeyDown} min="0" minlength="0"
                                                                 maxlength="25" />
                                                             <svg class="up-btn-max-min min-max"
                                                                 xmlns="http://www.w3.org/2000/svg" height="52"
@@ -469,7 +480,8 @@
                                                                 class="slds-input slds-combobox__input min-max-input-div no-spinner"
                                                                 placeholder="Max.." data-index={index}
                                                                 data-id={option.maxValue} value={option.maxValue}
-                                                                oninput={handleMaxValueChange} onkeydown={handleNumberKeyDown} min="0" minlength="0"
+                                                                oninput={handleMaxValueChange}
+                                                                onkeydown={handleNumberKeyDown} min="0" minlength="0"
                                                                 maxlength="25" />
                                                             <svg class="up-btn-max-min min-max"
                                                                 xmlns="http://www.w3.org/2000/svg" height="52"
@@ -492,14 +504,14 @@
                                                             <label class="error-message">{option.message}</label>
                                                         </template>
                                                     </div>
-                                                    <div class="delete-icon-cover">
-                                                        <svg data-id={index} onclick={clearSearch} width="15"
-                                                            height="15" viewBox="0 0 14 14" fill="none"
-                                                            xmlns="http://www.w3.org/2000/svg">
+                                                    <div class="delete-icon-cover" data-id={index}
+                                                        onclick={clearSearch}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                            fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                            stroke-linejoin="round" width="15" height="15">
                                                             <path
-                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                stroke="#212529" stroke-width="1.25"
-                                                                stroke-linecap="round" stroke-linejoin="round" />
+                                                                d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                                stroke-width="0.0625"></path>
                                                         </svg>
                                                     </div>
                                                 </div>
@@ -532,7 +544,8 @@
                                                                 class="slds-input slds-combobox__input min-max-input-div no-spinner"
                                                                 placeholder="Min.." data-index={index} data-id={index}
                                                                 value={option.minValue} oninput={handleMinValueChange}
-                                                                onkeydown={handleNumberKeyDown} min="0" minlength="0" maxlength="25" />
+                                                                onkeydown={handleNumberKeyDown} min="0" minlength="0"
+                                                                maxlength="25" />
                                                             <svg class="up-btn-max-min min-max"
                                                                 xmlns="http://www.w3.org/2000/svg" height="52"
                                                                 width="52" viewBox="0 0 520 520" fill="#fff"
@@ -554,14 +567,14 @@
                                                             <label class="error-message">{option.message}</label>
                                                         </template>
                                                     </div>
-                                                    <div class="delete-icon-cover">
-                                                        <svg data-id={index} onclick={clearSearch} width="15"
-                                                            height="15" viewBox="0 0 14 14" fill="none"
-                                                            xmlns="http://www.w3.org/2000/svg">
+                                                    <div class="delete-icon-cover" data-id={index}
+                                                        onclick={clearSearch}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                            fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                            stroke-linejoin="round" width="15" height="15">
                                                             <path
-                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                stroke="#212529" stroke-width="1.25"
-                                                                stroke-linecap="round" stroke-linejoin="round" />
+                                                                d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                                stroke-width="0.0625"></path>
                                                         </svg>
                                                     </div>
                                                 </div>
@@ -592,7 +605,8 @@
                                                                 class="slds-input slds-combobox__input min-max-input-div no-spinner"
                                                                 placeholder="Max.." data-index={index}
                                                                 data-id={option.maxValue} value={option.maxValue}
-                                                                oninput={handleMaxValueChange} onkeydown={handleNumberKeyDown} min="0" minlength="0"
+                                                                oninput={handleMaxValueChange}
+                                                                onkeydown={handleNumberKeyDown} min="0" minlength="0"
                                                                 maxlength="25" />
                                                             <svg class="up-btn-max-min min-max"
                                                                 xmlns="http://www.w3.org/2000/svg" height="52"
@@ -615,14 +629,14 @@
                                                             <label class="error-message">{option.message}</label>
                                                         </template>
                                                     </div>
-                                                    <div class="delete-icon-cover">
-                                                        <svg data-id={index} onclick={clearSearch} width="15"
-                                                            height="15" viewBox="0 0 14 14" fill="none"
-                                                            xmlns="http://www.w3.org/2000/svg">
+                                                    <div class="delete-icon-cover" data-id={index}
+                                                        onclick={clearSearch}>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                            fill="#212529" stroke="#212529" stroke-width="0.6"
+                                                            stroke-linejoin="round" width="15" height="15">
                                                             <path
-                                                                d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                stroke="#212529" stroke-width="1.25"
-                                                                stroke-linecap="round" stroke-linejoin="round" />
+                                                                d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                                stroke-width="0.0625"></path>
                                                         </svg>
                                                     </div>
                                                 </div>
@@ -674,13 +688,13 @@
                                             </div>
                                         </div>
 
-                                        <div class="delete-icon-cover">
-                                            <svg data-id={index} onclick={clearSearch} width="15" height="15"
-                                                viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
+                                                stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15"
+                                                height="15">
                                                 <path
-                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
+                                                    d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                    stroke-width="0.0625"></path>
                                             </svg>
                                         </div>
                                     </div>
@@ -712,13 +726,13 @@
                                             </div>
                                         </div>
 
-                                        <div class="delete-icon-cover single">
-                                            <svg data-id={index} onclick={clearSearch} width="15" height="15"
-                                                viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <div class="delete-icon-cover single" data-id={index} onclick={clearSearch}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
+                                                stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15"
+                                                height="15">
                                                 <path
-                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
+                                                    d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                    stroke-width="0.0625"></path>
                                             </svg>
                                         </div>
                                     </div>
@@ -750,13 +764,13 @@
                                             </div>
                                         </div>
 
-                                        <div class="delete-icon-cover single">
-                                            <svg data-id={index} onclick={clearSearch} width="15" height="15"
-                                                viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <div class="delete-icon-cover single" data-id={index} onclick={clearSearch}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
+                                                stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15"
+                                                height="15">
                                                 <path
-                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
+                                                    d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                    stroke-width="0.0625"></path>
                                             </svg>
                                         </div>
                                     </div>
@@ -793,13 +807,13 @@
                                             </div>
                                         </div>
 
-                                        <div class="delete-icon-cover single">
-                                            <svg data-id={index} onclick={clearSearch} width="15" height="15"
-                                                viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <div class="delete-icon-cover single" data-id={index} onclick={clearSearch}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
+                                                stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15"
+                                                height="15">
                                                 <path
-                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
+                                                    d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                    stroke-width="0.0625"></path>
                                             </svg>
                                         </div>
                                     </div>
@@ -833,13 +847,13 @@
                                             </div>
                                         </div>
 
-                                        <div class="delete-icon-cover single">
-                                            <svg data-id={index} onclick={clearSearch} width="15" height="15"
-                                                viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <div class="delete-icon-cover single" data-id={index} onclick={clearSearch}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
+                                                stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15"
+                                                height="15">
                                                 <path
-                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
+                                                    d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                    stroke-width="0.0625"></path>
                                             </svg>
                                         </div>
                                     </div>
@@ -892,13 +906,13 @@
                                             </div>
                                         </div>
 
-                                        <div class="delete-icon-cover">
-                                            <svg data-id={index} onclick={clearSearch} width="15" height="15"
-                                                viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
+                                                stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15"
+                                                height="15">
                                                 <path
-                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                    stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
+                                                    d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                                    stroke-width="0.0625"></path>
                                             </svg>
                                         </div>
                                     </div>
@@ -932,13 +946,13 @@
                                             onclick={checkboxFieldChange}></lightning-input>
                                     </div>
                                 </div>
-                                <div class="delete-icon-cover">
-                                    <svg data-id={index} onclick={clearSearch} width="15" height="15"
-                                        viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <div class="delete-icon-cover" data-id={index} onclick={clearSearch}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
+                                        stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15"
+                                        height="15">
                                         <path
-                                            d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                            stroke="#212529" stroke-width="1.25" stroke-linecap="round"
-                                            stroke-linejoin="round" />
+                                            d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z"
+                                            stroke-width="0.0625"></path>
                                     </svg>
                                 </div>
                             </div>
@@ -957,7 +971,9 @@
                 <div class="custom-logic-section">
                     <div class="custom-logic-header">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z" fill="#0176D3"/>
+                            <path
+                                d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"
+                                fill="#0176D3" />
                         </svg>
                         <span class="custom-logic-title">Custom Logic Expression</span>
                     </div>
@@ -1026,8 +1042,9 @@
                                                     role="none">
                                                     <input type="text" class="slds-input slds-combobox__input"
                                                         placeholder="Select Field" value={searchTerm1}
-                                                        onkeyup={handleModalFieldSearchChange} onfocus={handleModalFieldFocus}
-                                                        onblur={handleModalFieldBlur} disabled={isDisabled} />
+                                                        onkeyup={handleModalFieldSearchChange}
+                                                        onfocus={handleModalFieldFocus} onblur={handleModalFieldBlur}
+                                                        disabled={isDisabled} />
                                                 </div>
                                             </div>
                                             <template if:true={showOptions1}>
@@ -1038,7 +1055,8 @@
                                                             <template for:each={filteredOptions1} for:item="option">
                                                                 <template if:false={option.showRightIcon}>
                                                                     <li key={option.value} data-id={option.value}
-                                                                        onclick={changeFields} class="slds-listbox__item">
+                                                                        onclick={changeFields}
+                                                                        class="slds-listbox__item">
                                                                         <div
                                                                             class="slds-listbox__option slds-listbox__option_plain slds-media slds-media_small slds-media_center slds-p-horizontal_small">
                                                                             <span class="slds-media__body">
@@ -1111,7 +1129,7 @@
                     </div>
                     <div class="slds-modal__footer add-modal-footer">
                         <button class="exp-white-btn-css" onclick={handleClose}>
-                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
                                     fill="currentColor" />
@@ -1119,7 +1137,8 @@
                             Cancel
                         </button>
                         <button class="exp-blue-btn-css" disabled={isAddButtonDisabled} onclick={handleSave}>
-                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
                                 <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round" />
                             </svg>
@@ -1149,11 +1168,12 @@
                     </div>
 
                     <div class="slds-modal__content slds-p-around_medium confirmation-modal-body">
-                        <p class="confirmation-message">Are you sure you want to save these filter settings? This will update your default filter configuration.</p>
+                        <p class="confirmation-message">Are you sure you want to save these filter settings? This will
+                            update your default filter configuration.</p>
 
                         <div class="confirmation-modal-footer">
                             <button class="exp-white-btn-css" onclick={handleCancelSave}>
-                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
                                         fill="currentColor" />
@@ -1161,8 +1181,10 @@
                                 Cancel
                             </button>
                             <button class="exp-blue-btn-css" onclick={handleConfirmSave}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor" />
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
+                                        fill="currentColor" />
                                 </svg>
                                 Yes, Save
                             </button>

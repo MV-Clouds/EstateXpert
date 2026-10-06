@@ -1,4 +1,4 @@
-public without sharing class ContactTriggerHandler {
+public with sharing class ContactTriggerHandler {
     public class Condition {
         @AuraEnabled
         public String Lead_Field { get; set; }

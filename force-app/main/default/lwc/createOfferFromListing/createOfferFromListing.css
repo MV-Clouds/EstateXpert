@@ -6,23 +6,10 @@
     margin-bottom: 1rem;
 }
 
-.slds-form-element__label {
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 20px;
-    margin-bottom: 0.25rem;
-}
-
 .blue-header {
     background-color: #0176D3;
     color: white;
     border-bottom-style: unset;
-}
-
-.slds-modal__footer {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
 }
 
 .section_css {
@@ -109,16 +96,6 @@
     padding-left: 1rem;
 }
 
-.slds-gutters_small {
-    margin-left: -0.5rem;
-    margin-right: -0.5rem;
-}
-
-.slds-gutters_small > .slds-col {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-}
-
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -147,9 +124,5 @@ input[type=number] {
 @media only screen and (max-width: 800px) {
     .content_body {
         max-height: 18rem !important;
-    }
-    
-    .slds-medium-size_1-of-2 {
-        width: 100% !important;
     }
 }

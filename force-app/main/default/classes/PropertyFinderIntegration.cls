@@ -17,7 +17,7 @@ public with sharing class PropertyFinderIntegration {
         try {
             String escapePortalId = String.escapeSingleQuotes(portalId);
 
-            List<MVEX__Portal__c> portalPropertyFinder = [SELECT Id, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c 
+            List<MVEX__Portal__c> portalPropertyFinder = [SELECT Id, Name, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c 
                                                         WHERE Id =: escapePortalId AND MVEX__Is_Active__c = true WITH USER_MODE LIMIT 1];
 
             if (portalPropertyFinder.isEmpty()) {
@@ -27,10 +27,16 @@ public with sharing class PropertyFinderIntegration {
             }
 
             MVEX__Portal__c propertyFinderPortal = portalPropertyFinder[0];
-            Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(propertyFinderPortal.MVEX__Portal_Configuration__c);
+            Map<String, String> creds = getPFCredentials(propertyFinderPortal.Name, propertyFinderPortal.MVEX__Portal_Configuration__c);
+            String apiKey = creds.get('apiKey');
+            String apiSecret = creds.get('apiSecret');
 
-            String apiKey = (String) configMap.get('apiKey');
-            String apiSecret = (String) configMap.get('apiSecret');
+            if (String.isBlank(apiKey) || String.isBlank(apiSecret)) {
+                response.status = 'Failed';
+                response.message = 'Property Finder credentials are missing in Custom Setting.';
+                return response;
+            }
+
             String accessToken = getAccesstoken(apiKey, apiSecret);
 
             String endpoint = propertyFinderProductionEndpoint + 'listings';
@@ -119,7 +125,7 @@ public with sharing class PropertyFinderIntegration {
             String escapeListingId = String.escapeSingleQuotes(listingId);
             String escapePortalId = String.escapeSingleQuotes(portalId);
             String pfListingId = null;
-            List<MVEX__Portal__c> portalPropertyFinder = [SELECT Id, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c WHERE Id =: escapePortalId AND MVEX__Is_Active__c = true WITH USER_MODE LIMIT 1];
+            List<MVEX__Portal__c> portalPropertyFinder = [SELECT Id, Name, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c WHERE Id =: escapePortalId AND MVEX__Is_Active__c = true WITH USER_MODE LIMIT 1];
 
             if (portalPropertyFinder.isEmpty()) {
                 updatePortalListingRecord(listingId, portalId, 'Portal configuration is missing.', 'Exception');
@@ -129,11 +135,16 @@ public with sharing class PropertyFinderIntegration {
             MVEX__Portal__c propertyFinderPortal = portalPropertyFinder[0];
 
             Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(propertyFinderPortal.MVEX__Field_Mapping__c);
-            Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(propertyFinderPortal.MVEX__Portal_Configuration__c);
             Map<String, Object> finalMapping = new Map<String, Object>();
 
-            String apiKey = (String) configMap.get('apiKey');
-            String apiSecret = (String) configMap.get('apiSecret');
+            Map<String, String> creds = getPFCredentials(propertyFinderPortal.Name, propertyFinderPortal.MVEX__Portal_Configuration__c);
+            String apiKey = creds.get('apiKey');
+            String apiSecret = creds.get('apiSecret');
+
+            if (String.isBlank(apiKey) || String.isBlank(apiSecret)) {
+                updatePortalListingRecord(listingId, portalId, 'Property Finder credentials are missing in Custom Setting.', 'Exception');
+                return;
+            }
 
             List<String> fieldNames = new List<String>();
             for (String key : jsonMap.keySet()) {
@@ -183,6 +194,19 @@ public with sharing class PropertyFinderIntegration {
     @future(callout= true)
     public static void propertyFinderCreateListing(String resultBody, String listingId, String portalId, String apiKey, String apiSecret, String pfListingId) {
         try {
+            if ((String.isBlank(apiKey) || String.isBlank(apiSecret)) && String.isNotBlank(portalId)) {
+                List<MVEX__Portal__c> portals = [SELECT Id, Name, MVEX__Portal_Configuration__c FROM MVEX__Portal__c WHERE Id = :portalId WITH USER_MODE LIMIT 1];
+                if (!portals.isEmpty()) {
+                    Map<String, String> creds = getPFCredentials(portals[0].Name, portals[0].MVEX__Portal_Configuration__c);
+                    if (String.isBlank(apiKey)) apiKey = creds.get('apiKey');
+                    if (String.isBlank(apiSecret)) apiSecret = creds.get('apiSecret');
+                }
+            }
+            if (String.isBlank(apiKey) || String.isBlank(apiSecret)) {
+                Map<String, String> creds = getPFCredentials(null);
+                if (String.isBlank(apiKey)) apiKey = creds.get('apiKey');
+                if (String.isBlank(apiSecret)) apiSecret = creds.get('apiSecret');
+            }
             if (pfListingId == null) {
                 String endpoint = propertyFinderProductionEndpoint + 'listings';
                 String accessToken = getAccesstoken(apiKey, apiSecret);
@@ -219,6 +243,19 @@ public with sharing class PropertyFinderIntegration {
 
     public static void propertyFinderUpdateListing(String resultBody, String listingId, String portalId, String apiKey, String apiSecret, String pfListingId) {
         try {
+            if ((String.isBlank(apiKey) || String.isBlank(apiSecret)) && String.isNotBlank(portalId)) {
+                List<MVEX__Portal__c> portals = [SELECT Id, Name, MVEX__Portal_Configuration__c FROM MVEX__Portal__c WHERE Id = :portalId WITH USER_MODE LIMIT 1];
+                if (!portals.isEmpty()) {
+                    Map<String, String> creds = getPFCredentials(portals[0].Name, portals[0].MVEX__Portal_Configuration__c);
+                    if (String.isBlank(apiKey)) apiKey = creds.get('apiKey');
+                    if (String.isBlank(apiSecret)) apiSecret = creds.get('apiSecret');
+                }
+            }
+            if (String.isBlank(apiKey) || String.isBlank(apiSecret)) {
+                Map<String, String> creds = getPFCredentials(null);
+                if (String.isBlank(apiKey)) apiKey = creds.get('apiKey');
+                if (String.isBlank(apiSecret)) apiSecret = creds.get('apiSecret');
+            }
             String endpoint = propertyFinderProductionEndpoint + 'listings/' + pfListingId;
             String accessToken = getAccesstoken(apiKey, apiSecret);
 
@@ -259,7 +296,7 @@ public with sharing class PropertyFinderIntegration {
                 portalIds.add(listing.get('portalId'));
             }
 
-            List<MVEX__Portal__c> portalPropertyFinder = [SELECT Id, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c 
+            List<MVEX__Portal__c> portalPropertyFinder = [SELECT Id, Name, MVEX__Field_Mapping__c, MVEX__Portal_Configuration__c, MVEX__Is_Active__c FROM MVEX__Portal__c 
                                                     WHERE Id IN :portalIds AND MVEX__Is_Active__c = true WITH USER_MODE];
 
             if (portalPropertyFinder.isEmpty()) {
@@ -283,9 +320,17 @@ public with sharing class PropertyFinderIntegration {
                 String portalListingId = listingMap.get('portalListingId');
                 
                 if (portal != null && listing.MVEX__PF_Listing_ID__c != null) {
-                    Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(portal.MVEX__Portal_Configuration__c);
-                    String apiKey = (String) configMap.get('apiKey');
-                    String apiSecret = (String) configMap.get('apiSecret');
+                    Map<String, String> creds = getPFCredentials(portal.Name, portal.MVEX__Portal_Configuration__c);
+                    String apiKey = creds.get('apiKey');
+                    String apiSecret = creds.get('apiSecret');
+
+                    if (String.isBlank(apiKey) || String.isBlank(apiSecret)) {
+                        if (portalListingId != null) {
+                            failedDeletions.put(portalListingId, 'Property Finder credentials are missing in Custom Setting.');
+                            failedDeletionsForListings.put(listing.Id, 'Property Finder credentials are missing in Custom Setting.');
+                        }
+                        continue;
+                    }
 
                     String endpoint = propertyFinderProductionEndpoint + 'listings/' + listing.MVEX__PF_Listing_ID__c;
                     String accessToken = getAccesstoken(apiKey, apiSecret);
@@ -374,8 +419,76 @@ public with sharing class PropertyFinderIntegration {
         }
     }
 
+    /**
+    * Method Name : getPFCredentials
+    * @description : Retrieves API Key and Secret from PF_Credential__c custom setting (with fallback to portal config if needed).
+    * @param portalConfig Portal configuration JSON string (optional).
+    * @return Map<String, String> containing 'apiKey' and 'apiSecret'.
+    */
+    public static Map<String, String> getPFCredentials(String portalConfig) {
+        return getPFCredentials(null, portalConfig);
+    }
+
+    public static Map<String, String> getPFCredentials(String portalName, String portalConfig) {
+        Map<String, String> creds = new Map<String, String>{ 'apiKey' => null, 'apiSecret' => null };
+        try {
+            PF_Credential__c credential = null;
+            if (String.isNotBlank(portalName)) {
+                String trimmedName = portalName.trim();
+                credential = PF_Credential__c.getValues(trimmedName);
+                if (credential == null && trimmedName.length() > 80) {
+                    credential = PF_Credential__c.getValues(trimmedName.substring(0, 80));
+                }
+            }
+            if (credential == null) {
+                Map<String, PF_Credential__c> allCreds = PF_Credential__c.getAll();
+                if (allCreds != null && !allCreds.isEmpty()) {
+                    if (String.isNotBlank(portalName) && allCreds.containsKey(portalName.trim())) {
+                        credential = allCreds.get(portalName.trim());
+                    } else if (allCreds.size() == 1) {
+                        credential = allCreds.values()[0];
+                    }
+                }
+            }
+            if (credential != null) {
+                if (String.isNotBlank(credential.API_Key__c)) {
+                    creds.put('apiKey', credential.API_Key__c);
+                }
+                if (String.isNotBlank(credential.API_Secret__c)) {
+                    creds.put('apiSecret', credential.API_Secret__c);
+                }
+            }
+            if ((String.isBlank(creds.get('apiKey')) || String.isBlank(creds.get('apiSecret'))) && String.isNotBlank(portalConfig)) {
+                Map<String, Object> configMap = (Map<String, Object>) JSON.deserializeUntyped(portalConfig);
+                if (String.isBlank(creds.get('apiKey')) && configMap.containsKey('apiKey')) {
+                    creds.put('apiKey', (String) configMap.get('apiKey'));
+                }
+                if (String.isBlank(creds.get('apiSecret')) && configMap.containsKey('apiSecret')) {
+                    creds.put('apiSecret', (String) configMap.get('apiSecret'));
+                }
+            }
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'PropertyFinderIntegration', 'getPFCredentials', 'Error while retrieving Property Finder credentials.');
+        }
+        return creds;
+    }
+
+    public static String getAccesstoken() {
+        return getAccesstoken(null, null);
+    }
+
     public static String getAccesstoken(String apiKey, String apiSecret) {
         try {
+            if (String.isBlank(apiKey) || String.isBlank(apiSecret)) {
+                Map<String, String> creds = getPFCredentials(null);
+                if (String.isBlank(apiKey)) apiKey = creds.get('apiKey');
+                if (String.isBlank(apiSecret)) apiSecret = creds.get('apiSecret');
+            }
+            if (String.isBlank(apiKey) || String.isBlank(apiSecret)) {
+                ErrorHandler.insertErrorData(null, 'PropertyFinderIntegration', 'getAccesstoken', 'Property Finder credentials are missing.');
+                return 'Property Finder credentials are missing.';
+            }
+
             String endpoint = propertyFinderProductionEndpoint + 'auth/token';
             Http h3 = new Http();
             HttpRequest req3 = new HttpRequest();

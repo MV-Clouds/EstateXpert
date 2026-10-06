@@ -515,8 +515,8 @@
 .mapping-header-col {
     flex: 1;
     min-width: 0;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 700;
     color: #4a4a4a;
     font-family: 'Mulish';
 }
@@ -586,7 +586,7 @@
     color: #0176D3;
     border: 1px dashed #0176D3;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -607,7 +607,7 @@
 }
 
 .add-field-title {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: #374151;
     margin-bottom: 10px;
@@ -644,7 +644,7 @@
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 14px;
     color: #6b7280;
 }
 
@@ -747,13 +747,13 @@
     background: #f3f4f6;
     padding: 6px 12px;
     border-radius: 4px;
-    font-size: 13px;
+    font-size: 14px;
     color: #374151;
     word-break: break-all;
 }
 
 .mapping-data-empty {
-    font-size: 13px;
+    font-size: 14px;
     color: #9ca3af;
     font-style: italic;
     padding: 6px 12px;
@@ -797,7 +797,7 @@
     background: #eff6ff;
     border: 1px solid #bfdbfe;
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 14px;
     color: #1d4ed8;
     font-weight: 500;
     margin: 4px 20px;
@@ -811,89 +811,46 @@
     background-color: #fef2f2 !important;
 }
 
-/* Custom Action Dropdown Menu */
-.custom-action-dropdown {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    padding: 8px 0;
-    min-width: 170px;
-    font-family: 'Mulish', sans-serif;
-    transform-origin: top right;
-    animation: fadeInScale 0.15s ease-out;
-}
-
-@keyframes fadeInScale {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-.custom-dropdown-item {
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 14px;
-    color: #4b5563;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.custom-dropdown-item svg {
-    width: 16px;
-    height: 16px;
-    color: #6b7280;
-    transition: color 0.2s ease;
-}
-
-.custom-dropdown-item:hover {
-    background-color: #f3f4f6;
-    color: #111827;
-}
-
-.custom-dropdown-item:hover svg {
-    color: #111827;
-}
-
-.custom-dropdown-delete-item {
-    color: #dc2626;
-    border-top: 1px solid #f3f4f6;
-    margin-top: 4px;
-    padding-top: 12px;
-}
-
-.custom-dropdown-delete-item svg {
-    color: #dc2626;
-}
-
-.custom-dropdown-delete-item:hover {
-    background-color: #fef2f2;
-    color: #b91c1c;
-}
-
-.custom-dropdown-delete-item:hover svg {
-    color: #b91c1c;
-}
-
-.action-menu-btn {
-    background: transparent;
+.delete-div {
     border: 1px solid transparent;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 6px;
-    color: #6b7280;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
+    background: transparent;
+    box-shadow: none;
+    padding: 4px;
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.action-menu-btn:hover, .action-menu-btn:focus {
-    background: #f3f4f6;
-    color: #111827;
-    border-color: #e5e7eb;
-    outline: none;
+.delete-div:hover {
+    border-color: #fca5a5;
+    box-shadow: none;
+    transform: none;
+}
+
+.delete-div:hover svg path {
+    fill: #dc2626;
+}
+
+.delete-div:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.action-div {
+    border: 1px solid transparent;
+    box-shadow: none;
+    background: transparent;
+    padding: 4px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.action-div:hover {
+    border-color: #0366b8;
+    box-shadow: none;
+    transform: none;
+}
+
+.action-div:hover svg{
+    fill: none;
 }
 
 /* Connected Pill */
@@ -1101,7 +1058,7 @@
 
 .webhook-endpoint-url {
     font-family: monospace;
-    font-size: 13px;
+    font-size: 14px;
     color: #374151;
     white-space: nowrap;
     overflow: hidden;
@@ -1174,7 +1131,7 @@
 }
 
 .webhook-url-text {
-    font-size: 13px;
+    font-size: 14px;
     color: #374151;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     white-space: nowrap;
@@ -1213,7 +1170,7 @@
     border-radius: 6px;
     margin-bottom: 16px;
     color: #475569;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: 0.5px;
 }
@@ -1222,14 +1179,14 @@
 }
 .mapping-header-col.right-col {
     flex: 1;
-    padding-left: 20px;
+    padding-left: 3rem;
 }
 
 .mapping-row-card {
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 16px;
+    padding: 12px;
     margin-bottom: 12px;
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -1239,10 +1196,22 @@
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 12px;
 }
-.sf-field-combobox {
+.sf-field-box {
     width: 100%;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 0 12px;
+    font-size: 14px;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    height: 32px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .required-badge {
     background-color: #ffe4e6;
@@ -1275,14 +1244,13 @@
 .mapping-type-pill {
     display: inline-flex;
     background-color: #f1f5f9;
-    border-radius: 20px;
-    padding: 3px;
-    gap: 2px;
+    border-radius: 14px;
+    padding: 4px;
 }
 .mapping-pill-btn {
-    padding: 6px 16px;
+    padding: 4px 8px;
     border-radius: 16px;
-    font-size: 13px;
+    font-size: 10px;
     font-weight: 600;
     border: none;
     cursor: pointer;

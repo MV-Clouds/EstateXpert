@@ -494,6 +494,7 @@
   scroll-behavior: smooth;
   scrollbar-width: thin;
   scrollbar-color: #0170d27d transparent;
+  border-radius: 8px
 }
 
 .exp-table-content .slds-table th {

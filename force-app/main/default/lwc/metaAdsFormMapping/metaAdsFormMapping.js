@@ -309,7 +309,7 @@ export default class MetaAdsFormMapping extends LightningElement {
      */
     get webhookEndpointPreview() {
         try {
-            if (!this.selectedSite) return '';
+            if (!this.selectedSite) return 'No Active Site Selected';
             let base = this.selectedSite.replace(/\/+$/, '');
             return `${base}/services/apexrest/MVEX/PAGE/webhooks/`;
         } catch (e) { console.error(e); return ''; }
@@ -712,13 +712,12 @@ export default class MetaAdsFormMapping extends LightningElement {
 
                     let required = sf.required === 'true';
 
-                    let sourceType = savedData.sourceType || '';
+                    let sourceType = savedData.sourceType || SOURCE_META;
                     let customVal = savedData.customValue || '';
                     let metaVal = savedData.metaField || '';
                     
-                    if (!sourceType && required) {
+                    if (sourceType === SOURCE_META && !metaVal) {
                         metaVal = this.autoMatchMetaField(key, options);
-                        if (metaVal) sourceType = SOURCE_META;
                     }
 
                     return {
@@ -1082,8 +1081,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                 key: salesforceField.value,
                 label: salesforceField.label,
                 required: false,
-                sourceType: '',
-                metaTabClass: 'mapping-pill-btn',
+                sourceType: SOURCE_META,
+                metaTabClass: 'mapping-pill-btn active',
                 customTabClass: 'mapping-pill-btn',
                 sfOptions: [{ label: salesforceField.label.split(' (')[0], value: salesforceField.value }],
                 googleField: '',
@@ -1095,7 +1094,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                     { label: SOURCE_META, value: SOURCE_META },
                     { label: SOURCE_CUSTOM, value: SOURCE_CUSTOM }
                 ],
-                isMetaField: false,
+                isMetaField: true,
                 isCustomValue: false,
                 isReferenceField: this.isReferenceField(salesforceField),
                 referenceTo: salesforceField.referenceTo || '',

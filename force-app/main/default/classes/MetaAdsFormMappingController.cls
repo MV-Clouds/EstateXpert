@@ -357,7 +357,7 @@ public with sharing class MetaAdsFormMappingController {
     */
     @AuraEnabled
     public static List<MVEX__Error_Handling__c> getFailedLeads(String formId) {
-        List<MVEX__Error_Handling__c> allLeads = [SELECT Id, Name, CreatedDate, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE MVEX__Source_of_Error__c = 'MetaFailedLeads' WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 500];
+        List<MVEX__Error_Handling__c> allLeads = [SELECT Id, Name, CreatedDate, MVEX__Error_Body__c, MVEX__Error_Message__c FROM MVEX__Error_Handling__c WHERE MVEX__Source_of_Error__c = 'MetaFailedLeads' WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 500];
         List<MVEX__Error_Handling__c> filtered = new List<MVEX__Error_Handling__c>();
         try {
             for (MVEX__Error_Handling__c err : allLeads) {
@@ -463,16 +463,26 @@ public with sharing class MetaAdsFormMappingController {
     public static List<Map<String, String>> getActiveSites() {
         List<Map<String, String>> sitesList = new List<Map<String, String>>();
         try {
-            for (Site site : [SELECT Id, Name FROM Site WHERE Status = 'Active']) {
-                try {
-                    SiteDetail detail = [SELECT SecureUrl FROM SiteDetail WHERE DurableId = :site.Id LIMIT 1];
-                    if (detail != null) {
+            List<Site> activeSites = [SELECT Id, Name FROM Site WHERE Status = 'Active'];
+            Set<Id> siteIds = new Set<Id>();
+            for (Site site : activeSites) {
+                siteIds.add(site.Id);
+            }
+            
+            if (!siteIds.isEmpty()) {
+                Map<Id, SiteDetail> detailMap = new Map<Id, SiteDetail>();
+                for (SiteDetail detail : [SELECT DurableId, SecureUrl FROM SiteDetail WHERE DurableId IN :siteIds]) {
+                    detailMap.put((Id)detail.DurableId, detail);
+                }
+                
+                for (Site site : activeSites) {
+                    if (detailMap.containsKey(site.Id)) {
                         Map<String, String> siteInfo = new Map<String, String>();
                         siteInfo.put('label', site.Name);
-                        siteInfo.put('value', detail.SecureUrl);
+                        siteInfo.put('value', detailMap.get(site.Id).SecureUrl);
                         sitesList.add(siteInfo);
                     }
-                } catch (Exception e) {}
+                }
             }
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'MetaAdsFormMappingController', 'getActiveSites', e.getMessage());

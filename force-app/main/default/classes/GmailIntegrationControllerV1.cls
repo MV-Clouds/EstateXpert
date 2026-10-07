@@ -3,8 +3,6 @@ public with sharing class GmailIntegrationControllerV1 {
     public String refreshToken { get; set; }
     public Boolean isFailed { get; set; }
     public String errorMessage { get; set; }
-    public static String gmailEndpoint = System.label.Google_Endpoint;
-    public static String gmailSendingEndpoint = System.label.Gmail_Sending_Endpoint;
 
         
     public GmailIntegrationControllerV1() {
@@ -13,18 +11,27 @@ public with sharing class GmailIntegrationControllerV1 {
         refreshToken = '';
         try {
             String authCode = ApexPages.currentPage().getParameters().get('code');
-            
+            String state = ApexPages.currentPage().getParameters().get('state');
+
             if (authCode == null) {
                 isFailed = true;
                 errorMessage = 'Authorization code not found.';
                 return;
             }
 
-            OAuth_Configuration__mdt googleAdsConfig = OAuth_Configuration__mdt.getInstance('Google_Ads_Config');
+            if (state == null || (state != 'Google_Ads_Config' && state != 'Gmail_OAuth')) {
+                isFailed = true;
+                errorMessage = 'Invalid state parameter.';
+                return;
+            }
 
-            String clientId = googleAdsConfig.Client_Id__c;
-            String clientSecret = googleAdsConfig.Client_Secret__c;
-            String redirectUrl = googleAdsConfig.Redirect_URI__c;
+            String CONFIG_DEV_NAME = state;
+
+            OAuth_Configuration__mdt oAuthConfig = OAuth_Configuration__mdt.getInstance(CONFIG_DEV_NAME);
+
+            String clientId = oAuthConfig.Client_Id__c;
+            String clientSecret = oAuthConfig.Client_Secret__c;
+            String redirectUrl = oAuthConfig.Redirect_URI__c;
 
             if(String.isBlank(clientId) || String.isBlank(clientSecret) || String.isBlank(redirectUrl)){
                 isFailed = true;
@@ -32,7 +39,7 @@ public with sharing class GmailIntegrationControllerV1 {
                 return;
             }
             
-            String endPoint = googleAdsConfig.Token_Endpoint__c;
+            String endPoint = oAuthConfig.Token_Endpoint__c;
             
             HttpRequest req = new HttpRequest();
             req.setEndpoint(endPoint);
@@ -42,7 +49,7 @@ public with sharing class GmailIntegrationControllerV1 {
                 '&client_id=' + clientId +
                 '&client_secret=' + clientSecret +
                 '&redirect_uri=' + redirectUrl +
-                '&scope=' + googleAdsConfig.Scope__c + '&access_type=offline&grant_type=authorization_code');
+                '&scope=' + oAuthConfig.Scope__c + '&access_type=offline&grant_type=authorization_code');
             
             Http http = new Http();
             HttpResponse res = http.send(req);

@@ -6,8 +6,6 @@ export default class MessagePopup extends LightningElement {
     @track status;
     @track title;
     @track message;
-    @track duration;
-    timeoutInstance
 
 
     @track showPopup = false;
@@ -69,10 +67,6 @@ export default class MessagePopup extends LightningElement {
         `;
     }
 
-    get loadDuration(){
-        return `--duration : ${this.duration/1000}s`;
-    }
-
     connectedCallback(){
         loadStyle(this, globalStyles);
     }
@@ -88,40 +82,6 @@ export default class MessagePopup extends LightningElement {
         } catch (error) {
             console.error('error in showPopup poupMessgae : ', error.stack);
         }
-    }
-
-    @api
-    showMessageToast(messageData){
-        try {
-
-            clearTimeout(this.timeoutInstance)
-
-            this.type = 'toast';
-            this.status = messageData['status'] ? messageData['status'].toLowerCase() : 'warning';
-            this.title = messageData.title ? messageData.title : '';
-            this.message = messageData.message ? messageData.message : '';
-            const duration = messageData.duration ? messageData.duration : 5000;
-
-            this.template.host.style.setProperty('--duration', duration + 'ms');
-
-            this.showPopup = true;
-            this.timeoutInstance = setTimeout(() => {
-                this.showPopup = false;
-            }, duration);
-            
-        } catch (error) {
-            console.error('error in showToast poupMessgae : ', error.stack);
-        }
-    }
-
-    closeToast = () => {
-        this.showPopup = false;
-    }
-
-    removeElement(id){
-        this.toastMessages = this.toastMessages.filter((toast) => { 
-            return toast.id !== Number(id);
-        });
     }
 
     handleConfirmation(event){
@@ -145,7 +105,6 @@ export default class MessagePopup extends LightningElement {
             this.status = '';
             this.title = '';
             this.message = '';
-            this.duration = '';
             this.type = '';
             this.dispatchEvent(new CustomEvent('confirmation',{
                 detail : conform

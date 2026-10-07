@@ -543,11 +543,7 @@
 
 /* Required field row highlight */
 .mapping-row--required {
-    background: #fffbeb;
-    border: 1px solid #fbbf24;
-    border-radius: 8px;
-    padding: 8px;
-    margin-bottom: 8px;
+    /* Yellow background removed per request */
 }
 
 .mapping-row--error {
@@ -1299,8 +1295,7 @@
 
 
 .mapping-row-card--required {
-    background: #fffbeb;
-    border-color: #fbbf24;
+    /* Yellow background removed per request */
 }
 
 .mapping-row-card--error {

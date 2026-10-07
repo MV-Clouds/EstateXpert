@@ -267,12 +267,7 @@ global with sharing class MetaLeadWebhook {
                     
                     if (metaToSfFields.containsKey(fieldName)) {
                         for (String sfField : metaToSfFields.get(fieldName)) {
-                            try {
-                                newContact.put(sfField, fieldValue);
-                            } catch (Exception e) {
-                                ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'buildContact_mapField', e.getMessage());
-                                unmappedData += fieldName + ' (' + sfField + '): ' + fieldValue + '\n';
-                            }
+                            newContact.put(sfField, fieldValue);
                         }
                     } else {
                         unmappedData += fieldName + ': ' + fieldValue + '\n';
@@ -281,11 +276,7 @@ global with sharing class MetaLeadWebhook {
             }
 
             for (String sfField : sfToCustomValue.keySet()) {
-                try {
-                    newContact.put(sfField, sfToCustomValue.get(sfField));
-                } catch (Exception e) {
-                    ErrorHandler.insertErrorData(e, 'MetaLeadWebhook', 'buildContact_customValue', e.getMessage());
-                }
+                newContact.put(sfField, sfToCustomValue.get(sfField));
             }
 
             if (String.isNotBlank(unmappedData)) {

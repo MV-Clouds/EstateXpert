@@ -329,17 +329,13 @@ public with sharing class MetaAdsFormMappingController {
             List<MVEX__Error_Handling__c> allLeads = [SELECT MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE MVEX__Source_of_Error__c = 'MetaFailedLeads' WITH USER_MODE LIMIT 5000];
             for (MVEX__Error_Handling__c err : allLeads) {
                 if (String.isNotBlank(err.MVEX__Error_Body__c)) {
-                    try {
-                        Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(err.MVEX__Error_Body__c);
-                        if (payload != null && payload.containsKey('formId')) {
-                            String fId = String.valueOf(payload.get('formId'));
-                            if (String.isNotBlank(fId)) {
-                                Integer currentCount = countMap.containsKey(fId) ? countMap.get(fId) : 0;
-                                countMap.put(fId, currentCount + 1);
-                            }
+                    Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(err.MVEX__Error_Body__c);
+                    if (payload != null && payload.containsKey('formId')) {
+                        String fId = String.valueOf(payload.get('formId'));
+                        if (String.isNotBlank(fId)) {
+                            Integer currentCount = countMap.containsKey(fId) ? countMap.get(fId) : 0;
+                            countMap.put(fId, currentCount + 1);
                         }
-                    } catch(Exception e) {
-                        // Ignore parsing errors for individual records
                     }
                 }
             }
@@ -362,13 +358,9 @@ public with sharing class MetaAdsFormMappingController {
         try {
             for (MVEX__Error_Handling__c err : allLeads) {
                 if (String.isNotBlank(err.MVEX__Error_Body__c)) {
-                    try {
-                        Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(err.MVEX__Error_Body__c);
-                        if (payload.get('formId') == formId) {
-                            filtered.add(err);
-                        }
-                    } catch(Exception e) {
-                        // Ignore parsing errors for individual records
+                    Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(err.MVEX__Error_Body__c);
+                    if (payload.get('formId') == formId) {
+                        filtered.add(err);
                     }
                 }
             }

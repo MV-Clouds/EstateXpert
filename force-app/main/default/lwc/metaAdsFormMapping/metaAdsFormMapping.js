@@ -748,6 +748,12 @@ export default class MetaAdsFormMapping extends LightningElement {
                     const isAlreadyMapped = savedFieldKeys.includes(key);
 
                     return (required || isDefault || isAlreadyMapped);
+                }).sort((a, b) => {
+                    const aReq = a.required === 'true';
+                    const bReq = b.required === 'true';
+                    if (aReq && !bReq) return -1;
+                    if (!aReq && bReq) return 1;
+                    return 0;
                 });
 
                 this.currentFormFields = fieldsToDisplay.map(sf => {
@@ -1008,17 +1014,14 @@ export default class MetaAdsFormMapping extends LightningElement {
 
             this.currentFormFields = this.currentFormFields.map(f => {
                 if (f.key === sfKey) {
-                    let isMapped = (type === SOURCE_META && f.metaField) || (type === SOURCE_CUSTOM && f.customValue?.trim());
                     return Object.assign({}, f, {
                         sourceType: type,
                         isMetaField: type === SOURCE_META,
                         isCustomValue: type === SOURCE_CUSTOM,
                         metaTabClass: type === SOURCE_META ? 'mapping-pill-btn active' : 'mapping-pill-btn',
                         customTabClass: type === SOURCE_CUSTOM ? 'mapping-pill-btn active' : 'mapping-pill-btn',
-                        showRequiredError: f.required && !isMapped,
-                        rowClass: (f.required && !isMapped)
-                            ? 'mapping-row-card mapping-row-card--required mapping-row-card--error'
-                            : (f.required ? 'mapping-row-card mapping-row-card--required' : 'mapping-row-card')
+                        showRequiredError: false,
+                        rowClass: f.required ? 'mapping-row-card mapping-row-card--required' : 'mapping-row-card'
                     });
                 }
                 return f;
@@ -1183,6 +1186,18 @@ export default class MetaAdsFormMapping extends LightningElement {
             });
             
             if (unmappedRequired.length > 0) {
+                // Update UI to show error borders on unmapped required fields
+                this.currentFormFields = this.currentFormFields.map(f => {
+                    const isMapped = (f.sourceType === SOURCE_META && f.metaField) || (f.sourceType === SOURCE_CUSTOM && f.customValue?.trim());
+                    if (f.required && !isMapped) {
+                        return Object.assign({}, f, {
+                            showRequiredError: true,
+                            rowClass: 'mapping-row-card mapping-row-card--required mapping-row-card--error'
+                        });
+                    }
+                    return f;
+                });
+
                 const names = unmappedRequired.join(', ');
                 this.showToast('Validation Error',
                     `The following required Salesforce fields must be mapped before saving: ${names}`,

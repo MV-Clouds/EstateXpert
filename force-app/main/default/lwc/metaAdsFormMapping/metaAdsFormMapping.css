@@ -15,10 +15,11 @@
     position: relative;
     margin-top: -0.9rem;
     margin-left: -0.9rem;
+    background: #F0F8FE;
 }
 
 .main_header_cls {
-    background: #ffffff;
+    background: #F0F8FE;
     border-radius: 12px;
     display: flex;
     flex-direction: column;

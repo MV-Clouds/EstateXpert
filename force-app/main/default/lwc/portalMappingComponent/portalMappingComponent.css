@@ -4,7 +4,7 @@
 }
 
 .main_div_portal_mapping_container {
-    background-color: #f5f7fa;
+    background-color: #F0F8FE;
     height: 100%;
     width: 100%;
     display: flex;
@@ -23,7 +23,7 @@
 }
 
 .main_body {
-    background-color: #f5f7fa;
+    background-color: #F0F8FE;
     border-radius: 8px;
     padding: 16px;
     display: flex;

@@ -5,6 +5,7 @@ import { loadStyle } from 'lightning/platformResourceLoader';
 import getGoogleAuthUrl from '@salesforce/apex/GoogleAdsFormMappingController.getGoogleAuthUrl';
 import saveRefreshToken from '@salesforce/apex/GoogleAdsFormMappingController.saveRefreshToken';
 import getConnection from '@salesforce/apex/GoogleAdsFormMappingController.getConnection';
+import getConnectionInfo from '@salesforce/apex/GoogleAdsFormMappingController.getConnectionInfo';
 import getFormsForAccount from '@salesforce/apex/GoogleAdsFormMappingController.getFormsForAccount';
 import getExistingMappings from '@salesforce/apex/GoogleAdsFormMappingController.getExistingMappings';
 import getSalesforceLeadFields from '@salesforce/apex/GoogleAdsFormMappingController.getSalesforceLeadFields';
@@ -12,6 +13,7 @@ import saveMapping from '@salesforce/apex/GoogleAdsFormMappingController.saveMap
 import deleteMapping from '@salesforce/apex/GoogleAdsFormMappingController.deleteMapping';
 import disconnectGoogleAds from '@salesforce/apex/GoogleAdsFormMappingController.disconnectGoogleAds';
 import getFailedLeads from '@salesforce/apex/GoogleAdsFormMappingController.getFailedLeads';
+import getFailedLeadCounts from '@salesforce/apex/GoogleAdsFormMappingController.getFailedLeadCounts';
 import retryFailedLeads from '@salesforce/apex/GoogleAdsFormMappingController.retryFailedLeads';
 import discardFailedLeads from '@salesforce/apex/GoogleAdsFormMappingController.discardFailedLeads';
 import getActiveSites from '@salesforce/apex/GoogleAdsFormMappingController.getActiveSites';
@@ -22,54 +24,35 @@ import GlobalStyles from '@salesforce/resourceUrl/globalStyles';
 const SOURCE_GOOGLE = 'google';
 const SOURCE_CUSTOM = 'custom';
 
-const SOURCE_OPTIONS = [
-    { label: 'Do Not Map', value: '' },
-    { label: 'Google Form Field', value: SOURCE_GOOGLE },
-    { label: 'Custom Value', value: SOURCE_CUSTOM }
-];
-
 const DEFAULT_SALESFORCE_FIELDS = ['FirstName', 'LastName', 'Email', 'Phone', 'Company', 'AccountId'];
-
+const PAGE_SIZES = [10, 25, 50, 100];
 const DEFAULT_ERROR_MESSAGE = 'An unexpected error occurred.';
 
-const CLOSED_CONFIRMATION = {
-    isOpen: false,
-    title: '',
-    message: '',
-    confirmLabel: 'Confirm',
-    cancelLabel: 'Cancel',
-    isDanger: false,
-    action: null
-};
-
-const NOTICE_DISCONNECTED = 'Google Ads was disconnected. Salesforce clears the saved token in the background, so wait about a minute before connecting again.';
-const NOTICE_WEBHOOK_SAVED = 'Webhook site saved. Salesforce applies this change in the background and it can take up to a minute, so wait before creating a mapping.';
-
-export default class GoogleAdsConnection extends LightningElement {
+export default class GoogleAdsFormMapping extends LightningElement {
 
     // ---------- UI state ----------
     isLoading = true;
-    hasLoaded = false;          // first load finished (prevents the connect card flashing before data arrives)
+    hasLoaded = false;           // first load finished (prevents the connect card flashing before data arrives)
     isModalOpen = false;
     isEditMode = false;
     isWebhookModalOpen = false;
     isFailedModalOpen = false;
-    showForms = false;
+    showForms = false;           // forms have been fetched for the selected account
     showAddField = false;
-    showTokenInput = false;     // connection card: token paste step
-    isConnectionPending = false; // token saved, waiting for the async metadata deployment
-    syncNotice = '';            // banner shown after operations that finish asynchronously
+    showTokenInput = false;      // connect card: token paste step
+    isConnectionPending = false; // token saved, connection not visible yet
 
     // ---------- data ----------
     accounts = [];
+    connectionInfo = {};
     forms = [];
     currentFormFields = [];
     googleOptions = [];
     salesforceLeadFields = [];
     tableData = [];
     failedLeads = [];
+    failedLeadCounts = {};
     siteOptions = [];
-    sourceOptions = SOURCE_OPTIONS;
 
     selectedAccount = '';
     selectedFormId = '';
@@ -78,9 +61,14 @@ export default class GoogleAdsConnection extends LightningElement {
     webhookUrl = '';
     refreshToken = '';
 
+    // ---------- pagination ----------
+    currentPage = 1;
+    pageSize = 10;
+    visiblePages = 5;
+
     failedContext = { accountId: '', formId: '', formName: '' };
-    pendingRetryIds = [];   // set while the wizard is used from "Edit Mapping & Retry"
-    confirmation = { ...CLOSED_CONFIRMATION };
+    pendingRetryIds = [];          // set while the wizard is used from "Edit Mapping & Retry"
+    pendingConfirmAction = null;   // action to run when the user answers Yes in the confirmation popup
 
     // Canonical mapping structure returned from Apex.
     fullMappingJson = {};
@@ -123,12 +111,22 @@ export default class GoogleAdsConnection extends LightningElement {
 
     /**
      * Method Name: showToast
-     * @description: Dispatches a toast message with the given title, message and variant.
+     * @description: Dispatches a standard toast message with the given title, message and variant.
      * Date: 05/10/2026
      * Created By: Salmanhaider Aghariya
      */
     showToast(title, message, variant) {
         this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
+    }
+
+    /**
+     * Method Name: messagePopup
+     * @description: Getter for the generic messagePopup child component, used only for confirmations.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get messagePopup() {
+        return this.template.querySelector('c-message-popup');
     }
 
     /**
@@ -224,21 +222,23 @@ export default class GoogleAdsConnection extends LightningElement {
 
     /**
      * Method Name: loadInitialData
-     * @description: Loads the connection and mapping data on first render, then marks the component as loaded.
+     * @description: Loads the connection and, when connected, the mapping data on first render, then marks the component as loaded.
      * Date: 05/10/2026
      * Created By: Salmanhaider Aghariya
      */
     async loadInitialData() {
         await this.withLoading(async () => {
             await this.loadConnection();
-            await this.loadMappingData();
+            if (this.hasConnection) {
+                await this.loadMappingData();
+            }
         });
         this.hasLoaded = true;
     }
 
     /**
      * Method Name: loadMappingData
-     * @description: Loads saved mappings, Salesforce fields and the webhook URL, then builds the mapping table.
+     * @description: Loads saved mappings, failed-lead counts, Salesforce fields and the webhook URL, then builds the table.
      * Date: 05/10/2026
      * Created By: Salmanhaider Aghariya
      */
@@ -251,8 +251,27 @@ export default class GoogleAdsConnection extends LightningElement {
         this.fullMappingJson = this.parseJson(existingMappings);
         this.salesforceLeadFields = salesforceFields || [];
         this.webhookUrl = webhookUrl || '';
+        await this.refreshFailedLeadCounts();
         this.buildTableData();
         this.isMappingDataLoaded = true;
+    }
+
+    /**
+     * Method Name: refreshFailedLeadCounts
+     * @description: Loads failed-lead counts for mapped forms or the supplied form Ids.
+     */
+    async refreshFailedLeadCounts(formIds) {
+        const ids = formIds || Object.values(this.fullMappingJson || {}).flatMap(account =>
+            Object.keys(account?.forms || {})
+        );
+        if (!ids.length) {
+            this.failedLeadCounts = {};
+            return;
+        }
+        const counts = await getFailedLeadCounts({ formIds: [...new Set(ids)] }) || {};
+        this.failedLeadCounts = formIds
+            ? { ...this.failedLeadCounts, ...counts }
+            : counts;
     }
 
     /**
@@ -269,16 +288,39 @@ export default class GoogleAdsConnection extends LightningElement {
 
     /**
      * Method Name: loadConnection
-     * @description: Retrieves the connected Google Ads accounts; clears them and rethrows on failure.
+     * @description: Retrieves the connected Google Ads accounts and, when connected, the Google user details;
+     * clears them and rethrows on failure.
      * Date: 05/10/2026
      * Created By: Salmanhaider Aghariya
      */
     async loadConnection() {
         try {
-            this.accounts = (await getConnection()) || [];
+            const accounts = (await getConnection()) || [];
+            this.accounts = accounts.filter(account => !account?.manager);
         } catch (error) {
             this.accounts = [];
             throw error;
+        }
+        if (this.accounts.length) {
+            await this.loadConnectionInfo();
+        } else {
+            this.connectionInfo = {};
+        }
+    }
+
+    /**
+     * Method Name: loadConnectionInfo
+     * @description: Loads the Google user (email, name) at runtime and the saved connection date. A failure
+     * here never blocks the page; the account card falls back to dashes.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    async loadConnectionInfo() {
+        try {
+            this.connectionInfo = (await getConnectionInfo()) || {};
+        } catch (error) {
+            console.error('Could not load Google connection info', error);
+            this.connectionInfo = {};
         }
     }
 
@@ -303,6 +345,55 @@ export default class GoogleAdsConnection extends LightningElement {
             label: account.descriptiveName ? `${account.descriptiveName} (${account.id})` : String(account.id),
             value: String(account.id)
         }));
+    }
+
+    // ---------- account card ----------
+
+    /**
+     * Method Name: connectedTitle
+     * @description: Getter for the account card title (Google user name, then email, then a default).
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get connectedTitle() {
+        return this.connectionInfo?.name || this.connectionInfo?.email || 'Google Ads';
+    }
+
+    /**
+     * Method Name: connectedEmail
+     * @description: Getter for the connected Google account email shown on the account card.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get connectedEmail() {
+        return this.connectionInfo?.email || '—';
+    }
+
+    /**
+     * Method Name: accountCount
+     * @description: Getter for the number of accessible Google Ads accounts.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get accountCount() {
+        return this.accounts.length;
+    }
+
+    /**
+     * Method Name: connectedDateLabel
+     * @description: Getter for the formatted connected date shown on the account card.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get connectedDateLabel() {
+        const raw = this.connectionInfo?.connectedDate;
+        if (!raw) {
+            return '—';
+        }
+        const date = new Date(raw);
+        return Number.isNaN(date.getTime())
+            ? '—'
+            : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
     // ---------- connection card ----------
@@ -335,26 +426,6 @@ export default class GoogleAdsConnection extends LightningElement {
      */
     get showTokenForm() {
         return this.showTokenInput && !this.isConnectionPending;
-    }
-
-    /**
-     * Method Name: connectionStatusLabel
-     * @description: Getter for the connection status text.
-     * Date: 05/10/2026
-     * Created By: Salmanhaider Aghariya
-     */
-    get connectionStatusLabel() {
-        return this.isConnectionPending ? 'Connection pending' : 'Not Connected';
-    }
-
-    /**
-     * Method Name: connectionStatusClass
-     * @description: Getter for the connection status CSS classes.
-     * Date: 05/10/2026
-     * Created By: Salmanhaider Aghariya
-     */
-    get connectionStatusClass() {
-        return this.isConnectionPending ? 'connection-status connection-status--pending' : 'connection-status';
     }
 
     /**
@@ -421,8 +492,9 @@ export default class GoogleAdsConnection extends LightningElement {
 
     /**
      * Method Name: saveConnection
-     * @description: Saves the refresh token and checks the connection. The token is stored through an async
-     * deployment, so a failed check keeps the pending state instead of showing a save error.
+     * @description: Saves the refresh token and connection date, then checks the connection once. The token
+     * is stored through an async deployment, so a failed check keeps a simple
+     * pending state instead of showing a save error.
      * Date: 05/10/2026
      * Created By: Salmanhaider Aghariya
      */
@@ -435,7 +507,6 @@ export default class GoogleAdsConnection extends LightningElement {
             await saveRefreshToken({ refreshToken: this.refreshToken.trim() });
             this.refreshToken = '';
             this.showTokenInput = false;
-            this.syncNotice = '';
             this.isConnectionPending = true;
 
             try {
@@ -447,9 +518,9 @@ export default class GoogleAdsConnection extends LightningElement {
             if (this.hasConnection) {
                 this.isConnectionPending = false;
                 await this.ensureMappingData();
-                this.showToast('Success', 'Google Ads connection saved successfully.', 'success');
+                this.showToast('Success', 'Google Ads connected successfully.', 'success');
             } else {
-                this.showToast('Success', 'Token saved. It can take up to a minute to take effect.', 'success');
+                this.showToast('Success', 'Token saved. Check the status in a moment.', 'success');
             }
         });
     }
@@ -466,9 +537,9 @@ export default class GoogleAdsConnection extends LightningElement {
             if (this.hasConnection) {
                 this.isConnectionPending = false;
                 await this.ensureMappingData();
-                this.showToast('Success', 'Google Ads is connected.', 'success');
+                this.showToast('Success', 'Google Ads connected successfully.', 'success');
             } else {
-                this.showToast('Info', 'The connection is still being applied. Please check again in a few moments.', 'info');
+                this.showToast('Info', 'The connection is not ready yet. Please check again shortly.', 'info');
             }
         });
     }
@@ -483,8 +554,6 @@ export default class GoogleAdsConnection extends LightningElement {
         this.openConfirmation({
             title: 'Disconnect Google Ads',
             message: 'Are you sure you want to disconnect Google Ads? This will remove Google Ads webhook subscriptions for all mapped forms, revoke the Google OAuth connection, and delete the saved Google Ads mappings.',
-            confirmLabel: 'Disconnect',
-            isDanger: true,
             action: () => this.confirmDisconnect()
         });
     }
@@ -502,34 +571,16 @@ export default class GoogleAdsConnection extends LightningElement {
                 throw new Error(result?.message || 'Failed to disconnect Google Ads.');
             }
             this.accounts = [];
+            this.connectionInfo = {};
             this.resetWizard();
             this.tableData = [];
             this.fullMappingJson = {};
+            this.currentPage = 1;
             this.showTokenInput = false;
             this.isConnectionPending = false;
-            this.syncNotice = NOTICE_DISCONNECTED;
+            this.isMappingDataLoaded = false;
             this.showToast('Success', 'Google Ads disconnected successfully.', 'success');
         });
-    }
-
-    /**
-     * Method Name: dismissSyncNotice
-     * @description: Closes the background-sync banner.
-     * Date: 05/10/2026
-     * Created By: Salmanhaider Aghariya
-     */
-    dismissSyncNotice() {
-        this.syncNotice = '';
-    }
-
-    /**
-     * Method Name: hasSyncNotice
-     * @description: Getter to check if the background-sync banner should be shown.
-     * Date: 05/10/2026
-     * Created By: Salmanhaider Aghariya
-     */
-    get hasSyncNotice() {
-        return !!this.syncNotice;
     }
 
     // ===================== Wizard open / close =====================
@@ -645,17 +696,7 @@ export default class GoogleAdsConnection extends LightningElement {
         const mappedFormIds = new Set(Object.keys(this.fullMappingJson?.[accountId]?.forms || {}));
         const keepId = String(includeMappedFormId);
 
-        return (result || [])
-            .filter(form => !mappedFormIds.has(String(form.id)) || String(form.id) === keepId)
-            .map(form => {
-                const isSelected = String(form.id) === keepId;
-                return {
-                    ...form,
-                    fieldCount: this.getGoogleFields(form).length,
-                    isSelected,
-                    ariaPressed: String(isSelected)
-                };
-            });
+        return (result || []).filter(form => !mappedFormIds.has(String(form.id)) || String(form.id) === keepId);
     }
 
     /**
@@ -672,34 +713,31 @@ export default class GoogleAdsConnection extends LightningElement {
     }
 
     /**
-     * Method Name: selectFormCard
-     * @description: Selects a lead form card and prepares its mapping rows; locked while fixing a mapping for retry.
-     * Date: 05/10/2026
+     * Method Name: formOptions
+     * @description: Getter to build the lead form combobox options.
+     * Date: 06/10/2026
      * Created By: Salmanhaider Aghariya
      */
-    selectFormCard(event) {
-        if (this.hasPendingRetry) {
-            return;
-        }
-        this.selectedFormId = event.currentTarget.dataset.id;
-        this.forms = this.forms.map(form => {
-            const isSelected = String(form.id) === String(this.selectedFormId);
-            return { ...form, isSelected, ariaPressed: String(isSelected) };
-        });
-        this.prepareFormFields();
+    get formOptions() {
+        return this.forms.map(form => ({
+            label: `${form.name || form.headline || 'Lead Form'} (${form.id})`,
+            value: String(form.id)
+        }));
     }
 
     /**
-     * Method Name: handleFormCardKeydown
-     * @description: Allows selecting a form card with the Enter or Space key.
-     * Date: 05/10/2026
+     * Method Name: handleFormChange
+     * @description: Stores the selected lead form and prepares its mapping rows.
+     * Date: 06/10/2026
      * Created By: Salmanhaider Aghariya
      */
-    handleFormCardKeydown(event) {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            this.selectFormCard(event);
+    handleFormChange(event) {
+        this.selectedFormId = event.detail.value;
+        if (!this.selectedFormId) {
+            this.currentFormFields = [];
+            return;
         }
+        this.prepareFormFields();
     }
 
     /**
@@ -722,7 +760,7 @@ export default class GoogleAdsConnection extends LightningElement {
      */
     prepareFormFields(savedMapping = {}) {
         const form = this.forms.find(item => String(item.id) === String(this.selectedFormId));
-        this.googleOptions = this.getGoogleFields(form);
+        this.googleOptions = [{ label: 'Do Not Map', value: '' }, ...this.getGoogleFields(form)];
 
         this.currentFormFields = this.salesforceLeadFields
             .filter(field =>
@@ -754,11 +792,11 @@ export default class GoogleAdsConnection extends LightningElement {
     buildFieldRow(salesforceField, saved = {}) {
         return this.decorate({
             key: salesforceField.value,
-            label: salesforceField.label || this.formatFieldLabel(salesforceField.value),
+            label: (salesforceField.label || this.formatFieldLabel(salesforceField.value)).split(' (')[0],
             required: this.isRequiredField(salesforceField),
             referenceTo: salesforceField.referenceTo || '',
             isReferenceField: !!salesforceField.referenceTo,
-            sourceType: saved.sourceType || '',
+            sourceType: saved.sourceType || SOURCE_GOOGLE,
             googleField: saved.googleField || '',
             customValue: saved.customValue || '',
             showRequiredError: false
@@ -772,14 +810,16 @@ export default class GoogleAdsConnection extends LightningElement {
      * Created By: Salmanhaider Aghariya
      */
     decorate(field) {
+        const isGoogle = field.sourceType !== SOURCE_CUSTOM;
         return {
             ...field,
-            isGoogleField: field.sourceType === SOURCE_GOOGLE,
-            isCustomValue: field.sourceType === SOURCE_CUSTOM,
+            isGoogleField: isGoogle,
+            isCustomValue: !isGoogle,
+            googleTabClass: isGoogle ? 'mapping-pill-btn active' : 'mapping-pill-btn',
+            customTabClass: isGoogle ? 'mapping-pill-btn' : 'mapping-pill-btn active',
             rowClass: [
-                'mapping-row',
-                field.required && 'mapping-row--required',
-                field.showRequiredError && 'mapping-row--error'
+                'mapping-row-card',
+                field.showRequiredError && 'mapping-row-card--error'
             ].filter(Boolean).join(' ')
         };
     }
@@ -797,17 +837,14 @@ export default class GoogleAdsConnection extends LightningElement {
     }
 
     /**
-     * Method Name: handleSourceTypeChange
-     * @description: Updates the source type of a row and clears its previous value.
-     * Date: 05/10/2026
+     * Method Name: handleSourceTypeChangeFromTab
+     * @description: Switches a row between Google Form Field and Custom Value using the pill toggle.
+     * Date: 06/10/2026
      * Created By: Salmanhaider Aghariya
      */
-    handleSourceTypeChange(event) {
-        this.updateField(event.target.dataset.key, {
-            sourceType: event.detail.value,
-            googleField: '',
-            customValue: ''
-        });
+    handleSourceTypeChangeFromTab(event) {
+        const { key, type } = event.currentTarget.dataset;
+        this.updateField(key, { sourceType: type });
     }
 
     /**
@@ -838,6 +875,17 @@ export default class GoogleAdsConnection extends LightningElement {
      */
     handleReferenceChange(event) {
         this.updateField(event.target.dataset.key, { customValue: event.detail.recordId || '' });
+    }
+
+    /**
+     * Method Name: handleRemoveField
+     * @description: Removes a mapping row; required fields cannot be removed.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    handleRemoveField(event) {
+        const key = event.currentTarget.dataset.key;
+        this.currentFormFields = this.currentFormFields.filter(field => field.key !== key);
     }
 
     // ---------- add extra Salesforce field ----------
@@ -1006,7 +1054,6 @@ export default class GoogleAdsConnection extends LightningElement {
             message: this.hasPendingRetry
                 ? `${baseMessage} The ${this.pendingRetryIds.length} selected failed lead(s) will then be retried with this mapping.`
                 : baseMessage,
-            confirmLabel: this.hasPendingRetry ? 'Save & Retry' : 'Save',
             action: () => this.confirmSaveMapping(mappingJson)
         });
     }
@@ -1028,6 +1075,7 @@ export default class GoogleAdsConnection extends LightningElement {
             }
 
             this.fullMappingJson = JSON.parse(mappingJson);
+            await this.refreshFailedLeadCounts();
             this.buildTableData();
             this.isModalOpen = false;
             this.showToast('Success', 'Google Ads form mapping saved successfully.', 'success');
@@ -1045,7 +1093,8 @@ export default class GoogleAdsConnection extends LightningElement {
 
     /**
      * Method Name: buildTableData
-     * @description: Builds the account and form rows of the mapping table, keeping expanded rows open.
+     * @description: Builds account and form rows with failed-lead counts, keeping expanded rows open and
+     * the current page in range.
      * Date: 05/10/2026
      * Created By: Salmanhaider Aghariya
      */
@@ -1061,20 +1110,27 @@ export default class GoogleAdsConnection extends LightningElement {
                     formId,
                     formName: form?.formName || `Form ID: ${formId}`,
                     mappedCount: Object.keys(mappings).length,
+                    failedCount: this.failedLeadCounts[formId] || 0,
                     mappings
                 };
             });
+            const index = accountIdx + 1;
 
             return {
-                index: accountIdx + 1,
+                index,
                 id: accountId,
                 accountId,
                 accountName: accountObj?.accountName || this.getAccountName(accountId),
                 forms,
+                formCount: forms.length,
+                hasForms: forms.length > 0,
                 isExpanded: expandedIds.has(accountId),
-                accordionId: `${accountId}_accordion`
+                accordionId: `${accountId}_accordion`,
+                rowClass: index % 2 ? 'parent-row stripe' : 'parent-row'
             };
         });
+
+        this.currentPage = Math.min(this.currentPage, Math.max(1, this.totalPages));
     }
 
     /**
@@ -1144,8 +1200,6 @@ export default class GoogleAdsConnection extends LightningElement {
         this.openConfirmation({
             title: 'Confirm Delete',
             message: 'Are you sure you want to delete this mapping?',
-            confirmLabel: 'Delete',
-            isDanger: true,
             action: () => this.confirmDeleteMapping(hit.formRow, hit.accountRow.accountId)
         });
     }
@@ -1195,6 +1249,204 @@ export default class GoogleAdsConnection extends LightningElement {
      */
     get hasMappings() {
         return this.tableData.length > 0;
+    }
+
+    // ===================== Pagination =====================
+
+    /**
+     * Method Name: shownTableData
+     * @description: Getter for the account rows of the current page.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get shownTableData() {
+        const start = (this.currentPage - 1) * this.pageSize;
+        return this.tableData.slice(start, start + this.pageSize);
+    }
+
+    /**
+     * Method Name: totalItems
+     * @description: Getter for the total number of account rows.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get totalItems() {
+        return this.tableData.length;
+    }
+
+    /**
+     * Method Name: totalPages
+     * @description: Getter for the total number of pages.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get totalPages() {
+        return Math.ceil(this.totalItems / this.pageSize);
+    }
+
+    /**
+     * Method Name: isFirstPage
+     * @description: Getter to check if the current page is the first page.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get isFirstPage() {
+        return this.currentPage === 1;
+    }
+
+    /**
+     * Method Name: isLastPage
+     * @description: Getter to check if the current page is the last page.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get isLastPage() {
+        return this.totalItems === 0 || this.currentPage >= this.totalPages;
+    }
+
+    /**
+     * Method Name: startIndex
+     * @description: Getter for the position of the first row on the current page.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get startIndex() {
+        return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+    }
+
+    /**
+     * Method Name: endIndex
+     * @description: Getter for the position of the last row on the current page.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get endIndex() {
+        return Math.min(this.currentPage * this.pageSize, this.totalItems);
+    }
+
+    /**
+     * Method Name: recordCountInfo
+     * @description: Getter for the "Showing x - y of z" text.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get recordCountInfo() {
+        return this.totalItems === 0
+            ? 'Showing 0 records'
+            : `Showing ${this.startIndex} - ${this.endIndex} of ${this.totalItems}`;
+    }
+
+    /**
+     * Method Name: pageSizeOptions
+     * @description: Getter for the rows-per-page dropdown options.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get pageSizeOptions() {
+        return PAGE_SIZES.map(size => ({ label: String(size), value: size, isSelected: this.pageSize === size }));
+    }
+
+    /**
+     * Method Name: pageNumbers
+     * @description: Getter that builds the page number buttons, with ellipsis for long page lists.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get pageNumbers() {
+        const { totalPages, currentPage, visiblePages } = this;
+        const numberItem = n => ({
+            key: `p${n}`,
+            number: n,
+            isEllipsis: false,
+            className: `exp-pagination-button ${n === currentPage ? 'active' : ''}`
+        });
+
+        if (totalPages <= visiblePages) {
+            return Array.from({ length: totalPages }, (_, i) => numberItem(i + 1));
+        }
+
+        const pages = [numberItem(1)];
+        if (currentPage > 3) {
+            pages.push({ key: 'ellipsis-start', isEllipsis: true });
+        }
+        const start = Math.max(2, currentPage - 1);
+        const end = Math.min(currentPage + 1, totalPages - 1);
+        for (let i = start; i <= end; i++) {
+            pages.push(numberItem(i));
+        }
+        if (currentPage < totalPages - 2) {
+            pages.push({ key: 'ellipsis-end', isEllipsis: true });
+        }
+        pages.push(numberItem(totalPages));
+        return pages;
+    }
+
+    /**
+     * Method Name: scrollToTop
+     * @description: Scrolls the mapping table back to the top after a page change.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    scrollToTop() {
+        const wrapper = this.template.querySelector('.exp-main-table-wrapper');
+        if (wrapper) {
+            wrapper.scrollTop = 0;
+        }
+    }
+
+    /**
+     * Method Name: handlePrevious
+     * @description: Goes to the previous page.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    handlePrevious() {
+        if (this.currentPage > 1) {
+            this.currentPage -= 1;
+            this.scrollToTop();
+        }
+    }
+
+    /**
+     * Method Name: handleNext
+     * @description: Goes to the next page.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    handleNext() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage += 1;
+            this.scrollToTop();
+        }
+    }
+
+    /**
+     * Method Name: handlePageChange
+     * @description: Goes to the page number that was clicked.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    handlePageChange(event) {
+        const selected = parseInt(event.currentTarget.dataset.id, 10);
+        if (selected !== this.currentPage) {
+            this.currentPage = selected;
+            this.scrollToTop();
+        }
+    }
+
+    /**
+     * Method Name: handlePageSizeChange
+     * @description: Changes the rows per page and returns to the first page.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    handlePageSizeChange(event) {
+        const value = parseInt(event.target.value, 10);
+        if (!Number.isNaN(value) && value !== this.pageSize) {
+            this.pageSize = value;
+            this.currentPage = 1;
+            this.scrollToTop();
+        }
     }
 
     // ===================== Failed leads =====================
@@ -1252,6 +1504,8 @@ export default class GoogleAdsConnection extends LightningElement {
     async refreshFailedLeadsSafely() {
         try {
             await this.refreshFailedLeads();
+            await this.refreshFailedLeadCounts([this.failedContext.formId]);
+            this.buildTableData();
         } catch (error) {
             console.error('Failed to refresh failed leads', error);
             this.showToast('Warning', 'The action completed, but the failed leads list could not be refreshed. Please reopen it.', 'warning');
@@ -1377,8 +1631,6 @@ export default class GoogleAdsConnection extends LightningElement {
         this.openConfirmation({
             title: 'Discard Failed Leads',
             message: `Discard ${ids.length} failed lead(s)? They will be removed permanently and will not be created in Salesforce.`,
-            confirmLabel: 'Discard',
-            isDanger: true,
             action: () => this.confirmDiscard(ids)
         });
     }
@@ -1459,14 +1711,13 @@ export default class GoogleAdsConnection extends LightningElement {
         this.openConfirmation({
             title: 'Confirm Webhook Site',
             message: 'Google lead form webhooks will be delivered to this site. Once a mapping exists this cannot be changed. Do you want to continue?',
-            confirmLabel: 'Save',
             action: () => this.confirmSaveWebhook(siteUrl)
         });
     }
 
     /**
      * Method Name: confirmSaveWebhook
-     * @description: Saves the selected webhook site and shows the background-sync notice.
+     * @description: Saves the selected webhook site.
      * Date: 05/10/2026
      * Created By: Salmanhaider Aghariya
      */
@@ -1475,43 +1726,40 @@ export default class GoogleAdsConnection extends LightningElement {
             await saveWebhookUrl({ siteUrl });
             this.webhookUrl = siteUrl;
             this.isWebhookModalOpen = false;
-            this.syncNotice = NOTICE_WEBHOOK_SAVED;
-            this.showToast('Success', 'Webhook site saved. It may take a few moments to take effect.', 'success');
+            this.showToast('Success', 'Webhook site saved successfully.', 'success');
         });
     }
 
-    // ===================== Confirmation dialog =====================
+    // ===================== Confirmation (generic messagePopup) =====================
 
     /**
      * Method Name: openConfirmation
-     * @description: Opens the confirmation dialog with the given texts and the action to run on confirm.
-     * Date: 05/10/2026
+     * @description: Opens the messagePopup Yes/No confirmation and stores the action to run on Yes.
+     * Date: 06/10/2026
      * Created By: Salmanhaider Aghariya
      */
-    openConfirmation({ title, message, confirmLabel = 'Confirm', cancelLabel = 'Cancel', isDanger = false, action }) {
-        this.confirmation = { isOpen: true, title, message, confirmLabel, cancelLabel, isDanger, action };
+    openConfirmation({ title, message, action }) {
+        const popup = this.messagePopup;
+        if (!popup) {
+            console.error('messagePopup component was not found.');
+            this.showToast('Error', 'Unable to open the confirmation dialog.', 'error');
+            return;
+        }
+        this.pendingConfirmAction = action;
+        popup.showMessagePopup({ status: 'warning', title, message });
     }
 
     /**
-     * Method Name: cancelConfirmation
-     * @description: Closes the confirmation dialog without running the action.
-     * Date: 05/10/2026
+     * Method Name: handleConfirmation
+     * @description: Handles the messagePopup confirmation event. The action runs only when detail is exactly
+     * true (Yes); No or the close icon never run it. An unexpected error shows a toast.
+     * Date: 06/10/2026
      * Created By: Salmanhaider Aghariya
      */
-    cancelConfirmation() {
-        this.confirmation = { ...CLOSED_CONFIRMATION };
-    }
-
-    /**
-     * Method Name: confirmAction
-     * @description: Closes the dialog and runs the confirmed action; an unexpected error shows a toast.
-     * Date: 05/10/2026
-     * Created By: Salmanhaider Aghariya
-     */
-    async confirmAction() {
-        const { action } = this.confirmation;
-        this.cancelConfirmation();
-        if (typeof action !== 'function') {
+    async handleConfirmation(event) {
+        const action = this.pendingConfirmAction;
+        this.pendingConfirmAction = null;
+        if (event.detail !== true || typeof action !== 'function') {
             return;
         }
         try {
@@ -1521,16 +1769,6 @@ export default class GoogleAdsConnection extends LightningElement {
             this.isLoading = false;
             this.showToast('Error', this.getErrorMessage(error), 'error');
         }
-    }
-
-    /**
-     * Method Name: confirmButtonClass
-     * @description: Getter for the confirm button CSS class (red for dangerous actions).
-     * Date: 05/10/2026
-     * Created By: Salmanhaider Aghariya
-     */
-    get confirmButtonClass() {
-        return this.confirmation.isDanger ? 'exp-red-btn-css' : 'exp-blue-btn-css';
     }
 
     // ===================== Getters =====================
@@ -1616,6 +1854,36 @@ export default class GoogleAdsConnection extends LightningElement {
     }
 
     /**
+     * Method Name: isFormDropdownDisabled
+     * @description: Getter to disable the form dropdown while loading, in retry mode or until an account is selected.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get isFormDropdownDisabled() {
+        return this.isLoading || !this.selectedAccount || this.hasPendingRetry;
+    }
+
+    /**
+     * Method Name: showNoFormsMsg
+     * @description: Getter to show the "no available forms" message once forms were fetched and none can be mapped.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get showNoFormsMsg() {
+        return this.showForms && !!this.selectedAccount && this.forms.length === 0;
+    }
+
+    /**
+     * Method Name: hasFormFields
+     * @description: Getter to show the field mapping section once a form is selected.
+     * Date: 06/10/2026
+     * Created By: Salmanhaider Aghariya
+     */
+    get hasFormFields() {
+        return !!this.selectedFormId;
+    }
+
+    /**
      * Method Name: saveButtonLabel
      * @description: Getter for the wizard save button label.
      * Date: 05/10/2026
@@ -1672,7 +1940,9 @@ export default class GoogleAdsConnection extends LightningElement {
      * Created By: Salmanhaider Aghariya
      */
     get webhookButtonTitle() {
-        return this.isWebhookLocked ? 'The webhook site cannot be changed while mappings exist. Delete all mappings to change it.' : 'Select the Force.com site that receives Google leads';
+        return this.isWebhookLocked
+            ? 'The webhook site cannot be changed while mappings exist. Delete all mappings to change it.'
+            : 'Select the Force.com site that receives Google leads';
     }
 
     /**
@@ -1763,7 +2033,9 @@ export default class GoogleAdsConnection extends LightningElement {
      */
     get additionalFieldOptions() {
         const used = new Set(this.currentFormFields.map(field => field.key));
-        return this.salesforceLeadFields.filter(field => !used.has(field.value)).map(field => ({ label: field.label || this.formatFieldLabel(field.value), value: field.value }));
+        return this.salesforceLeadFields
+            .filter(field => !used.has(field.value))
+            .map(field => ({ label: (field.label || this.formatFieldLabel(field.value)).split(' (')[0], value: field.value }));
     }
 
     /**

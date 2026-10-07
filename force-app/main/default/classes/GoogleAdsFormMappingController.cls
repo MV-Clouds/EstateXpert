@@ -16,7 +16,6 @@ public with sharing class GoogleAdsFormMappingController {
     private static final String GOOGLE_FAILED_SOURCE = GoogleLeadsWebhook.FAILED_SOURCE;
     private static final String WEBHOOK_PATH = '/services/apexrest/Lead';
     private static final Integer MAX_RETRY_BATCH = 200;
-
     private static final Set<String> SYSTEM_FIELDS = new Set<String>{
         'ownerid', 'recordtypeid', 'currencyisocode', 'createdbyid', 'lastmodifiedbyid', 'masterrecordid'
     };
@@ -177,22 +176,26 @@ public with sharing class GoogleAdsFormMappingController {
     * Created By : Salmanhaider Aghariya
     * Last Modified Date : 05/10/2026
     * Last Modified By : Salmanhaider Aghariya
-    * @param fieldName to store the custom metadata field name
-    * @param value to store the field value
-    * @description : Used to update a Google OAuth custom metadata field asynchronously.
+    * @param fieldValues to store the custom metadata field names and values
+    * @description : Used to update Google OAuth custom metadata fields asynchronously.
     */
-    private static void updateConfigField(String fieldName, String value) {
+    private static void updateConfigField(Map<String, String> fieldValues) {
         try {
+            if (fieldValues == null || fieldValues.isEmpty()) {
+                throw auraError('At least one Google OAuth configuration field is required.');
+            }
             OAuth_Configuration__mdt config = getGoogleOAuthConfiguration();
 
             Metadata.CustomMetadata record = new Metadata.CustomMetadata();
             record.fullName = 'OAuth_Configuration__mdt.' + config.DeveloperName;
             record.label = config.MasterLabel;
 
-            Metadata.CustomMetadataValue fieldValue = new Metadata.CustomMetadataValue();
-            fieldValue.field = fieldName;
-            fieldValue.value = value;
-            record.values.add(fieldValue);
+            for (String fieldName : fieldValues.keySet()) {
+                Metadata.CustomMetadataValue fieldValue = new Metadata.CustomMetadataValue();
+                fieldValue.field = fieldName;
+                fieldValue.value = fieldValues.get(fieldName);
+                record.values.add(fieldValue);
+            }
 
             Metadata.DeployContainer container = new Metadata.DeployContainer();
             container.addMetadata(record);
@@ -200,7 +203,7 @@ public with sharing class GoogleAdsFormMappingController {
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) {
-            throw auraError('Failed to update ' + fieldName + '. ' + e.getMessage());
+            throw auraError('Failed to update Google OAuth configuration. ' + e.getMessage());
         }
     }
 
@@ -246,6 +249,58 @@ public with sharing class GoogleAdsFormMappingController {
         } catch (Exception e) {
             logError(e, 'getFailedLeads');
             throw auraError('Failed to retrieve failed leads.');
+        }
+    }
+
+    /**
+    * Method Name : getFailedLeadCounts
+    * @param formIds Google Lead Form Ids to count failed leads for
+    * @return Map from form Id to its failed lead count
+    * @description : Counts recent failed leads for the supplied forms.
+    */
+    @AuraEnabled
+    public static Map<String, Integer> getFailedLeadCounts(List<String> formIds) {
+        try {
+            Set<String> requestedFormIds = new Set<String>();
+            if (formIds != null) {
+                requestedFormIds.addAll(formIds);
+            }
+            requestedFormIds.remove(null);
+            requestedFormIds.remove('');
+
+            Map<String, Integer> countsByFormId = new Map<String, Integer>();
+            for (String formId : requestedFormIds) {
+                countsByFormId.put(formId, 0);
+            }
+            if (requestedFormIds.isEmpty()) {
+                return countsByFormId;
+            }
+
+            for (MVEX__Error_Handling__c err : [
+                SELECT Id, MVEX__Error_Body__c
+                FROM MVEX__Error_Handling__c
+                WHERE MVEX__Source_of_Error__c = :GOOGLE_FAILED_SOURCE
+                WITH USER_MODE
+                ORDER BY CreatedDate DESC
+                LIMIT 2000
+            ]) {
+                if (String.isBlank(err.MVEX__Error_Body__c)) {
+                    continue;
+                }
+                try {
+                    Map<String, Object> parsed = (Map<String, Object>)JSON.deserializeUntyped(err.MVEX__Error_Body__c);
+                    String formId = getFormIdFromBody(parsed);
+                    if (requestedFormIds.contains(formId)) {
+                        countsByFormId.put(formId, countsByFormId.get(formId) + 1);
+                    }
+                } catch (Exception e) {
+                    System.debug(LoggingLevel.WARN, 'Skipped unparsable failed lead ' + err.Id + ': ' + e.getMessage());
+                }
+            }
+            return countsByFormId;
+        } catch (Exception e) {
+            logError(e, 'getFailedLeadCounts');
+            throw auraError('Failed to retrieve failed lead counts.');
         }
     }
 
@@ -458,7 +513,7 @@ public with sharing class GoogleAdsFormMappingController {
                 + '&scope=' + encode(config.Scope__c)
                 + '&access_type=offline'
                 + '&prompt=consent'
-                + '&state=' + encode(UserInfo.getUserId());
+                + '&state=' + encode('Google_Ads_Config');
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) {
@@ -474,7 +529,7 @@ public with sharing class GoogleAdsFormMappingController {
     * Last Modified By : Salmanhaider Aghariya
     * @param refreshToken to store the Google refresh token
     * @return success String
-    * @description : Used to save the Google refresh token in the OAuth configuration.
+    * @description : Used to save the Google refresh token and connection timestamp in OAuth configuration.
     */
     @AuraEnabled
     public static String saveRefreshToken(String refreshToken) {
@@ -482,7 +537,11 @@ public with sharing class GoogleAdsFormMappingController {
             if (String.isBlank(refreshToken)) {
                 throw auraError('Refresh token cannot be blank.');
             }
-            updateConfigField('Refresh_Token__c', refreshToken);
+
+            Map<String, String> fieldValues = new Map<String, String>();
+            fieldValues.put('Refresh_Token__c', refreshToken);
+            fieldValues.put('Connected_At__c', System.now().formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\''));
+            updateConfigField(fieldValues);
             return 'success';
         } catch (AuraHandledException e) {
             throw e;
@@ -518,6 +577,37 @@ public with sharing class GoogleAdsFormMappingController {
     }
 
     /**
+    * Method Name : getConnectionInfo
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 05/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @return Map with name, email, and connectedDate values for the LWC connection card
+    * @description : Retrieves Google account details at runtime and the persisted connection timestamp.
+    */
+    @AuraEnabled(cacheable=false)
+    public static Map<String, Object> getConnectionInfo() {
+        try {
+            OAuth_Configuration__mdt config = getGoogleOAuthConfiguration();
+
+            if (String.isBlank(config.Refresh_Token__c)) {
+                return new Map<String, Object>();
+            }
+            Map<String, String> userInfo = getGoogleUserInfo(getAccessTokenForRefreshToken(config, config.Refresh_Token__c));
+            System.debug(LoggingLevel.INFO, 'Retrieved Google user info: ' + userInfo);
+            Map<String, Object> connectionInfo = new Map<String, Object>();
+            connectionInfo.put('name', userInfo.get('name'));
+            connectionInfo.put('email', userInfo.get('email'));
+            connectionInfo.put('connectedDate', config.Connected_At__c);
+            return connectionInfo;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            logError(e, 'getConnectionInfo');
+            throw auraError('Failed to retrieve the Google Ads connection Info.');
+        }
+    }
+
+    /**
     * Method Name : getAccessToken
     * Created By : Salmanhaider Aghariya
     * Last Modified Date : 05/10/2026
@@ -528,14 +618,32 @@ public with sharing class GoogleAdsFormMappingController {
     private static String getAccessToken() {
         try {
             OAuth_Configuration__mdt config = getGoogleOAuthConfiguration();
-
-            if (String.isBlank(config.Client_Id__c) || String.isBlank(config.Client_Secret__c) || String.isBlank(config.Token_Endpoint__c)) {
-                throw auraError('Google Ads OAuth configuration is incomplete.');
-            }
             if (String.isBlank(config.Refresh_Token__c)) {
                 throw auraError('Google Ads is not connected.');
             }
+            return getAccessTokenForRefreshToken(config, config.Refresh_Token__c);
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw auraError('Failed to obtain Google Ads access token. ' + e.getMessage());
+        }
+    }
 
+    /**
+    * Method Name : getAccessTokenForRefreshToken
+    * @param config Google Ads OAuth configuration
+    * @param refreshToken Google refresh token to exchange
+    * @return Google access token
+    * @description : Exchanges the supplied refresh token for a Google access token.
+    */
+    private static String getAccessTokenForRefreshToken(OAuth_Configuration__mdt config, String refreshToken) {
+        try {
+            if (config == null || String.isBlank(config.Client_Id__c) || String.isBlank(config.Client_Secret__c) || String.isBlank(config.Token_Endpoint__c)) {
+                throw auraError('Google Ads OAuth configuration is incomplete.');
+            }
+            if (String.isBlank(refreshToken)) {
+                throw auraError('Google Ads is not connected.');
+            }
             HttpRequest request = new HttpRequest();
             request.setEndpoint(config.Token_Endpoint__c);
             request.setMethod('POST');
@@ -543,7 +651,7 @@ public with sharing class GoogleAdsFormMappingController {
             request.setBody(
                 'client_id=' + encode(config.Client_Id__c) +
                 '&client_secret=' + encode(config.Client_Secret__c) +
-                '&refresh_token=' + encode(config.Refresh_Token__c) +
+                '&refresh_token=' + encode(refreshToken) +
                 '&grant_type=refresh_token'
             );
 
@@ -562,6 +670,30 @@ public with sharing class GoogleAdsFormMappingController {
         } catch (Exception e) {
             throw auraError('Failed to obtain Google Ads access token. ' + e.getMessage());
         }
+    }
+
+    /**
+    * Method Name : getGoogleUserInfo
+    * @param accessToken Google access token
+    * @return User name and email
+    * @description : Retrieves the Google profile details used by the connection card.
+    */
+    private static Map<String, String> getGoogleUserInfo(String accessToken) {
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint('https://www.googleapis.com/oauth2/v2/userinfo');
+        request.setMethod('GET');
+        request.setHeader('Authorization', 'Bearer ' + accessToken);
+
+        HttpResponse response = new Http().send(request);
+        if (response.getStatusCode() != 200) {
+            throw auraError('Failed to retrieve Google account details. ' + response.getBody());
+        }
+
+        Map<String, Object> userInfo = (Map<String, Object>)JSON.deserializeUntyped(response.getBody());
+        Map<String, String> accountInfo = new Map<String, String>();
+        accountInfo.put('name', String.isBlank(str(userInfo.get('name'))) ? '' : str(userInfo.get('name')));
+        accountInfo.put('email', String.isBlank(str(userInfo.get('email'))) ? '' : str(userInfo.get('email')));
+        return accountInfo;
     }
 
     /**
@@ -1097,7 +1229,10 @@ public with sharing class GoogleAdsFormMappingController {
     @future
     private static void clearStoredRefreshToken() {
         try {
-            updateConfigField('Refresh_Token__c', '');
+            updateConfigField(new Map<String, String>{
+                'Refresh_Token__c' => '',
+                'Connected_At__c' => null
+            });
         } catch (Exception e) {
             logError(e, 'clearStoredRefreshToken');
         }
@@ -1234,7 +1369,7 @@ public with sharing class GoogleAdsFormMappingController {
     /**
     * Method Name : getActiveSites
     * Created By : Salmanhaider Aghariya
-    * Last Modified Date : 05/10/2026
+    * Last Modified Date : 07/10/2026
     * Last Modified By : Salmanhaider Aghariya
     * @return List of active Force.com site options
     * @description : Used to retrieve active sites (setup objects, so USER_MODE is not used).
@@ -1243,22 +1378,41 @@ public with sharing class GoogleAdsFormMappingController {
     public static List<SiteOption> getActiveSites() {
         try {
             List<SiteOption> options = new List<SiteOption>();
-            for (Site s : [SELECT Id, MasterLabel FROM Site WHERE Status = 'Active' AND SiteType = 'Visualforce' ORDER BY MasterLabel LIMIT 50]) {
-                try {
-                    String siteKey = String.valueOf(s.Id).left(15);
-                    List<SiteDetail> details = [SELECT SecureUrl FROM SiteDetail WHERE DurableId = :siteKey LIMIT 1];
-                    if (details.isEmpty() || String.isBlank(details[0].SecureUrl)) {
-                        continue;
-                    }
-                    String url = details[0].SecureUrl.trim().removeEnd('/');
-                    SiteOption option = new SiteOption();
-                    option.value = url;
-                    option.label = s.MasterLabel + ' (' + url + ')';
-                    options.add(option);
-                } catch (Exception e) {
-                    System.debug(LoggingLevel.WARN, 'Skipped site ' + s.Id + ': ' + e.getMessage());
+
+            List<Site> sites = [SELECT Id, MasterLabel FROM Site WHERE Status = 'Active' AND SiteType = 'Visualforce' ORDER BY MasterLabel LIMIT 50];
+
+            if (sites.isEmpty()) {
+                return options;
+            }
+
+            Set<String> siteKeys = new Set<String>();
+
+            for (Site site : sites) {
+                siteKeys.add(String.valueOf(site.Id).left(15));
+            }
+
+            Map<String, String> secureUrlBySiteKey = new Map<String, String>();
+
+            for (SiteDetail detail : [SELECT DurableId, SecureUrl FROM SiteDetail WHERE DurableId IN :siteKeys]) {
+                if (String.isNotBlank(detail.SecureUrl)) {
+                    secureUrlBySiteKey.put(detail.DurableId, detail.SecureUrl.trim().removeEnd('/'));
                 }
             }
+
+            for (Site site : sites) {
+                String siteKey = String.valueOf(site.Id).left(15);
+                String url = secureUrlBySiteKey.get(siteKey);
+
+                if (String.isBlank(url)) {
+                    continue;
+                }
+
+                SiteOption option = new SiteOption();
+                option.value = url;
+                option.label = site.MasterLabel + ' (' + url + ')';
+                options.add(option);
+            }
+
             return options;
         } catch (Exception e) {
             logError(e, 'getActiveSites');
@@ -1300,7 +1454,7 @@ public with sharing class GoogleAdsFormMappingController {
                 throw auraError('The webhook site cannot be changed while mappings exist. Delete all mappings first.');
             }
 
-            updateConfigField('Webhook_URL__c', normalized);
+            updateConfigField(new Map<String, String>{ 'Webhook_URL__c' => normalized });
             return 'success';
         } catch (AuraHandledException e) {
             throw e;

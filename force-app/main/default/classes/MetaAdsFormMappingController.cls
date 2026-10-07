@@ -318,6 +318,34 @@ public with sharing class MetaAdsFormMappingController {
     }
 
     /**
+    * Method Name : getFailedLeadsCountMap
+    * @description : Retrieves a map of form IDs to their failed leads count.
+    * @return Map<String, Integer>
+    */
+    @AuraEnabled
+    public static Map<String, Integer> getFailedLeadsCountMap() {
+        Map<String, Integer> countMap = new Map<String, Integer>();
+        try {
+            List<MVEX__Error_Handling__c> allLeads = [SELECT MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE MVEX__Source_of_Error__c = 'MetaFailedLeads' WITH USER_MODE LIMIT 5000];
+            for (MVEX__Error_Handling__c err : allLeads) {
+                if (String.isNotBlank(err.MVEX__Error_Body__c)) {
+                    Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(err.MVEX__Error_Body__c);
+                    if (payload != null && payload.containsKey('formId')) {
+                        String fId = String.valueOf(payload.get('formId'));
+                        if (String.isNotBlank(fId)) {
+                            Integer currentCount = countMap.containsKey(fId) ? countMap.get(fId) : 0;
+                            countMap.put(fId, currentCount + 1);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'MetaAdsFormMappingController', 'getFailedLeadsCountMap', e.getMessage());
+        }
+        return countMap;
+    }
+
+    /**
     * Method Name : getFailedLeads
     * @description : Retrieves a list of failed leads for a particular form.
     * @param formId : The ID of the form.
@@ -325,18 +353,14 @@ public with sharing class MetaAdsFormMappingController {
     */
     @AuraEnabled
     public static List<MVEX__Error_Handling__c> getFailedLeads(String formId) {
-        List<MVEX__Error_Handling__c> allLeads = [SELECT Id, Name, CreatedDate, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE MVEX__Source_of_Error__c = 'MetaFailedLeads' WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 500];
+        List<MVEX__Error_Handling__c> allLeads = [SELECT Id, Name, CreatedDate, MVEX__Error_Body__c, MVEX__Error_Message__c FROM MVEX__Error_Handling__c WHERE MVEX__Source_of_Error__c = 'MetaFailedLeads' WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 500];
         List<MVEX__Error_Handling__c> filtered = new List<MVEX__Error_Handling__c>();
         try {
             for (MVEX__Error_Handling__c err : allLeads) {
                 if (String.isNotBlank(err.MVEX__Error_Body__c)) {
-                    try {
-                        Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(err.MVEX__Error_Body__c);
-                        if (payload.get('formId') == formId) {
-                            filtered.add(err);
-                        }
-                    } catch(Exception e) {
-                        // Ignore parsing errors for individual records
+                    Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(err.MVEX__Error_Body__c);
+                    if (payload.get('formId') == formId) {
+                        filtered.add(err);
                     }
                 }
             }
@@ -356,7 +380,7 @@ public with sharing class MetaAdsFormMappingController {
     @AuraEnabled
     public static String retryFailedLead(String errorRecordId, String mappingJsonOverride) {
         try {
-            MVEX__Error_Handling__c err = [SELECT Id, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE Id = :errorRecordId WITH USER_MODE LIMIT 1];
+            MVEX__Error_Handling__c err = [SELECT Id, MVEX__Error_Body__c, MVEX__Error_Message__c FROM MVEX__Error_Handling__c WHERE Id = :errorRecordId WITH USER_MODE LIMIT 1];
             if (err == null || String.isBlank(err.MVEX__Error_Body__c)) {
                 return 'Error record not found or body is empty.';
             }
@@ -374,6 +398,9 @@ public with sharing class MetaAdsFormMappingController {
             String result = MetaLeadWebhook.createSalesforceContact(ctx);
             if (result == 'Success') {
                 delete as user err;
+            } else {
+                err.MVEX__Error_Message__c = result;
+                update as user err;
             }
             return result;
         } catch (Exception e) {
@@ -384,7 +411,7 @@ public with sharing class MetaAdsFormMappingController {
 
     /**
     * Method Name : retryMultipleFailedLeads
-    * @description : Retries multiple failed leads.
+    * @description : Retries multiple failed leads in bulk (no SOQL/DML in loops).
     * @param errorRecordIds : A list of error record IDs.
     * @return Map<String, String>
     */
@@ -392,8 +419,64 @@ public with sharing class MetaAdsFormMappingController {
     public static Map<String, String> retryMultipleFailedLeads(List<String> errorRecordIds) {
         Map<String, String> results = new Map<String, String>();
         try {
-            for (String recordId : errorRecordIds) {
-                results.put(recordId, retryFailedLead(recordId, null));
+            // 1. Bulk query error records
+            List<MVEX__Error_Handling__c> errs = [SELECT Id, MVEX__Error_Body__c, MVEX__Error_Message__c FROM MVEX__Error_Handling__c WHERE Id IN :errorRecordIds WITH USER_MODE];
+            
+            Map<String, MetaLeadWebhook.ContactContext> ctxMap = new Map<String, MetaLeadWebhook.ContactContext>();
+            Map<String, MVEX__Error_Handling__c> errMap = new Map<String, MVEX__Error_Handling__c>();
+
+            // 2. Build contexts (NO queries, NO DML here)
+            for (MVEX__Error_Handling__c err : errs) {
+                if (String.isBlank(err.MVEX__Error_Body__c)) {
+                    results.put(err.Id, 'Error record body is empty.');
+                    continue;
+                }
+                
+                try {
+                    Map<String, Object> retryPayload = (Map<String, Object>) JSON.deserializeUntyped(err.MVEX__Error_Body__c);
+                    String lId = (String) retryPayload.get('leadId');
+                    String pId = (String) retryPayload.get('pageId');
+                    String fId = (String) retryPayload.get('formId');
+                    String fName = (String) retryPayload.get('formName');
+                    Map<String, Object> lData = (Map<String, Object>) retryPayload.get('leadData');
+                    
+                    MetaLeadWebhook.ContactContext ctx = new MetaLeadWebhook.ContactContext(lData, fName, pId, fId, lId);
+                    ctx.isRetry = true;
+                    // No override in bulk
+                    ctxMap.put(err.Id, ctx);
+                    errMap.put(err.Id, err);
+                } catch (Exception e) {
+                    results.put(err.Id, 'Retry Error: ' + e.getMessage());
+                }
+            }
+
+            // 3. Process all contacts in BULK
+            if (!ctxMap.isEmpty()) {
+                Map<String, String> processResults = MetaLeadWebhook.processMultipleContacts(ctxMap);
+                
+                List<MVEX__Error_Handling__c> toDelete = new List<MVEX__Error_Handling__c>();
+                List<MVEX__Error_Handling__c> toUpdate = new List<MVEX__Error_Handling__c>();
+                
+                for (String errId : processResults.keySet()) {
+                    String res = processResults.get(errId);
+                    results.put(errId, res);
+                    
+                    MVEX__Error_Handling__c err = errMap.get(errId);
+                    if (res == 'Success') {
+                        toDelete.add(err);
+                    } else {
+                        err.MVEX__Error_Message__c = res;
+                        toUpdate.add(err);
+                    }
+                }
+                
+                // 4. Bulk DML on Error Records
+                if (!toDelete.isEmpty()) {
+                    delete as user toDelete;
+                }
+                if (!toUpdate.isEmpty()) {
+                    update as user toUpdate;
+                }
             }
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'MetaAdsFormMappingController', 'retryMultipleFailedLeads', e.getMessage());
@@ -431,16 +514,26 @@ public with sharing class MetaAdsFormMappingController {
     public static List<Map<String, String>> getActiveSites() {
         List<Map<String, String>> sitesList = new List<Map<String, String>>();
         try {
-            for (Site site : [SELECT Id, Name FROM Site WHERE Status = 'Active']) {
-                try {
-                    SiteDetail detail = [SELECT SecureUrl FROM SiteDetail WHERE DurableId = :site.Id LIMIT 1];
-                    if (detail != null) {
+            List<Site> activeSites = [SELECT Id, Name FROM Site WHERE Status = 'Active'];
+            Set<Id> siteIds = new Set<Id>();
+            for (Site site : activeSites) {
+                siteIds.add(site.Id);
+            }
+            
+            if (!siteIds.isEmpty()) {
+                Map<Id, SiteDetail> detailMap = new Map<Id, SiteDetail>();
+                for (SiteDetail detail : [SELECT DurableId, SecureUrl FROM SiteDetail WHERE DurableId IN :siteIds]) {
+                    detailMap.put((Id)detail.DurableId, detail);
+                }
+                
+                for (Site site : activeSites) {
+                    if (detailMap.containsKey(site.Id)) {
                         Map<String, String> siteInfo = new Map<String, String>();
                         siteInfo.put('label', site.Name);
-                        siteInfo.put('value', detail.SecureUrl);
+                        siteInfo.put('value', detailMap.get(site.Id).SecureUrl);
                         sitesList.add(siteInfo);
                     }
-                } catch (Exception e) {}
+                }
             }
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'MetaAdsFormMappingController', 'getActiveSites', e.getMessage());

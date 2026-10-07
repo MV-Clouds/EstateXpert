@@ -6,6 +6,8 @@ import getSalesforceLeadFields from '@salesforce/apex/MetaAdsFormMappingControll
 import getExistingMappings from '@salesforce/apex/MetaAdsFormMappingController.getExistingMappings';
 import saveMappingApex from '@salesforce/apex/MetaAdsFormMappingController.saveMapping';
 import deactivateConnection from '@salesforce/apex/MetaAdsTokenController.deactivateConnection';
+import checkConnectionStatus from '@salesforce/apex/MetaAdsTokenController.checkConnectionStatus';
+import getFailedLeadsCountMap from '@salesforce/apex/MetaAdsFormMappingController.getFailedLeadsCountMap';
 import getFailedLeads from '@salesforce/apex/MetaAdsFormMappingController.getFailedLeads';
 import retryFailedLead from '@salesforce/apex/MetaAdsFormMappingController.retryFailedLead';
 import retryMultipleFailedLeads from '@salesforce/apex/MetaAdsFormMappingController.retryMultipleFailedLeads';
@@ -29,13 +31,24 @@ export default class MetaAdsFormMapping extends LightningElement {
     
     @track isLoading = true;
     @track tableData = [];
+    @track shownTableData = [];
+    @track currentPage = 1;
+    @track pageSize = 10;
+    @track visiblePages = 5;
+    @track connectedAccountName = 'Connected';
+    @track connectedAppId = '';
+    @track actualAccountName = '';
+    @track businessName = '';
+    @track systemUserName = '';
+    @track pageName = '';
+    @track connectedDateStr = '';
+    @track isIntegrationError = false;
 
     @track isModalOpen = false;
-    @track isModalLoading = false;
     @track isEditingMode = false;
     @track spinnerLabel = 'Loading forms...';
 
-    @track isWebhookModalOpen = false;
+    @track isWebhookPopoverOpen = false;
     @track siteOptions = [];
     @track selectedSite = '';
 
@@ -48,6 +61,8 @@ export default class MetaAdsFormMapping extends LightningElement {
     @track currentFormFields = [];   // [{ key, label, value, options }]
     @track formsLoaded = false;      // true once forms have been fetched for selected page
     @track availableSalesforceFields = [];
+
+
     @track showAddField = false;
     @track selectedAdditionalField = '';
 
@@ -59,20 +74,27 @@ export default class MetaAdsFormMapping extends LightningElement {
     @track activeFailedLeadId = null;
     failedLeadDataMap = {};
     @track failedLeads = [];
-    @track isRetrying = false;
     selectedFailedLeadsFormId = '';
+    pendingRetryIds = [];  // IDs pending retry after mapping edit
     
     // ─── GETTERS ─────────────────────────────────────────────────────────────
 
-    /** 
-     * @description Checks if failed wizard is on step 1 
+    /**
+     * @description Checks if failed wizard is on step 1
      */
-    get isFailedWizardStep1() { return this.failedWizardStep === 1; }
+    get isFailedWizardStep1() {
+        try { return this.failedWizardStep === 1; } catch (e) { console.error(e); return false; }
+    }
     
     /** 
      * @description Checks if failed wizard is on step 2 
      */
-    get isFailedWizardStep2() { return this.failedWizardStep === 2; }
+    /**
+     * @description Checks if failed wizard is on step 2
+     */
+    get isFailedWizardStep2() {
+        try { return this.failedWizardStep === 2; } catch (e) { console.error(e); return false; }
+    }
 
     /** 
      * @description Checks if all failed leads are selected 
@@ -110,14 +132,14 @@ export default class MetaAdsFormMapping extends LightningElement {
      * @description Page selection is disabled while loading or in edit mode 
      */
     get isPageSelectionDisabled() {
-        try { return this.isModalLoading || this.isEditingMode; } catch (e) { console.error(e); return true; }
+        try { return this.isLoading || this.isEditingMode; } catch (e) { console.error(e); return true; }
     }
 
     /** 
      * @description Form dropdown is disabled while loading OR no page selected OR in edit mode 
      */
     get isFormDropdownDisabled() {
-        try { return this.isModalLoading || !this.selectedPageId || this.isEditingMode; } catch (e) { console.error(e); return true; }
+        try { return this.isLoading || !this.selectedPageId || this.isEditingMode; } catch (e) { console.error(e); return true; }
     }
 
     /** 
@@ -138,7 +160,7 @@ export default class MetaAdsFormMapping extends LightningElement {
      * @description Save is enabled only when a form is selected 
      */
     get isSaveDisabled() {
-        try { return !this.selectedFormId || this.isModalLoading; } catch (e) { console.error(e); return true; }
+        try { return !this.selectedFormId || this.isLoading; } catch (e) { console.error(e); return true; }
     }
 
     /** 
@@ -221,7 +243,7 @@ export default class MetaAdsFormMapping extends LightningElement {
      * @description Checks if action buttons for failed leads should be disabled 
      */
     get isFailedActionDisabled() {
-        try { return !this.hasSelectedFailedLeads || this.isRetrying; } catch (e) { console.error(e); return true; }
+        try { return !this.hasSelectedFailedLeads || this.isLoading; } catch (e) { console.error(e); return true; }
     }
 
     /** 
@@ -231,7 +253,7 @@ export default class MetaAdsFormMapping extends LightningElement {
         try {
             if (!this.failedLeads) return true;
             const selectedCount = this.failedLeads.filter(l => l.selected).length;
-            return selectedCount !== 1 || this.isRetrying;
+            return selectedCount === 0 || this.isLoading;
         } catch (e) { console.error(e); return true; }
     }
 
@@ -250,14 +272,157 @@ export default class MetaAdsFormMapping extends LightningElement {
     }
 
     /** 
+     * @description Gets the label for the failed summary 
+     */
+    get failedSummary() {
+        try {
+            const total = this.failedLeads.length;
+            const selected = this.failedLeads.filter(l => l.selected).length;
+            return `${total} failed lead(s), ${selected} selected`;
+        } catch (e) { console.error(e); return ''; }
+    }
+
+    /** 
+     * @description Checks if there is a pending retry (after edit mapping) 
+     */
+    get hasPendingRetry() {
+        try { return this.pendingRetryIds.length > 0; } catch (e) { return false; }
+    }
+
+    /** 
+     * @description Gets the save button label depending on pending retry state 
+     */
+    get saveButtonLabel() {
+        try {
+            return this.hasPendingRetry ? `Save & Retry (${this.pendingRetryIds.length})` : 'Save Mapping';
+        } catch (e) { return 'Save Mapping'; }
+    }
+
+    /** 
+     * @description Gets the retry banner text 
+     */
+    get retryBannerText() {
+        try {
+            return `Fixing mapping for this form. After saving, ${this.pendingRetryIds.length} selected failed lead(s) will be retried automatically.`;
+        } catch (e) { return ''; }
+    }
+
+    /** 
      * @description Generates the Webhook endpoint URL preview 
      */
     get webhookEndpointPreview() {
         try {
-            if (!this.selectedSite) return '';
+            if (!this.selectedSite) return 'No Active Site Selected';
             let base = this.selectedSite.replace(/\/+$/, '');
             return `${base}/services/apexrest/MVEX/PAGE/webhooks/`;
         } catch (e) { console.error(e); return ''; }
+    }
+
+
+
+    /** 
+     * @description Gets the total number of items for pagination 
+     */
+    get totalItems() {
+        try { return this.tableData ? this.tableData.length : 0; } catch (e) { console.error(e); return 0; }
+    }
+
+    /** 
+     * @description Gets the total number of pages for pagination 
+     */
+    get totalPages() {
+        try { return Math.ceil(this.totalItems / this.pageSize); } catch (e) { console.error(e); return 0; }
+    }
+
+    /** 
+     * @description Determines whether to show ellipsis in pagination 
+     */
+    get showEllipsis() {
+        try { return Math.ceil(this.totalItems / this.pageSize) > this.visiblePages; } catch (e) { console.error(e); return false; }
+    }
+
+    /** 
+     * @description Checks if the current page is the first page 
+     */
+    get isFirstPage() {
+        try { return this.currentPage === 1; } catch (e) { console.error(e); return true; }
+    }
+
+    /** 
+     * @description Checks if the current page is the last page 
+     */
+    get isLastPage() {
+        try { return this.currentPage === Math.ceil(this.totalItems / this.pageSize) || this.totalItems === 0; } catch (e) { console.error(e); return true; }
+    }
+
+    /** 
+     * @description Gets the start index for the current page 
+     */
+    get startIndex() {
+        try { return this.totalItems === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1; } catch (e) { console.error(e); return 0; }
+    }
+
+    /** 
+     * @description Gets the end index for the current page 
+     */
+    get endIndex() {
+        try { return Math.min(this.currentPage * this.pageSize, this.totalItems); } catch (e) { console.error(e); return 0; }
+    }
+    
+    /** 
+     * @description Gets the record count info text to display 
+     */
+    get recordCountInfo() {
+        try {
+            if (this.totalItems === 0) return 'Showing 0 records';
+            return `Showing ${this.startIndex} - ${this.endIndex} of ${this.totalItems}`;
+        } catch (e) { console.error(e); return ''; }
+    }
+
+    /** 
+     * @description Calculates and returns the page numbers array for pagination 
+     */
+    get pageNumbers() {
+        try {
+            const totalPages = this.totalPages;
+            const currentPage = this.currentPage;
+            const visiblePages = this.visiblePages;
+            let pages = [];
+            if (totalPages <= visiblePages) {
+                for (let i = 1; i <= totalPages; i++) {
+                    pages.push({
+                        number: i,
+                        isEllipsis: false,
+                        className: `exp-pagination-button ${i === currentPage ? 'active' : ''}`
+                    });
+                }
+            } else {
+                pages.push({ number: 1, isEllipsis: false, className: `exp-pagination-button ${currentPage === 1 ? 'active' : ''}` });
+                if (currentPage > 3) pages.push({ isEllipsis: true });
+                let start = Math.max(2, currentPage - 1);
+                let end = Math.min(currentPage + 1, totalPages - 1);
+                for (let i = start; i <= end; i++) {
+                    pages.push({ number: i, isEllipsis: false, className: `exp-pagination-button ${i === currentPage ? 'active' : ''}` });
+                }
+                if (currentPage < totalPages - 2) pages.push({ isEllipsis: true });
+                pages.push({ number: totalPages, isEllipsis: false, className: `exp-pagination-button ${currentPage === totalPages ? 'active' : ''}` });
+            }
+            return pages;
+        } catch (e) { console.error(e); return []; }
+    }
+
+    /** 
+     * @description Gets the options for the page size dropdown 
+     */
+    get pageSizeOptions() {
+        try {
+            const sizes = [10, 25, 50, 100];
+            return sizes.map(size => ({
+                label: String(size),
+                value: size,
+                isSelected: this.pageSize === size
+            }));
+        } catch (e) { console.error(e); return []; }
     }
 
     // ─── LIFECYCLE HOOKS ─────────────────────────────────────────────────────
@@ -285,8 +450,29 @@ export default class MetaAdsFormMapping extends LightningElement {
         }
     }
 
+    /**
+     * @description Displays the full-page spinner
+     */
+    showSpinner() {
+        try {
+            this.isLoading = true;
+        } catch(e) { console.error(e); }
+    }
+    
+    /**
+     * @description Hides the full-page spinner
+     */
+    hideSpinner() {
+        try {
+            this.isLoading = false;
+        } catch(e) { console.error(e); }
+    }
+
+    /**
+     * @description Loads initial data including pages, existing mappings, and connection status
+     */
     async loadInitialData() {
-        this.isLoading = true;
+        this.showSpinner();
         try {
             // 1. Get SF Fields
             this.salesforceLeadFields = await getSalesforceLeadFields();
@@ -328,18 +514,44 @@ export default class MetaAdsFormMapping extends LightningElement {
             // For now we assume a single client app id environment
             this.currentClientAppId = 'default_app_id'; // We can adapt this if multi-app is needed
 
-            this.buildTableData();
+            const statusRes = await checkConnectionStatus();
+            if (statusRes && statusRes.success) {
+                this.isIntegrationError = false;
+                this.connectedAccountName = 'Connected';
+                this.connectedAppId = statusRes.client_app_id;
+                this.actualAccountName = statusRes.account_name; // Fallback to whatever was resolved as main
+                this.businessName = statusRes.business_name;
+                this.systemUserName = statusRes.system_user;
+                this.pageName = statusRes.page_name;
+                
+                if (statusRes.connected_date) {
+                    const d = new Date(statusRes.connected_date);
+                    this.connectedDateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                }
+            } else {
+                this.isIntegrationError = true;
+            }
+
+            const failedCountRes = await getFailedLeadsCountMap();
+            
+            this.buildTableData(failedCountRes || {});
             
         } catch (error) {
             console.error('Error loading data', error);
+            this.isIntegrationError = true;
             this.showToast('Error', 'Failed to load initial data.', 'error');
         } finally {
-            this.isLoading = false;
+            this.hideSpinner();
         }
     }
 
-    buildTableData() {
-        let data = [];
+    /**
+     * @description Builds the data structure for the mapping table, injecting failed lead counts.
+     * @param {Object} failedCountMap - A map of form IDs to failed lead counts.
+     */
+    buildTableData(failedCountMap = {}) {
+        try {
+            let data = [];
         let pageIndex = 1;
         // traverse fullMappingJson
         for (let pId in this.fullMappingJson) {
@@ -366,11 +578,6 @@ export default class MetaAdsFormMapping extends LightningElement {
             let formIndex = 1;
             for (let fId in formsObj) {
                 let formVal = formsObj[fId];
-                // Check if old format (formVal is a string/object mapping instead of having 'mappings')
-                // Wait, if it's the old format but nested under clientAppId, pId would be the clientAppId!
-                // Let's migrate clientAppId logic in loadInitialData, or handle it gracefully.
-                // If the root key is NOT a numeric Page ID but rather 'default_app_id', this might break.
-                // I will add a migration step in loadInitialData to flatten it if it has a clientAppId.
                 
                 let isFormNewFormat = formVal.mappings !== undefined;
                 let formName = isFormNewFormat ? formVal.formName : 'Form ID: ' + fId;
@@ -381,6 +588,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                     if (fData) formName = fData.name;
                 }
                 
+                let fFailedCount = failedCountMap[fId] || 0;
+                
                 pageRow.forms.push({
                     index: formIndex++,
                     id: fId + '_' + pId,
@@ -388,15 +597,33 @@ export default class MetaAdsFormMapping extends LightningElement {
                     pageId: pId,
                     formName: formName,
                     mappedCount: Object.keys(mappings).length,
-                    mappings: mappings
+                    mappings: mappings,
+                    failedCount: fFailedCount,
+                    hasFailedLeads: fFailedCount > 0,
+                    failedPillLabel: fFailedCount + ' Failed'
                 });
             }
             data.push(pageRow);
         }
-        this.tableData = data;
+            this.tableData = data;
+            this.updateShownData();
+        } catch (e) {
+            console.error('Error in buildTableData', e);
+        }
     }
 
-
+    /**
+     * @description Re-fetches the failed leads count and rebuilds the table data
+     */
+    async refreshTableData() {
+        try {
+            const failedCountRes = await getFailedLeadsCountMap();
+            this.buildTableData(failedCountRes || {});
+        } catch (error) {
+            console.error('Error refreshing table data', error);
+            this.buildTableData({});
+        }
+    }
 
     // --- Modal Logic ---
 
@@ -421,12 +648,26 @@ export default class MetaAdsFormMapping extends LightningElement {
     }
 
     /**
-     * @description Closes the mapping modal
+     * @description Closes the mapping modal. If a pending retry was in progress, reopen the failed leads modal.
      */
     closeModal() {
-        this.isModalOpen = false;
+        try {
+            this.isModalOpen = false;
+            this.isEditingMode = false;
+            // If user cancels out of edit-mapping-and-retry, go back to failed leads modal
+            if (this.pendingRetryIds.length > 0) {
+                this.pendingRetryIds = [];
+                this.isFailedLeadsModalOpen = true;
+            }
+        } catch (e) {
+            console.error('Error in closeModal', e);
+        }
     }
 
+    /**
+     * @description Handles selecting a Meta Page from the wizard.
+     * @param {Event} event 
+     */
     async handlePageSelection(event) {
         try {
             this.selectedPageId = event.detail.value;
@@ -437,7 +678,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                 return;
             }
 
-            this.isModalLoading = true;
+            this.showSpinner();
             this.spinnerLabel   = 'Loading forms...';
             this.formsLoaded    = false;
             const formsRes = await getLeadForms({ pageId: this.selectedPageId });
@@ -453,7 +694,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             this.showToast('Error', 'Error fetching forms.', 'error');
             this.formsLoaded = true;
         } finally {
-            this.isModalLoading = false;
+            this.hideSpinner();
         }
     }
 
@@ -507,6 +748,12 @@ export default class MetaAdsFormMapping extends LightningElement {
                     const isAlreadyMapped = savedFieldKeys.includes(key);
 
                     return (required || isDefault || isAlreadyMapped);
+                }).sort((a, b) => {
+                    const aReq = a.required === 'true';
+                    const bReq = b.required === 'true';
+                    if (aReq && !bReq) return -1;
+                    if (!aReq && bReq) return 1;
+                    return 0;
                 });
 
                 this.currentFormFields = fieldsToDisplay.map(sf => {
@@ -518,19 +765,21 @@ export default class MetaAdsFormMapping extends LightningElement {
 
                     let required = sf.required === 'true';
 
-                    let sourceType = savedData.sourceType || '';
+                    let sourceType = savedData.sourceType || SOURCE_META;
                     let customVal = savedData.customValue || '';
                     let metaVal = savedData.metaField || '';
                     
-                    if (!sourceType && required) {
+                    if (sourceType === SOURCE_META && !metaVal) {
                         metaVal = this.autoMatchMetaField(key, options);
-                        if (metaVal) sourceType = SOURCE_META;
                     }
 
                     return {
                         key: key,
                         label: sf.label.split(' (')[0],
                         sourceType: sourceType,
+                        metaTabClass: sourceType === SOURCE_META ? 'mapping-pill-btn active' : 'mapping-pill-btn',
+                        customTabClass: sourceType === SOURCE_CUSTOM ? 'mapping-pill-btn active' : 'mapping-pill-btn',
+                        sfOptions: [{ label: sf.label.split(' (')[0], value: key }],
                         sourceOptions: [
                             { label: 'Do Not Map', value: '' },
                             { label: SOURCE_META, value: SOURCE_META },
@@ -546,8 +795,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                         required: required,
                         showRequiredError: required && !sourceType,
                         rowClass: required && !sourceType
-                            ? 'mapping-row mapping-row--required mapping-row--error'
-                            : (required ? 'mapping-row mapping-row--required' : 'mapping-row')
+                            ? 'mapping-row-card mapping-row-card--required mapping-row-card--error'
+                            : (required ? 'mapping-row-card mapping-row-card--required' : 'mapping-row-card')
                     };
                 });
 
@@ -684,8 +933,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                         isCustomValue: type === SOURCE_CUSTOM,
                         showRequiredError: f.required && !isMapped,
                         rowClass: (f.required && !isMapped)
-                            ? 'mapping-row mapping-row--required mapping-row--error'
-                            : (f.required ? 'mapping-row mapping-row--required' : 'mapping-row')
+                            ? 'mapping-row-card mapping-row-card--required mapping-row-card--error'
+                            : (f.required ? 'mapping-row-card mapping-row-card--required' : 'mapping-row-card')
                     });
                 }
                 return f;
@@ -716,8 +965,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                         failedLeadValue: leadVal,
                         showRequiredError: f.required && !isMapped,
                         rowClass: (f.required && !isMapped)
-                            ? 'mapping-row mapping-row--required mapping-row--error'
-                            : (f.required ? 'mapping-row mapping-row--required' : 'mapping-row')
+                            ? 'mapping-row-card mapping-row-card--required mapping-row-card--error'
+                            : (f.required ? 'mapping-row-card mapping-row-card--required' : 'mapping-row-card')
                     });
                 }
                 return f;
@@ -743,14 +992,67 @@ export default class MetaAdsFormMapping extends LightningElement {
                         customValue: customValue,
                         showRequiredError: f.required && !isMapped,
                         rowClass: (f.required && !isMapped)
-                            ? 'mapping-row mapping-row--required mapping-row--error'
-                            : (f.required ? 'mapping-row mapping-row--required' : 'mapping-row')
+                            ? 'mapping-row-card mapping-row-card--required mapping-row-card--error'
+                            : (f.required ? 'mapping-row-card mapping-row-card--required' : 'mapping-row-card')
                     });
                 }
                 return f;
             });
         } catch (e) {
             console.error('Error in handleCustomValueChange', e);
+        }
+    }
+
+    /**
+     * @description Handles clicking pill toggle to switch between Meta and Custom
+     * @param {Event} event 
+     */
+    handleSourceTypeChangeFromTab(event) {
+        try {
+            const sfKey = event.target.dataset.key;
+            const type = event.target.dataset.type;
+
+            this.currentFormFields = this.currentFormFields.map(f => {
+                if (f.key === sfKey) {
+                    return Object.assign({}, f, {
+                        sourceType: type,
+                        isMetaField: type === SOURCE_META,
+                        isCustomValue: type === SOURCE_CUSTOM,
+                        metaTabClass: type === SOURCE_META ? 'mapping-pill-btn active' : 'mapping-pill-btn',
+                        customTabClass: type === SOURCE_CUSTOM ? 'mapping-pill-btn active' : 'mapping-pill-btn',
+                        showRequiredError: false,
+                        rowClass: f.required ? 'mapping-row-card mapping-row-card--required' : 'mapping-row-card'
+                    });
+                }
+                return f;
+            });
+        } catch (e) {
+            console.error('Error in handleSourceTypeChangeFromTab', e);
+        }
+    }
+
+    /**
+     * @description Removes a mapping row
+     * @param {Event} event 
+     */
+    handleRemoveField(event) {
+        try {
+            const sfKey = event.currentTarget.dataset.key;
+            this.currentFormFields = this.currentFormFields.filter(f => f.key !== sfKey);
+        } catch (e) {
+            console.error('Error in handleRemoveField', e);
+        }
+    }
+
+    /**
+     * @description Placeholder for sf combobox change
+     * @param {Event} event 
+     */
+    handleSfFieldChange(event) {
+        try {
+            // Just keeping it as placeholder if we need it
+        } catch (e) {
+            console.error('Error in handleSfFieldChange', e);
         }
     }
 
@@ -772,8 +1074,8 @@ export default class MetaAdsFormMapping extends LightningElement {
                     customValue: recordId,
                     showRequiredError: field.required && !isMapped,
                     rowClass: (field.required && !isMapped)
-                        ? 'mapping-row mapping-row--required mapping-row--error'
-                        : (field.required ? 'mapping-row mapping-row--required' : 'mapping-row')
+                        ? 'mapping-row-card mapping-row-card--required mapping-row-card--error'
+                        : (field.required ? 'mapping-row-card mapping-row-card--required' : 'mapping-row-card')
                 });
             });
         } catch (e) {
@@ -797,15 +1099,23 @@ export default class MetaAdsFormMapping extends LightningElement {
      * @description Shows the add field input section.
      */
     handleShowAddField() {
-        this.showAddField = true;
+        try {
+            this.showAddField = true;
+        } catch (e) {
+            console.error('Error in handleShowAddField', e);
+        }
     }
 
     /**
      * @description Hides the add field input section.
      */
     handleCancelAddField() {
-        this.selectedAdditionalField = '';
-        this.showAddField = false;
+        try {
+            this.selectedAdditionalField = '';
+            this.showAddField = false;
+        } catch (e) {
+            console.error('Error in handleCancelAddField', e);
+        }
     }
 
     /**
@@ -833,7 +1143,10 @@ export default class MetaAdsFormMapping extends LightningElement {
                 key: salesforceField.value,
                 label: salesforceField.label,
                 required: false,
-                sourceType: '',
+                sourceType: SOURCE_META,
+                metaTabClass: 'mapping-pill-btn active',
+                customTabClass: 'mapping-pill-btn',
+                sfOptions: [{ label: salesforceField.label.split(' (')[0], value: salesforceField.value }],
                 googleField: '',
                 customValue: '',
                 metaField: '',
@@ -843,13 +1156,14 @@ export default class MetaAdsFormMapping extends LightningElement {
                     { label: SOURCE_META, value: SOURCE_META },
                     { label: SOURCE_CUSTOM, value: SOURCE_CUSTOM }
                 ],
-                isMetaField: false,
+                isMetaField: true,
                 isCustomValue: false,
                 isReferenceField: this.isReferenceField(salesforceField),
                 referenceTo: salesforceField.referenceTo || '',
                 showRequiredError: false,
-                rowClass: 'mapping-row'
+                rowClass: 'mapping-row-card'
             };
+
 
             this.currentFormFields = [...this.currentFormFields, newField];
             this.handleCancelAddField();
@@ -872,6 +1186,18 @@ export default class MetaAdsFormMapping extends LightningElement {
             });
             
             if (unmappedRequired.length > 0) {
+                // Update UI to show error borders on unmapped required fields
+                this.currentFormFields = this.currentFormFields.map(f => {
+                    const isMapped = (f.sourceType === SOURCE_META && f.metaField) || (f.sourceType === SOURCE_CUSTOM && f.customValue?.trim());
+                    if (f.required && !isMapped) {
+                        return Object.assign({}, f, {
+                            showRequiredError: true,
+                            rowClass: 'mapping-row-card mapping-row-card--required mapping-row-card--error'
+                        });
+                    }
+                    return f;
+                });
+
                 const names = unmappedRequired.join(', ');
                 this.showToast('Validation Error',
                     `The following required Salesforce fields must be mapped before saving: ${names}`,
@@ -925,22 +1251,51 @@ export default class MetaAdsFormMapping extends LightningElement {
                 mappings: formMapping
             };
 
-            this.isModalLoading = true;
+            this.showSpinner();
             try {
                 const jsonStr = JSON.stringify(this.fullMappingJson);
                 const result = await saveMappingApex({ mappingJson: jsonStr, pageId: this.selectedPageId });
                 
                 if (result && result.success) {
-                    this.showToast('Success', 'Form mapping saved and webhook subscribed successfully.', 'success');
-                    this.buildTableData();
-                    this.closeModal();
+                    await this.refreshTableData();
+                    this.isModalOpen = false;
+                    this.isEditingMode = false;
+
+                    if (this.pendingRetryIds.length > 0) {
+                        // Bulk retry the selected leads with the updated mapping
+                        const retryIds = [...this.pendingRetryIds];
+                        this.pendingRetryIds = [];
+                        this.isFailedLeadsModalOpen = true;
+                        this.showSpinner();
+                        try {
+                            const results = await retryMultipleFailedLeads({ errorRecordIds: retryIds });
+                            let successCount = 0;
+                            let errorCount = 0;
+                            for (let id in results) {
+                                if (results[id] === 'Success') successCount++;
+                                else errorCount++;
+                            }
+                            await this.loadFailedLeads();
+                            if (errorCount === 0) {
+                                this.showToast('Success', `Mapping saved & ${successCount} lead(s) retried successfully.`, 'success');
+                            } else {
+                                this.showToast('Retry Completed', `${successCount} success(es), ${errorCount} failure(s). Check the list for details.`, 'warning');
+                            }
+                        } catch (err) {
+                            this.showToast('Error', err.body ? err.body.message : err.message, 'error');
+                        } finally {
+                            this.hideSpinner();
+                        }
+                    } else {
+                        this.showToast('Success', 'Form mapping saved and webhook subscribed successfully.', 'success');
+                    }
                 } else {
                     this.showToast('Error', result.message || 'Error saving mapping.', 'error');
                 }
             } catch (error) {
                 this.showToast('Error', error.body ? error.body.message : error.message, 'error');
             } finally {
-                this.isModalLoading = false;
+                this.hideSpinner();
             }
         } catch (e) {
             console.error('Error in saveMapping', e);
@@ -960,10 +1315,13 @@ export default class MetaAdsFormMapping extends LightningElement {
             if (row) {
                 row.isExpanded = !row.isExpanded;
             }
+            this.updateShownData();
         } catch (e) {
             console.error('Error in handleToggleRow', e);
         }
     }
+
+
 
     /**
      * @description Initiates the edit flow for a specific mapping row.
@@ -1026,7 +1384,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             this.formsLoaded       = false;
             this.isEditingMode     = true;
             this.isModalOpen       = true;
-            this.isModalLoading    = true;
+            this.showSpinner();
             this.spinnerLabel      = 'Loading form fields...';
 
             try {
@@ -1041,7 +1399,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                 this.showToast('Error', 'Failed to load form details for editing.', 'error');
                 this.closeModal();
             } finally {
-                this.isModalLoading = false;
+                this.hideSpinner();
             }
         } catch (e) {
             console.error('Error in editRow', e);
@@ -1054,7 +1412,7 @@ export default class MetaAdsFormMapping extends LightningElement {
      */
     async deleteRow(row) {
         try {
-            this.isLoading = true;
+            this.showSpinner();
             if (this.fullMappingJson[row.pageId]) {
                 let pageObj = this.fullMappingJson[row.pageId];
                 let isNewFormat = pageObj.forms !== undefined;
@@ -1073,7 +1431,7 @@ export default class MetaAdsFormMapping extends LightningElement {
                 
                 if (result && result.success) {
                     this.showToast('Success', 'Mapping deleted.', 'success');
-                    this.buildTableData();
+                    await this.refreshTableData();
                 } else {
                     this.showToast('Error', 'Failed to delete mapping.', 'error');
                 }
@@ -1081,7 +1439,7 @@ export default class MetaAdsFormMapping extends LightningElement {
         } catch (e) {
             this.showToast('Error', e.message, 'error');
         } finally {
-            this.isLoading = false;
+            this.hideSpinner();
         }
     }
 
@@ -1102,14 +1460,14 @@ export default class MetaAdsFormMapping extends LightningElement {
      */
     async confirmDeactivate() {
         try {
-            this.isLoading = true;
+            this.showSpinner();
             try {
                 const result = await deactivateConnection();
                 if (result && result.success) {
                     this.showToast('Success', 'Integration deactivated successfully.', 'success');
                     this.fullMappingJson = {};
                     this.availablePages = [];
-                    this.buildTableData();
+                    await this.refreshTableData();
                     this.dispatchEvent(new CustomEvent('mvexdeactivated'));
                 } else {
                     this.showToast('Error', result?.message || 'Failed to deactivate integration.', 'error');
@@ -1117,7 +1475,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             } catch (error) {
                 this.showToast('Error', error.body ? error.body.message : error.message, 'error');
             } finally {
-                this.isLoading = false;
+                this.hideSpinner();
             }
         } catch (e) {
             console.error('Error in confirmDeactivate', e);
@@ -1195,6 +1553,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             this.failedWizardStep = 1;
             this.activeFailedLeadId = null;
             this.failedLeadDataMap = {};
+            this.pendingRetryIds = [];
             this.isFailedLeadsModalOpen = true;
             await this.loadFailedLeads();
         } catch (e) {
@@ -1212,6 +1571,8 @@ export default class MetaAdsFormMapping extends LightningElement {
             this.failedWizardStep = 1;
             this.activeFailedLeadId = null;
             this.failedLeadDataMap = {};
+            this.pendingRetryIds = [];
+            this.refreshTableData();
         } catch (e) {
             console.error('Error in closeFailedLeadsModal', e);
         }
@@ -1222,7 +1583,7 @@ export default class MetaAdsFormMapping extends LightningElement {
      */
     async loadFailedLeads() {
         try {
-            this.isRetrying = true;
+            this.showSpinner();
             try {
                 const results = await getFailedLeads({ formId: this.selectedFailedLeadsFormId });
                 this.failedLeads = results.map((r, index) => {
@@ -1246,7 +1607,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             } catch (error) {
                 this.showToast('Error', 'Failed to load error records', 'error');
             } finally {
-                this.isRetrying = false;
+                this.hideSpinner();
             }
         } catch (e) {
             console.error('Error in loadFailedLeads', e);
@@ -1293,7 +1654,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             const selectedIds = this.failedLeads.filter(l => l.selected).map(l => l.Id);
             if (selectedIds.length === 0) return;
 
-            this.isRetrying = true;
+            this.showSpinner();
             try {
                 const results = await retryMultipleFailedLeads({ errorRecordIds: selectedIds });
                 let successCount = 0;
@@ -1311,7 +1672,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             } catch (error) {
                 this.showToast('Error', error.body ? error.body.message : error.message, 'error');
             } finally {
-                this.isRetrying = false;
+                this.hideSpinner();
             }
         } catch (e) {
             console.error('Error in retrySelectedFailedLeads', e);
@@ -1326,7 +1687,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             const selectedIds = this.failedLeads.filter(l => l.selected).map(l => l.Id);
             if (selectedIds.length === 0) return;
 
-            this.isRetrying = true;
+            this.showSpinner();
             try {
                 const success = await deleteFailedLeads({ errorRecordIds: selectedIds });
                 if (success) {
@@ -1338,7 +1699,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             } catch (error) {
                 this.showToast('Error', error.body ? error.body.message : error.message, 'error');
             } finally {
-                this.isRetrying = false;
+                this.hideSpinner();
             }
         } catch (e) {
             console.error('Error in discardSelectedFailedLeads', e);
@@ -1346,33 +1707,20 @@ export default class MetaAdsFormMapping extends LightningElement {
     }
 
     /**
-     * @description Transitions to the second step of the failed leads wizard to review its data.
-     * @param {Event} event 
+     * @description Transitions to the edit mapping step to fix and retry multiple selected failed leads.
      */
-    async reviewSelectedFailedLead(event) {
+    async reviewSelectedFailedLead() {
         try {
-            const selected = this.failedLeads.find(l => l.selected);
-            if (!selected) return;
+            const selectedIds = this.failedLeads.filter(l => l.selected).map(l => l.Id);
+            if (!selectedIds.length) return;
 
-            const leadId = selected.Id;
-            this.activeFailedLeadId = leadId;
-            this.failedWizardStep = 2;
-            
+            this.pendingRetryIds = selectedIds;
+            this.isFailedLeadsModalOpen = false;
+
+            // Use first selected lead's payload to determine pageId / formId context
+            const firstLead = this.failedLeads.find(l => l.selected);
             let payload = {};
-            try {
-                payload = JSON.parse(selected.Body);
-            } catch (e) {
-                console.error('Failed to parse error body', e);
-            }
-
-            this.failedLeadDataMap = {};
-            if (payload.leadData && payload.leadData.field_data) {
-                payload.leadData.field_data.forEach(field => {
-                    if (field.name && field.values && field.values.length > 0) {
-                        this.failedLeadDataMap[field.name] = field.values[0];
-                    }
-                });
-            }
+            try { payload = JSON.parse(firstLead.Body); } catch (e) {}
 
             let pageId = payload.pageId;
             if (!pageId) {
@@ -1383,13 +1731,13 @@ export default class MetaAdsFormMapping extends LightningElement {
                     }
                 }
             }
-            
+
             this.selectedPageId = pageId;
             this.selectedFormId = this.selectedFailedLeadsFormId;
 
             if (!this.availableForms || !this.availableForms.some(f => String(f.id) === String(this.selectedFormId))) {
                 try {
-                    this.isRetrying = true;
+                    this.showSpinner();
                     const formsRes = await getLeadForms({ pageId: this.selectedPageId });
                     if (formsRes && formsRes.success && formsRes.forms) {
                         this.availableForms = formsRes.forms;
@@ -1397,22 +1745,15 @@ export default class MetaAdsFormMapping extends LightningElement {
                 } catch (e) {
                     console.error(e);
                 } finally {
-                    this.isRetrying = false;
+                    this.hideSpinner();
                 }
             }
 
             this.handleFormSelection({ detail: { value: this.selectedFormId } });
-            
-            this.currentFormFields = this.currentFormFields.map(f => {
-                let leadValue = '';
-                if (f.sourceType === SOURCE_META && f.metaField) {
-                    leadValue = this.failedLeadDataMap[f.metaField] || '';
-                }
-                return {
-                    ...f,
-                    failedLeadValue: leadValue
-                };
-            });
+
+            // Open the main mapping modal with edit mode
+            this.isEditingMode = true;
+            this.isModalOpen = true;
         } catch (e) {
             console.error('Error in reviewSelectedFailedLead', e);
         }
@@ -1477,7 +1818,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             
             tempMappingJson[this.selectedPageId].forms[this.selectedFormId] = { formName: formName, mappings: formMapping };
 
-            this.isRetrying = true;
+            this.showSpinner();
             try {
                 const jsonStr = JSON.stringify(tempMappingJson);
                 
@@ -1492,7 +1833,7 @@ export default class MetaAdsFormMapping extends LightningElement {
             } catch (error) {
                 this.showToast('Error', error.body ? error.body.message : error.message, 'error');
             } finally {
-                this.isRetrying = false;
+                this.hideSpinner();
             }
         } catch (e) {
             console.error('Error in saveAndRetryFailedLead', e);
@@ -1502,31 +1843,30 @@ export default class MetaAdsFormMapping extends LightningElement {
     // --- Webhook Modal ---
 
     /**
-     * @description Opens the modal displaying webhook info and active sites.
+     * @description Toggles the webhook popover and fetches sites if needed.
      */
-    async openWebhookModal() {
+    async toggleWebhookPopover() {
+        if (this.isWebhookPopoverOpen) {
+            this.isWebhookPopoverOpen = false;
+            return;
+        }
+
         try {
-            this.isLoading = true;
-            try {
+            if (!this.siteOptions || this.siteOptions.length === 0) {
+                this.showSpinner();
                 const sites = await getActiveSites();
                 this.siteOptions = (sites || []).map(s => ({ label: s.label, value: s.value }));
-                this.selectedSite = '';
-                this.isWebhookModalOpen = true;
-            } catch (e) {
-                this.showToast('Error', 'Failed to fetch Force.com sites.', 'error');
-            } finally {
-                this.isLoading = false;
+                if (this.siteOptions.length > 0) {
+                    this.selectedSite = this.siteOptions[0].value;
+                }
             }
+            this.isWebhookPopoverOpen = true;
         } catch (e) {
-            console.error('Error in openWebhookModal', e);
+            console.error('Error in toggleWebhookPopover', e);
+            this.showToast('Error', 'Failed to fetch Force.com sites.', 'error');
+        } finally {
+            this.hideSpinner();
         }
-    }
-
-    /**
-     * @description Closes the webhook modal.
-     */
-    closeWebhookModal() {
-        this.isWebhookModalOpen = false;
     }
 
     /**
@@ -1534,7 +1874,11 @@ export default class MetaAdsFormMapping extends LightningElement {
      * @param {Event} event 
      */
     handleSiteChange(event) {
-        this.selectedSite = event.detail.value;
+        try {
+            this.selectedSite = event.detail.value;
+        } catch (e) {
+            console.error('Error in handleSiteChange', e);
+        }
     }
 
     /**
@@ -1548,12 +1892,15 @@ export default class MetaAdsFormMapping extends LightningElement {
                 navigator.clipboard.writeText(this.webhookEndpointPreview)
                     .then(() => {
                         this.showToast('Success', 'Webhook URL copied to clipboard!', 'success');
+                        this.isWebhookPopoverOpen = false;
                     })
                     .catch(err => {
                         this.fallbackCopyTextToClipboard(this.webhookEndpointPreview);
+                        this.isWebhookPopoverOpen = false;
                     });
             } else {
                 this.fallbackCopyTextToClipboard(this.webhookEndpointPreview);
+                this.isWebhookPopoverOpen = false;
             }
         } catch (e) {
             console.error('Error in handleCopyWebhook', e);
@@ -1581,6 +1928,98 @@ export default class MetaAdsFormMapping extends LightningElement {
             document.body.removeChild(textArea);
         } catch (e) {
             console.error('Error in fallbackCopyTextToClipboard', e);
+        }
+    }
+
+    // --- Pagination Logic ---
+
+    /**
+     * @description Updates the shown data in the table based on the current page and page size
+     */
+    updateShownData() {
+        try {
+            const startIndex = (this.currentPage - 1) * this.pageSize;
+            const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
+            this.shownTableData = this.tableData.slice(startIndex, endIndex);
+        } catch (e) {
+            console.error('Error in updateShownData', e);
+        }
+    }
+
+    /**
+     * @description Scrolls to the top of the table div
+     */
+    scrollToTop() {
+        try {
+            const tableDiv = this.template.querySelector('.meta-table-content') || this.template.querySelector('.exp-table-content');
+            if (tableDiv) {
+                tableDiv.scrollTop = 0;
+            }
+        } catch (error) {
+            console.error('Error in scrollToTop', error);
+        }
+    }
+
+    /**
+     * @description Handles clicking the previous page button
+     */
+    handlePrevious() {
+        try {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+                this.updateShownData();
+                this.scrollToTop();
+            }
+        } catch (e) {
+            console.error('Error in handlePrevious', e);
+        }
+    }
+
+    /**
+     * @description Handles clicking the next page button
+     */
+    handleNext() {
+        try {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+                this.updateShownData();
+                this.scrollToTop();
+            }
+        } catch (e) {
+            console.error('Error in handleNext', e);
+        }
+    }
+
+    /**
+     * @description Handles direct clicking on a page number
+     */
+    handlePageChange(event) {
+        try {
+            const selectedPage = parseInt(event.currentTarget.dataset.id, 10);
+            if (selectedPage !== this.currentPage) {
+                this.currentPage = selectedPage;
+                this.updateShownData();
+                this.scrollToTop();
+            }
+        } catch (e) {
+            console.error('Error in handlePageChange', e);
+        }
+    }
+
+    /**
+     * @description Handles changing the page size limit
+     */
+    handlePageSizeChange(event) {
+        try {
+            const value = parseInt(event.target.value, 10);
+            if (!isNaN(value) && this.pageSize !== value) {
+                this.pageSize = value;
+                this.currentPage = 1;
+                this.updateShownData();
+                this.scrollToTop();
+            }
+        } catch (e) {
+            console.error('Error in handlePageSizeChange', e);
         }
     }
 }

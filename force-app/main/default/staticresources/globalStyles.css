@@ -508,6 +508,7 @@
   scroll-behavior: smooth;
   scrollbar-width: thin;
   scrollbar-color: #0170d27d transparent;
+  border-radius: 8px
 }
 
 .exp-table-content .slds-table th {
@@ -548,7 +549,7 @@
 }
 
 .exp-table-content tbody tr:nth-child(odd) {
-  background-color: aliceblue;
+  background-color: #f0f8ff;
 }
 
 .exp-table-content table tbody tr:hover td {
@@ -898,7 +899,6 @@
 .exp-accordion-wrapper {
     margin: 12px;
     padding: 16px;
-    background-color: #f6f9fc;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
     animation: expAccordionReveal 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -933,7 +933,7 @@
 .exp-accordion-badge {
     background-color: #dbeafe;
     color: #1e3a8a;
-    padding: 2px 8px;
+    padding: 5px 8px;
     border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
@@ -947,14 +947,32 @@
 }
 
 .exp-accordion-table-content .slds-table th {
-    background: rgb(211 232 251 / 1) !important;
+    background:#f0f8ff !important;
     color: #1e3a8a !important;
     text-transform: uppercase;
     font-size: 12px !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     height: 40px !important;
 }
 
 .exp-accordion-table-content .slds-table td {
     background: #ffffff !important;
+}
+
+/* Hovering anywhere inside the accordion must not tint the nested table; only the hovered inner row. */
+.exp-table-content table tbody tr.accordion-row:hover td.no-padding-td {
+    background-color: transparent !important;
+}
+
+.exp-table-content table tbody tr.accordion-row:hover .exp-accordion-table-content td {
+    background-color: #ffffff !important;
+}
+
+.exp-table-content table tbody tr.accordion-row .exp-accordion-table-content tbody tr:hover > td {
+    background-color: #ebf3f6 !important;
+}
+
+.exp-table-content tbody tr.accordion-row, 
+.exp-table-content tbody tr.accordion-row:nth-child(odd) {
+    background-color: #ffffff !important;
 }

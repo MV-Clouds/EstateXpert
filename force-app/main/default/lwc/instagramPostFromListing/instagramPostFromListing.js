@@ -98,10 +98,27 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
     * Last modified by : Rachit Shah
     */
     connectedCallback() {
+        this.hideStandardCloseButton();
         loadStyle(this, globalStyles);
         this.getS3ConfigDataAsync();
         this.checkInstagramCredentials();
 
+    }
+
+    disconnectedCallback() {
+        if (this.styleElement) {
+            this.styleElement.remove();
+        }
+    }
+
+    hideStandardCloseButton() {
+        this.styleElement = document.createElement('style');
+        this.styleElement.innerHTML = `
+            .slds-modal__close {
+                display: none !important;
+            }
+        `;
+        document.head.appendChild(this.styleElement);
     }
 
     renderedCallback() {

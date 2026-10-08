@@ -18,7 +18,7 @@
                         appId: appId,
                         autoLogAppEvents: true,
                         xfbml: true,
-                        version: '{!JSENCODE(apiVersion)}' || 'v21.0'
+                        version: '{!JSENCODE(apiVersion)}' || 'v24.0'
                     });
                     console.log('[WhatsApp] FB SDK Initialized successfully.');
                 } else {
@@ -984,8 +984,9 @@
                                                 <line x1="12" y1="16" x2="12" y2="12"></line>
                                                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
                                             </svg>
-                                            <strong>Note:</strong> Ensure you have administrator access to your Meta
-                                            Business Suite before proceeding.
+                                            <strong>Note:</strong> It might take 3-5 minutes to process after
+                                            connecting as changes may take time to save. Ensure you have administrator
+                                            access to your Meta Business Suite before proceeding.
                                         </div>
                                     </div>
                                 </div>

@@ -458,6 +458,7 @@
                     opacity: 0;
                     transform: translateY(-6px);
                 }
+
                 to {
                     opacity: 1;
                     transform: translateY(0);
@@ -469,6 +470,7 @@
                     opacity: 1;
                     transform: translateY(0);
                 }
+
                 to {
                     opacity: 0;
                     transform: translateY(-6px);
@@ -860,9 +862,10 @@
                                     </svg>
                                     <div class="info-content">
                                         <p class="info-title error-title">Configuration Missing</p>
-                                        <p class="info-text error-text">The WhatsApp Business integration configuration is
+                                        <p class="info-text error-text">The WhatsApp Business integration configuration
+                                            is
                                             missing. Please ask your administrator to configure the Tech Provider App
-                                            credentials in Custom Metadata (WBConnect_Configuration__mdt) first.</p>
+                                            credentials in Custom Metadata (OAuth_Configuration__mdt) first.</p>
                                     </div>
                                 </div>
                             </apex:outputPanel>
@@ -890,7 +893,8 @@
                                         </div>
                                     </div>
 
-                                    <button type="button" class="connect-btn" id="connect-btn" onclick="launchWhatsAppSignup()">
+                                    <button type="button" class="connect-btn" id="connect-btn"
+                                        onclick="launchWhatsAppSignup()">
                                         <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
                                             xmlns="http://www.w3.org/2000/svg">
                                             <path fill-rule="evenodd" clip-rule="evenodd"
@@ -913,13 +917,15 @@
 
                                     <!-- Inline Error Alert Banner -->
                                     <div class="inline-error-banner" id="error-message-container">
-                                        <svg class="inline-error-icon" width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                                        <svg class="inline-error-icon" width="16" height="16" viewBox="0 0 20 20"
+                                            fill="currentColor">
                                             <path fill-rule="evenodd"
                                                 d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
                                                 clip-rule="evenodd" />
                                         </svg>
                                         <span class="inline-error-text" id="error-message"></span>
-                                        <button type="button" class="inline-error-close" onclick="hideError()" title="Dismiss">&times;</button>
+                                        <button type="button" class="inline-error-close" onclick="hideError()"
+                                            title="Dismiss">&times;</button>
                                     </div>
                                 </div>
 
@@ -940,30 +946,33 @@
                                         <ul class="info-list">
                                             <li class="info-list-item">
                                                 <svg class="info-list-icon" width="16" height="16" viewBox="0 0 24 24"
-                                                    fill="none" stroke="#0176D3" stroke-width="2"
-                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    fill="none" stroke="#0176D3" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
                                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                                                     <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                                 </svg>
-                                                Connect your WhatsApp Business Account (WABA) seamlessly to your workspace.
+                                                Connect your WhatsApp Business Account (WABA) seamlessly to your
+                                                workspace.
                                             </li>
                                             <li class="info-list-item">
                                                 <svg class="info-list-icon" width="16" height="16" viewBox="0 0 24 24"
-                                                    fill="none" stroke="#0176D3" stroke-width="2"
-                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    fill="none" stroke="#0176D3" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
                                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                                                     <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                                 </svg>
-                                                Send and receive customer messages directly from Salesforce in real time.
+                                                Send and receive customer messages directly from Salesforce in real
+                                                time.
                                             </li>
                                             <li class="info-list-item">
                                                 <svg class="info-list-icon" width="16" height="16" viewBox="0 0 24 24"
-                                                    fill="none" stroke="#0176D3" stroke-width="2"
-                                                    stroke-linecap="round" stroke-linejoin="round">
+                                                    fill="none" stroke="#0176D3" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
                                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                                                     <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                                 </svg>
-                                                Automatic webhook events keep message delivery, read receipts, and status updated.
+                                                Automatic webhook events keep message delivery, read receipts, and
+                                                status updated.
                                             </li>
                                         </ul>
 
@@ -975,7 +984,8 @@
                                                 <line x1="12" y1="16" x2="12" y2="12"></line>
                                                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
                                             </svg>
-                                            <strong>Note:</strong> Ensure you have administrator access to your Meta Business Suite before proceeding.
+                                            <strong>Note:</strong> Ensure you have administrator access to your Meta
+                                            Business Suite before proceeding.
                                         </div>
                                     </div>
                                 </div>
@@ -996,10 +1006,14 @@
                                         <span class="field-key">Account ID (WABA ID)</span>
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <span class="field-val" id="waba-id-display">{!businessAccountId}</span>
-                                            <button class="copy-btn" onclick="copyToClipboard('waba-id-display')" title="Copy WABA ID">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <button class="copy-btn" onclick="copyToClipboard('waba-id-display')"
+                                                title="Copy WABA ID">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
                                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1">
+                                                    </path>
                                                 </svg>
                                             </button>
                                         </div>
@@ -1008,10 +1022,14 @@
                                         <span class="field-key">Phone Number ID</span>
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <span class="field-val" id="phone-id-display">{!phoneNumberId}</span>
-                                            <button class="copy-btn" onclick="copyToClipboard('phone-id-display')" title="Copy Phone Number ID">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <button class="copy-btn" onclick="copyToClipboard('phone-id-display')"
+                                                title="Copy Phone Number ID">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
                                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1">
+                                                    </path>
                                                 </svg>
                                             </button>
                                         </div>
@@ -1054,14 +1072,17 @@
                 <div class="modal-header">
                     <h3 class="modal-title">Deactivate Integration</h3>
                     <button class="modal-close-icon" onclick="closeConfirmationModal()" title="Close">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p class="modal-message">Are you sure you want to deactivate WhatsApp integration? This will disconnect your WhatsApp Business Account and you will need to set it up again to continue using WhatsApp messaging.</p>
+                    <p class="modal-message">Are you sure you want to deactivate WhatsApp integration? This will
+                        disconnect your WhatsApp Business Account and you will need to set it up again to continue using
+                        WhatsApp messaging.</p>
                     <div class="modal-footer">
                         <button class="modal-btn modal-btn-cancel" onclick="closeConfirmationModal()">Cancel</button>
                         <button class="modal-btn modal-btn-confirm" onclick="confirmDeactivation()">Deactivate</button>

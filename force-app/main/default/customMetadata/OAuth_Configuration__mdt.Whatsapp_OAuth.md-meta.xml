@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Whatsapp OAuth</label>
+    <protected>false</protected>
+    <values>
+        <field>API_Version__c</field>
+        <value xsi:type="xsd:string">v24.0</value>
+    </values>
+    <values>
+        <field>Access_Token__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Authorization_Endpoint__c</field>
+        <value xsi:type="xsd:string">https://graph.facebook.com</value>
+    </values>
+    <values>
+        <field>Client_App_ID__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Client_Business_Account_ID__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Client_Id__c</field>
+        <value xsi:type="xsd:string">514916280628381</value>
+    </values>
+    <values>
+        <field>Client_Phone_Number_ID__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Client_Secret__c</field>
+        <value xsi:type="xsd:string">6e1719dde4e730a3a55e0eab8899f62b</value>
+    </values>
+    <values>
+        <field>Config_Id__c</field>
+        <value xsi:type="xsd:string">8971126402921271</value>
+    </values>
+    <values>
+        <field>Connected_Date__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Token_Endpoint__c</field>
+        <value xsi:type="xsd:string">https://graph.facebook.com/v21.0/oauth/access_token</value>
+    </values>
+</CustomMetadata>

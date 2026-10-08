@@ -135,7 +135,7 @@
                 border-radius: 12px;
                 padding: 32px;
                 width: 100%;
-                max-width: 85%;
+                max-width: 1060px;
                 height: max-content;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.02);
                 border: 1px solid #e5e9f0;
@@ -621,10 +621,19 @@
                 margin: 1.5rem 0 0.5rem 0;
             }
 
+            .contact-config-title {
+                font-size: 12px;
+                font-weight: 500;
+                color: #1f2937;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin: 0 0 0.5rem 0;
+            }
+
             .details-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 1.5rem;
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
             }
 
             .detail-item {
@@ -643,6 +652,399 @@
                 font-size: 16px;
                 font-weight: 500;
                 color: #131314;
+            }
+
+            /* Connected State 2-Column Layout */
+            .connected-layout-container {
+                display: flex;
+                gap: 24px;
+                align-items: flex-start;
+            }
+
+            .connected-left-col {
+                flex: 1;
+                min-width: 270px;
+                max-width: 360px;
+            }
+
+            .connected-right-col {
+                flex: 1.4;
+                min-width: 0;
+                max-width: 600px;
+            }
+
+            /* Contact Object Configuration Info Box */
+            .obj-config-info-box {
+                background: #f0f7ff;
+                border: 1px solid #c9e2f8;
+                border-left: 4px solid #0176d3;
+                border-radius: 8px;
+                padding: 12px 14px;
+                margin-bottom: 14px;
+                box-shadow: 0 1px 3px rgba(1, 118, 211, 0.05);
+            }
+
+            .obj-config-info-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 6px;
+            }
+
+            .obj-config-info-icon {
+                flex-shrink: 0;
+                color: #0176d3;
+            }
+
+            .obj-config-info-title {
+                font-size: 13.5px;
+                font-weight: 700;
+                color: #014486;
+                line-height: 1.3;
+                flex: 1;
+            }
+
+            .obj-config-info-badge {
+                font-size: 10.5px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                background: #e0f2fe;
+                color: #0369a1;
+                border: 1px solid #bae6fd;
+                padding: 2px 7px;
+                border-radius: 12px;
+            }
+
+            .obj-config-info-desc {
+                font-size: 12.5px;
+                color: #475569;
+                line-height: 1.5;
+                margin-bottom: 6px;
+            }
+
+            .obj-config-info-points {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .obj-config-info-point {
+                display: flex;
+                align-items: flex-start;
+                gap: 6px;
+                font-size: 12px;
+                color: #334155;
+                line-height: 1.4;
+            }
+
+            .obj-config-info-point-bullet {
+                color: #0176d3;
+                font-weight: bold;
+                font-size: 14px;
+                line-height: 1;
+                margin-top: 1px;
+            }
+
+            .obj-config-info-point strong {
+                color: #0f172a;
+            }
+
+            /* Object Configuration Top Bar */
+            .config-top-bar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: #ffffff;
+                border: 1px solid #dfe6ef;
+                border-left: 4px solid #0176d3;
+                border-radius: 8px;
+                padding: 10px 16px;
+                margin-bottom: 16px;
+                gap: 12px;
+                flex-wrap: wrap;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            }
+
+            .config-object-info {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .config-object-pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 13px;
+                font-weight: 600;
+                color: #0176d3;
+                background: #eef6ff;
+                border: 1px solid #cfe5fb;
+                border-radius: 99px;
+                padding: 3px 12px 3px 10px;
+                line-height: 1.6;
+            }
+
+            .phone-field-tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                font-size: 12.5px;
+                font-weight: 500;
+                color: #0176d3;
+                background: #eef6ff;
+                border: 1px solid #cfe5fb;
+                border-radius: 99px;
+                padding: 3px 12px 3px 9px;
+                line-height: 1.6;
+            }
+
+            .config-top-actions {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            /* Accordion Styles */
+            .custom-accordion {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            .accordion-item {
+                border: 1px solid #dfe6ef;
+                border-left: 4px solid #0176d3;
+                border-radius: 8px;
+                background: #ffffff;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+                overflow: hidden;
+                transition: all 0.2s ease;
+            }
+
+            .accordion-item.open {
+                border-color: #b7daf7;
+                border-left-color: #0176d3;
+                box-shadow: 0 2px 8px rgba(1, 118, 211, 0.12);
+            }
+
+            .accordion-header-btn {
+                width: 100%;
+                border: 0;
+                background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+                color: #1f2937;
+                min-height: 50px;
+                padding: 10px 16px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                border-radius: 7px;
+            }
+
+            .accordion-header-btn:hover {
+                background: linear-gradient(180deg, #f9fcff 0%, #edf5ff 100%);
+            }
+
+            .accordion-item.open .accordion-header-btn {
+                background: linear-gradient(180deg, #f2f8ff 0%, #e8f2ff 100%);
+                border-bottom: 1px solid #d9e8f7;
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+
+            .accordion-title-group {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .section-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 28px;
+                height: 28px;
+                border-radius: 6px;
+                background: #eef6ff;
+                border: 1px solid #cfe5fb;
+                flex-shrink: 0;
+            }
+
+            .accordion-title {
+                font-size: 14px;
+                font-weight: 600;
+                color: #1f2937;
+            }
+
+            .accordion-icon-wrap {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 26px;
+                height: 26px;
+                border-radius: 6px;
+                background: #ffffff;
+                border: 1px solid #d7dee7;
+                flex-shrink: 0;
+            }
+
+            .accordion-icon {
+                transition: transform 0.22s ease;
+            }
+
+            .accordion-item.open .accordion-icon {
+                transform: rotate(180deg);
+            }
+
+            .accordion-panel {
+                display: none;
+                padding: 14px 16px;
+                background: #ffffff;
+                border-top: 1px solid #edf1f6;
+            }
+
+            .accordion-item.open .accordion-panel {
+                display: block;
+            }
+
+            /* Configuration Tables */
+            .config-table-container {
+                overflow-x: auto;
+                border-radius: 8px;
+                background: #ffffff;
+                margin: 8px 0 14px 0;
+                border: 1px solid #e6ebf0;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            }
+
+            .config-table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
+                table-layout: fixed;
+            }
+
+            .config-table th {
+                background: #0176d3;
+                color: #ffffff;
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: 0.3px;
+                padding: 10px 12px;
+                text-align: center;
+            }
+
+            .config-table thead tr th:first-child {
+                border-top-left-radius: 7px;
+            }
+
+            .config-table thead tr th:last-child {
+                border-top-right-radius: 7px;
+            }
+
+            .config-table td {
+                padding: 8px 12px;
+                font-size: 13px;
+                color: #475569;
+                text-align: center;
+                vertical-align: middle;
+                height: 42px;
+                border-bottom: 1px solid #f1f5f9;
+            }
+
+            .config-table tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+            .config-table tbody tr:nth-child(odd) {
+                background-color: #f8fafc;
+            }
+
+            .config-table tbody tr:hover td {
+                background-color: #edf5ff !important;
+            }
+
+            .obj-static-label {
+                font-size: 13.5px;
+                font-weight: 600;
+                color: #1e293b;
+            }
+
+            .obj-combobox {
+                width: 100%;
+                max-width: 260px;
+                height: 32px;
+                padding: 4px 10px;
+                border: 1px solid #cbd5e1;
+                border-radius: 6px;
+                font-size: 13px;
+                font-family: inherit;
+                color: #1e293b;
+                background-color: #ffffff;
+                box-sizing: border-box;
+                cursor: pointer;
+                outline: none;
+                transition: all 0.2s ease;
+            }
+
+            .obj-combobox:focus {
+                border-color: #0176d3;
+                box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.15);
+            }
+
+            .obj-text-input {
+                width: 100%;
+                max-width: 260px;
+                height: 32px;
+                padding: 4px 10px;
+                border: 1px solid #cbd5e1;
+                border-radius: 6px;
+                font-size: 13px;
+                font-family: inherit;
+                color: #1e293b;
+                background-color: #ffffff;
+                box-sizing: border-box;
+                outline: none;
+                transition: all 0.2s ease;
+            }
+
+            .obj-text-input:focus {
+                border-color: #0176d3;
+                box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.15);
+            }
+
+            .obj-checkbox-input {
+                width: 18px;
+                height: 18px;
+                cursor: pointer;
+                accent-color: #0176d3;
+            }
+
+            .table-header-title {
+                font-size: 12.5px;
+                font-weight: 700;
+                color: #475569;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin: 8px 0 6px 0;
+            }
+
+            @media (max-width: 992px) {
+                .connected-layout-container {
+                    flex-direction: column;
+                }
+                .connected-left-col {
+                    max-width: 100%;
+                    width: 100%;
+                }
             }
 
             /* Loading Spinner Overlay */
@@ -1340,56 +1742,301 @@
 
                             <!-- Configuration Details (shown when configured) -->
                             <div id="config-details-div" style="display:none">
-                                <div class="status-badge">
-                                    <span class="status-dot"></span>
-                                    Active
-                                </div>
+                                <div class="connected-layout-container">
+                                    <!-- Left Column: WhatsApp Account Connection Details -->
+                                    <div class="connected-left-col">
+                                        <div class="status-badge">
+                                            <span class="status-dot"></span>
+                                            Active
+                                        </div>
 
-                                <div class="input-label">WhatsApp Business Account ID</div>
-                                <div class="account-box">
-                                    <div class="account-box-left">
-                                        <div class="shield-icon">
-                                            <svg viewBox="0 0 24 24">
+                                        <div class="input-label">WhatsApp Business Account ID</div>
+                                        <div class="account-box">
+                                            <div class="account-box-left">
+                                                <div class="shield-icon">
+                                                    <svg viewBox="0 0 24 24">
+                                                        <path
+                                                            d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
+                                                    </svg>
+                                                </div>
+                                                <div class="account-info">
+                                                    <p class="account-id" id="waba-id-display">{!businessAccountId}</p>
+                                                    <p class="account-status">Connected and verified</p>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="copy-btn" onclick="copyToClipboard('waba-id-display')"
+                                                title="Copy ID">
+                                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                                    <path
+                                                        d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <button type="button" class="deactivate-btn" onclick="deactivateWhatsApp()">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M12 2V12" stroke="currentColor" stroke-width="2"
+                                                    stroke-linecap="round" />
                                                 <path
-                                                    d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
+                                                    d="M6.2 5.8C4.2 7.3 3 9.6 3 12.2C3 17.1 7 21 12 21C17 21 21 17.1 21 12.2C21 9.6 19.8 7.3 17.8 5.8"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                                             </svg>
-                                        </div>
-                                        <div class="account-info">
-                                            <p class="account-id" id="waba-id-display">{!businessAccountId}</p>
-                                            <p class="account-status">Connected and verified</p>
+                                            Deactivate Integration
+                                        </button>
+
+                                        <div class="section-title">INTEGRATION DETAILS</div>
+                                        <div class="details-grid">
+                                            <div class="detail-item">
+                                                <span class="detail-label">Application ID</span>
+                                                <span class="detail-value" id="app-id-display">{!appId}</span>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-label">Last Edited</span>
+                                                <span class="detail-value" id="last-edited">{!lastModifiedDate}</span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <button type="button" class="copy-btn" onclick="copyToClipboard('waba-id-display')"
-                                        title="Copy ID">
-                                        <svg viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                                            <path
-                                                d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                                        </svg>
-                                    </button>
-                                </div>
 
-                                <button type="button" class="deactivate-btn" onclick="deactivateWhatsApp()">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M12 2V12" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" />
-                                        <path
-                                            d="M6.2 5.8C4.2 7.3 3 9.6 3 12.2C3 17.1 7 21 12 21C17 21 21 17.1 21 12.2C21 9.6 19.8 7.3 17.8 5.8"
-                                            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                    </svg>
-                                    Deactivate Integration
-                                </button>
+                                    <!-- Right Column: Contact Object Configuration (from ObjectConfigComp) -->
+                                    <div class="connected-right-col">
+                                        <div class="contact-config-title">CONTACT CONFIGURATION</div>
+                                        <!-- Configuration Information Banner -->
+                                        <div class="obj-config-info-box">
+                                            <div class="obj-config-info-header">
+                                                <svg class="obj-config-info-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                                </svg>
+                                                <span class="obj-config-info-title">Why is Contact Configuration important?</span>
+                                                <span class="obj-config-info-badge">Important Setting</span>
+                                            </div>
+                                            <div class="obj-config-info-desc">
+                                                This setting connects your WhatsApp Business Account to Salesforce Contacts and is essential for messaging features:
+                                            </div>
+                                            <ul class="obj-config-info-points">
+                                                <li class="obj-config-info-point">
+                                                    <span class="obj-config-info-point-bullet">&#8226;</span>
+                                                    <span><strong>Phone Field Mapping:</strong> Selects which Contact field (e.g. Phone, Mobile) identifies contacts in the Chat Window and matches incoming webhook messages.</span>
+                                                </li>
+                                                <li class="obj-config-info-point">
+                                                    <span class="obj-config-info-point-bullet">&#8226;</span>
+                                                    <span><strong>Automatic Contact Creation:</strong> Sets default values for required fields when a new customer messages you, preventing record creation errors.</span>
+                                                </li>
+                                            </ul>
+                                        </div>
 
-                                <div class="section-title">INTEGRATION DETAILS</div>
-                                <div class="details-grid">
-                                    <div class="detail-item">
-                                        <span class="detail-label">Application ID</span>
-                                        <span class="detail-value" id="app-id-display">{!appId}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label">Last Edited</span>
-                                        <span class="detail-value" id="last-edited">{!lastModifiedDate}</span>
+                                        <!-- Global header: Object label + phone pill + Edit/Cancel/Save -->
+                                        <div class="config-top-bar">
+                                            <div class="config-object-info">
+                                                <span class="config-object-pill">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#0176d3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <circle cx="12" cy="7" r="4" stroke="#0176d3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                    Contact
+                                                </span>
+                                                <span class="phone-field-tag" id="active-phone-tag" style="display:none">
+                                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 011 1V20a1 1 0 01-1 1C5.4 21 3 9.6 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.57 3.57a1 1 0 01-.24 1.02l-2.21 2.2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    </svg>
+                                                    <span id="active-phone-tag-text">Phone (Phone)</span>
+                                                </span>
+                                            </div>
+
+                                            <div class="config-top-actions">
+                                                <div id="obj-view-actions">
+                                                    <button type="button" class="exp-blue-btn-css" onclick="enableObjConfigEdit()">
+                                                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        </svg>
+                                                        Edit
+                                                    </button>
+                                                </div>
+                                                <div id="obj-edit-actions" style="display:none; gap: 8px;">
+                                                    <button type="button" class="exp-white-btn-css" onclick="cancelObjConfigEdit()">
+                                                        <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+                                                            <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor"/>
+                                                        </svg>
+                                                        Cancel
+                                                    </button>
+                                                    <button type="button" class="exp-blue-btn-css" id="save-obj-config-btn" onclick="saveObjConfig()" disabled="disabled">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M5 12.5L10 17L19 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        </svg>
+                                                        Save
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Custom Accordions -->
+                                        <div class="custom-accordion">
+                                            <!-- Section 1: Whatsapp Chat Window Configuration -->
+                                            <div class="accordion-item" id="chat-accordion-item">
+                                                <button type="button" class="accordion-header-btn" onclick="toggleAccordion('chat-accordion-item')">
+                                                    <span class="accordion-title-group">
+                                                        <span class="section-icon">
+                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M4 7.5C4 6.11929 5.11929 5 6.5 5H17.5C18.8807 5 20 6.11929 20 7.5V16.5C20 17.8807 18.8807 19 17.5 19H6.5C5.11929 19 4 17.8807 4 16.5V7.5Z" stroke="#0176D3" stroke-width="1.6"/>
+                                                                <path d="M8 11H16M8 14.5H13" stroke="#0176D3" stroke-width="1.6" stroke-linecap="round"/>
+                                                            </svg>
+                                                        </span>
+                                                        <span class="accordion-title">Whatsapp Chat Window Configuration</span>
+                                                    </span>
+                                                    <span class="accordion-icon-wrap">
+                                                        <svg class="accordion-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M5 7.5L10 12.5L15 7.5" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        </svg>
+                                                    </span>
+                                                </button>
+                                                <div class="accordion-panel">
+                                                    <!-- Chat Window View Mode -->
+                                                    <div id="chat-view-panel">
+                                                        <div class="config-table-container">
+                                                            <table class="config-table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width:50%">Object</th>
+                                                                        <th style="width:50%">Phone Field</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td><span class="obj-static-label">Contact</span></td>
+                                                                        <td><span id="chat-phone-view-val">-</span></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Chat Window Edit Mode -->
+                                                    <div id="chat-edit-panel" style="display:none">
+                                                        <div class="config-table-container">
+                                                            <table class="config-table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width:50%">Object</th>
+                                                                        <th style="width:50%">Phone Field</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td><span class="obj-static-label">Contact</span></td>
+                                                                        <td>
+                                                                            <select class="obj-combobox" id="chat-phone-select" onchange="markObjConfigDirty()">
+                                                                                <!-- Dynamic options -->
+                                                                            </select>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Section 2: Whatsapp Webhook Configuration -->
+                                            <div class="accordion-item" id="webhook-accordion-item">
+                                                <button type="button" class="accordion-header-btn" onclick="toggleAccordion('webhook-accordion-item')">
+                                                    <span class="accordion-title-group">
+                                                        <span class="section-icon">
+                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M6 8C6 6.34315 7.34315 5 9 5H15C16.6569 5 18 6.34315 18 8V16C18 17.6569 16.6569 19 15 19H9C7.34315 19 6 17.6569 6 16V8Z" stroke="#0176D3" stroke-width="1.6"/>
+                                                                <circle cx="12" cy="15.2" r="1" fill="#0176D3"/>
+                                                            </svg>
+                                                        </span>
+                                                        <span class="accordion-title">Whatsapp Webhook Configuration</span>
+                                                    </span>
+                                                    <span class="accordion-icon-wrap">
+                                                        <svg class="accordion-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M5 7.5L10 12.5L15 7.5" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        </svg>
+                                                    </span>
+                                                </button>
+                                                <div class="accordion-panel">
+                                                    <!-- Webhook View Mode -->
+                                                    <div id="webhook-view-panel">
+                                                        <div class="table-header-title">Required Fields for New Contact Creation</div>
+                                                        <div class="config-table-container">
+                                                            <table class="config-table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width:33%">Field API Name</th>
+                                                                        <th style="width:33%">Field Type</th>
+                                                                        <th style="width:34%">Default Value</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="webhook-req-fields-view-body">
+                                                                    <!-- Dynamic rows -->
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+
+                                                        <div class="table-header-title">Incoming Message Matching Phone Field</div>
+                                                        <div class="config-table-container">
+                                                            <table class="config-table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width:50%">Phone Field for Incoming WhatsApp Messages</th>
+                                                                        <th style="width:50%">Selected Field</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td>Phone Field</td>
+                                                                        <td><span id="webhook-phone-view-val">-</span></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Webhook Edit Mode -->
+                                                    <div id="webhook-edit-panel" style="display:none">
+                                                        <div class="table-header-title">Required Fields for New Contact Creation</div>
+                                                        <div class="config-table-container">
+                                                            <table class="config-table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width:33%">Field API Name</th>
+                                                                        <th style="width:33%">Field Type</th>
+                                                                        <th style="width:34%">Default Value</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="webhook-req-fields-edit-body">
+                                                                    <!-- Dynamic inputs -->
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+
+                                                        <div class="table-header-title">Incoming Message Matching Phone Field</div>
+                                                        <div class="config-table-container">
+                                                            <table class="config-table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width:50%">Phone Field for Incoming WhatsApp Messages</th>
+                                                                        <th style="width:50%">Configure</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td>Phone Field</td>
+                                                                        <td>
+                                                                            <select class="obj-combobox" id="webhook-phone-select" onchange="markObjConfigDirty()">
+                                                                                <!-- Dynamic options -->
+                                                                            </select>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1781,6 +2428,389 @@
                 window.top.location.href = '/lightning/n/Control_Center_Dev';
             }
 
+            // --- Contact Object Configuration Logic ---
+            var contactConfigData = {
+                phoneFields: [],
+                requiredFields: [],
+                savedChatPhone: '',
+                savedWebhookPhone: '',
+                savedFieldValues: {},
+                isDirty: false
+            };
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                var div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            function toggleAccordion(itemId) {
+                var el = document.getElementById(itemId);
+                if (el) {
+                    el.classList.toggle('open');
+                }
+            }
+
+            function markObjConfigDirty() {
+                contactConfigData.isDirty = true;
+                var saveBtn = document.getElementById('save-obj-config-btn');
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                }
+            }
+
+            function enableObjConfigEdit() {
+                var viewActions = document.getElementById('obj-view-actions');
+                var editActions = document.getElementById('obj-edit-actions');
+                var chatView = document.getElementById('chat-view-panel');
+                var chatEdit = document.getElementById('chat-edit-panel');
+                var webhookView = document.getElementById('webhook-view-panel');
+                var webhookEdit = document.getElementById('webhook-edit-panel');
+
+                if (viewActions) viewActions.style.display = 'none';
+                if (editActions) editActions.style.display = 'flex';
+                if (chatView) chatView.style.display = 'none';
+                if (chatEdit) chatEdit.style.display = 'block';
+                if (webhookView) webhookView.style.display = 'none';
+                if (webhookEdit) webhookEdit.style.display = 'block';
+
+                var chatAccordion = document.getElementById('chat-accordion-item');
+                var webhookAccordion = document.getElementById('webhook-accordion-item');
+                if (chatAccordion) chatAccordion.classList.add('open');
+                if (webhookAccordion) webhookAccordion.classList.add('open');
+
+                contactConfigData.isDirty = false;
+                var saveBtn = document.getElementById('save-obj-config-btn');
+                if (saveBtn) saveBtn.disabled = true;
+            }
+
+            function cancelObjConfigEdit() {
+                var viewActions = document.getElementById('obj-view-actions');
+                var editActions = document.getElementById('obj-edit-actions');
+                var chatView = document.getElementById('chat-view-panel');
+                var chatEdit = document.getElementById('chat-edit-panel');
+                var webhookView = document.getElementById('webhook-view-panel');
+                var webhookEdit = document.getElementById('webhook-edit-panel');
+
+                if (viewActions) viewActions.style.display = 'block';
+                if (editActions) editActions.style.display = 'none';
+                if (chatView) chatView.style.display = 'block';
+                if (chatEdit) chatEdit.style.display = 'none';
+                if (webhookView) webhookView.style.display = 'block';
+                if (webhookEdit) webhookEdit.style.display = 'none';
+
+                var chatAccordion = document.getElementById('chat-accordion-item');
+                var webhookAccordion = document.getElementById('webhook-accordion-item');
+                if (chatAccordion) chatAccordion.classList.remove('open');
+                if (webhookAccordion) webhookAccordion.classList.remove('open');
+
+                contactConfigData.isDirty = false;
+                renderContactConfig();
+            }
+
+            function loadContactConfig() {
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.WhatsappConnectController.getContactObjectConfig}',
+                    function (result, event) {
+                        if (event.status && result && result.success) {
+                            var phoneFieldList = [];
+                            if (result.phoneFields && Array.isArray(result.phoneFields)) {
+                                phoneFieldList = result.phoneFields;
+                            } else if (result.phoneAndTextFields && result.phoneAndTextFields.length > 0 && result.phoneAndTextFields[0].phoneFields) {
+                                phoneFieldList = result.phoneAndTextFields[0].phoneFields;
+                            } else if (result.requiredFields && result.requiredFields.length > 0 && result.requiredFields[0].phoneFields) {
+                                phoneFieldList = result.requiredFields[0].phoneFields;
+                            }
+                            contactConfigData.phoneFields = phoneFieldList;
+
+                            var reqList = [];
+                            if (result.requiredFields && Array.isArray(result.requiredFields)) {
+                                if (result.requiredFields.length > 0 && result.requiredFields[0].requiredFields) {
+                                    reqList = result.requiredFields[0].requiredFields;
+                                } else {
+                                    reqList = result.requiredFields;
+                                }
+                            }
+                            contactConfigData.requiredFields = reqList;
+
+                            var savedWebhookPhone = '';
+                            var savedValues = {};
+                            if (result.savedConfig && result.savedConfig.ObjectConfigInfo) {
+                                try {
+                                    var objInfo = JSON.parse(result.savedConfig.ObjectConfigInfo);
+                                    if (objInfo && typeof objInfo === 'object') {
+                                        savedWebhookPhone = objInfo.phoneField || '';
+                                        if (objInfo.requiredFields && Array.isArray(objInfo.requiredFields)) {
+                                            objInfo.requiredFields.forEach(function (rf) {
+                                                if (rf && rf.name) {
+                                                    savedValues[rf.name] = rf.value;
+                                                }
+                                            });
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error('Error parsing ObjectConfigInfo:', e);
+                                }
+                            }
+                            contactConfigData.savedFieldValues = savedValues;
+
+                            var savedChatPhone = '';
+                            if (result.savedConfig && result.savedConfig.ChatWindowConfigInfo) {
+                                try {
+                                    var chatInfo = JSON.parse(result.savedConfig.ChatWindowConfigInfo);
+                                    if (chatInfo && chatInfo.Contact) {
+                                        savedChatPhone = chatInfo.Contact.phoneField || '';
+                                    }
+                                } catch (e) {
+                                    console.error('Error parsing ChatWindowConfigInfo:', e);
+                                }
+                            }
+
+                            // Fallback logic for phone field: saved -> 'Phone' -> first available
+                            var defaultPhone = '';
+                            if (savedWebhookPhone) {
+                                defaultPhone = savedWebhookPhone;
+                            } else if (savedChatPhone) {
+                                defaultPhone = savedChatPhone;
+                            } else {
+                                var hasPhone = phoneFieldList.some(function (f) { return f.value === 'Phone'; });
+                                if (hasPhone) {
+                                    defaultPhone = 'Phone';
+                                } else if (phoneFieldList.length > 0) {
+                                    defaultPhone = phoneFieldList[0].value;
+                                }
+                            }
+
+                            contactConfigData.savedWebhookPhone = savedWebhookPhone || defaultPhone;
+                            contactConfigData.savedChatPhone = savedChatPhone || defaultPhone;
+
+                            renderContactConfig();
+                        } else {
+                            console.error('Failed to load contact config:', event);
+                        }
+                    },
+                    { escape: true }
+                );
+            }
+
+            function renderContactConfig() {
+                var phoneList = contactConfigData.phoneFields;
+                var reqList = contactConfigData.requiredFields;
+                var chatPhone = contactConfigData.savedChatPhone;
+                var webhookPhone = contactConfigData.savedWebhookPhone;
+                var savedVals = contactConfigData.savedFieldValues;
+
+                // Find labels
+                var chatPhoneLabel = chatPhone;
+                var webhookPhoneLabel = webhookPhone;
+                phoneList.forEach(function (p) {
+                    if (p.value === chatPhone) {
+                        chatPhoneLabel = p.label + ' (' + p.value + ')';
+                    }
+                    if (p.value === webhookPhone) {
+                        webhookPhoneLabel = p.label + ' (' + p.value + ')';
+                    }
+                });
+
+                // Top bar tag
+                var tagEl = document.getElementById('active-phone-tag');
+                var tagTextEl = document.getElementById('active-phone-tag-text');
+                if (tagEl && tagTextEl) {
+                    if (webhookPhoneLabel) {
+                        tagTextEl.textContent = webhookPhoneLabel;
+                        tagEl.style.display = 'inline-flex';
+                    } else {
+                        tagEl.style.display = 'none';
+                    }
+                }
+
+                // View Mode - Chat Window
+                var chatViewEl = document.getElementById('chat-phone-view-val');
+                if (chatViewEl) {
+                    chatViewEl.textContent = chatPhoneLabel || '-';
+                }
+
+                // View Mode - Webhook Phone
+                var webhookViewEl = document.getElementById('webhook-phone-view-val');
+                if (webhookViewEl) {
+                    webhookViewEl.textContent = webhookPhoneLabel || '-';
+                }
+
+                // View Mode - Webhook Required Fields
+                var reqViewBody = document.getElementById('webhook-req-fields-view-body');
+                if (reqViewBody) {
+                    reqViewBody.innerHTML = '';
+                    if (!reqList || reqList.length === 0) {
+                        reqViewBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#94a3b8;">No required fields for Contact</td></tr>';
+                    } else {
+                        reqList.forEach(function (rf) {
+                            var currentVal = savedVals[rf.name] !== undefined ? savedVals[rf.name] : (rf.value || '');
+                            var tr = document.createElement('tr');
+                            tr.innerHTML = '<td><strong>' + escapeHtml(rf.name) + '</strong></td>' +
+                                           '<td>' + escapeHtml(rf.type || 'String') + '</td>' +
+                                           '<td>' + (currentVal ? escapeHtml(currentVal) : '<em style="color:#94a3b8;">Not specified</em>') + '</td>';
+                            reqViewBody.appendChild(tr);
+                        });
+                    }
+                }
+
+                // Edit Mode - Chat Window dropdown
+                var chatSelect = document.getElementById('chat-phone-select');
+                if (chatSelect) {
+                    chatSelect.innerHTML = '';
+                    phoneList.forEach(function (p) {
+                        var opt = document.createElement('option');
+                        opt.value = p.value;
+                        opt.textContent = p.label + ' (' + p.value + ')';
+                        if (p.value === chatPhone) {
+                            opt.selected = true;
+                        }
+                        chatSelect.appendChild(opt);
+                    });
+                }
+
+                // Edit Mode - Webhook Phone dropdown
+                var webhookSelect = document.getElementById('webhook-phone-select');
+                if (webhookSelect) {
+                    webhookSelect.innerHTML = '';
+                    phoneList.forEach(function (p) {
+                        var wopt = document.createElement('option');
+                        wopt.value = p.value;
+                        wopt.textContent = p.label + ' (' + p.value + ')';
+                        if (p.value === webhookPhone) {
+                            wopt.selected = true;
+                        }
+                        webhookSelect.appendChild(wopt);
+                    });
+                }
+
+                // Edit Mode - Webhook Required Fields inputs
+                var reqEditBody = document.getElementById('webhook-req-fields-edit-body');
+                if (reqEditBody) {
+                    reqEditBody.innerHTML = '';
+                    if (!reqList || reqList.length === 0) {
+                        reqEditBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#94a3b8;">No required fields for Contact</td></tr>';
+                    } else {
+                        reqList.forEach(function (erf) {
+                            var evalVal = savedVals[erf.name] !== undefined ? savedVals[erf.name] : (erf.value || '');
+                            var etr = document.createElement('tr');
+                            var inputHtml = '';
+                            var typeUpper = (erf.type || 'STRING').toUpperCase();
+
+                            if (typeUpper === 'PICKLIST' && erf.picklistValues && erf.picklistValues.length > 0) {
+                                inputHtml = '<select class="obj-combobox" data-field="' + escapeHtml(erf.name) + '" data-type="' + escapeHtml(typeUpper) + '" onchange="markObjConfigDirty()">';
+                                erf.picklistValues.forEach(function (pv) {
+                                    var isSel = (pv.value === evalVal) ? 'selected="selected"' : '';
+                                    inputHtml += '<option value="' + escapeHtml(pv.value) + '" ' + isSel + '>' + escapeHtml(pv.label) + '</option>';
+                                });
+                                inputHtml += '</select>';
+                            } else if (typeUpper === 'BOOLEAN') {
+                                var isChk = (evalVal === true || evalVal === 'true') ? 'checked="checked"' : '';
+                                inputHtml = '<input type="checkbox" class="obj-checkbox-input" data-field="' + escapeHtml(erf.name) + '" data-type="' + escapeHtml(typeUpper) + '" ' + isChk + ' onchange="markObjConfigDirty()"/>';
+                            } else if (typeUpper === 'INTEGER' || typeUpper === 'DOUBLE' || typeUpper === 'CURRENCY') {
+                                inputHtml = '<input type="number" class="obj-text-input" data-field="' + escapeHtml(erf.name) + '" data-type="' + escapeHtml(typeUpper) + '" value="' + escapeHtml(evalVal) + '" oninput="markObjConfigDirty()"/>';
+                            } else if (typeUpper === 'DATE') {
+                                inputHtml = '<input type="date" class="obj-text-input" data-field="' + escapeHtml(erf.name) + '" data-type="' + escapeHtml(typeUpper) + '" value="' + escapeHtml(evalVal) + '" onchange="markObjConfigDirty()"/>';
+                            } else {
+                                inputHtml = '<input type="text" class="obj-text-input" data-field="' + escapeHtml(erf.name) + '" data-type="' + escapeHtml(typeUpper) + '" value="' + escapeHtml(evalVal) + '" oninput="markObjConfigDirty()"/>';
+                            }
+
+                            etr.innerHTML = '<td><strong>' + escapeHtml(erf.name) + '</strong></td>' +
+                                            '<td>' + escapeHtml(erf.type || 'String') + '</td>' +
+                                            '<td>' + inputHtml + '</td>';
+                            reqEditBody.appendChild(etr);
+                        });
+                    }
+                }
+            }
+
+            function saveObjConfig() {
+                var chatSelect = document.getElementById('chat-phone-select');
+                var webhookSelect = document.getElementById('webhook-phone-select');
+                var selectedChatPhone = chatSelect ? chatSelect.value : '';
+                var selectedWebhookPhone = webhookSelect ? webhookSelect.value : '';
+
+                if (!selectedChatPhone) {
+                    showError('Please select a Phone Field under Whatsapp Chat Window Configuration.');
+                    return;
+                }
+                if (!selectedWebhookPhone) {
+                    showError('Please select a Phone Field under Whatsapp Webhook Configuration.');
+                    return;
+                }
+
+                // Gather required fields values
+                var reqInputs = document.querySelectorAll('#webhook-req-fields-edit-body [data-field]');
+                var reqFieldList = [];
+                for (var i = 0; i < reqInputs.length; i++) {
+                    var input = reqInputs[i];
+                    var fieldName = input.getAttribute('data-field');
+                    var fieldType = input.getAttribute('data-type') || 'STRING';
+                    var val = input.type === 'checkbox' ? input.checked.toString() : input.value.trim();
+
+                    if (fieldType !== 'BOOLEAN' && !val) {
+                        showError('Please enter a default value for ' + fieldName + '.');
+                        return;
+                    }
+
+                    reqFieldList.push({
+                        name: fieldName,
+                        value: val,
+                        type: fieldType
+                    });
+                }
+
+                var webhookPayload = {
+                    objectApiName: 'Contact',
+                    phoneField: selectedWebhookPhone,
+                    requiredFields: reqFieldList
+                };
+
+                var chatPayload = {
+                    Contact: {
+                        nameField: '',
+                        phoneField: selectedChatPhone,
+                        emailField: ''
+                    }
+                };
+
+                var webhookJson = JSON.stringify(webhookPayload);
+                var chatJson = JSON.stringify(chatPayload);
+
+                showSpinner('Saving Contact configuration...');
+
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.WhatsappConnectController.saveContactObjectConfig}',
+                    webhookJson, chatJson,
+                    function (result, event) {
+                        hideSpinner();
+                        if (event.status && result === 'Success') {
+                            contactConfigData.savedChatPhone = selectedChatPhone;
+                            contactConfigData.savedWebhookPhone = selectedWebhookPhone;
+                            for (var j = 0; j < reqFieldList.length; j++) {
+                                contactConfigData.savedFieldValues[reqFieldList[j].name] = reqFieldList[j].value;
+                            }
+                            cancelObjConfigEdit();
+
+                            var spinner = document.getElementById('loading-spinner');
+                            var spinnerText = spinner ? spinner.querySelector('.spinner-text') : null;
+                            var spinnerIcon = spinner ? (spinner.querySelector('.spinner-big') || spinner.querySelector('.spinner')) : null;
+                            if (spinnerIcon) spinnerIcon.style.borderTopColor = '#16a34a';
+                            if (spinnerText) spinnerText.textContent = 'Contact configuration saved successfully!';
+                            if (spinner) spinner.classList.add('show');
+                            setTimeout(function () {
+                                if (spinner) spinner.classList.remove('show');
+                                if (spinnerIcon) spinnerIcon.style.borderTopColor = '#0176D3';
+                            }, 2000);
+                        } else {
+                            showError(result || 'Failed to save Contact configuration. Please try again.');
+                        }
+                    },
+                    { escape: true }
+                );
+            }
+
             document.addEventListener("DOMContentLoaded", function () {
                 var appInput = document.getElementById("app-id-input");
                 if (appInput) {
@@ -1816,6 +2846,8 @@
                         var lastEditedEl = document.getElementById('last-edited');
                         if (lastEditedEl) lastEditedEl.textContent = storedLastModifiedDate;
                     }
+
+                    loadContactConfig();
                 }
             });
 

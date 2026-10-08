@@ -184,4 +184,138 @@ public with sharing class WhatsappConnectController {
             return false;
         }
     }
+
+    /**
+     * Method Name : getContactObjectConfig
+     * @description : Retrieves Contact phone fields, required fields, and saved MVEX__Object_Config__mdt configuration.
+     * @return Map<String, Object> containing phone fields, required fields, and saved configuration.
+     */
+    @RemoteAction
+    public static Map<String, Object> getContactObjectConfig() {
+        Map<String, Object> result = new Map<String, Object>();
+        try {
+            List<Map<String, String>> phoneFields = new List<Map<String, String>>();
+            List<Map<String, Object>> requiredFields = new List<Map<String, Object>>();
+
+            Map<String, Schema.SObjectField> fieldMap = Schema.SObjectType.Contact.fields.getMap();
+            for (Schema.SObjectField field : fieldMap.values()) {
+                Schema.DescribeFieldResult dfr = field.getDescribe();
+
+                // Fetch createable and accessible phone fields
+                if (dfr.getType() == Schema.DisplayType.PHONE && dfr.isAccessible() && dfr.isCreateable() && !dfr.isCalculated()) {
+                    phoneFields.add(new Map<String, String>{
+                        'label' => dfr.getLabel(),
+                        'value' => dfr.getName()
+                    });
+                }
+
+                // Filter required fields for Contact creation
+                if (dfr.isNillable() || dfr.isAutoNumber() || !dfr.isAccessible() || !dfr.isCreateable() || dfr.isCalculated() || dfr.isExternalId() || dfr.getType() == Schema.DisplayType.BOOLEAN) {
+                    continue;
+                }
+                if (dfr.getName() == 'Id' || dfr.getName() == 'CreatedDate' || dfr.getName() == 'LastModifiedDate') {
+                    continue;
+                }
+
+                Map<String, Object> fieldInfo = new Map<String, Object>{
+                    'name' => dfr.getName(),
+                    'label' => dfr.getLabel(),
+                    'type' => dfr.getType().name(),
+                    'value' => ''
+                };
+
+                if (dfr.getType() == Schema.DisplayType.Picklist) {
+                    List<Map<String, String>> picklistValues = new List<Map<String, String>>();
+                    for (Schema.PicklistEntry entry : dfr.getPicklistValues()) {
+                        picklistValues.add(new Map<String, String>{
+                            'label' => entry.getLabel(),
+                            'value' => entry.getValue()
+                        });
+                    }
+                    fieldInfo.put('picklistValues', picklistValues);
+                    fieldInfo.put('value', dfr.getDefaultValue() != null ? String.valueOf(dfr.getDefaultValue()) : (picklistValues.isEmpty() ? '' : picklistValues[0].get('value')));
+                } else if (dfr.getType() == Schema.DisplayType.Reference && !dfr.getReferenceTo().isEmpty()) {
+                    fieldInfo.put('relatedObject', dfr.getReferenceTo()[0].getDescribe().getName());
+                }
+
+                requiredFields.add(fieldInfo);
+            }
+
+            // Retrieve saved configuration from MVEX__Object_Config__mdt
+            Map<String, String> savedConfig = new Map<String, String>{
+                'ObjectConfigInfo' => '{}',
+                'ChatWindowConfigInfo' => '{}'
+            };
+            List<MVEX__Object_Config__mdt> configList = [SELECT MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt WITH USER_MODE LIMIT 1];
+            if (!configList.isEmpty()) {
+                if (String.isNotBlank(configList[0].MVEX__ObjectConfigInfo__c)) {
+                    savedConfig.put('ObjectConfigInfo', configList[0].MVEX__ObjectConfigInfo__c);
+                }
+                if (String.isNotBlank(configList[0].MVEX__ChatWindowConfigInfo__c)) {
+                    savedConfig.put('ChatWindowConfigInfo', configList[0].MVEX__ChatWindowConfigInfo__c);
+                }
+            }
+
+            result.put('phoneFields', phoneFields);
+            result.put('requiredFields', requiredFields);
+            result.put('savedConfig', savedConfig);
+            result.put('success', true);
+        } catch (Exception e) {
+            result.put('success', false);
+            result.put('message', e.getMessage());
+            ErrorHandler.insertErrorData(e, 'WhatsappConnectController', 'getContactObjectConfig', e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * Method Name : saveContactObjectConfig
+     * @description : Saves Contact phone field and webhook configuration to MVEX__Object_Config__mdt.
+     * @param webhookJson JSON string for Webhook configuration
+     * @param chatJson JSON string for Chat Window configuration
+     * @return String 'Success' or error message
+     */
+    @RemoteAction
+    public static String saveContactObjectConfig(String webhookJson, String chatJson) {
+        try {
+            String devName = 'objectConfigInfo';
+            String masterLabel = 'objectConfigInfo';
+
+            List<MVEX__Object_Config__mdt> configList = [SELECT MasterLabel, DeveloperName, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt WITH USER_MODE LIMIT 1];
+            if (!configList.isEmpty()) {
+                devName = configList[0].DeveloperName;
+                masterLabel = configList[0].MasterLabel;
+            }
+
+            Metadata.CustomMetadata mdata = new Metadata.CustomMetadata();
+            mdata.fullName = 'MVEX__Object_Config__mdt.MVEX__' + devName;
+            mdata.label = masterLabel;
+
+            if (webhookJson != null) {
+                Metadata.CustomMetadataValue instance1 = new Metadata.CustomMetadataValue();
+                instance1.field = 'MVEX__ObjectConfigInfo__c';
+                instance1.value = webhookJson;
+                mdata.values.add(instance1);
+            }
+
+            if (chatJson != null) {
+                Metadata.CustomMetadataValue instance2 = new Metadata.CustomMetadataValue();
+                instance2.field = 'MVEX__ChatWindowConfigInfo__c';
+                instance2.value = chatJson;
+                mdata.values.add(instance2);
+            }
+
+            Metadata.DeployContainer container = new Metadata.DeployContainer();
+            container.addMetadata(mdata);
+
+            if (!Test.isRunningTest()) {
+                Metadata.Operations.enqueueDeployment(container, null);
+            }
+
+            return 'Success';
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'WhatsappConnectController', 'saveContactObjectConfig', e.getMessage());
+            return 'Error: ' + e.getMessage();
+        }
+    }
 }

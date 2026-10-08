@@ -2,7 +2,6 @@ import { LightningElement, wire } from "lwc";
 import globalStyles from "@salesforce/resourceUrl/globalStyles";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
-import FORM_FACTOR from "@salesforce/client/formFactor";
 import checkConnectionStatus from '@salesforce/apex/MetaAdsTokenController.checkConnectionStatus';
 
 export default class EstateXpertControlCenter extends NavigationMixin(LightningElement) {

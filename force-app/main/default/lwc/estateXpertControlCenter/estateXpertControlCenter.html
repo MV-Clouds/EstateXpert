@@ -58,8 +58,8 @@
                                         data-title="Map Listing & Property"
                                         data-desc="The &quot;Map Listing and Property&quot; modal streamlines data synchronization between Listing and Property records by allowing users to define field correspondences. This automation ensures that relevant information is consistently transferred between the two object types, eliminating manual data entry and reducing errors."
                                         onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
-                                        <img src="/resource/MVEX__controlcenterimg/portalfieldmapping.png"
-                                            alt="mapping" class="card-icon" draggable="false" />
+                                        <img src="/resource/MVEX__controlcenterimg/portalfieldmapping.png" alt="mapping"
+                                            class="card-icon" draggable="false" />
                                         <div class="card-content">
                                             <h3 class="card-title">Map Listing & Property</h3>
                                             <p class="card-description">Automate field synchronization</p>
@@ -102,8 +102,8 @@
                                         data-title="Integration Hub"
                                         data-desc="The &quot;Integration Hub&quot; modal simplifies storage, email, instagram integration by providing seamless connectivity with various third-party services, enhancing overall functionality and user experience. Connect your favorite tools and platforms in one centralized location."
                                         onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
-                                        <img src="/resource/MVEX__controlcenterimg/storage.png"
-                                            alt="integration" class="card-icon" draggable="false" />
+                                        <img src="/resource/MVEX__controlcenterimg/storage.png" alt="integration"
+                                            class="card-icon" draggable="false" />
                                         <div class="card-content">
                                             <h3 class="card-title">Integration Hub</h3>
                                             <p class="card-description">Connect multiple services</p>
@@ -134,18 +134,19 @@
                                     <div class="section-icon integration-icon">
                                         <!-- You can use the same icon or a custom one for lead capture -->
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round" />
                                         </svg>
                                     </div>
                                     <h2 class="section-title">Lead Capture</h2>
                                 </div>
                                 <div class="features-grid">
-                                    <div class="feature-card" onclick={metaAdsMethod}
-                                        data-title="Meta Ads"
+                                    <div class="feature-card" onclick={metaAdsMethod} data-title="Meta Ads"
                                         data-desc="The &quot;Meta Ads&quot; integration allows you to automatically capture leads from Facebook and Instagram directly into Salesforce. Configure custom field mapping to ensure lead data flows seamlessly."
                                         onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
-                                        <img src="/resource/MVEX__controlcenterimg/meta.png"
-                                            alt="capture" class="card-icon" draggable="false" />
+                                        <img src="/resource/MVEX__controlcenterimg/meta.png" alt="capture"
+                                            class="card-icon" draggable="false" />
                                         <div class="card-content">
                                             <h3 class="card-title">Meta Ads</h3>
                                             <p class="card-description">Facebook & Instagram Leads</p>
@@ -153,12 +154,44 @@
                                         </div>
                                     </div>
 
-                                    <div class="feature-card" onclick={googleAdsMethod} data-title="Google Ads" data-desc="The &quot;Google Ads&quot; integration allows you to automatically capture leads from Google advertising accounts directly into Salesforce." onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
-                                        <img src="/resource/MVEX__controlcenterimg/google.png" alt="Google Ads" class="card-icon" draggable="false" />
+                                    <div class="feature-card" onclick={googleAdsMethod} data-title="Google Ads"
+                                        data-desc="The &quot;Google Ads&quot; integration allows you to automatically capture leads from Google advertising accounts directly into Salesforce."
+                                        onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
+                                        <img src="/resource/MVEX__controlcenterimg/google.png" alt="Google Ads"
+                                            class="card-icon" draggable="false" />
                                         <div class="card-content">
                                             <h3 class="card-title">Google Ads</h3>
                                             <p class="card-description">Google Lead Forms</p>
                                             <span class="card-tag integration">Ads</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- WhatsApp Business Section -->
+                            <div class="section-group">
+                                <div class="section-header">
+                                    <div class="section-icon whatsapp-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                            <path
+                                                d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                    </div>
+                                    <h2 class="section-title">WhatsApp Business</h2>
+                                </div>
+                                <div class="features-grid">
+                                    <div class="feature-card" onclick={whatsappEmbeddedSignuprMethod}
+                                        data-title="WhatsApp Business API"
+                                        data-desc="The &quot;WhatsApp Business&quot; connects your WhatsApp Business Account with Salesforce to enable the chat feature directly from Salesforce. Start conversations, send messages, and manage customer communications without leaving your CRM platform."
+                                        onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
+                                        <img src="/resource/MVEX__controlcenterimg/whatsapp.png" alt="whatsapp"
+                                            class="card-icon" draggable="false" />
+                                        <div class="card-content">
+                                            <h3 class="card-title">WhatsApp Business</h3>
+                                            <p class="card-description">API messaging integration</p>
+                                            <span class="card-tag whatsapp">Chat</span>
                                         </div>
                                     </div>
                                 </div>
@@ -191,9 +224,6 @@
                                     portal-name={portalName} portal-icon-url={portalIconUrl}
                                     portal-status={portalStatus} is-x-m-l-for-p-f={isXMLForPF}>
                                 </c-portal-mapping-landing-page>
-                            </template>
-                            <template if:true={isGoogleAdsMappingComponent}>
-                                <c-google-ads-form-mapping></c-google-ads-form-mapping>
                             </template>
                         </div>
                     </template>

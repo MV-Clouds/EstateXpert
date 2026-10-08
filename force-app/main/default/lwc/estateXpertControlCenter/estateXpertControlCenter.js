@@ -427,4 +427,21 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
         this.selectedComponentTitle = portalName;
         this.currentView = 'childComponent';
     }
+
+    /**
+     * Method Name: whatsappEmbeddedSignuprMethod
+     * @description: Used to open WhatsApp Embedded Signup.
+     * Date: 07/10/2026
+     * Created By: Karan Singh
+     */
+    whatsappEmbeddedSignuprMethod(event) {
+        event.preventDefault();
+        // For VF page, we still need to navigate
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: '/apex/WhatsappConnectSDK'
+            }
+        });
+    }
 }

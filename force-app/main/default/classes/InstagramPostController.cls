@@ -7,20 +7,25 @@ public with sharing class InstagramPostController {
     }
 
     private static String getMediaTypeFromUrl(String mediaUrl) {
-        if (String.isBlank(mediaUrl)) {
+        try {
+            if (String.isBlank(mediaUrl)) {
+                return 'IMAGE';
+            }
+            
+            String lowerUrl = mediaUrl.toLowerCase();
+            if (lowerUrl.contains('?')) {
+                lowerUrl = lowerUrl.substringBefore('?');
+            }
+            
+            if (lowerUrl.endsWith('.mp4') || lowerUrl.endsWith('.mov')) {
+                return 'REELS';
+            }
+            
+            return 'IMAGE';
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'InstagramPostController', 'getMediaTypeFromUrl', 'Error getting media type.');
             return 'IMAGE';
         }
-        
-        String lowerUrl = mediaUrl.toLowerCase();
-        if (lowerUrl.contains('?')) {
-            lowerUrl = lowerUrl.substringBefore('?');
-        }
-        
-        if (lowerUrl.endsWith('.mp4') || lowerUrl.endsWith('.mov')) {
-            return 'REELS';
-        }
-        
-        return 'IMAGE';
     }
 
     public static Map<String, String> generateAWSHeaders(String payload, String contentMD5, String awsAccessKey, String awsSecretKey, String awsRegion, String awsBucketName) {
@@ -378,21 +383,26 @@ public with sharing class InstagramPostController {
     }
 
     private static String extractInstagramErrorMessage(String responseBody) {
-        if (String.isBlank(responseBody)) {
-            return 'Unknown Error';
-        }
         try {
-            Map<String, Object> jsonResponse = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
-            if (jsonResponse.containsKey('error')) {
-                Map<String, Object> errorObj = (Map<String, Object>) jsonResponse.get('error');
-                if (errorObj != null && errorObj.containsKey('message')) {
-                    return (String) errorObj.get('message');
-                }
+            if (String.isBlank(responseBody)) {
+                return 'Unknown Error';
             }
+            try {
+                Map<String, Object> jsonResponse = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
+                if (jsonResponse.containsKey('error')) {
+                    Map<String, Object> errorObj = (Map<String, Object>) jsonResponse.get('error');
+                    if (errorObj != null && errorObj.containsKey('message')) {
+                        return (String) errorObj.get('message');
+                    }
+                }
+            } catch (Exception e) {
+                // Ignore parsing error and just return the raw body
+            }
+            return responseBody;
         } catch (Exception e) {
-            // Ignore parsing error and just return the raw body
+            ErrorHandler.insertErrordata(e, 'InstagramPostController', 'extractInstagramErrorMessage', 'Error extracting Instagram error message.');
+            return responseBody;
         }
-        return responseBody;
     }
 
     public static void sendEmailNotification(String errorMessage) {

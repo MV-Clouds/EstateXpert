@@ -36,7 +36,7 @@
 }
 
 .background-css {
-    background-color: #F9FAFB !important;
+    background-color: #F0F8FE !important;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: unset;
@@ -101,6 +101,7 @@
     justify-content: center;
     align-items: center;
     color: #6B7280;
+    padding: 0 !important;
 }
 
 .drag-handle:active {

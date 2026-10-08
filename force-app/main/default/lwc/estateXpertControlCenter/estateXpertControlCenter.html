@@ -219,6 +219,9 @@
                                 <c-portal-mapping-component
                                     onportalnavigate={handlePortalNavigation}></c-portal-mapping-component>
                             </template>
+                            <template if:true={isGoogleAdsMappingComponent}>
+                                <c-google-ads-form-mapping></c-google-ads-form-mapping>
+                            </template>
                         </div>
                     </template>
                 </div>

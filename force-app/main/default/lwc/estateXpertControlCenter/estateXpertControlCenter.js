@@ -133,16 +133,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     }
 
     /**
-     * Method Name: isPortalMappingLandingPageComponent
-     * @description: Checks if PortalMappingLandingPage component is selected
-     * Date: 23/09/2026
-     * Created By: Vyom Soni
-     */
-    get isPortalMappingLandingPageComponent() {
-        return this.selectedComponent === 'portalMappingLandingPage';
-    }
-
-    /**
      * Method Name: isGoogleAdsMappingComponent
      * @description: Checks if GoogleAdsMapping component is selected
      * Date: 1/10/2026
@@ -406,26 +396,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             'Portal Integration',
             'Connect and manage your portal integrations. Configure field mappings and synchronize data between Salesforce and external portals seamlessly.'
         );
-    }
-
-    /**
-     * Method Name: handlePortalNavigation
-     * @description: Handles navigation from portalMapping to portalMappingLandingPage
-     * Date: 17/02/2026
-     * Created By: Karan Singh
-     */
-    handlePortalNavigation(event) {
-        const { portalId, portalGen, portalName, portalIconUrl, portalStatus, isXMLForPF } = event.detail;
-        this.portalId = portalId;
-        this.portalGen = portalGen;
-        this.portalName = portalName;
-        this.portalIconUrl = portalIconUrl;
-        this.portalStatus = portalStatus;
-        this.isXMLForPF = isXMLForPF;
-        this.parentComponentTitle = 'Portal Integration';
-        this.selectedComponent = 'portalMappingLandingPage';
-        this.selectedComponentTitle = portalName;
-        this.currentView = 'childComponent';
     }
 
     /**

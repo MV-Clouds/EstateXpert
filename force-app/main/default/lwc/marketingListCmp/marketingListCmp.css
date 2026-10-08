@@ -556,8 +556,4 @@
 
 .custom-checkbox input[type="checkbox"]:checked+.checkmark::before {
     display: block;
-}
-
-.exp-table-content tbody tr:nth-child(odd) {
-    background-color: aliceblue;
-}
+}

@@ -85,16 +85,71 @@ public with sharing class InstagramPostController {
             return null;
         }
     }
-        
+    public static void deleteAwsImages(List<String> awsObjectKeys, List<String> awsObjectKeysToPreserve) {
+        try {
+            MVEX__AWS_Config__c awsData = MVEX__AWS_Config__c.getOrgDefaults();
+            if (awsData == null || String.isBlank(awsData.MVEX__AWS_Access_Key__c)) return;
+            
+            String awsAccessKey = awsData.MVEX__AWS_Access_Key__c;
+            String awsSecretKey = awsData.MVEX__AWS_Secret_Access_Key__c;
+            String awsRegion = awsData.MVEX__S3_Region_Name__c;
+            String awsBucketName = awsData.MVEX__S3_Bucket_Name__c;
+            String endpoint = 'https://' + awsBucketName + '.s3.amazonaws.com/';
+            
+            List<String> keysToDelete = new List<String>();
+            if (awsObjectKeys != null) {
+                for(String objectKey : awsObjectKeys) {
+                    if(awsObjectKeysToPreserve == null || !awsObjectKeysToPreserve.contains(objectKey)){
+                        keysToDelete.add(objectKey);
+                    }
+                }
+            }
+
+            if (!keysToDelete.isEmpty()) {
+                String payload = '<Delete><Quiet>true</Quiet>';
+                for(String objectKey : keysToDelete) {
+                    payload += '<Object><Key>' + objectKey + '</Key></Object>';
+                }
+                payload += '</Delete>';
+
+                String contentMD5 = EncodingUtil.base64Encode(Crypto.generateDigest('MD5', Blob.valueOf(payload)));
+                Map<String, String> headers = generateAWSHeaders(payload, contentMD5, awsAccessKey, awsSecretKey, awsRegion, awsBucketName);
+
+                HttpRequest req = new HttpRequest();
+                req.setTimeout(120000);
+                req.setEndpoint(endpoint + '?delete');
+                req.setMethod('POST');
+                req.setHeader('Content-Type', 'application/xml');
+                req.setHeader('Content-MD5', contentMD5);
+                
+                for(String key : headers.keySet()){
+                    req.setHeader(key, headers.get(key));
+                }
+                
+                req.setBody(payload);
+                
+                Http http = new Http();
+                HttpResponse res = http.send(req);
+
+                if(res.getStatusCode() != 200) {
+                    ErrorHandler.insertErrordata(null, 'InstagramPostController', 'deleteAwsImages', 'Failed to delete AWS objects: ' + res.getBody());
+                }
+            }
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'InstagramPostController', 'deleteAwsImages', 'Error while deleting AWS objects.');
+        }
+    }
+    
     @AuraEnabled
     public static Map<String, String> getPropertyMediaUrls(String listingId) {
 
         try {
             Map<String, String> mediaUrlMap = new Map<String, String>();
     
-            MVEX__Listing__c listingRecord = [SELECT MVEX__Property__c FROM MVEX__Listing__c WHERE Id = :listingId WITH USER_MODE LIMIT 1];
+            List<MVEX__Listing__c> listingRecords = [SELECT MVEX__Property__c FROM MVEX__Listing__c WHERE Id = :listingId WITH USER_MODE LIMIT 1];
         
-            if (listingRecord != null && listingRecord.MVEX__Property__c != null) {
+            if (!listingRecords.isEmpty() && listingRecords[0].MVEX__Property__c != null) {
+                MVEX__Listing__c listingRecord = listingRecords[0];
                 List<MVEX__Property_File__c> propertyFiles = [SELECT Name, MVEX__BaseUrl__c,MVEX__Size__c,MVEX__ExternalLink__c FROM MVEX__Property_File__c 
                                                                 WHERE MVEX__Property__c = :listingRecord.MVEX__Property__c AND MVEX__Size__c != null  WITH USER_MODE];
         
@@ -184,6 +239,7 @@ public with sharing class InstagramPostController {
                 if (instaOAuth == null || String.isBlank(instaOAuth.User_Id__c) || String.isBlank(instaOAuth.Access_Token__c)) {
                     apexResponse.status = 'ERROR';
                     apexResponse.message = 'Instagram is not connected. Please connect your account first.';
+                    deleteAwsImages(awsObjectKeys, awsObjectKeysToPreserve);
                     return apexResponse;
                 }
 
@@ -245,11 +301,12 @@ public with sharing class InstagramPostController {
                     apexResponse.message = 'Instagram post is successfully created.';
                     return apexResponse;
                 } else {
+                    String parsedErrorMessage = extractInstagramErrorMessage(response.getBody());
                     sendEmailNotification(response.getBody());
+                    deleteAwsImages(awsObjectKeys, awsObjectKeysToPreserve);
                     apexResponse.status = 'ERROR';
-                    apexResponse.message = 'Failed to create media container: ' + response.getBody();
+                    apexResponse.message = 'Failed to create media container: ' + parsedErrorMessage;
                     return apexResponse;
-
                 }
             } else {
                 List<String> mediaContainerIds = new List<String>();
@@ -281,9 +338,11 @@ public with sharing class InstagramPostController {
                         MediaResponse mediaResponse = (MediaResponse) JSON.deserialize(response.getBody(), MediaResponse.class);
                         mediaContainerIds.add(mediaResponse.id);
                     } else {
+                        String parsedErrorMessage = extractInstagramErrorMessage(response.getBody());
                         sendEmailNotification(response.getBody());
+                        deleteAwsImages(awsObjectKeys, awsObjectKeysToPreserve);
                         apexResponse.status = 'ERROR';
-                        apexResponse.message = 'Failed to create media container: ' + response.getBody();
+                        apexResponse.message = 'Failed to create media container: ' + parsedErrorMessage;
                         return apexResponse;
                     }
                 }
@@ -311,10 +370,29 @@ public with sharing class InstagramPostController {
         } catch (Exception e) {
             sendEmailNotification(e.getMessage());
             ErrorHandler.insertErrordata(e, 'InstagramPostController', 'postToInstagram', 'Error while posting to instagram.');
+            deleteAwsImages(awsObjectKeys, awsObjectKeysToPreserve);
             apexResponse.status = 'ERROR';
             apexResponse.message = 'Exception: ' + e.getMessage();
             return apexResponse;
         }
+    }
+
+    private static String extractInstagramErrorMessage(String responseBody) {
+        if (String.isBlank(responseBody)) {
+            return 'Unknown Error';
+        }
+        try {
+            Map<String, Object> jsonResponse = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
+            if (jsonResponse.containsKey('error')) {
+                Map<String, Object> errorObj = (Map<String, Object>) jsonResponse.get('error');
+                if (errorObj != null && errorObj.containsKey('message')) {
+                    return (String) errorObj.get('message');
+                }
+            }
+        } catch (Exception e) {
+            // Ignore parsing error and just return the raw body
+        }
+        return responseBody;
     }
 
     public static void sendEmailNotification(String errorMessage) {
@@ -324,6 +402,10 @@ public with sharing class InstagramPostController {
             String errorEmailId = System.Label.ErrorNotificationEmail;
     
             List<EmailTemplate> emailTemplates = [SELECT Id, HtmlValue, Subject FROM EmailTemplate WHERE DeveloperName = 'Instagram_Error_Template' WITH USER_MODE LIMIT 1];
+            
+            if (emailTemplates.isEmpty()) {
+                return;
+            }
             
             EmailTemplate emailTemplate = emailTemplates[0];
         

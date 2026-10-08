@@ -1,4 +1,5 @@
 <template>
+    <!-- ============ Empty / error state ============ -->
     <template if:true={showEmptyState}>
         <div class="exp-no-data-container">
             <img src={emptyStateUrl} alt="No Property Found" draggable="false">
@@ -11,583 +12,435 @@
         <template if:true={spinnerdatatable}>
             <c-spinner-component></c-spinner-component>
         </template>
+
         <template if:false={showOfferForm}>
-            <div class="container">
-                <div class="box1">
-                    <div class="main_detail_box">
-                        <div class="carousel-container">
-                            <div class="carousel">
-                                <template if:true={imagesOnDescription.length}>
-                                    <div class="carousel-inner">
-                                        <template for:each={imagesOnDescription} for:item="image">
-                                            <div class="carousel-item" key={image.Id}>
-                                                <template if:true={image.isLoading}>
-                                                    <div class="image-spinner">
-                                                        <lightning-spinner alternative-text="Loading image..."
-                                                            size="medium"></lightning-spinner>
-                                                    </div>
-                                                </template>
-                                                <img src={image.MVEX__BaseUrl__c} alt="Property Image"
-                                                    class="carousel-image" onload={handleImageLoaded}
-                                                    onerror={handleImageError} data-id={image.Id} />
-                                            </div>
-                                        </template>
-                                    </div>
-                                    <button class="carousel-control prev" onclick={prevSlide}>
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z"
-                                                fill="#ffffff" />
-                                        </svg>
-                                    </button>
-                                    <button class="carousel-control next" onclick={nextSlide}>
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M8.59 16.59L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.59Z"
-                                                fill="#ffffff" />
-                                        </svg>
-                                    </button>
-                                </template>
-                            </div>
-                        </div>
-                        <div class="agent_details desktop-only">
-                            <div class="box2">
-                                <template for:each={propertyData} for:item="info">
-                                    <div key={info.Id} class="agent_info">
-                                        <div class="info_Name">
-                                            <h1><b>{info.Name}</b></h1>
-                                            <p>{formattedAddress}</p>
-                                        </div>
-                                        <div class="vendor_info">
-                                            <lightning-avatar slot="media" variant="circle" size="large"
-                                                src={info.MVEX__Listing_Agent_Photo__c}
-                                                fallback-icon-name="standard:avatar"
-                                                alternative-text={info.MVEX__Listing_Agent_Full_Name__c}></lightning-avatar>
-                                            <div class="vendor_details">
-                                                <p class="vendorName"><b>{info.MVEX__Listing_Agent_Full_Name__c}</b>
-                                                </p>
-                                                <p class="vendorType">{info.MVEX__Listing_Agent_Email__c}</p>
-                                                <p class="vendorType">{info.MVEX__Listing_Agent_Mobile_Phone__c}</p>
-                                            </div>
-                                        </div>
-                                        <div class="info_Price">
-                                            <p class="info_Price_value">{formattedPrice}</p>
-                                        </div>
-                                        <template if:true={showOffer}>
-                                            <button class="offer_button" onclick={makeOffer}>Make an Offer</button>
-                                        </template>
-                                        <template if:true={showSiteVisit}>
-                                            <div class="site_visit_section">
-                                                <!-- Status Message (shown when no buttons are visible) -->
-                                                <template if:true={showStatusMessageBox}>
-                                                    <div class="status-message">
-                                                        <p class="status-text">{statusMessage}</p>
-                                                        <template if:true={showingDate}>
-                                                            <p class="showing-date">Scheduled for: {showingDate}</p>
-                                                        </template>
-                                                        <template if:true={rescheduleMessage}>
-                                                            <p class="reschedule-date">{rescheduleMessage}</p>
-                                                        </template>
-                                                    </div>
-                                                </template>
+            <template if:true={hasProperty}>
+                <div class="page">
 
-                                                <!-- Primary Action Buttons (Initial State) -->
-                                                <template if:false={showStatusMessageBox}>
-                                                    <div class="site_visit_buttons">
-                                                        <template if:true={showConfirmButton}>
-                                                            <button class="offer_button offer_button-primary"
-                                                                onclick={confirmSiteVisit}>Confirm</button>
-                                                        </template>
-                                                        <template if:true={showRescheduleButton}>
-                                                            <button class="offer_button offer_button-secondary"
-                                                                onclick={rescheduleSiteVisit}>Reschedule</button>
-                                                        </template>
-                                                        <template if:true={showCancelButton}>
-                                                            <button class="offer_button offer_button-neutral"
-                                                                onclick={cancelSiteVisit}>Cancel</button>
-                                                        </template>
-                                                        <template if:true={showReactivateButton}>
-                                                            <button class="offer_button offer_button-primary"
-                                                                onclick={reactivateSiteVisit}>Reactivate
-                                                                Request</button>
-                                                        </template>
-                                                    </div>
-
-                                                    <!-- Change Plans Link (Confirmed State) -->
-                                                    <template if:true={showChangeLinksAfterConfirm}>
-                                                        <div class="change-plans-section">
-                                                            <p class="change-plans-text">Need to change plans?</p>
-                                                        </div>
-                                                    </template>
-                                                </template>
-                                            </div>
-                                        </template>
-                                        <template if:true={showBooking}>
-                                            <button class="offer_button" onclick={makeBooking}>Make a Booking</button>
-                                        </template>
-                                    </div>
-                                </template>
-                            </div>
+                    <!-- ============ Header ============ -->
+                    <header class="page-header">
+                        <div class="title-block">
+                            <h1 class="page-title">{property.Name}</h1>
+                            <p class="page-address">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                                <span>{formattedAddress}</span>
+                            </p>
                         </div>
-                    </div>
-                    <div class="image_loop">
-                        <template for:each={imagesOnDescription} for:item="propertyImage">
-                            <div class="each_image" key={propertyImage.Id}>
-                                <template if:true={propertyImage.isLoading}>
-                                    <div class="image-spinner">
-                                        <lightning-spinner alternative-text="Loading image..."
-                                            size="small"></lightning-spinner>
-                                    </div>
-                                </template>
-                                <img src={propertyImage.MVEX__BaseUrl__c} alt="Property" onload={handleImageLoaded}
-                                    onerror={handleImageError} data-id={propertyImage.Id} />
-                                <div class="black1" onclick={handleBoxClick} data-id={propertyImage.Id}>
-                                    <div class="imgInfo">
-                                        <p>+{totalCountOfImg}</p>
-                                    </div>
-                                </div>
+                        <template if:true={hasAgent}>
+                            <div class="agent-pill">
+                                <span class="avatar avatar-sm">
+                                    <template if:true={agentPhotoUrl}><img src={agentPhotoUrl} alt={agentName} /></template>
+                                    <template if:false={agentPhotoUrl}>{agentInitials}</template>
+                                </span>
+                                <span class="agent-pill-name">{agentName}</span>
                             </div>
                         </template>
-                    </div>
-                    <div class="agent_details mobile-only">
-                        <div class="box2">
-                            <template for:each={propertyData} for:item="info">
-                                <div key={info.Id} class="agent_info">
-                                    <div class="info_Name">
-                                        <h1><b>{info.Name}</b></h1>
-                                        <p>{formattedAddress}</p>
-                                    </div>
-                                    <div class="vendor_info">
-                                        <lightning-avatar slot="media" variant="circle" size="large"
-                                            src={info.MVEX__Listing_Agent_Photo__c} fallback-icon-name="standard:avatar"
-                                            alternative-text={info.MVEX__Listing_Agent_Full_Name__c}></lightning-avatar>
-                                        <div class="vendor_details">
-                                            <p class="vendorName"><b>{info.MVEX__Listing_Agent_Full_Name__c}</b></p>
-                                            <p class="vendorType">{info.MVEX__Listing_Agent_Email__c}</p>
-                                            <p class="vendorType">{info.MVEX__Listing_Agent_Mobile_Phone__c}</p>
-                                        </div>
-                                    </div>
-                                    <div class="info_Price">
-                                        <svg width="11" height="16" viewBox="0 0 11 16" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M11 2V0H0V2H3.5C4.802 2 5.901 2.838 6.315 4H0V6H6.315C6.10973 6.58323 5.72892 7.08861 5.22488 7.44672C4.72085 7.80483 4.1183 7.9981 3.5 8H0V10.414L5.586 16H8.414L2.414 10H3.5C4.65196 9.99846 5.76816 9.59975 6.66039 8.8711C7.55263 8.14245 8.16632 7.12842 8.398 6H11V4H8.398C8.24471 3.2722 7.92884 2.58848 7.474 2H11Z"
-                                                fill="#0176D3" />
-                                        </svg>
-                                        <p class="info_Price_value">{formattedPrice}</p>
-                                    </div>
-                                    <template if:true={showOffer}>
-                                        <button class="offer_button sticky-offer" onclick={makeOffer}>Make an
-                                            Offer</button>
-                                    </template>
-                                    <template if:true={showSiteVisit}>
-                                        <div class="site_visit_section">
-                                            <!-- Status Message (shown when no buttons are visible) -->
-                                            <template if:true={showStatusMessageBox}>
-                                                <div class="status-message">
-                                                    <p class="status-text">{statusMessage}</p>
-                                                    <template if:true={showingDate}>
-                                                        <p class="showing-date">Scheduled for: {showingDate}</p>
-                                                    </template>
-                                                    <template if:true={rescheduleMessage}>
-                                                        <p class="reschedule-date">{rescheduleMessage}</p>
-                                                    </template>
-                                                </div>
-                                            </template>
+                    </header>
 
-                                            <!-- Mobile Buttons -->
-                                            <template if:false={showStatusMessageBox}>
-                                                <div class="site_visit_buttons">
-                                                    <template if:true={showConfirmButton}>
-                                                        <button class="offer_button sticky-offer offer_button-primary"
-                                                            onclick={confirmSiteVisit}>Confirm</button>
-                                                    </template>
-                                                    <template if:true={showRescheduleButton}>
-                                                        <button class="offer_button sticky-offer offer_button-secondary"
-                                                            onclick={rescheduleSiteVisit}>Reschedule</button>
-                                                    </template>
-                                                    <template if:true={showCancelButton}>
-                                                        <button class="offer_button sticky-offer offer_button-neutral"
-                                                            onclick={cancelSiteVisit}>Cancel</button>
-                                                    </template>
-                                                    <template if:true={showReactivateButton}>
-                                                        <button class="offer_button sticky-offer offer_button-primary"
-                                                            onclick={reactivateSiteVisit}>Reactivate Request</button>
-                                                    </template>
-                                                </div>
+                    <div class="layout">
+                        <div class="overview-layout">
 
-                                                <!-- Change Plans Link (Confirmed State) -->
-                                                <template if:true={showChangeLinksAfterConfirm}>
-                                                    <div class="change-plans-section">
-                                                        <p class="change-plans-text">Need to change plans?</p>
+                            <!-- ============ Gallery ============ -->
+                            <section class="gallery">
+                            <template if:true={hasImages}>
+                                <div class="carousel" ontouchstart={handleTouchStart} ontouchend={handleTouchEnd}>
+                                    <div class="carousel-inner" style={carouselStyle}>
+                                        <template for:each={slides} for:item="slide">
+                                            <div class="carousel-item" key={slide.Id}>
+                                                <template if:true={slide.isLoading}>
+                                                    <div class="image-spinner">
+                                                        <lightning-spinner alternative-text="Loading image..." size="medium"></lightning-spinner>
                                                     </div>
                                                 </template>
-                                            </template>
-                                        </div>
-                                    </template>
-                                    <template if:true={showBooking}>
-                                        <button class="offer_button sticky-offer" onclick={makeBooking}>Make a
-                                            Booking</button>
-                                    </template>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
+                                                <template if:true={slide.isVideo}>
+                                                    <video class="carousel-image" src={slide.mediaUrl} controls playsinline
+                                                        preload="metadata" data-id={slide.Id} data-index={slide.index}
+                                                        onloadeddata={handleImageLoaded} onerror={handleImageError}>
+                                                    </video>
+                                                </template>
+                                                <template if:false={slide.isVideo}>
+                                                    <img class="carousel-image" src={slide.mediaUrl} alt="Property photo"
+                                                        loading="lazy" data-id={slide.Id} data-index={slide.index}
+                                                        onload={handleImageLoaded} onerror={handleImageError}
+                                                        onclick={openPreview} />
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
 
-                <div class="box3">
-                    <div class="tab-container">
-                        <div class="div1">
-                            <div class="tab-menu">
-                                <ul>
-                                    <li><a class="active-tab" data-tab-id="tab1">Description</a></li>
-                                    <li><a data-tab-id="tab2">Gallery</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="tab-css active-tab-content" data-id="tab1">
-                            <template for:each={propertyData} for:item="item">
-                                <div class="about" key={item.Id}>
-                                    <h1>About this Property</h1>
-                                    <p>{item.MVEX__Description__c}</p>
-                                </div>
-                                <div class="property_details" key={item.Id}>
-                                    <h1>Property Details</h1>
-                                    <div class="property_v_span">
-                                        <template if:true={item.MVEX__Bedrooms__c}>
-                                            <div class="property_v">
-                                                <img src={plvimg1} alt="bed" />
-                                                <p>{item.MVEX__Bedrooms__c} Beds</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__Bathrooms__c}>
-                                            <div class="property_v">
-                                                <img src={plvimg2} alt="bath" />
-                                                <p>{item.MVEX__Bathrooms__c} Baths</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__Parking_Spaces__c}>
-                                            <div class="property_v">
-                                                <img src={plvimg4} alt="parking" />
-                                                <p>{item.MVEX__Parking_Spaces__c} Parking</p>
-                                            </div>
-                                        </template>
-                                    </div>
-                                    <div class="details_1">
-                                        <template if:true={item.MVEX__Lot_Size__c}>
-                                            <div class="details_class">
-                                                <p class="details_field">Carpet Area</p>
-                                                <p class="details_value">{item.MVEX__Lot_Size__c} sqft</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__Property_Type__c}>
-                                            <div class="details_class">
-                                                <p class="details_field">Property Type</p>
-                                                <p class="details_value">{item.MVEX__Property_Type__c}</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__Status__c}>
-                                            <div class="details_class">
-                                                <p class="details_field">Status</p>
-                                                <p class="details_value">{item.MVEX__Status__c}</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__Year_Built__c}>
-                                            <div class="details_class">
-                                                <p class="details_field">Year Built</p>
-                                                <p class="details_value">{item.MVEX__Year_Built__c}</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__Furnished__c}>
-                                            <div class="details_class">
-                                                <p class="details_field">Furnished Status</p>
-                                                <p class="details_value">{item.MVEX__Furnished__c}</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__Completion_Status__c}>
-                                            <div class="details_class">
-                                                <p class="details_field">Completion Status</p>
-                                                <p class="details_value">{item.MVEX__Completion_Status__c}</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__Floor__c}>
-                                            <div class="details_class">
-                                                <p class="details_field">Floor</p>
-                                                <p class="details_value">{item.MVEX__Floor__c}</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__Parking_Available__c}>
-                                            <div class="details_class">
-                                                <p class="details_field">Parking Available</p>
-                                                <p class="details_value">{item.MVEX__Parking_Available__c}</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__Private_Amenities__c}>
-                                            <div class="details_class">
-                                                <p class="details_field">Private Amenities</p>
-                                                <p class="details_value">{item.MVEX__Private_Amenities__c}</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__RERA_Permit_Number__c}>
-                                            <div class="details_class">
-                                                <p class="details_field">RERA Permit Number</p>
-                                                <p class="details_value">{item.MVEX__RERA_Permit_Number__c}</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__Service_Charge__c}>
-                                            <div class="details_class">
-                                                <p class="details_field">Service Charge</p>
-                                                <p class="details_value">{item.MVEX__Service_Charge__c}</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__Property_Category__c}>
-                                            <div class="details_class">
-                                                <p class="details_field">Property Category</p>
-                                                <p class="details_value">{item.MVEX__Property_Category__c}</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__Property_Status__c}>
-                                            <div class="details_class">
-                                                <p class="details_field">Property Status</p>
-                                                <p class="details_value">{item.MVEX__Property_Status__c}</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={item.MVEX__Property_Sub_Type__c}>
-                                            <div class="details_class">
-                                                <p class="details_field">Property Sub Type</p>
-                                                <p class="details_value">{item.MVEX__Property_Sub_Type__c}</p>
-                                            </div>
-                                        </template>
-                                        <template if:true={isRentListing}>
-                                            <template if:true={item.MVEX__Availability_Date__c}>
-                                                <div class="details_class">
-                                                    <p class="details_field">Availability Date</p>
-                                                    <p class="details_value">{item.MVEX__Availability_Date__c}</p>
-                                                </div>
-                                            </template>
-                                            <template if:true={item.MVEX__Available_From__c}>
-                                                <div class="details_class">
-                                                    <p class="details_field">Available From</p>
-                                                    <p class="details_value">{item.MVEX__Available_From__c}</p>
-                                                </div>
-                                            </template>
-                                            <template if:true={item.MVEX__Available_to__c}>
-                                                <div class="details_class">
-                                                    <p class="details_field">Available To</p>
-                                                    <p class="details_value">{item.MVEX__Available_to__c}</p>
-                                                </div>
-                                            </template>
-                                        </template>
-                                    </div>
-                                </div>
-                                <div class="address" key={item.Id}>
-                                    <h1>Address Details</h1>
-                                    <div class="address_and_landmark">
-                                        <div class="address_class">
-                                            <h2>Address</h2>
-                                            <p>{formattedAddress}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="map_div_class" key={item.Id}>
-                                    <template if:true={hasValidLocation}>
-                                        <div class="map_details">
-                                            <p class="map_d2" onclick={openGoogleMap}>View on Google Map</p>
-                                            <template if:false={isFullScreen}>
-                                                <p class="map_full_view" onclick={toggleFullMapView}>Full View</p>
-                                            </template>
-                                            <template if:true={isFullScreen}>
-                                                <p class="map_close_view" onclick={toggleFullMapView}>Close Full View
-                                                </p>
-                                            </template>
-                                        </div>
-                                        <div class={mapClass}>
-                                            <lightning-map map-markers={mapMarkers} center={mapCenter}></lightning-map>
-                                        </div>
+                                    <template if:true={hasMultipleImages}>
+                                        <button class="carousel-control prev" onclick={prevSlide} aria-label="Previous media">
+                                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                                        </button>
+                                        <button class="carousel-control next" onclick={nextSlide} aria-label="Next media">
+                                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                                        </button>
                                     </template>
-                                    <template if:false={hasValidLocation}>
-                                        <div class="map_error">
-                                            <p>Map unavailable: Location data not provided.</p>
-                                        </div>
+                                    <span class="carousel-counter">{slideCounter}</span>
+                                </div>
+
+                                <template if:true={hasMultipleImages}>
+                                    <div class="thumb-strip">
+                                        <template for:each={slides} for:item="slide">
+                                            <button class={slide.thumbClass} key={slide.Id} data-index={slide.index}
+                                                aria-label={slide.label} aria-current={slide.ariaCurrent}
+                                                onclick={selectSlide}>
+                                                <template if:true={slide.isVideo}>
+                                                    <video src={slide.mediaUrl} muted playsinline preload="metadata"
+                                                        aria-label={slide.label} data-id={slide.Id} onerror={handleImageError}>
+                                                    </video>
+                                                    <span class="thumb-video-indicator" aria-hidden="true">▶</span>
+                                                </template>
+                                                <template if:false={slide.isVideo}>
+                                                    <img src={slide.mediaUrl} alt="" loading="lazy"
+                                                        data-id={slide.Id} onerror={handleImageError} />
+                                                </template>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </template>
+                            </template>
+                            <template if:false={hasImages}>
+                                <div class="gallery-empty">
+                                    <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>
+                                    <p>No photos or videos available for this property yet.</p>
+                                </div>
+                            </template>
+                            </section>
+
+                            <!-- ============ Sticky summary card ============ -->
+                            <aside class="summary-card">
+                            <div class="summary-top">
+                                <p class="summary-label">{priceLabel}</p>
+                                <p class="summary-price">
+                                    <span class="summary-price-amount">{priceAmount}</span>
+                                    <template if:true={priceSuffix}><span class="summary-price-suffix">{priceSuffix}</span></template>
+                                </p>
+                            </div>
+
+                            <template if:true={showSiteVisit}>
+                                <span class={statusPillClass}><span class="status-dot"></span>{statusPillLabel}</span>
+                            </template>
+
+                            <template if:true={hasAgent}>
+                                <div class="summary-divider"></div>
+                                <div class="agent-row">
+                                    <span class="avatar avatar-md">
+                                        <template if:true={agentPhotoUrl}><img src={agentPhotoUrl} alt={agentName} /></template>
+                                        <template if:false={agentPhotoUrl}>{agentInitials}</template>
+                                    </span>
+                                    <div class="agent-row-text">
+                                        <p class="agent-row-name">{agentName}</p>
+                                        <p class="agent-row-meta">{agentMeta}</p>
+                                        <template if:true={agentMailHref}>
+                                            <a class="agent-row-email" href={agentMailHref} title="Email agent">{agentEmail}</a>
+                                        </template>
+                                    </div>
+                                    <template if:true={agentTelHref}>
+                                        <a class="round-btn" href={agentTelHref} aria-label="Call agent" title="Call agent">
+                                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                        </a>
                                     </template>
                                 </div>
                             </template>
-                        </div>
-                        <div class="tab-css" data-id="tab2">
-                            <div class="images_total">
-                                <p>All Images <b>({totalImagesInGallery})</b></p>
-                            </div>
-                            <div class="PropertyImages">
-                                <template for:each={propertyImages} for:item="propertyImage">
-                                    <div class="thumbnails" key={propertyImage.Id} data-id={propertyImage.Id}
-                                        data-name={propertyImage.Name} data-url={propertyImage.MVEX__BaseUrl__c}
-                                        onclick={previewAllImages}>
-                                        <template if:true={propertyImage.isLoading}>
-                                            <div class="image-spinner">
-                                                <lightning-spinner alternative-text="Loading image..."
-                                                    size="small"></lightning-spinner>
-                                            </div>
+
+                            <!-- Offer / booking -->
+                            <template if:true={showOffer}>
+                                <button class="btn btn-blue" onclick={makeOffer}>Make an Offer</button>
+                            </template>
+                            <template if:true={showBooking}>
+                                <button class="btn btn-blue" onclick={makeBooking}>Make a Booking</button>
+                            </template>
+
+                            <!-- Site visit -->
+                            <template if:true={showSiteVisit}>
+                                <template if:true={showingDate}>
+                                    <div class="showing-box">
+                                        <span class="showing-icon">
+                                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+                                        </span>
+                                        <div class="showing-text">
+                                            <p class="showing-label">Your showing</p>
+                                            <p class="showing-date">{showingDate}</p>
+                                            <template if:true={showingDurationLabel}>
+                                                <p class="showing-meta">{showingDurationLabel}</p>
+                                            </template>
+                                            <template if:true={rescheduleMessage}>
+                                                <p class="showing-reschedule">{rescheduleMessage}</p>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Status message (shown when no buttons are visible) -->
+                                <template if:true={showStatusMessageBox}>
+                                    <div class="status-note">
+                                        <p>{statusMessage}</p>
+                                        <template if:true={cancellationNote}>
+                                            <p class="status-note-sub">{cancellationNote}</p>
                                         </template>
-                                        <img src={propertyImage.MVEX__BaseUrl__c} alt="Property"
-                                            onload={handleImageLoaded} onerror={handleImageError}
-                                            data-id={propertyImage.Id} />
+                                    </div>
+                                </template>
+
+                                <!-- Action buttons -->
+                                <template if:false={showStatusMessageBox}>
+                                    <div class="action-stack">
+                                        <template if:true={showConfirmButton}>
+                                            <button class="btn btn-green" onclick={confirmSiteVisit}>
+                                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                                                Confirm showing
+                                            </button>
+                                        </template>
+                                        <template if:true={showRescheduleButton}>
+                                            <button class="btn btn-blue" onclick={rescheduleSiteVisit}>
+                                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4M8 2v4M3 10h5"/><circle cx="16" cy="16" r="6"/><path d="M16 14v2l1 1"/></svg>
+                                                Reschedule
+                                            </button>
+                                        </template>
+                                        <template if:true={showCancelButton}>
+                                            <button class="btn btn-outline" onclick={cancelSiteVisit}>
+                                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                                                Cancel
+                                            </button>
+                                        </template>
+                                        <template if:true={showReactivateButton}>
+                                            <button class="btn btn-green" onclick={reactivateSiteVisit}>Reactivate Request</button>
+                                        </template>
+                                    </div>
+
+                                    <template if:true={showFreeCancellationNote}>
+                                        <p class="summary-note">
+                                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+                                            <span>Free cancellation up to 24 hours before your showing.</span>
+                                        </p>
+                                    </template>
+                                    <!-- Change Plans note (confirmed state) -->
+                                    <template if:true={showChangeLinksAfterConfirm}>
+                                        <p class="summary-note">
+                                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+                                            <span>Need to change plans?</span>
+                                        </p>
+                                    </template>
+                                </template>
+                            </template>
+                            </aside>
+
+                            <!-- ============ About ============ -->
+                            <section class="card about-card">
+                            <div class="card-head">
+                                <span class="card-icon">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+                                </span>
+                                <h2 class="card-title">About this Property</h2>
+                            </div>
+                            <p class="about-text">{property.MVEX__Description__c}</p>
+                            <template if:true={hasHighlights}>
+                                <div class="chip-row">
+                                    <template for:each={highlights} for:item="h">
+                                        <span class="chip" key={h.key}>
+                                            <template if:true={h.isBed}>
+                                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"/></svg>
+                                            </template>
+                                            <template if:true={h.isBath}>
+                                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
+                                            </template>
+                                            <template if:true={h.isParking}>
+                                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+                                            </template>
+                                            <template if:true={h.isArea}>
+                                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                                            </template>
+                                            {h.text}
+                                        </span>
+                                    </template>
+                                </div>
+                            </template>
+                            </section>
+                        </div>
+
+                        <!-- ============ Property details ============ -->
+                        <section class="card card-full">
+                            <div class="card-head">
+                                <span class="card-icon">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h4M3 12h4M3 19h4M11 5h10M11 12h10M11 19h10"/></svg>
+                                </span>
+                                <h2 class="card-title">Property Details</h2>
+                            </div>
+                            <div class="details-grid">
+                                <template for:each={detailRows} for:item="row">
+                                    <div class="detail" key={row.label}>
+                                        <p class="detail-label">{row.label}</p>
+                                        <p class="detail-value">{row.value}</p>
                                     </div>
                                 </template>
                             </div>
-                        </div>
+                        </section>
+
+                        <!-- ============ Address + map ============ -->
+                        <section class="card card-full">
+                            <div class="card-head">
+                                <span class="card-icon">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                                </span>
+                                <h2 class="card-title">Address Details</h2>
+                            </div>
+                            <p class="address-text">{formattedAddress}</p>
+
+                            <template if:true={hasAddressRows}>
+                                <div class="details-grid address-grid">
+                                    <template for:each={addressRows} for:item="row">
+                                        <div class="detail" key={row.label}>
+                                            <p class="detail-label">{row.label}</p>
+                                            <p class="detail-value">{row.value}</p>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <div class="map-links">
+                                <template if:true={hasValidLocation}>
+                                    <button class="link-btn" onclick={openGoogleMap}>
+                                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                                        View on Google Map
+                                    </button>
+                                    <template if:false={isFullScreen}>
+                                        <button class="link-btn" onclick={toggleFullMapView}>
+                                            Full View
+                                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>
+                                        </button>
+                                    </template>
+                                    <template if:true={isFullScreen}>
+                                        <button class="map-close-btn" onclick={toggleFullMapView}>Close Full View</button>
+                                    </template>
+                                </template>
+                            </div>
+                            <div class={mapClass}>
+                                <lightning-map map-markers={mapMarkers} center={mapCenter} zoom-level={mapZoom} list-view="hidden"></lightning-map>
+                            </div>
+                            <template if:false={hasValidLocation}>
+                                <div class="map-error"><p>Map unavailable: Location data not provided.</p></div>
+                            </template>
+                        </section>
                     </div>
                 </div>
-            </div>
+            </template>
         </template>
 
+        <!-- ============ Image preview ============ -->
         <template if:true={Show_ImagePreview}>
-            <div class="slds-modal slds-fade-in-open image_preview" role="dialog" aria-modal="true">
-                <div class="image_control_bar" onclick={stopEventPropagation}>
-                    <div class="image_title">
-                        <lightning-icon icon-name="doctype:image" alternative-text="Image file" title="Image"
-                            size="medium"></lightning-icon>
-                        <h2>{PreviewImageTitle}</h2>
-                    </div>
-                    <div class="close_img" onclick={closeImagePreview}>
-                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                            <g id="SVGRepo_iconCarrier">
-                                <path
-                                    d="M16 8L8 16M12 12L16 16M8 8L10 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-                                    stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                </path>
-                            </g>
-                        </svg>
-                    </div>
+            <div class="preview" role="dialog" aria-modal="true" onclick={closeImagePreview}>
+                <div class="preview-bar" onclick={stopEventPropagation}>
+                    <h2 class="preview-title">{PreviewImageTitle}</h2>
+                    <button class="preview-close" onclick={closeImagePreview} aria-label="Close preview">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
                 </div>
-                <div class="img_preview_container">
+                <div class="preview-stage">
                     <template if:true={Is_ImageHavePreview}>
-                        <img src={PreviewImageSrc} onload={handleImageLoaded} onerror={handleImageNotLoaded}
-                            onclick={stopEventPropagation} data-id={PreviewImageId} />
+                        <template if:true={PreviewIsVideo}>
+                            <video class="preview-image" src={PreviewImageSrc} controls autoplay playsinline
+                                onloadeddata={handleImageLoaded} onerror={handleImageNotLoaded}
+                                onclick={stopEventPropagation} data-id={PreviewImageId}>
+                            </video>
+                        </template>
+                        <template if:false={PreviewIsVideo}>
+                            <img class="preview-image" src={PreviewImageSrc} alt={PreviewImageTitle}
+                                onload={handleImageLoaded} onerror={handleImageNotLoaded}
+                                onclick={stopEventPropagation} data-id={PreviewImageId} />
+                        </template>
                     </template>
                     <template if:true={PreviewImgSpinner}>
-                        <div class="slds-spinner_container" style="position: absolute; background: #04040466;">
-                            <div class="slds-spinner--brand slds-spinner slds-spinner--large slds-is-relative"
-                                role="alert">
-                                <span class="slds-assistive-text">Loading</span>
-                                <div class="slds-spinner__dot-a"></div>
-                                <div class="slds-spinner__dot-b"></div>
-                            </div>
+                        <div class="preview-spinner">
+                            <lightning-spinner alternative-text="Loading image..." size="large"></lightning-spinner>
                         </div>
                     </template>
                 </div>
-                <div class="Next_Previous_btn">
-                    <div onclick={changeImg} data-name="Previous_Image" class={previousButtonClass}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M15.41 16.59L10.83 12L15.41 7.41L14 6L8 12L14 18L15.41 16.59Z" fill="#ffffff" />
-                        </svg>
-                    </div>
-                    <div onclick={changeImg} data-name="Next_Image" class={nextButtonClass}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M8.59 16.59L13.17 12L8.59 7.41L10 6L16 12L10 18L8.59 16.59Z" fill="#ffffff" />
-                        </svg>
-                    </div>
+                <div class="preview-nav" onclick={stopEventPropagation}>
+                    <button class={previousButtonClass} data-name="Previous_Image" onclick={changeImg} aria-label="Previous photo">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+                    <button class={nextButtonClass} data-name="Next_Image" onclick={changeImg} aria-label="Next photo">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
                 </div>
             </div>
         </template>
 
+        <!-- ============ Confirm popup (original flow) ============ -->
         <template if:true={showConfirmPopup}>
-            <section role="dialog" class="slds-modal slds-fade-in-open custom-modal" aria-modal="true">
-                <div class="slds-modal__container custom-modal-container">
-                    <header class="slds-modal__header custom-modal-header">
-                        <button class="slds-button slds-button_icon custom-modal-close" title="Close"
-                            onclick={closePopup}>
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                    fill="white" />
-                            </svg>
-                            <span class="slds-assistive-text">Close</span>
+            <div class="modal-overlay">
+                <section class="modal" role="dialog" aria-modal="true">
+                    <header class="modal-head">
+                        <h2 class="modal-title">Confirm Site Visit</h2>
+                        <button class="modal-close" title="Close" onclick={closePopup}>
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                            <span class="assistive">Close</span>
                         </button>
-                        <h2 class="slds-modal__title custom-modal-title">Confirm Site Visit</h2>
                     </header>
-                    <div class="slds-modal__content custom-modal-content slds-p-around_medium">
+                    <div class="modal-body">
                         <p>Are you sure you want to confirm the site visit for {showingDate}?</p>
                     </div>
-                    <footer class="slds-modal__footer custom-modal-footer">
-                        <button class="slds-button slds-button_neutral custom-button custom-button-neutral"
-                            onclick={closePopup}>Cancel</button>
-                        <button class="slds-button slds-button_brand custom-button custom-button-brand"
-                            onclick={handleConfirm}>Confirm</button>
+                    <footer class="modal-foot">
+                        <button class="btn btn-ghost btn-sm" onclick={closePopup}>Cancel</button>
+                        <button class="btn btn-blue btn-sm" onclick={handleConfirm}>Confirm</button>
                     </footer>
-                </div>
-            </section>
-            <div class="slds-backdrop custom-backdrop slds-backdrop_open"></div>
+                </section>
+            </div>
         </template>
 
+        <!-- ============ Cancel popup (original flow) ============ -->
         <template if:true={showCancelPopup}>
-            <section role="dialog" class="slds-modal slds-fade-in-open custom-modal" aria-modal="true">
-                <div class="slds-modal__container custom-modal-container">
-                    <header class="slds-modal__header custom-modal-header">
-                        <button class="slds-button slds-button_icon custom-modal-close" title="Close"
-                            onclick={closePopup}>
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                    fill="white" />
-                            </svg>
-                            <span class="slds-assistive-text">Close</span>
+            <div class="modal-overlay">
+                <section class="modal" role="dialog" aria-modal="true">
+                    <header class="modal-head">
+                        <h2 class="modal-title">Cancel Site Visit</h2>
+                        <button class="modal-close" title="Close" onclick={closePopup}>
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                            <span class="assistive">Close</span>
                         </button>
-                        <h2 class="slds-modal__title custom-modal-title">Cancel Site Visit</h2>
                     </header>
-                    <div class="slds-modal__content custom-modal-content slds-p-around_medium">
+                    <div class="modal-body">
                         <p>Are you sure you want to cancel the site visit scheduled for {showingDate}?</p>
                         <lightning-input type="text" label="Reason for Cancellation" required value={cancellationReason}
-                            onchange={handleReasonChange} class="input-width"></lightning-input>
+                            onchange={handleReasonChange}></lightning-input>
                     </div>
-                    <footer class="slds-modal__footer custom-modal-footer">
-                        <button class="slds-button slds-button_neutral custom-button custom-button-neutral"
-                            onclick={closePopup}>No</button>
-                        <button class="slds-button slds-button_destructive custom-button custom-button-destructive"
-                            onclick={handleCancel}>Yes, Cancel</button>
+                    <footer class="modal-foot">
+                        <button class="btn btn-ghost btn-sm" onclick={closePopup}>No</button>
+                        <button class="btn btn-danger btn-sm" onclick={handleCancel}>Yes, Cancel</button>
                     </footer>
-                </div>
-            </section>
-            <div class="slds-backdrop custom-backdrop slds-backdrop_open"></div>
+                </section>
+            </div>
         </template>
 
+        <!-- ============ Reschedule popup (original flow) ============ -->
         <template if:true={showReschedulePopup}>
-            <section role="dialog" class="slds-modal slds-fade-in-open custom-modal" aria-modal="true">
-                <div class="slds-modal__container custom-modal-container">
-                    <header class="slds-modal__header custom-modal-header">
-                        <button class="slds-button slds-button_icon custom-modal-close" title="Close"
-                            onclick={closePopup}>
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                    fill="white" />
-                            </svg>
-                            <span class="slds-assistive-text">Close</span>
+            <div class="modal-overlay">
+                <section class="modal" role="dialog" aria-modal="true">
+                    <header class="modal-head">
+                        <h2 class="modal-title">Reschedule Site Visit</h2>
+                        <button class="modal-close" title="Close" onclick={closePopup}>
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                            <span class="assistive">Close</span>
                         </button>
-                        <h2 class="slds-modal__title custom-modal-title">Reschedule Site Visit</h2>
                     </header>
-                    <div class="slds-modal__content custom-modal-content slds-p-around_medium">
+                    <div class="modal-body">
                         <lightning-input type="datetime" label="Select New Date and Time" value={newScheduleDate}
                             onchange={handleDateChange} required></lightning-input>
                     </div>
-                    <footer class="slds-modal__footer custom-modal-footer">
-                        <button class="slds-button slds-button_neutral custom-button custom-button-neutral"
-                            onclick={closePopup}>Cancel</button>
-                        <button class="slds-button slds-button_brand custom-button custom-button-brand"
-                            onclick={handleReschedule}>Save</button>
+                    <footer class="modal-foot">
+                        <button class="btn btn-ghost btn-sm" onclick={closePopup}>Cancel</button>
+                        <button class="btn btn-blue btn-sm" onclick={handleReschedule}>Save</button>
                     </footer>
-                </div>
-            </section>
-            <div class="slds-backdrop custom-backdrop slds-backdrop_open"></div>
+                </section>
+            </div>
         </template>
-    <template if:true={showToast}>
-        <div class={toastClass}>
-            <span class="toast-message">{toastMessage}</span>
-            <button class="toast-close" onclick={handleToastClose}>×</button>
-        </div>
+
+        <!-- ============ Toast ============ -->
+        <template if:true={showToast}>
+            <div class={toastClass} role="status">
+                <span class="toast-message">{toastMessage}</span>
+                <button class="toast-close" onclick={handleToastClose} aria-label="Dismiss">×</button>
+            </div>
+        </template>
     </template>
 </template>

@@ -90,6 +90,19 @@ public with sharing class WhatsappConnectController {
     }
 
     @RemoteAction
+    public static Boolean saveManualDetails(String accessToken, String phoneId, String wabaId, String appId) {
+        try {
+            if (String.isBlank(accessToken) || String.isBlank(phoneId) || String.isBlank(wabaId) || String.isBlank(appId)) {
+                return false;
+            }
+            return saveMetaData(accessToken.trim(), phoneId.trim(), wabaId.trim(), appId.trim());
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'WhatsappConnectController', 'saveManualDetails', e.getMessage());
+            return false;
+        }
+    }
+
+    @RemoteAction
     public static String saveFBLoginDetails(String sAccessToken, String phoneId, String wabaId, String appId) {
         try {
             OAuth_Configuration__mdt config = getConfig();

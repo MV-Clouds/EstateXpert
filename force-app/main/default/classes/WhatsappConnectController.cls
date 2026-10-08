@@ -15,6 +15,7 @@ public with sharing class WhatsappConnectController {
     public static String configurationId {get; set;}
     public static String clientSecret {get; set;}
     public static String lastModifiedDate {get; set;}
+    public static String namespace {get; set;}
 
     private static final String CONFIG_DEV_NAME = 'Whatsapp_OAuth';
 
@@ -22,6 +23,9 @@ public with sharing class WhatsappConnectController {
     private static OAuth_Configuration__mdt mockConfig;
 
     public WhatsappConnectController() {
+        String className = WhatsappConnectController.class.getName();
+        namespace = className.contains('.') ? className.substringBefore('.') : 'c';
+
         OAuth_Configuration__mdt config = getConfig();
 
         if (config != null) {
@@ -78,6 +82,53 @@ public with sharing class WhatsappConnectController {
         }
     }
 
+    /**
+     * Method Name : getIntegrationConfig
+     * @description : Retrieves WhatsApp integration settings and connection status for LWC.
+     * @return Map<String, Object> containing config parameters and isConnected flag.
+     */
+    @AuraEnabled
+    public static Map<String, Object> getIntegrationConfig() {
+        Map<String, Object> result = new Map<String, Object>();
+        try {
+            OAuth_Configuration__mdt config = getConfig();
+            if (config != null) {
+                result.put('clientId', config.Client_Id__c != null ? config.Client_Id__c : '');
+                result.put('configurationId', config.Config_Id__c != null ? config.Config_Id__c : '');
+                result.put('apiVersion', String.isNotBlank(config.API_Version__c) ? config.API_Version__c : '26.0');
+                result.put('apiEndpoint', String.isNotBlank(config.Authorization_Endpoint__c) ? config.Authorization_Endpoint__c : 'https://graph.facebook.com');
+                result.put('appId', config.Client_App_ID__c != null ? config.Client_App_ID__c : '');
+                result.put('businessAccountId', config.Client_Business_Account_ID__c != null ? config.Client_Business_Account_ID__c : '');
+                result.put('phoneNumberId', config.Client_Phone_Number_ID__c != null ? config.Client_Phone_Number_ID__c : '');
+                result.put('accessToken', config.Access_Token__c != null ? config.Access_Token__c : '');
+
+                String lastMod = '';
+                if (config.Connected_Date__c != null) {
+                    lastMod = config.Connected_Date__c.format('MM/dd/yyyy, hh:mm:ss a');
+                } else if (config.SystemModstamp != null && String.isNotBlank(config.Client_Business_Account_ID__c)) {
+                    lastMod = config.SystemModstamp.format('MM/dd/yyyy, hh:mm:ss a');
+                }
+                result.put('lastModifiedDate', lastMod);
+                result.put('isConnected', String.isNotBlank(config.Client_Business_Account_ID__c));
+            } else {
+                result.put('clientId', '');
+                result.put('configurationId', '');
+                result.put('apiVersion', '26.0');
+                result.put('apiEndpoint', 'https://graph.facebook.com');
+                result.put('appId', '');
+                result.put('businessAccountId', '');
+                result.put('phoneNumberId', '');
+                result.put('accessToken', '');
+                result.put('lastModifiedDate', '');
+                result.put('isConnected', false);
+            }
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'WhatsappConnectController', 'getIntegrationConfig', e.getMessage());
+        }
+        return result;
+    }
+
+    @AuraEnabled
     @RemoteAction
     public static Boolean unlinkAccount() {
         try {
@@ -89,6 +140,7 @@ public with sharing class WhatsappConnectController {
         }
     }
 
+    @AuraEnabled
     @RemoteAction
     public static Boolean saveManualDetails(String accessToken, String phoneId, String wabaId, String appId) {
         try {
@@ -102,6 +154,7 @@ public with sharing class WhatsappConnectController {
         }
     }
 
+    @AuraEnabled
     @RemoteAction
     public static String saveFBLoginDetails(String sAccessToken, String phoneId, String wabaId, String appId) {
         try {

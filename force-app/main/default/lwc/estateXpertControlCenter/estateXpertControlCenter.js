@@ -142,6 +142,10 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
         return this.selectedComponent === 'googleAdsMapping';
     }
 
+    get isWhatsappConnectComponent() {
+        return this.selectedComponent === 'whatsappConnect';
+    }
+
     /**
      * Method Name: googleAdsMethod
      * @description: Opens the Google Ads Mapping component
@@ -405,13 +409,13 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Created By: Karan Singh
      */
     whatsappEmbeddedSignuprMethod(event) {
-        event.preventDefault();
-        // For VF page, we still need to navigate
-        this[NavigationMixin.Navigate]({
-            type: "standard__webPage",
-            attributes: {
-                url: '/apex/WhatsappConnectSDK'
-            }
-        });
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
+        this.openComponent(
+            'whatsappConnect',
+            'WhatsApp Business',
+            'The "WhatsApp Business" connects your WhatsApp Business Account with Salesforce to enable the chat feature directly from Salesforce. Start conversations, send messages, and manage customer communications without leaving your CRM platform.'
+        );
     }
 }

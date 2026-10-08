@@ -145,17 +145,6 @@
 
 /* CLOSE ICON CSS END HERE */
 
-/* POP UP HEADER CSS START HERE */
-.exp-pop-up-header-css {
-  background-color: #0176D3;
-  color: white;
-  border-bottom-style: unset;
-  border-top-left-radius: 8px !important;
-  border-top-right-radius: 8px !important;
-}
-
-/* POP UP HEADER CSS END HERE */
-
 /* PAGINATION BUTTON CSS START HERE */
 .exp-pagination-btn-css {
   background-color: #ffffff;
@@ -969,7 +958,7 @@
 }
 
 .exp-table-content table tbody tr.accordion-row .exp-accordion-table-content tbody tr:hover > td {
-    background-color: #ebf3f6 !important;
+    background-color: #EAF4FD !important;
 }
 
 .exp-table-content tbody tr.accordion-row, 
@@ -978,14 +967,15 @@
 }
 /* NEW UNIVERSAL POPUP UI CSS (Header & Footer) */
 .exp-popup-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid #e5e7eb;
-    background-color: #ffffff;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 16px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    background-color: #ffffff !important;
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+    text-align: left !important;
 }
 
 .exp-popup-header-left {
@@ -1012,6 +1002,7 @@
 .exp-popup-title-group {
     display: flex;
     flex-direction: column;
+    text-align: left !important;
 }
 
 .exp-popup-title {
@@ -1049,14 +1040,15 @@
 }
 
 .exp-popup-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 24px;
-    border-top: 1px solid #e5e7eb;
-    background-color: #ffffff;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 16px 24px !important;
+    border-top: 1px solid #e5e7eb !important;
+    background-color: #ffffff !important;
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+    box-shadow: none !important;
 }
 
 .exp-popup-footer-right {

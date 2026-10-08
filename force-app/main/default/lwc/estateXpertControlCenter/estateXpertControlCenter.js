@@ -274,6 +274,12 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             this.portalName = null;
             this.portalIconUrl = null;
             this.portalStatus = null;
+            
+            // Tell the portal mapping component to go back to its main view
+            const portalCmp = this.template.querySelector('c-portal-mapping-component');
+            if (portalCmp) {
+                portalCmp.resetView();
+            }
         }
     }
 
@@ -423,7 +429,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
         this.portalStatus = portalStatus;
         this.isXMLForPF = isXMLForPF;
         this.parentComponentTitle = 'Portal Integration';
-        this.selectedComponent = 'portalMappingLandingPage';
+        this.selectedComponent = 'portalMapping';
         this.selectedComponentTitle = portalName;
         this.currentView = 'childComponent';
     }

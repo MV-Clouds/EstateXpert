@@ -24,7 +24,7 @@
 
     <div class="wrapper-instagram-post">
 
-        <div class="exp-popup-header">
+        <div class="slds-modal__header exp-popup-header">
             <div class="exp-popup-header-left">
                 <div class="exp-popup-icon-box">
                     <svg viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" fill="none"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path stroke="#000000" stroke-width="12" d="M96 162c-14.152 0-24.336-.007-32.276-.777-7.849-.761-12.87-2.223-16.877-4.741a36 36 0 0 1-11.33-11.329c-2.517-4.007-3.98-9.028-4.74-16.877C30.007 120.336 30 110.152 30 96c0-14.152.007-24.336.777-32.276.76-7.849 2.223-12.87 4.74-16.877a36 36 0 0 1 11.33-11.33c4.007-2.517 9.028-3.98 16.877-4.74C71.663 30.007 81.847 30 96 30c14.152 0 24.336.007 32.276.777 7.849.76 12.87 2.223 16.877 4.74a36 36 0 0 1 11.329 11.33c2.518 4.007 3.98 9.028 4.741 16.877.77 7.94.777 18.124.777 32.276 0 14.152-.007 24.336-.777 32.276-.761 7.849-2.223 12.87-4.741 16.877a36 36 0 0 1-11.329 11.329c-4.007 2.518-9.028 3.98-16.877 4.741-7.94.77-18.124.777-32.276.777Z"></path><circle cx="96" cy="96" r="30" stroke="#000000" stroke-width="12"></circle><circle cx="135" cy="57" r="9" fill="#000000"></circle></g></svg>
@@ -34,12 +34,12 @@
                     <p class="exp-popup-subtitle">Publish photos and videos directly to your Instagram account</p>
                 </div>
             </div>
-            <button class="exp-popup-close-btn" onclick={closeAction}>
+            <!-- <button class="exp-popup-close-btn" onclick={closeAction}>
                 <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
-            </button>
+            </button> -->
         </div>
 
-        <div class="content-body">
+        <div class="slds-modal__content content-body">
             <template if:false={hasAllCredentials}>
                 <div class="credentials-missing-container">
                     <div class="credentials-missing-content">
@@ -169,7 +169,7 @@
         </div>
 
         <template if:true={hasAllCredentials}>
-            <div class="exp-popup-footer">
+            <div class="slds-modal__footer exp-popup-footer">
                 <button class="exp-white-btn-css" onclick={closeAction}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -188,7 +188,7 @@
             </div>
         </template>
         <template if:false={hasAllCredentials}>
-            <div class="exp-popup-footer">
+            <div class="slds-modal__footer exp-popup-footer">
                 <button class="exp-white-btn-css" onclick={closeAction}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

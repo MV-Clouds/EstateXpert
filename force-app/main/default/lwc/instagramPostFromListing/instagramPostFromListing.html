@@ -137,9 +137,13 @@
                         <span class={captionCountClass}>{captionLength} / 2200</span>
                     </div>
                     <textarea data-id="caption" placeholder="Write your caption here... Share your story!"
-                        maxlength="2200" class="caption-textarea" value={caption}
+                        maxlength="2200" class={captionTextareaClass} value={caption}
                         oninput={handleCaptionInput}
-                        onchange={handleCaptionChange}></textarea>
+                        onchange={handleCaptionChange}
+                        onblur={handleCaptionBlur}></textarea>
+                    <template if:true={hashtagErrorMessage}>
+                        <div class="hashtag-error-msg">{hashtagErrorMessage}</div>
+                    </template>
                 </div>
 
                 <div class={submitContainerClass}>

@@ -794,3 +794,22 @@
         font-size: 11px !important;
     }
 }
+.hashtag-error-msg {
+    color: #ea001e;
+    font-size: 13px;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.caption-textarea-error {
+    width: 100%;
+    height: 120px;
+    resize: none;
+    padding: 10px;
+    border: 1px solid #ea001e;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    box-shadow: 0 0 0 1px #ea001e;
+}

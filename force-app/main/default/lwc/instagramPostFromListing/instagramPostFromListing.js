@@ -37,6 +37,11 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
     @track hasInstagramCredentials = false;
     @track invalidVideoDuration = [];
     @track invalidVideoSize = [];
+    @track hashtagErrorMessage = '';
+
+    get captionTextareaClass() {
+        return this.hashtagErrorMessage ? 'caption-textarea caption-textarea-error' : 'caption-textarea';
+    }
 
     get isFileAvailable() {
         return this.selectedFileWithPreview.length > 0;
@@ -58,7 +63,7 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
     }
 
     get isUploadDisabled() {
-        return !this.isFileAvailable;
+        return !this.isFileAvailable || !!this.hashtagErrorMessage;
     }
 
     get uploadButtonClass() {
@@ -355,6 +360,13 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
 
     handleCaptionInput(event) {
         this.captionLength = event.target.value.length;
+        const text = event.target.value;
+        const hashtags = text.match(/#/g) || [];
+        if (hashtags.length > 5) {
+            this.hashtagErrorMessage = 'You can use a maximum of 5 hashtags.';
+        } else {
+            this.hashtagErrorMessage = '';
+        }
     }
 
     /**

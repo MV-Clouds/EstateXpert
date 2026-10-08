@@ -28,7 +28,7 @@ public with sharing class WhatsappConnectController {
             clientId = config.Client_Id__c != null ? config.Client_Id__c : '';
             clientSecret = config.Client_Secret__c != null ? config.Client_Secret__c : '';
             configurationId = config.Config_Id__c != null ? config.Config_Id__c : '';
-            apiVersion = String.isNotBlank(config.API_Version__c) ? config.API_Version__c : 'v24.0';
+            apiVersion = String.isNotBlank(config.API_Version__c) ? config.API_Version__c : '26.0';
             apiEndpoint = String.isNotBlank(config.Authorization_Endpoint__c) ? config.Authorization_Endpoint__c : 'https://graph.facebook.com';
 
             appId = config.Client_App_ID__c != null ? config.Client_App_ID__c : '';
@@ -47,7 +47,7 @@ public with sharing class WhatsappConnectController {
             clientId = '';
             clientSecret = '';
             configurationId = '';
-            apiVersion = 'v24.0';
+            apiVersion = '26.0';
             apiEndpoint = 'https://graph.facebook.com';
             appId = '';
             businessAccountId = '';

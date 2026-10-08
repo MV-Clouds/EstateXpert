@@ -145,7 +145,6 @@
             }
 
             .page-title {
-                font-family: 'Mulish', sans-serif;
                 font-size: 18px;
                 font-weight: 600;
                 color: #0f1419;
@@ -155,7 +154,6 @@
             }
 
             .page-subtitle {
-                font-family: 'Mulish', sans-serif;
                 font-size: 16px;
                 color: #536471;
                 margin: 0;
@@ -211,7 +209,6 @@
                 border: 1px solid #CFD9DE;
                 border-radius: 4px;
                 box-sizing: border-box;
-                font-family: 'Mulish';
                 background: #ffffff;
                 transition: all 0.25s ease;
                 user-select: text;
@@ -363,7 +360,7 @@
                 border: 1px solid #FFE082;
                 border-radius: 6px;
                 padding: 10px 14px;
-                margin-top: 73px;
+                margin-top: 7.5rem;
                 display: flex;
                 align-items: center;
                 gap: 8px;
@@ -410,9 +407,8 @@
 
             .deactivate-btn {
                 width: 100%;
-                height: 36px;
-                padding: 0 24px;
-                font-size: 14px;
+                padding: 12px 24px;
+                font-size: 16px;
                 font-weight: 500;
                 background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
                 color: #DC2626;
@@ -424,7 +420,7 @@
                 align-items: center;
                 justify-content: center;
                 gap: 8px;
-                margin-top: 1.5rem;
+                margin-top: 1rem;
                 box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
             }
 
@@ -517,13 +513,6 @@
                 border-top: 1px solid #e5e7eb;
             }
 
-            .badges-row {
-                display: flex;
-                gap: 10px;
-                flex-wrap: wrap;
-                margin-bottom: 1rem;
-            }
-
             .status-badge {
                 display: inline-flex;
                 align-items: center;
@@ -534,13 +523,8 @@
                 font-size: 14px;
                 font-weight: 500;
                 color: #0176D3;
+                margin-bottom: 16px;
                 box-shadow: 0 1px 3px rgba(1, 118, 211, 0.1);
-            }
-
-            .status-badge.success {
-                background: #dcfce7;
-                color: #166534;
-                box-shadow: 0 1px 3px rgba(22, 101, 52, 0.1);
             }
 
             .status-dot {
@@ -550,65 +534,115 @@
                 border-radius: 50%;
             }
 
-            .status-dot.success {
-                background: #16a34a;
-            }
-
-            .section-header {
-                font-size: 16px;
-                font-weight: 500;
-                color: #1f2937;
-                margin: 1.5rem 0 0.5rem 0;
-            }
-
-            .card {
-                background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+            .account-box {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
                 padding: 16px;
-                border-radius: 8px;
+                background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
                 border: 1px solid #E5E7EB;
-                margin-top: 8px;
+                border-radius: 8px;
+                margin-bottom: 1rem;
                 box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
             }
 
-            .field-item {
+            .account-box-left {
                 display: flex;
-                justify-content: space-between;
                 align-items: center;
-                padding: 8px 12px;
-                background: white;
-                border-radius: 6px;
-                margin-top: 6px;
-                font-size: 13px;
-                border: 1px solid #edf2f7;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+                gap: 12px;
+                flex: 1;
             }
 
-            .field-key {
-                color: #64748b;
+            .shield-icon {
+                width: 40px;
+                height: 40px;
+                background: #0176D3;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+
+            .shield-icon svg {
+                width: 24px;
+                height: 24px;
+                fill: white;
+            }
+
+            .account-info {
+                flex: 1;
+            }
+
+            .account-id {
+                font-size: 18px;
                 font-weight: 500;
+                color: #131314;
+                margin: 0 0 4px 0;
             }
 
-            .field-val {
-                font-weight: 600;
-                color: #1e293b;
+            .account-status {
+                font-size: 14px;
+                color: #10B981;
+                margin: 0;
             }
 
             .copy-btn {
-                padding: 4px 6px;
-                background: #f8fafc;
-                border: 1px solid #e2e8f0;
-                border-radius: 4px;
+                padding: 8px 12px;
+                background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+                border: 1px solid #e5e7eb;
+                border-radius: 6px;
                 cursor: pointer;
-                transition: all 0.2s ease;
-                display: inline-flex;
+                transition: all 0.3s ease;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+                display: flex;
                 align-items: center;
                 justify-content: center;
-                color: #64748b;
             }
 
             .copy-btn:hover {
-                background: #e2e8f0;
-                color: #0176D3;
+                background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+                border-color: #0176D3;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 6px rgba(1, 118, 211, 0.2);
+            }
+
+            .copy-btn svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            .section-title {
+                font-size: 12px;
+                font-weight: 500;
+                color: #1f2937;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin: 1.5rem 0 0.5rem 0;
+            }
+
+            .details-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+            }
+
+            .detail-item {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .detail-label {
+                font-size: 14px;
+                font-weight: 500;
+                color: #636363;
+            }
+
+            .detail-value {
+                font-size: 16px;
+                font-weight: 500;
+                color: #131314;
             }
 
             /* Loading Spinner Overlay */
@@ -979,7 +1013,6 @@
                 outline: none;
                 transition: all 0.2s ease;
                 box-sizing: border-box;
-                font-family: inherit;
             }
 
             .manual-field-input:focus {
@@ -990,7 +1023,6 @@
             .manual-field-textarea {
                 min-height: 68px;
                 resize: vertical;
-                font-family: monospace, inherit;
                 font-size: 12.5px;
                 line-height: 1.4;
             }
@@ -1078,6 +1110,13 @@
             .exp-blue-btn-css {
                 margin: unset;
                 background: #0176D3;
+                font-weight: unset;
+                cursor: pointer;
+            }
+
+            .exp-red-btn-css {
+                margin: unset;
+                background: #B3261E;
                 font-weight: unset;
                 cursor: pointer;
             }
@@ -1299,87 +1338,61 @@
                                 </div>
                             </div>
 
-                            <!-- Results Section (Configuration Details) -->
-                            <div class="results-container" id="results-container">
-                                <div class="badges-row">
-                                    <div class="status-badge success">
-                                        <span class="status-dot success"></span>
-                                        Connected &amp; Active
-                                    </div>
+                            <!-- Configuration Details (shown when configured) -->
+                            <div id="config-details-div" style="display:none">
+                                <div class="status-badge">
+                                    <span class="status-dot"></span>
+                                    Active
                                 </div>
 
-                                <div class="section-header">💬 Connected WhatsApp Business Account</div>
-                                <div class="card" id="page-display">
-                                    <div class="field-item">
-                                        <span class="field-key">Account ID (WABA ID)</span>
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <span class="field-val" id="waba-id-display">{!businessAccountId}</span>
-                                            <button class="copy-btn" onclick="copyToClipboard('waba-id-display')"
-                                                title="Copy WABA ID">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round">
-                                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1">
-                                                    </path>
-                                                </svg>
-                                            </button>
+                                <div class="input-label">WhatsApp Business Account ID</div>
+                                <div class="account-box">
+                                    <div class="account-box-left">
+                                        <div class="shield-icon">
+                                            <svg viewBox="0 0 24 24">
+                                                <path
+                                                    d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
+                                            </svg>
+                                        </div>
+                                        <div class="account-info">
+                                            <p class="account-id" id="waba-id-display">{!businessAccountId}</p>
+                                            <p class="account-status">Connected and verified</p>
                                         </div>
                                     </div>
-                                    <div class="field-item">
-                                        <span class="field-key">Phone Number ID</span>
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <span class="field-val" id="phone-id-display">{!phoneNumberId}</span>
-                                            <button class="copy-btn" onclick="copyToClipboard('phone-id-display')"
-                                                title="Copy Phone Number ID">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                    stroke-linejoin="round">
-                                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1">
-                                                    </path>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="field-item">
-                                        <span class="field-key">Meta Application ID</span>
-                                        <span class="field-val" id="app-id-display">{!appId}</span>
-                                    </div>
-                                    <div class="field-item">
-                                        <span class="field-key">Integration Status</span>
-                                        <span class="field-val" style="color: #16a34a;">Connected and Verified</span>
-                                    </div>
-                                    <div class="field-item">
-                                        <span class="field-key">Last Modified</span>
-                                        <span class="field-val" id="last-edited">{!lastModifiedDate}</span>
-                                    </div>
+                                    <button type="button" class="copy-btn" onclick="copyToClipboard('waba-id-display')"
+                                        title="Copy ID">
+                                        <svg viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                            <path
+                                                d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                                        </svg>
+                                    </button>
                                 </div>
 
-                                <div style="display: flex; gap: 10px; margin-top: 16px;">
-                                    <button type="button" class="manual-trigger-btn" style="flex: 1; margin: 0;"
-                                        onclick="openManualConfigModal()">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round">
-                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                        </svg>
-                                        Edit Credentials
-                                    </button>
-                                    <button class="deactivate-btn" style="flex: 1; margin: 0;"
-                                        onclick="deactivateWhatsApp()">
-                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                        Deactivate Integration
-                                    </button>
+                                <button type="button" class="deactivate-btn" onclick="deactivateWhatsApp()">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 2V12" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" />
+                                        <path
+                                            d="M6.2 5.8C4.2 7.3 3 9.6 3 12.2C3 17.1 7 21 12 21C17 21 21 17.1 21 12.2C21 9.6 19.8 7.3 17.8 5.8"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                    </svg>
+                                    Deactivate Integration
+                                </button>
+
+                                <div class="section-title">INTEGRATION DETAILS</div>
+                                <div class="details-grid">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Application ID</span>
+                                        <span class="detail-value" id="app-id-display">{!appId}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Last Edited</span>
+                                        <span class="detail-value" id="last-edited">{!lastModifiedDate}</span>
+                                    </div>
                                 </div>
                             </div>
-                            <!-- Alias container for backward compatibility -->
-                            <div id="config-details-div" style="display:none;"></div>
 
                         </div>
                     </div>
@@ -1420,8 +1433,22 @@
                         WhatsApp messaging.</p>
                 </div>
                 <div class="manual-modal-footer">
-                    <button type="button" class="exp-white-btn-css" onclick="closeConfirmationModal()">Cancel</button>
-                    <button type="button" class="exp-red-btn-css" onclick="confirmDeactivation()">Deactivate</button>
+                    <button type="button" class="exp-white-btn-css" onclick="closeConfirmationModal()">
+                        <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="currentColor" />
+                        </svg>
+                        Cancel</button>
+                    <button type="button" class="exp-red-btn-css" onclick="confirmDeactivation()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                            <path
+                                d="M6.2 5.8C4.2 7.3 3 9.6 3 12.2C3 17.1 7 21 12 21C17 21 21 17.1 21 12.2C21 9.6 19.8 7.3 17.8 5.8"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                        Deactivate
+                    </button>
                 </div>
             </div>
         </div>
@@ -1432,10 +1459,11 @@
                 <div class="manual-modal-header">
                     <div class="manual-header-left">
                         <div class="manual-header-icon-box">
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" clip-rule="evenodd"
                                     d="M12 2C6.477 2 2 6.477 2 12C2 13.819 2.484 15.524 3.328 17L2 22L7.155 20.697C8.601 21.527 10.252 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM8.889 7.667C8.694 7.234 8.489 7.225 8.305 7.217C8.155 7.21 7.983 7.21 7.811 7.21C7.639 7.21 7.362 7.275 7.126 7.533C6.89 7.79 6.22 8.417 6.22 9.697C6.22 10.977 7.148 12.213 7.277 12.385C7.406 12.557 9.07 15.228 11.688 16.273C13.864 17.142 14.307 16.969 14.779 16.926C15.251 16.883 16.303 16.304 16.518 15.698C16.733 15.093 16.733 14.577 16.668 14.47C16.604 14.363 16.432 14.298 16.174 14.17C15.916 14.041 14.649 13.418 14.413 13.332C14.177 13.246 14.005 13.203 13.833 13.461C13.661 13.719 13.167 14.298 13.017 14.47C12.866 14.642 12.716 14.663 12.458 14.535C12.2 14.406 11.369 14.134 10.384 13.256C9.617 12.573 9.099 11.73 8.948 11.472C8.798 11.214 8.932 11.074 9.062 10.946C9.178 10.83 9.321 10.643 9.45 10.493C9.579 10.343 9.622 10.235 9.708 10.063C9.794 9.892 9.751 9.741 9.686 9.613C9.622 9.484 9.106 8.148 8.889 7.667Z"
-                                    fill="#0176D3" />
+                                    fill="#25D366" />
                             </svg>
                         </div>
                         <div class="manual-header-text">
@@ -1733,17 +1761,18 @@
             });
 
             function copyToClipboard(elementId) {
-                var el = document.getElementById(elementId);
+                var targetId = elementId || 'waba-id-display';
+                var el = document.getElementById(targetId);
                 var text = el ? el.textContent.trim() : '';
                 if (!text) return;
                 navigator.clipboard.writeText(text).then(function () {
-                    var btn = event ? event.currentTarget : null;
+                    var btn = event ? (event.currentTarget || event.target.closest('.copy-btn')) : null;
                     if (btn) {
                         var originalHtml = btn.innerHTML;
-                        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                        btn.innerHTML = '<svg viewBox="0 0 20 20" fill="#10B981" style="width:18px;height:18px;"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>';
                         setTimeout(function () {
                             btn.innerHTML = originalHtml;
-                        }, 1500);
+                        }, 2000);
                     }
                 });
             }
@@ -1767,8 +1796,8 @@
                     var setupDiv = document.getElementById("setup-form-div");
                     if (setupDiv) setupDiv.style.display = "none";
 
-                    var resultsDiv = document.getElementById("results-container");
-                    if (resultsDiv) resultsDiv.style.display = "block";
+                    var detailsDiv = document.getElementById("config-details-div") || document.getElementById("results-container");
+                    if (detailsDiv) detailsDiv.style.display = "block";
 
                     var wabaEl = document.getElementById('waba-id-display');
                     if (wabaEl) wabaEl.textContent = wabaId;

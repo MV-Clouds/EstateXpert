@@ -10,357 +10,357 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
-                <fullName>Afrikaans</fullName>
+                <fullName>af</fullName>
                 <default>false</default>
                 <label>Afrikaans</label>
             </value>
             <value>
-                <fullName>Albanian</fullName>
+                <fullName>sq</fullName>
                 <default>false</default>
                 <label>Albanian</label>
             </value>
             <value>
-                <fullName>Arabic</fullName>
+                <fullName>ar</fullName>
                 <default>false</default>
                 <label>Arabic</label>
             </value>
             <value>
-                <fullName>Azerbaijani</fullName>
+                <fullName>az</fullName>
                 <default>false</default>
                 <label>Azerbaijani</label>
             </value>
             <value>
-                <fullName>Bengali</fullName>
+                <fullName>bn</fullName>
                 <default>false</default>
                 <label>Bengali</label>
             </value>
             <value>
-                <fullName>Bulgarian</fullName>
+                <fullName>bg</fullName>
                 <default>false</default>
                 <label>Bulgarian</label>
             </value>
             <value>
-                <fullName>Catalan</fullName>
+                <fullName>ca</fullName>
                 <default>false</default>
                 <label>Catalan</label>
             </value>
             <value>
-                <fullName>Chinese (CHN)</fullName>
+                <fullName>zh_CN</fullName>
                 <default>false</default>
                 <label>Chinese (CHN)</label>
             </value>
             <value>
-                <fullName>Chinese (HKG)</fullName>
+                <fullName>zh_HK</fullName>
                 <default>false</default>
                 <label>Chinese (HKG)</label>
             </value>
             <value>
-                <fullName>Chinese (TAI)</fullName>
+                <fullName>zh_TW</fullName>
                 <default>false</default>
                 <label>Chinese (TAI)</label>
             </value>
             <value>
-                <fullName>Croatian</fullName>
+                <fullName>hr</fullName>
                 <default>false</default>
                 <label>Croatian</label>
             </value>
             <value>
-                <fullName>Czech</fullName>
+                <fullName>cs</fullName>
                 <default>false</default>
                 <label>Czech</label>
             </value>
             <value>
-                <fullName>Danish</fullName>
+                <fullName>da</fullName>
                 <default>false</default>
                 <label>Danish</label>
             </value>
             <value>
-                <fullName>Dutch</fullName>
+                <fullName>nl</fullName>
                 <default>false</default>
                 <label>Dutch</label>
             </value>
             <value>
-                <fullName>English</fullName>
+                <fullName>en</fullName>
                 <default>false</default>
                 <label>English</label>
             </value>
             <value>
-                <fullName>English (UK)</fullName>
+                <fullName>en_GB</fullName>
                 <default>false</default>
                 <label>English (UK)</label>
             </value>
             <value>
-                <fullName>English (US)</fullName>
+                <fullName>en_US</fullName>
                 <default>false</default>
                 <label>English (US)</label>
             </value>
             <value>
-                <fullName>Estonian</fullName>
+                <fullName>et</fullName>
                 <default>false</default>
                 <label>Estonian</label>
             </value>
             <value>
-                <fullName>Filipino</fullName>
+                <fullName>fil</fullName>
                 <default>false</default>
                 <label>Filipino</label>
             </value>
             <value>
-                <fullName>Finnish</fullName>
+                <fullName>fi</fullName>
                 <default>false</default>
                 <label>Finnish</label>
             </value>
             <value>
-                <fullName>French</fullName>
+                <fullName>fr</fullName>
                 <default>false</default>
                 <label>French</label>
             </value>
             <value>
-                <fullName>Georgian</fullName>
+                <fullName>ka</fullName>
                 <default>false</default>
                 <label>Georgian</label>
             </value>
             <value>
-                <fullName>German</fullName>
+                <fullName>de</fullName>
                 <default>false</default>
                 <label>German</label>
             </value>
             <value>
-                <fullName>Greek</fullName>
+                <fullName>el</fullName>
                 <default>false</default>
                 <label>Greek</label>
             </value>
             <value>
-                <fullName>Gujarati</fullName>
+                <fullName>gu</fullName>
                 <default>false</default>
                 <label>Gujarati</label>
             </value>
             <value>
-                <fullName>Hausa</fullName>
+                <fullName>ha</fullName>
                 <default>false</default>
                 <label>Hausa</label>
             </value>
             <value>
-                <fullName>Hebrew</fullName>
+                <fullName>he</fullName>
                 <default>false</default>
                 <label>Hebrew</label>
             </value>
             <value>
-                <fullName>Hindi</fullName>
+                <fullName>hi</fullName>
                 <default>false</default>
                 <label>Hindi</label>
             </value>
             <value>
-                <fullName>Hungarian</fullName>
+                <fullName>hu</fullName>
                 <default>false</default>
                 <label>Hungarian</label>
             </value>
             <value>
-                <fullName>Indonesian</fullName>
+                <fullName>id</fullName>
                 <default>false</default>
                 <label>Indonesian</label>
             </value>
             <value>
-                <fullName>Irish</fullName>
+                <fullName>ga</fullName>
                 <default>false</default>
                 <label>Irish</label>
             </value>
             <value>
-                <fullName>Italian</fullName>
+                <fullName>it</fullName>
                 <default>false</default>
                 <label>Italian</label>
             </value>
             <value>
-                <fullName>Japanese</fullName>
+                <fullName>ja</fullName>
                 <default>false</default>
                 <label>Japanese</label>
             </value>
             <value>
-                <fullName>Kannada</fullName>
+                <fullName>kn</fullName>
                 <default>false</default>
                 <label>Kannada</label>
             </value>
             <value>
-                <fullName>Kazakh</fullName>
+                <fullName>kk</fullName>
                 <default>false</default>
                 <label>Kazakh</label>
             </value>
             <value>
-                <fullName>Kinyarwanda</fullName>
+                <fullName>rw_RW</fullName>
                 <default>false</default>
                 <label>Kinyarwanda</label>
             </value>
             <value>
-                <fullName>Korean</fullName>
+                <fullName>ko</fullName>
                 <default>false</default>
                 <label>Korean</label>
             </value>
             <value>
-                <fullName>Kyrgyz (Kyrgyzstan)</fullName>
+                <fullName>ky_KG</fullName>
                 <default>false</default>
                 <label>Kyrgyz (Kyrgyzstan)</label>
             </value>
             <value>
-                <fullName>Lao</fullName>
+                <fullName>lo</fullName>
                 <default>false</default>
                 <label>Lao</label>
             </value>
             <value>
-                <fullName>Latvian</fullName>
+                <fullName>lv</fullName>
                 <default>false</default>
                 <label>Latvian</label>
             </value>
             <value>
-                <fullName>Lithuanian</fullName>
+                <fullName>lt</fullName>
                 <default>false</default>
                 <label>Lithuanian</label>
             </value>
             <value>
-                <fullName>Macedonian</fullName>
+                <fullName>mk</fullName>
                 <default>false</default>
                 <label>Macedonian</label>
             </value>
             <value>
-                <fullName>Malay</fullName>
+                <fullName>ms</fullName>
                 <default>false</default>
                 <label>Malay</label>
             </value>
             <value>
-                <fullName>Malayalam</fullName>
+                <fullName>ml</fullName>
                 <default>false</default>
                 <label>Malayalam</label>
             </value>
             <value>
-                <fullName>Marathi</fullName>
+                <fullName>mr</fullName>
                 <default>false</default>
                 <label>Marathi</label>
             </value>
             <value>
-                <fullName>Norwegian</fullName>
+                <fullName>nb</fullName>
                 <default>false</default>
                 <label>Norwegian</label>
             </value>
             <value>
-                <fullName>Persian</fullName>
+                <fullName>fa</fullName>
                 <default>false</default>
                 <label>Persian</label>
             </value>
             <value>
-                <fullName>Polish</fullName>
+                <fullName>pl</fullName>
                 <default>false</default>
                 <label>Polish</label>
             </value>
             <value>
-                <fullName>Portuguese (BR)</fullName>
+                <fullName>pt_BR</fullName>
                 <default>false</default>
                 <label>Portuguese (BR)</label>
             </value>
             <value>
-                <fullName>Portuguese (POR)</fullName>
+                <fullName>pt_PT</fullName>
                 <default>false</default>
                 <label>Portuguese (POR)</label>
             </value>
             <value>
-                <fullName>Punjabi</fullName>
+                <fullName>pa</fullName>
                 <default>false</default>
                 <label>Punjabi</label>
             </value>
             <value>
-                <fullName>Romanian</fullName>
+                <fullName>ro</fullName>
                 <default>false</default>
                 <label>Romanian</label>
             </value>
             <value>
-                <fullName>Russian</fullName>
+                <fullName>ru</fullName>
                 <default>false</default>
                 <label>Russian</label>
             </value>
             <value>
-                <fullName>Serbian</fullName>
+                <fullName>sr</fullName>
                 <default>false</default>
                 <label>Serbian</label>
             </value>
             <value>
-                <fullName>Slovak</fullName>
+                <fullName>sk</fullName>
                 <default>false</default>
                 <label>Slovak</label>
             </value>
             <value>
-                <fullName>Slovenian</fullName>
+                <fullName>sl</fullName>
                 <default>false</default>
                 <label>Slovenian</label>
             </value>
             <value>
-                <fullName>Spanish</fullName>
+                <fullName>es</fullName>
                 <default>false</default>
                 <label>Spanish</label>
             </value>
             <value>
-                <fullName>Spanish (ARG)</fullName>
+                <fullName>es_AR</fullName>
                 <default>false</default>
                 <label>Spanish (ARG)</label>
             </value>
             <value>
-                <fullName>Spanish (SPA)</fullName>
+                <fullName>es_ES</fullName>
                 <default>false</default>
                 <label>Spanish (SPA)</label>
             </value>
             <value>
-                <fullName>Spanish (MEX)</fullName>
+                <fullName>es_MX</fullName>
                 <default>false</default>
                 <label>Spanish (MEX)</label>
             </value>
             <value>
-                <fullName>Swahili</fullName>
+                <fullName>sw</fullName>
                 <default>false</default>
                 <label>Swahili</label>
             </value>
             <value>
-                <fullName>Swedish</fullName>
+                <fullName>sv</fullName>
                 <default>false</default>
                 <label>Swedish</label>
             </value>
             <value>
-                <fullName>Tamil</fullName>
+                <fullName>ta</fullName>
                 <default>false</default>
                 <label>Tamil</label>
             </value>
             <value>
-                <fullName>Telugu</fullName>
+                <fullName>te</fullName>
                 <default>false</default>
                 <label>Telugu</label>
             </value>
             <value>
-                <fullName>Thai</fullName>
+                <fullName>th</fullName>
                 <default>false</default>
                 <label>Thai</label>
             </value>
             <value>
-                <fullName>Turkish</fullName>
+                <fullName>tr</fullName>
                 <default>false</default>
                 <label>Turkish</label>
             </value>
             <value>
-                <fullName>Ukrainian</fullName>
+                <fullName>uk</fullName>
                 <default>false</default>
                 <label>Ukrainian</label>
             </value>
             <value>
-                <fullName>Urdu</fullName>
+                <fullName>ur</fullName>
                 <default>false</default>
                 <label>Urdu</label>
             </value>
             <value>
-                <fullName>Uzbek</fullName>
+                <fullName>uz</fullName>
                 <default>false</default>
                 <label>Uzbek</label>
             </value>
             <value>
-                <fullName>Vietnamese</fullName>
+                <fullName>vi</fullName>
                 <default>false</default>
                 <label>Vietnamese</label>
             </value>
             <value>
-                <fullName>Zulu</fullName>
+                <fullName>zu</fullName>
                 <default>false</default>
                 <label>Zulu</label>
             </value>

@@ -228,7 +228,7 @@
 .child-component-container {
     width: 100%;
     flex: 1;
-    background: #ffffff;
+    background: #F0F8FE;
     overflow: hidden;
     min-height: 0;
     display: flex;

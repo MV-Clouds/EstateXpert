@@ -194,6 +194,18 @@
                                             <span class="card-tag whatsapp">Chat</span>
                                         </div>
                                     </div>
+                                    <div class="feature-card" onclick={whatsappTemplateBuilderMethod}
+                                        data-title="WhatsApp Templates"
+                                        data-desc="The &quot;Message Templates&quot; enables you to create different message templates for sending to users during marketing campaigns or regular chatting. Design reusable templates with dynamic content to maintain consistent and professional communication."
+                                        onmouseenter={handleCardHover} onmouseleave={handleCardLeave}>
+                                        <img src="/resource/MVEX__controlcenterimg/whatsappTemplate.png" alt="template"
+                                            class="card-icon" draggable="false" />
+                                        <div class="card-content">
+                                            <h3 class="card-title">Message Templates</h3>
+                                            <p class="card-description">Reusable templates</p>
+                                            <span class="card-tag whatsapp">Templates</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -225,6 +237,11 @@
                             <template if:true={isWhatsappConnectComponent}>
                                 <c-whatsapp-connect-comp
                                     onwhatsappdeactivated={handleWhatsappDeactivated}></c-whatsapp-connect-comp>
+                            </template>
+                            <template if:true={isWhatsappTemplateComponent}>
+                                <c-wa-template-home-page
+                                    is-inside-control-center="true"
+                                    onbacktocontrolcenter={goToControlCenter}></c-wa-template-home-page>
                             </template>
                         </div>
                     </template>

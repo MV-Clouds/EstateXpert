@@ -151,6 +151,27 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
         return this.selectedComponent === 'whatsappConnect';
     }
 
+    get isWhatsappTemplateComponent() {
+        return this.selectedComponent === 'whatsappTemplates';
+    }
+
+    /**
+     * Method Name: whatsappTemplateBuilderMethod
+     * @description: Opens the WhatsApp Message Templates component in-place inside control center
+     * Date: 09/10/2026
+     * Created By: Karan Singh
+     */
+    whatsappTemplateBuilderMethod(event) {
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
+        this.openComponent(
+            'whatsappTemplates',
+            'Message Templates',
+            'The "Message Templates" enables you to create different message templates for sending to users during marketing campaigns or regular chatting. Design reusable templates with dynamic content to maintain consistent and professional communication.'
+        );
+    }
+
     /**
      * Method Name: googleAdsMethod
      * @description: Opens the Google Ads Mapping component

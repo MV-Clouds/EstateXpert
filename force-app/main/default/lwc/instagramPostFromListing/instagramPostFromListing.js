@@ -37,51 +37,91 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
     @track hasInstagramCredentials = false;
     @track invalidVideoDuration = [];
     @track invalidVideoSize = [];
+    @track hashtagErrorMessage = '';
 
+    /**
+     * @description captionTextareaClass method
+     */
+    get captionTextareaClass() {
+        return this.hashtagErrorMessage ? 'caption-textarea caption-textarea-error' : 'caption-textarea';
+    }
+
+    /**
+     * @description isFileAvailable method
+     */
     get isFileAvailable() {
         return this.selectedFileWithPreview.length > 0;
     }
 
+    /**
+     * @description hasAllCredentials method
+     */
     get hasAllCredentials() {
         return this.hasAWSCredentials && this.hasInstagramCredentials;
     }
 
+    /**
+     * @description missingCredentialsMessage method
+     */
     get missingCredentialsMessage() {
-        if (!this.hasAWSCredentials && !this.hasInstagramCredentials) {
-            return 'AWS and Instagram credentials are required to upload media.';
-        } else if (!this.hasAWSCredentials) {
-            return 'AWS credentials are required to upload media.';
-        } else if (!this.hasInstagramCredentials) {
-            return 'Instagram credentials are required to upload media.';
+        try {
+            if (!this.hasAWSCredentials && !this.hasInstagramCredentials) {
+                return 'AWS and Instagram credentials are required to upload media.';
+            } else if (!this.hasAWSCredentials) {
+                return 'AWS credentials are required to upload media.';
+            } else if (!this.hasInstagramCredentials) {
+                return 'Instagram credentials are required to upload media.';
+            }
+            return '';
+        } catch (error) {
+            console.error('Error in missingCredentialsMessage: ', error);
         }
-        return '';
     }
 
+    /**
+     * @description isUploadDisabled method
+     */
     get isUploadDisabled() {
-        return !this.isFileAvailable;
+        return !this.isFileAvailable || !!this.hashtagErrorMessage;
     }
 
+    /**
+     * @description uploadButtonClass method
+     */
     get uploadButtonClass() {
         return this.isFileAvailable
             ? 'upload-button upload-button-enabled'
             : 'upload-button upload-button-disabled';
     }
 
+    /**
+     * @description submitContainerClass method
+     */
     get submitContainerClass() {
         return this.isFileAvailable
             ? 'submit-button-selected'
             : 'submit-button-empty';
     }
 
+    /**
+     * @description captionCountClass method
+     */
     get captionCountClass() {
         return this.captionLength >= 2100 ? 'char-count char-count-warning' : 'char-count';
     }
 
     @wire(CurrentPageReference)
+    /**
+     * @description setCurrentPageReference method
+     */
     setCurrentPageReference(pageRef) {
-        if (pageRef && pageRef.state && pageRef.state.recordId) {
-            this.listingId = pageRef.state.recordId;
-            this.fetchPropertyMediaUrls();
+        try {
+            if (pageRef && pageRef.state && pageRef.state.recordId) {
+                this.listingId = pageRef.state.recordId;
+                this.fetchPropertyMediaUrls();
+            }
+        } catch (error) {
+            console.error('Error in setCurrentPageReference: ', error);
         }
     }
 
@@ -93,12 +133,19 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
     * Last modified by : Rachit Shah
     */
     connectedCallback() {
-        loadStyle(this, globalStyles);
-        this.getS3ConfigDataAsync();
-        this.checkInstagramCredentials();
+        try {
+            loadStyle(this, globalStyles);
+            this.getS3ConfigDataAsync();
+            this.checkInstagramCredentials();
 
+        } catch (error) {
+            console.error('Error in connectedCallback: ', error);
+        }
     }
 
+    /**
+     * @description renderedCallback method
+     */
     renderedCallback() {
         try {
             if (this.isAwsSdkInitialized) {
@@ -117,38 +164,48 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
         }
     }
 
+    /**
+     * @description fetchPropertyMediaUrls method
+     */
     fetchPropertyMediaUrls() {
-        if (this.listingId) {
-            getPropertyMediaUrls({ listingId: this.listingId })
-                .then(result => {
-                    for (const key in result) {
-                        if (Object.prototype.hasOwnProperty.call(result, key)) {
-                            const fileUrl = result[key];
+        try {
+            if (this.listingId) {
+                getPropertyMediaUrls({ listingId: this.listingId })
+                    .then(result => {
+                        for (const key in result) {
+                            if (Object.prototype.hasOwnProperty.call(result, key)) {
+                                const fileUrl = result[key];
 
-                            const lowerKey = key.toLowerCase();
-                            const isRemoteVideo = lowerKey.endsWith('.mp4') || lowerKey.endsWith('.mov') || lowerKey.endsWith('.quicktime');
+                                const lowerKey = key.toLowerCase();
+                                const isRemoteVideo = lowerKey.endsWith('.mp4') || lowerKey.endsWith('.mov') || lowerKey.endsWith('.quicktime');
 
-                            const jpegFile = {
-                                name: key,
-                                size: 0,
-                                preview: fileUrl,
-                                url: fileUrl,
-                                isRemoteVideo: isRemoteVideo,
-                                isDelete: false
-                            };
-                            this.awsObjectKeysToPreserve.push(key);
-                            this.fileURLs.push(fileUrl);
-                            this.selectedFileWithPreview.push(jpegFile);
+                                const jpegFile = {
+                                    name: key,
+                                    size: 0,
+                                    preview: fileUrl,
+                                    url: fileUrl,
+                                    isRemoteVideo: isRemoteVideo,
+                                    isDelete: false
+                                };
+                                this.awsObjectKeysToPreserve.push(key);
+                                this.fileURLs.push(fileUrl);
+                                this.selectedFileWithPreview.push(jpegFile);
+                            }
                         }
-                    }
-                })
-                .catch(error => {
-                    this.error = error;
-                    console.error('Error fetching media URLs:', error);
-                });
+                    })
+                    .catch(error => {
+                        this.error = error;
+                        console.error('Error fetching media URLs:', error);
+                    });
+            }
+        } catch (error) {
+            console.error('Error in fetchPropertyMediaUrls: ', error);
         }
     }
 
+    /**
+     * @description getS3ConfigDataAsync method
+     */
     getS3ConfigDataAsync() {
         try {
             getS3ConfigSettings()
@@ -175,6 +232,9 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
         }
     }
 
+    /**
+     * @description checkInstagramCredentials method
+     */
     checkInstagramCredentials() {
         try {
             checkInstagramIntegration()
@@ -197,6 +257,9 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
         }
     }
 
+    /**
+     * @description initializeAwsSdk method
+     */
     initializeAwsSdk(confData) {
         try {
             let AWS = window.AWS;
@@ -220,97 +283,107 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
         }
     }
 
+    /**
+     * @description handleDrop method
+     */
     async handleDrop(event) {
-        event.preventDefault();
         try {
-            const files = event.dataTransfer.files;
-            this.isImageData = true;
-            this.largeImageFiles = [];
-            this.invalidVideoDuration = [];
-            const fileProcessingPromises = [];
-            let invalidFileTypes = [];
+            event.preventDefault();
+            try {
+                const files = event.dataTransfer.files;
+                this.isImageData = true;
+                this.largeImageFiles = [];
+                this.invalidVideoDuration = [];
+                const fileProcessingPromises = [];
+                let invalidFileTypes = [];
 
-            // Check if adding files would exceed 10 file limit
-            const totalFilesAfter = this.selectedFileWithPreview.length + files.length;
-            if (totalFilesAfter > 10) {
-                this.showToast('Error', `Cannot add ${files.length} files. Maximum 10 files allowed.`, 'error');
-                return;
-            }
-
-            // It's a carousel if: there are already existing files, OR multiple files are being added together
-            const isCarousel = this.selectedFileWithPreview.length > 0 || files.length > 1;
-
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                const isValidFileType = ['image/png', 'image/jpg', 'image/jpeg', 'video/mp4'].includes(file.type);
-                const fileSizeInKB = Math.floor(file.size / 1024);
-                const isAllowedSize = file.type === 'video/mp4'
-                    ? fileSizeInKB <= 25000  // Updated to 25MB for consistency
-                    : fileSizeInKB <= 8000;
-
-                if (!isValidFileType) {
-                    invalidFileTypes.push(file.name);
-                    continue;
+                // Check if adding files would exceed 10 file limit
+                const totalFilesAfter = this.selectedFileWithPreview.length + files.length;
+                if (totalFilesAfter > 10) {
+                    this.showToast('Error', `Cannot add ${files.length} files. Maximum 10 files allowed.`, 'error');
+                    return;
                 }
 
-                // For videos, validate duration with explicit carousel flag
-                if (file.type === 'video/mp4') {
-                    const validation = await this.validateVideo(file, isCarousel);
-                    if (!validation.isValid) {
-                        this.invalidVideoDuration.push(validation.errorMessage);
+                // It's a carousel if: there are already existing files, OR multiple files are being added together
+                const isCarousel = this.selectedFileWithPreview.length > 0 || files.length > 1;
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const isValidFileType = ['image/png', 'image/jpg', 'image/jpeg', 'video/mp4'].includes(file.type);
+                    const fileSizeInKB = Math.floor(file.size / 1024);
+                    const isAllowedSize = file.type === 'video/mp4'
+                        ? fileSizeInKB <= 25000  // Updated to 25MB for consistency
+                        : fileSizeInKB <= 8000;
+
+                    if (!isValidFileType) {
+                        invalidFileTypes.push(file.name);
                         continue;
                     }
-                }
 
-                if (isAllowedSize) {
-                    if (this.picaInstance && file.type !== 'video/mp4') {
-                        const jpegFilePromise = this.convertToJpeg(file).then(jpegFile => {
-                            this.selectedFilesToUpload.push(jpegFile);
-                            return {
-                                name: jpegFile.name,
-                                size: jpegFile.size,
-                                preview: URL.createObjectURL(jpegFile),
-                                isDelete: true
-                            };
-                        });
-                        fileProcessingPromises.push(jpegFilePromise);
-                    } else {
-                        const thumbnailPromise = this.createThumbnail(file).then(preview => {
-                            this.selectedFilesToUpload.push(file);
-                            return {
-                                name: file.name,
-                                size: file.size,
-                                preview: preview,
-                                isDelete: true
-                            };
-                        });
-                        fileProcessingPromises.push(thumbnailPromise);
+                    // For videos, validate duration with explicit carousel flag
+                    if (file.type === 'video/mp4') {
+                        const validation = await this.validateVideo(file, isCarousel);
+                        if (!validation.isValid) {
+                            this.invalidVideoDuration.push(validation.errorMessage);
+                            continue;
+                        }
                     }
-                } else {
-                    this.largeImageFiles.push(file.name);
+
+                    if (isAllowedSize) {
+                        if (this.picaInstance && file.type !== 'video/mp4') {
+                            const jpegFilePromise = this.convertToJpeg(file).then(jpegFile => {
+                                this.selectedFilesToUpload.push(jpegFile);
+                                return {
+                                    name: jpegFile.name,
+                                    size: jpegFile.size,
+                                    preview: URL.createObjectURL(jpegFile),
+                                    isDelete: true
+                                };
+                            });
+                            fileProcessingPromises.push(jpegFilePromise);
+                        } else {
+                            const thumbnailPromise = this.createThumbnail(file).then(preview => {
+                                this.selectedFilesToUpload.push(file);
+                                return {
+                                    name: file.name,
+                                    size: file.size,
+                                    preview: preview,
+                                    isDelete: true
+                                };
+                            });
+                            fileProcessingPromises.push(thumbnailPromise);
+                        }
+                    } else {
+                        this.largeImageFiles.push(file.name);
+                    }
                 }
+
+                const fileDataArray = await Promise.all(fileProcessingPromises);
+                this.selectedFileWithPreview = [...this.selectedFileWithPreview, ...fileDataArray];
+
+                if (invalidFileTypes.length > 0) {
+                    this.showToast('Error', `Invalid file types: ${invalidFileTypes.join(', ')}`, 'error');
+                }
+
+                if (this.invalidVideoDuration.length > 0) {
+                    this.showToast('Error', `Video validation errors:\n${this.invalidVideoDuration.join('\n')}`, 'error');
+                }
+
+                if (this.largeImageFiles.length > 0) {
+                    this.showToast('Error', `File(s) too large: ${this.largeImageFiles.join(', ')}`, 'error');
+                }
+
+            } catch (error) {
+                console.error('Error in file drop handling:', error.stack);
             }
-
-            const fileDataArray = await Promise.all(fileProcessingPromises);
-            this.selectedFileWithPreview = [...this.selectedFileWithPreview, ...fileDataArray];
-
-            if (invalidFileTypes.length > 0) {
-                this.showToast('Error', `Invalid file types: ${invalidFileTypes.join(', ')}`, 'error');
-            }
-
-            if (this.invalidVideoDuration.length > 0) {
-                this.showToast('Error', `Video validation errors:\n${this.invalidVideoDuration.join('\n')}`, 'error');
-            }
-
-            if (this.largeImageFiles.length > 0) {
-                this.showToast('Error', `File(s) too large: ${this.largeImageFiles.join(', ')}`, 'error');
-            }
-
         } catch (error) {
-            console.error('Error in file drop handling:', error.stack);
+            console.error('Error in handleDrop: ', error);
         }
     }
 
+    /**
+     * @description convertToJpeg method
+     */
     async convertToJpeg(file) {
 
         try {
@@ -332,29 +405,56 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
         }
     }
 
+    /**
+     * @description loadImage method
+     */
     loadImage(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const img = new Image();
-                img.onload = () => resolve(img);
-                img.src = event.target.result;
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
+        try {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.src = event.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        } catch (error) {
+            console.error('Error in loadImage: ', error);
+        }
     }
 
+    /**
+     * @description allowDrop method
+     */
     allowDrop(event) {
         event.preventDefault();
     }
 
+    /**
+     * @description handleCaptionChange method
+     */
     handleCaptionChange(event) {
         this.caption = event.target.value;
     }
 
+    /**
+     * @description handleCaptionInput method
+     */
     handleCaptionInput(event) {
-        this.captionLength = event.target.value.length;
+        try {
+            this.captionLength = event.target.value.length;
+            const text = event.target.value;
+            const hashtags = text.match(/#/g) || [];
+            if (hashtags.length > 5) {
+                this.hashtagErrorMessage = 'You can use a maximum of 5 hashtags.';
+            } else {
+                this.hashtagErrorMessage = '';
+            }
+        } catch (error) {
+            console.error('Error in handleCaptionInput: ', error);
+        }
     }
 
     /**
@@ -363,31 +463,35 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
      * @returns {Promise<number>} Duration in seconds
      */
     getVideoDuration(file) {
-        return new Promise((resolve, reject) => {
-            try {
-                const video = document.createElement('video');
-                const objectUrl = URL.createObjectURL(file);
-                video.src = objectUrl;
+        try {
+            return new Promise((resolve, reject) => {
+                try {
+                    const video = document.createElement('video');
+                    const objectUrl = URL.createObjectURL(file);
+                    video.src = objectUrl;
 
-                video.addEventListener('loadedmetadata', () => {
-                    URL.revokeObjectURL(objectUrl);
-                    resolve(video.duration);
-                });
+                    video.addEventListener('loadedmetadata', () => {
+                        URL.revokeObjectURL(objectUrl);
+                        resolve(video.duration);
+                    });
 
-                video.addEventListener('error', () => {
-                    URL.revokeObjectURL(objectUrl);
-                    reject(new Error('Failed to load video metadata'));
-                });
+                    video.addEventListener('error', () => {
+                        URL.revokeObjectURL(objectUrl);
+                        reject(new Error('Failed to load video metadata'));
+                    });
 
-                // Set a timeout to handle cases where metadata never loads
-                setTimeout(() => {
-                    URL.revokeObjectURL(objectUrl);
-                    reject(new Error('Video metadata timeout'));
-                }, 10000);
-            } catch (error) {
-                reject(error);
-            }
-        });
+                    // Set a timeout to handle cases where metadata never loads
+                    setTimeout(() => {
+                        URL.revokeObjectURL(objectUrl);
+                        reject(new Error('Video metadata timeout'));
+                    }, 10000);
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        } catch (error) {
+            console.error('Error in getVideoDuration: ', error);
+        }
     }
 
     /**
@@ -395,8 +499,12 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
      * @returns {boolean} True if carousel, False if single video
      */
     isCarouselPost() {
-        const totalMedia = this.selectedFileWithPreview.length + this.selectedFilesToUpload.length;
-        return totalMedia > 1 || (totalMedia === 1 && this.selectedFilesToUpload.some(f => f.type !== 'video/mp4'));
+        try {
+            const totalMedia = this.selectedFileWithPreview.length + this.selectedFilesToUpload.length;
+            return totalMedia > 1 || (totalMedia === 1 && this.selectedFilesToUpload.some(f => f.type !== 'video/mp4'));
+        } catch (error) {
+            console.error('Error in isCarouselPost: ', error);
+        }
     }
 
     /**
@@ -478,6 +586,9 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
         }
     }
 
+    /**
+     * @description handleSelectedFiles method
+     */
     async handleSelectedFiles(event) {
         try {
             if (event.target.files && event.target.files.length > 0) {
@@ -587,281 +698,386 @@ export default class InstagramPostFromListing extends NavigationMixin(LightningE
     }
 
 
+    /**
+     * @description createThumbnail method
+     */
     createThumbnail(file) {
-        return new Promise((resolve, reject) => {
-            try {
-                const video = document.createElement('video');
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
+        try {
+            return new Promise((resolve, reject) => {
+                try {
+                    const video = document.createElement('video');
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
 
-                video.src = URL.createObjectURL(file);
+                    video.src = URL.createObjectURL(file);
 
-                video.addEventListener('loadeddata', () => {
-                    video.currentTime = 1;
+                    video.addEventListener('loadeddata', () => {
+                        video.currentTime = 1;
 
-                    video.addEventListener('seeked', () => {
-                        canvas.width = video.videoWidth;
-                        canvas.height = video.videoHeight;
+                        video.addEventListener('seeked', () => {
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
 
-                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                            context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                        const thumbnailDataUrl = canvas.toDataURL('image/jpeg');
+                            const thumbnailDataUrl = canvas.toDataURL('image/jpeg');
 
-                        resolve(thumbnailDataUrl);
+                            resolve(thumbnailDataUrl);
+                        });
                     });
-                });
 
-                video.onerror = () => {
-                    reject('Error loading video file');
-                };
-            } catch (error) {
-                reject(`Error in createThumbnail -> ${error.stack}`);
-            }
-        });
+                    video.onerror = () => {
+                        reject('Error loading video file');
+                    };
+                } catch (error) {
+                    reject(`Error in createThumbnail -> ${error.stack}`);
+                }
+            });
+        } catch (error) {
+            console.error('Error in createThumbnail: ', error);
+        }
     }
 
+    /**
+     * @description handleDragStart method
+     */
     handleDragStart(event) {
-        const index = event.target.dataset.index;
-        event.dataTransfer.setData('index', index);
+        try {
+            const index = event.target.dataset.index;
+            event.dataTransfer.setData('index', index);
 
-        event.target.classList.add('dragging');
+            event.target.classList.add('dragging');
+        } catch (error) {
+            console.error('Error in handleDragStart: ', error);
+        }
     }
 
+    /**
+     * @description handleDragEnter method
+     */
     handleDragEnter(event) {
-        event.preventDefault();
-        const dropTarget = event.target.closest(".dropableimage");
-        if (dropTarget) {
-            dropTarget.classList.add('highlight');
+        try {
+            event.preventDefault();
+            const dropTarget = event.target.closest(".dropableimage");
+            if (dropTarget) {
+                dropTarget.classList.add('highlight');
+            }
+        } catch (error) {
+            console.error('Error in handleDragEnter: ', error);
         }
     }
 
+    /**
+     * @description handleDragLeave method
+     */
     handleDragLeave(event) {
-        event.preventDefault();
-        const dropTarget = event.target.closest(".dropableimage");
-        if (dropTarget) {
-            dropTarget.classList.remove('highlight');
+        try {
+            event.preventDefault();
+            const dropTarget = event.target.closest(".dropableimage");
+            if (dropTarget) {
+                dropTarget.classList.remove('highlight');
+            }
+        } catch (error) {
+            console.error('Error in handleDragLeave: ', error);
         }
     }
 
+    /**
+     * @description handleDragEnd method
+     */
     handleDragEnd(event) {
-        event.target.classList.remove('dragging');
-        this.template.querySelectorAll('.dropableimage').forEach(el => el.classList.remove('highlight'));
+        try {
+            event.target.classList.remove('dragging');
+            this.template.querySelectorAll('.dropableimage').forEach(el => el.classList.remove('highlight'));
+        } catch (error) {
+            console.error('Error in handleDragEnd: ', error);
+        }
     }
 
 
+    /**
+     * @description handleDropImages method
+     */
     handleDropImages(event) {
-        event.preventDefault();
+        try {
+            event.preventDefault();
 
-        const draggedIndex = parseInt(event.dataTransfer.getData('index'), 10);
-        const droppedIndex = parseInt(event.target.closest('.dropableimage').dataset.index, 10);
+            const draggedIndex = parseInt(event.dataTransfer.getData('index'), 10);
+            const droppedIndex = parseInt(event.target.closest('.dropableimage').dataset.index, 10);
 
-        if (draggedIndex !== droppedIndex) {
-            const draggedFile = this.selectedFileWithPreview.splice(draggedIndex, 1)[0];
-            this.selectedFileWithPreview.splice(droppedIndex, 0, draggedFile);
+            if (draggedIndex !== droppedIndex) {
+                const draggedFile = this.selectedFileWithPreview.splice(draggedIndex, 1)[0];
+                this.selectedFileWithPreview.splice(droppedIndex, 0, draggedFile);
 
+            }
+
+            this.template.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+            this.template.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+
+        } catch (error) {
+            console.error('Error in handleDropImages: ', error);
         }
-
-        this.template.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
-        this.template.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
-
     }
 
+    /**
+     * @description handleDragOver method
+     */
     handleDragOver(event) {
-        event.preventDefault();
-        event.target.classList.add('drag-over');
+        try {
+            event.preventDefault();
+            event.target.classList.add('drag-over');
+        } catch (error) {
+            console.error('Error in handleDragOver: ', error);
+        }
     }
 
+    /**
+     * @description handleRemoveFile method
+     */
     handleRemoveFile(event) {
-        const fileNameToRemove = event.currentTarget.dataset.name;
+        try {
+            const fileNameToRemove = event.currentTarget.dataset.name;
 
-        this.selectedFileWithPreview = this.selectedFileWithPreview.filter(file => file.name !== fileNameToRemove);
-        this.selectedFilesToUpload = this.selectedFilesToUpload.filter(file => file.name !== fileNameToRemove);
-        this.awsObjectKeysToPreserve = this.awsObjectKeysToPreserve.filter(key => key !== fileNameToRemove);
+            this.selectedFileWithPreview = this.selectedFileWithPreview.filter(file => file.name !== fileNameToRemove);
+            this.selectedFilesToUpload = this.selectedFilesToUpload.filter(file => file.name !== fileNameToRemove);
+            this.awsObjectKeysToPreserve = this.awsObjectKeysToPreserve.filter(key => key !== fileNameToRemove);
+        } catch (error) {
+            console.error('Error in handleRemoveFile: ', error);
+        }
     }
 
+    /**
+     * @description handlePost method
+     */
     async handlePost() {
-        const totalFiles = this.selectedFileWithPreview.length;
+        try {
+            const totalFiles = this.selectedFileWithPreview.length;
 
-        if (totalFiles === 0) {
-            this.showToast('Error', 'Please select a file to upload.', 'error');
-            return;
-        }
+            if (totalFiles === 0) {
+                this.showToast('Error', 'Please select a file to upload.', 'error');
+                return;
+            }
 
-        if (totalFiles > 10) {
-            this.showToast('Error', 'You can upload maximum 10 files.', 'error');
-            return;
-        }
+            if (totalFiles > 10) {
+                this.showToast('Error', 'You can upload maximum 10 files.', 'error');
+                return;
+            }
 
-        this.showSpinner = true;
-        this.isLoading = true;
-        if (this.selectedFilesToUpload.length === 0) {
-            this.progressText = 'Processing Post...';
-            this.progressStyle = 'width: 100%';
-        }
-
-        const isSuccess = await this.uploadToAWS();
-
-        if (isSuccess) {
-            this.fileURLs = this.selectedFileWithPreview.map(file => file.url || file.preview);
-            postToInstagram({ mediaUrls: this.fileURLs, caption: this.caption, awsObjectKeys: this.awsObjectKeys, awsObjectKeysToPreserve: this.awsObjectKeysToPreserve })
-                .then(result => {
-                    if (result.status === 'SUCCESS') {
-                        this.showToast('Success', result.message, 'success');
-                        this.clearFiles();
-                        this.closeAction();
-                    } else {
-                        this.showToast('Error', result.message, 'error');
-                    }
-                    this.showSpinner = false;
-                    this.isLoading = false;
-                })
-                .catch(error => {
-                    console.error('Error posting to Instagram:', error);
-                    this.showToast('Error', 'Failed to post to Instagram.', 'error');
-                    this.showSpinner = false;
-                    this.isLoading = false;
-                });
-        }
-        else {
-            this.showToast('Error', 'Error during uploading files', 'error');
-        }
-
-
-    }
-
-    clearFiles() {
-        this.selectedFilesToUpload = [];
-        this.selectedFileWithPreview = [];
-        this.allFilesData = [];
-        this.caption = '';
-        this.fileURLs = [];
-        this.awsObjectKeys = [];
-        this.awsObjectKeysToPreserve = [];
-    }
-
-    async uploadToAWS() {
-        if (this.selectedFilesToUpload.length > 0) {
-            this.initializeAwsSdk(this.confData);
             this.showSpinner = true;
             this.isLoading = true;
-            this.progressText = 'Uploading...';
-            this.progressStyle = 'width: 0%';
-
-            try {
-                const totalFiles = this.selectedFilesToUpload.length;
-                const percentagePerFile = 100 / totalFiles;
-                const fileProgressArray = new Array(totalFiles).fill(0);
-
-                const uploadPromises = this.selectedFilesToUpload
-                    .filter(file => file.size > 0)
-                    .map((file, index) =>
-                        this.uploadFileToS3(file, percentagePerFile, index, fileProgressArray)
-                    );
-
-                const results = await Promise.all(uploadPromises);
-
-                this.selectedFileWithPreview.forEach(file => {
-                    const result = results.find(res => res.key === file.name);
-
-                    if (result) {
-                        file.url = result.Location;
-                    }
-                });
-
-                this.fileURLs = this.selectedFileWithPreview.map(file => file.url || file.preview);
-                this.awsObjectKeys = results.map(result => result.key);
-
-                return true;
-            } catch (error) {
-                console.error('Error Stack-->', error.stack);
-                return false;
-            } finally {
-                setTimeout(() => {
-                    this.progressText = 'Uploading Files...';
-                }, 1000);
+            if (this.selectedFilesToUpload.length === 0) {
+                this.progressText = 'Processing Post...';
+                this.progressStyle = 'width: 100%';
             }
-        }
-        else {
-            return true;
-        }
 
-    }
-    uploadFileToS3(file, percentagePerFile, index, fileProgressArray) {
-        return new Promise((resolve, reject) => {
-            try {
-                const params = {
-                    Key: file.name,
-                    ContentType: file.type,
-                    Body: file,
-                    ACL: "public-read"
-                };
+            const isSuccess = await this.uploadToAWS();
 
-                this.s3.upload(params)
-                    .on('httpUploadProgress', (progress) => {
-                        const fileProgress = (progress.loaded / progress.total) * percentagePerFile;
-                        fileProgressArray[index] = fileProgress;
-
-                        const cumulativeProgress = fileProgressArray.reduce((acc, curr) => acc + curr, 0);
-                        this.uploadProgress = Math.min(100, Math.round(cumulativeProgress));
-
-                        this.progressText = `Uploading: ${this.uploadProgress}%`;
-                        this.progressStyle = `width: ${this.uploadProgress}%`;
-                    })
-                    .promise()
-                    .then(response => {
-                        resolve({
-                            key: response.Key,
-                            Location: response.Location
-                        });
+            if (isSuccess) {
+                this.fileURLs = this.selectedFileWithPreview.map(file => file.url || file.preview);
+                postToInstagram({ mediaUrls: this.fileURLs, caption: this.caption, awsObjectKeys: this.awsObjectKeys, awsObjectKeysToPreserve: this.awsObjectKeysToPreserve })
+                    .then(result => {
+                        if (result.status === 'SUCCESS') {
+                            this.showToast('Success', result.message, 'success');
+                            this.clearFiles();
+                            this.closeAction();
+                        } else {
+                            this.showToast('Error', result.message, 'error');
+                        }
+                        this.showSpinner = false;
+                        this.isLoading = false;
                     })
                     .catch(error => {
-                        console.error('Error in uploadFileToS3-->', error.stack);
-                        reject(error);
+                        console.error('Error posting to Instagram:', error);
+                        this.showToast('Error', 'Failed to post to Instagram.', 'error');
+                        this.showSpinner = false;
+                        this.isLoading = false;
                     });
-            } catch (error) {
-                console.error('Error in uploadFileToS3-->', error.stack);
-                reject(error);
             }
-        });
+            else {
+                this.showToast('Error', 'Error during uploading files', 'error');
+            }
+
+
+        } catch (error) {
+            console.error('Error in handlePost: ', error);
+        }
     }
 
+    /**
+     * @description clearFiles method
+     */
+    clearFiles() {
+        try {
+            this.selectedFilesToUpload = [];
+            this.selectedFileWithPreview = [];
+            this.allFilesData = [];
+            this.caption = '';
+            this.fileURLs = [];
+            this.awsObjectKeys = [];
+            this.awsObjectKeysToPreserve = [];
+        } catch (error) {
+            console.error('Error in clearFiles: ', error);
+        }
+    }
 
-    showToast(title, message, variant) {
-        if (typeof window !== 'undefined') {
-            const event = new ShowToastEvent({
-                title: title,
-                message: message,
-                variant: variant,
+    /**
+     * @description uploadToAWS method
+     */
+    async uploadToAWS() {
+        try {
+            if (this.selectedFilesToUpload.length > 0) {
+                this.initializeAwsSdk(this.confData);
+                this.showSpinner = true;
+                this.isLoading = true;
+                this.progressText = 'Uploading...';
+                this.progressStyle = 'width: 0%';
+
+                try {
+                    const totalFiles = this.selectedFilesToUpload.length;
+                    const percentagePerFile = 100 / totalFiles;
+                    const fileProgressArray = new Array(totalFiles).fill(0);
+
+                    const uploadPromises = this.selectedFilesToUpload
+                        .filter(file => file.size > 0)
+                        .map((file, index) =>
+                            this.uploadFileToS3(file, percentagePerFile, index, fileProgressArray)
+                        );
+
+                    const results = await Promise.all(uploadPromises);
+
+                    this.selectedFileWithPreview.forEach(file => {
+                        const result = results.find(res => res.key === file.name);
+
+                        if (result) {
+                            file.url = result.Location;
+                        }
+                    });
+
+                    this.fileURLs = this.selectedFileWithPreview.map(file => file.url || file.preview);
+                    this.awsObjectKeys = results.map(result => result.key);
+
+                    return true;
+                } catch (error) {
+                    console.error('Error Stack-->', error.stack);
+                    return false;
+                } finally {
+                    setTimeout(() => {
+                        this.progressText = 'Uploading Files...';
+                    }, 1000);
+                }
+            }
+            else {
+                return true;
+            }
+
+        } catch (error) {
+            console.error('Error in uploadToAWS: ', error);
+        }
+    }
+    /**
+     * @description uploadFileToS3 method
+     */
+    uploadFileToS3(file, percentagePerFile, index, fileProgressArray) {
+        try {
+            return new Promise((resolve, reject) => {
+                try {
+                    const params = {
+                        Key: file.name,
+                        ContentType: file.type,
+                        Body: file,
+                        ACL: "public-read"
+                    };
+
+                    this.s3.upload(params)
+                        .on('httpUploadProgress', (progress) => {
+                            const fileProgress = (progress.loaded / progress.total) * percentagePerFile;
+                            fileProgressArray[index] = fileProgress;
+
+                            const cumulativeProgress = fileProgressArray.reduce((acc, curr) => acc + curr, 0);
+                            this.uploadProgress = Math.min(100, Math.round(cumulativeProgress));
+
+                            this.progressText = `Uploading: ${this.uploadProgress}%`;
+                            this.progressStyle = `width: ${this.uploadProgress}%`;
+                        })
+                        .promise()
+                        .then(response => {
+                            resolve({
+                                key: response.Key,
+                                Location: response.Location
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error in uploadFileToS3-->', error.stack);
+                            reject(error);
+                        });
+                } catch (error) {
+                    console.error('Error in uploadFileToS3-->', error.stack);
+                    reject(error);
+                }
             });
-            this.dispatchEvent(event);
+        } catch (error) {
+            console.error('Error in uploadFileToS3: ', error);
         }
     }
 
-    closeAction() {
-        this.dispatchEvent(new CloseActionScreenEvent());
-    }
 
-    navigateToStorageIntegration(event) {
-        if (event) {
-            event.preventDefault();
-        }
-
-        this[NavigationMixin.GenerateUrl]({
-            type: 'standard__navItemPage',
-            attributes: {
-                apiName: 'Control_Center_Dev'
-            },
-            state: {
-                c__openComponent: 'storageIntegration'
+    /**
+     * @description showToast method
+     */
+    showToast(title, message, variant) {
+        try {
+            if (typeof window !== 'undefined') {
+                const event = new ShowToastEvent({
+                    title: title,
+                    message: message,
+                    variant: variant,
+                });
+                this.dispatchEvent(event);
             }
-        }).then((url) => {
-            window.open(url, '_blank');
-        }).catch((error) => {
-            console.error('Error generating tab URL:', error);
-            window.open('/lightning/n/MVEX__Control_Center?c__openComponent=storageIntegration', '_blank');
-        }).finally(() => {
-            this.closeAction();
-        });
+        } catch (error) {
+            console.error('Error in showToast: ', error);
+        }
+    }
+
+    /**
+     * @description closeAction method
+     */
+    closeAction() {
+        try {
+            this.dispatchEvent(new CloseActionScreenEvent());
+        } catch (error) {
+            console.error('Error in closeAction: ', error);
+        }
+    }
+
+    /**
+     * @description navigateToStorageIntegration method
+     */
+    navigateToStorageIntegration(event) {
+        try {
+            if (event) {
+                event.preventDefault();
+            }
+
+            this[NavigationMixin.GenerateUrl]({
+                type: 'standard__navItemPage',
+                attributes: {
+                    apiName: 'Control_Center_Dev'
+                },
+                state: {
+                    c__openComponent: 'storageIntegration'
+                }
+            }).then((url) => {
+                window.open(url, '_blank');
+            }).catch((error) => {
+                console.error('Error generating tab URL:', error);
+                window.open('/lightning/n/MVEX__Control_Center?c__openComponent=storageIntegration', '_blank');
+            }).finally(() => {
+                this.closeAction();
+            });
+        } catch (error) {
+            console.error('Error in navigateToStorageIntegration: ', error);
+        }
     }
 
 }

@@ -2,7 +2,6 @@ import { LightningElement, wire } from "lwc";
 import globalStyles from "@salesforce/resourceUrl/globalStyles";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
-import FORM_FACTOR from "@salesforce/client/formFactor";
 import checkConnectionStatus from '@salesforce/apex/MetaAdsTokenController.checkConnectionStatus';
 
 export default class EstateXpertControlCenter extends NavigationMixin(LightningElement) {
@@ -274,6 +273,12 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             this.portalName = null;
             this.portalIconUrl = null;
             this.portalStatus = null;
+            
+            // Tell the portal mapping component to go back to its main view
+            const portalCmp = this.template.querySelector('c-portal-mapping-component');
+            if (portalCmp) {
+                portalCmp.resetView();
+            }
         }
     }
 
@@ -423,7 +428,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
         this.portalStatus = portalStatus;
         this.isXMLForPF = isXMLForPF;
         this.parentComponentTitle = 'Portal Integration';
-        this.selectedComponent = 'portalMappingLandingPage';
+        this.selectedComponent = 'portalMapping';
         this.selectedComponentTitle = portalName;
         this.currentView = 'childComponent';
     }

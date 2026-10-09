@@ -1,4 +1,4 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import { subscribe, unsubscribe } from 'lightning/empApi';
@@ -221,6 +221,21 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
         this.portalStatusToAssign = event.currentTarget.dataset.portalstatus;
         this.portalGen = event.currentTarget.dataset.portalgen;
         
+        // Fire custom event for control center to handle breadcrumb navigation
+        const navigateEvent = new CustomEvent('portalnavigate', {
+            detail: {
+                portalId: this.selectedPortalId,
+                portalGen: this.portalGen,
+                portalName: this.selectedPortalName,
+                portalIconUrl: this.portalIconUrl,
+                portalStatus: this.portalStatusToAssign,
+                isXMLForPF: this.isXMLForPF
+            },
+            bubbles: true,
+            composed: true
+        });
+        this.dispatchEvent(navigateEvent);
+
         this.showMainView = false;
         this.showLandingPageView = true;
         this.getListingFields();
@@ -339,6 +354,11 @@ export default class PortalMappingComponent extends NavigationMixin(LightningEle
     // ==========================================
     handleBackToMain(event) {
         if(event) event.preventDefault();
+        this.resetView();
+    }
+
+    @api
+    resetView() {
         this.showLandingPageView = false;
         this.showMainView = true;
         this.getPortalRecord();

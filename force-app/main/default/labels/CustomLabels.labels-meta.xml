@@ -26,7 +26,7 @@
         <language>en_US</language>
         <protected>true</protected>
         <shortDescription>InstagramEndPoint</shortDescription>
-        <value>https://graph.instagram.com/v21.0/</value>
+        <value>https://graph.instagram.com/</value>
     </labels>
     <labels>
         <fullName>PropertyFinder_Endpoint_Production</fullName>

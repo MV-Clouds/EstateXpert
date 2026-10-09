@@ -35,13 +35,9 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     getStateParameters(currentPageReference) {
         this.currentPageRef = currentPageReference;
         if (currentPageReference && currentPageReference.state) {
-            const target = currentPageReference.state.c__openComponent;
-            if (target === 'storageIntegration') {
-                this.generalIntegrationMethod();
-            } else if (target === 'metaAdsMapping') {
-                this.metaAdsMethod();
-            } else if (target === 'whatsappConnect') {
-                this.whatsappEmbeddedSignuprMethod();
+            const target = currentPageReference.state.c__openComponent || currentPageReference.state.c__view;
+            if (target && this.selectedComponent !== target) {
+                this.routeToComponent(target, true);
             }
         }
     }
@@ -49,11 +45,114 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     /**
      * Method Name: connectedCallback
      * @description: Lifecycle hook that fires when the component is inserted into the DOM
-     * Date: 23/09/2026
-     * Created By: Vyom Soni
      */
     connectedCallback() {
         loadStyle(this, globalStyles);
+        try {
+            window.addEventListener('popstate', this.handlePopState);
+        } catch (e) {
+            console.warn('Error attaching popstate listener:', e);
+        }
+
+        // Handle direct URL on page refresh or initial load
+        const target = this.getOpenComponentFromUrl();
+        if (target && this.selectedComponent !== target) {
+            this.routeToComponent(target, true);
+        }
+    }
+
+    disconnectedCallback() {
+        try {
+            window.removeEventListener('popstate', this.handlePopState);
+        } catch (e) {
+            console.warn('Error removing popstate listener:', e);
+        }
+    }
+
+    handlePopState = () => {
+        try {
+            const target = this.getOpenComponentFromUrl();
+            if (target) {
+                if (this.selectedComponent !== target) {
+                    this.routeToComponent(target, true);
+                }
+            } else {
+                if (this.currentView !== 'controlCenter') {
+                    this.goToControlCenter(true);
+                }
+            }
+        } catch (e) {
+            console.error('Error handling popstate:', e);
+        }
+    };
+
+    getOpenComponentFromUrl() {
+        try {
+            if (this.currentPageRef?.state?.c__openComponent) {
+                return this.currentPageRef.state.c__openComponent;
+            }
+            if (this.currentPageRef?.state?.c__view) {
+                return this.currentPageRef.state.c__view;
+            }
+            if (window?.location?.search) {
+                const searchParams = new URLSearchParams(window.location.search);
+                return searchParams.get('c__openComponent') || searchParams.get('c__view') || searchParams.get('openComponent');
+            }
+        } catch (e) {
+            console.error('Error reading URL params:', e);
+        }
+        return null;
+    }
+
+    routeToComponent(target, skipUrlUpdate = false) {
+        if (!target) return;
+        const normalized = target.toLowerCase();
+
+        if (normalized === 'whatsapptemplates' || normalized === 'whatsapptemplate' || normalized === 'messagetemplates') {
+            this.whatsappTemplateBuilderMethod(null, skipUrlUpdate);
+        } else if (normalized === 'whatsappconnect' || normalized === 'whatsapp' || normalized === 'whatsappbusiness') {
+            this.whatsappEmbeddedSignuprMethod(null, skipUrlUpdate);
+        } else if (normalized === 'storageintegration' || normalized === 'integrationhub' || normalized === 'generalintegration') {
+            this.generalIntegrationMethod(null, skipUrlUpdate);
+        } else if (normalized === 'metaadsmapping' || normalized === 'metaads' || normalized === 'meta') {
+            this.metaAdsMethod(null, skipUrlUpdate);
+        } else if (normalized === 'portalmapping' || normalized === 'portalintegration') {
+            this.portalIntegrationMethod(null, skipUrlUpdate);
+        } else if (normalized === 'googleadsmapping' || normalized === 'googleads' || normalized === 'google') {
+            this.googleAdsMethod(null, skipUrlUpdate);
+        } else if (normalized === 'mapfields' || normalized === 'maplistingandproperty') {
+            this.mapListingAndPropertyMethod(null, skipUrlUpdate);
+        } else if (normalized === 'leadassignmentrule' || normalized === 'contactassignmentrules') {
+            this.leadAssignmentRule(null, skipUrlUpdate);
+        } else {
+            console.warn('Unknown component requested from URL:', target);
+        }
+    }
+
+    updateUrl(componentName) {
+        try {
+            if (window?.history && window?.location) {
+                const url = new URL(window.location.href);
+                const currentParam = url.searchParams.get('c__openComponent') || url.searchParams.get('c__view');
+
+                if (componentName) {
+                    if (currentParam !== componentName) {
+                        url.searchParams.set('c__openComponent', componentName);
+                        url.searchParams.delete('c__view');
+                        window.history.pushState({ openComponent: componentName }, '', url.toString());
+                    }
+                } else {
+                    if (currentParam || url.searchParams.has('c__openComponent') || url.searchParams.has('c__view') || url.searchParams.has('openComponent')) {
+                        url.searchParams.delete('c__openComponent');
+                        url.searchParams.delete('c__view');
+                        url.searchParams.delete('openComponent');
+                        window.history.pushState({ openComponent: null }, '', url.toString());
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Error updating URL:', e);
+        }
     }
 
     /**
@@ -161,14 +260,15 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Date: 09/10/2026
      * Created By: Karan Singh
      */
-    whatsappTemplateBuilderMethod(event) {
+    whatsappTemplateBuilderMethod(event, skipUrlUpdate = false) {
         if (event && typeof event.preventDefault === 'function') {
             event.preventDefault();
         }
         this.openComponent(
             'whatsappTemplates',
             'Message Templates',
-            'The "Message Templates" enables you to create different message templates for sending to users during marketing campaigns or regular chatting. Design reusable templates with dynamic content to maintain consistent and professional communication.'
+            'The "Message Templates" enables you to create different message templates for sending to users during marketing campaigns or regular chatting. Design reusable templates with dynamic content to maintain consistent and professional communication.',
+            skipUrlUpdate
         );
     }
 
@@ -178,13 +278,15 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Date: 1/10/2026
      * Created By: Salmanhaider Aghariya
      */
-    
-    googleAdsMethod(event) {
-        event.preventDefault();
+    googleAdsMethod(event, skipUrlUpdate = false) {
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
         this.openComponent(
             'googleAdsMapping', 
             'Google Ads Mapping',
-            'Configure form field mapping for Google Ads to automatically capture leads.'
+            'Configure form field mapping for Google Ads to automatically capture leads.',
+            skipUrlUpdate
         );
     }
 
@@ -238,24 +340,27 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
 
     /**
      * Method Name: openComponent
-     * @description: Opens a child component in-place
+     * @description: Opens a child component in-place and updates browser URL
      * Date: 17/02/2026
      * Created By: Karan Singh
      */
-    openComponent(componentName, title, description) {
+    openComponent(componentName, title, description, skipUrlUpdate = false) {
         this.selectedComponent = componentName;
         this.selectedComponentTitle = title;
         this.selectedComponentDescription = description;
         this.currentView = 'childComponent';
+        if (skipUrlUpdate !== true) {
+            this.updateUrl(componentName);
+        }
     }
 
     /**
      * Method Name: goToControlCenter
-     * @description: Always returns to the main control center view
+     * @description: Always returns to the main control center view and restores normal URL
      * Date: 17/02/2026
      * Created By: Karan Singh
      */
-    goToControlCenter() {
+    goToControlCenter(skipUrlUpdate = false) {
         try {
             this.currentView = 'controlCenter';
             this.selectedComponent = null;
@@ -269,8 +374,8 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             this.portalStatus = null;
             this.integrationType = null;
         
-            if (window?.history?.replaceState && window?.location?.pathname) {
-                window.history.replaceState({}, document.title, window.location.pathname);
+            if (skipUrlUpdate !== true) {
+                this.updateUrl(null);
             }
         } catch (e) {
             console.error('Error in goToControlCenter:', e.stack);
@@ -300,6 +405,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             if (portalCmp) {
                 portalCmp.resetView();
             }
+            this.updateUrl('portalMapping');
         }
     }
 
@@ -309,12 +415,15 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Date: 09/09/2024
      * Created By: Karan Singh
      */
-    mapListingAndPropertyMethod(event) {
-        event.preventDefault();
+    mapListingAndPropertyMethod(event, skipUrlUpdate = false) {
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
         this.openComponent(
             'mapFields', 
             'Map Listing & Property',
-            'The "Map Listing and Property" modal streamlines data synchronization between Listing and Property records by allowing users to define field correspondences. This automation ensures that relevant information is consistently transferred between the two object types, eliminating manual data entry and reducing errors.'
+            'The "Map Listing and Property" modal streamlines data synchronization between Listing and Property records by allowing users to define field correspondences. This automation ensures that relevant information is consistently transferred between the two object types, eliminating manual data entry and reducing errors.',
+            skipUrlUpdate
         );
     }
 
@@ -324,12 +433,15 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Date: 09/09/2024
      * Created By: Karan Singh
      */
-    leadAssignmentRule(event) {
-        event.preventDefault();
+    leadAssignmentRule(event, skipUrlUpdate = false) {
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
         this.openComponent(
             'leadAssignmentRule', 
             'Contact Assignment Rules',
-            'The "Contact Assignment Rule" modal allows users to configure contact assignment rules, enabling automatic distribution of contacts based on custom criteria. Set up intelligent routing to ensure contacts reach the right team members efficiently.'
+            'The "Contact Assignment Rule" modal allows users to configure contact assignment rules, enabling automatic distribution of contacts based on custom criteria. Set up intelligent routing to ensure contacts reach the right team members efficiently.',
+            skipUrlUpdate
         );
     }
 
@@ -339,14 +451,15 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Date: 09/09/2024
      * Created By: Karan Singh
      */
-    generalIntegrationMethod(event) {
+    generalIntegrationMethod(event, skipUrlUpdate = false) {
         if (event && typeof event.preventDefault === 'function') {
             event.preventDefault();
         }
         this.openComponent(
             'storageIntegration', 
             'Integration Hub',
-            'The "Integration Hub" modal simplifies storage, email, instagram integration by providing seamless connectivity with various third-party services, enhancing overall functionality and user experience. Connect your favorite tools and platforms in one centralized location.'
+            'The "Integration Hub" modal simplifies storage, email, instagram integration by providing seamless connectivity with various third-party services, enhancing overall functionality and user experience. Connect your favorite tools and platforms in one centralized location.',
+            skipUrlUpdate
         );
     }
 
@@ -354,7 +467,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Method Name: metaAdsMethod
      * @description: Used to handle Meta Ads card click. Checks connection and redirects appropriately.
      */
-    async metaAdsMethod(event) {
+    async metaAdsMethod(event, skipUrlUpdate = false) {
         if (event && typeof event.preventDefault === 'function') {
             event.preventDefault();
         }
@@ -366,7 +479,8 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
                 this.openComponent(
                     'metaAdsMapping', 
                     'Meta Ads Mapping',
-                    'Configure form field mapping for Meta Ads to automatically capture leads.'
+                    'Configure form field mapping for Meta Ads to automatically capture leads.',
+                    skipUrlUpdate
                 );
             } else {
                 // If not connected, navigate to SDK page
@@ -419,18 +533,39 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     }
 
     /**
+     * Method Name: handlePortalNavigation
+     * @description: Handles navigation inside portal mapping component
+     */
+    handlePortalNavigation(event) {
+        if (event && event.detail) {
+            const { portalName, portalId, portalGen, portalIconUrl, portalStatus, isXMLForPF } = event.detail;
+            this.parentComponentTitle = 'Portal Integration';
+            this.selectedComponentTitle = portalName || 'Portal Mapping';
+            this.portalId = portalId;
+            this.portalGen = portalGen;
+            this.portalName = portalName;
+            this.portalIconUrl = portalIconUrl;
+            this.portalStatus = portalStatus;
+            this.isXMLForPF = isXMLForPF;
+        }
+    }
+
+    /**
      * Method Name: portalIntegrationMethod
      * @description: Used to open portalMapping component in-place.
      * Date: 09/09/2024
      * Updated: 17/02/2026
      * Created By: Karan Singh
      */
-    portalIntegrationMethod(event) {
-        event.preventDefault();
+    portalIntegrationMethod(event, skipUrlUpdate = false) {
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
         this.openComponent(
             'portalMapping',
             'Portal Integration',
-            'Connect and manage your portal integrations. Configure field mappings and synchronize data between Salesforce and external portals seamlessly.'
+            'Connect and manage your portal integrations. Configure field mappings and synchronize data between Salesforce and external portals seamlessly.',
+            skipUrlUpdate
         );
     }
 
@@ -440,7 +575,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Date: 07/10/2026
      * Created By: Karan Singh
      */
-    async whatsappEmbeddedSignuprMethod(event) {
+    async whatsappEmbeddedSignuprMethod(event, skipUrlUpdate = false) {
         if (event && typeof event.preventDefault === 'function') {
             event.preventDefault();
         }
@@ -463,7 +598,8 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
                 this.openComponent(
                     'whatsappConnect',
                     'WhatsApp Business',
-                    'The "WhatsApp Business" connects your WhatsApp Business Account with Salesforce to enable the chat feature directly from Salesforce. Start conversations, send messages, and manage customer communications without leaving your CRM platform.'
+                    'The "WhatsApp Business" connects your WhatsApp Business Account with Salesforce to enable the chat feature directly from Salesforce. Start conversations, send messages, and manage customer communications without leaving your CRM platform.',
+                    skipUrlUpdate
                 );
             } else {
                 this.handleWhatsappDeactivated();
@@ -481,7 +617,8 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
                 this.openComponent(
                     'whatsappConnect',
                     'WhatsApp Business',
-                    'The "WhatsApp Business" connects your WhatsApp Business Account with Salesforce to enable the chat feature directly from Salesforce. Start conversations, send messages, and manage customer communications without leaving your CRM platform.'
+                    'The "WhatsApp Business" connects your WhatsApp Business Account with Salesforce to enable the chat feature directly from Salesforce. Start conversations, send messages, and manage customer communications without leaving your CRM platform.',
+                    skipUrlUpdate
                 );
             } else {
                 this.handleWhatsappDeactivated();

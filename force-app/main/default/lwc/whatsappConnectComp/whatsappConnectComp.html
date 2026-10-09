@@ -218,13 +218,17 @@
                                     <div class="accordion-panel">
                                         <template if:false={isContactEditMode}>
                                             <div class="exp-table-content exp-accordion-table-content">
-                                                <table class="slds-table">
+                                                <table class="slds-table chat-config-table">
+                                                    <colgroup>
+                                                        <col class="col-chat-object" />
+                                                        <col class="col-chat-field" />
+                                                    </colgroup>
                                                     <thead>
                                                         <tr>
-                                                            <th scope="col" style="width:50%">
+                                                            <th scope="col" class="col-chat-object">
                                                                 <div class="slds-truncate">Object</div>
                                                             </th>
-                                                            <th scope="col" style="width:50%">
+                                                            <th scope="col" class="col-chat-field">
                                                                 <div class="slds-truncate">Phone Field</div>
                                                             </th>
                                                         </tr>
@@ -233,11 +237,11 @@
                                                         <template if:true={chatWindowRows.length}>
                                                             <template for:each={chatWindowRows} for:item="row">
                                                                 <tr key={row.id}>
-                                                                    <td>
+                                                                    <td class="col-chat-object">
                                                                         <div class="slds-truncate">{row.selectedObject}
                                                                         </div>
                                                                     </td>
-                                                                    <td>
+                                                                    <td class="col-chat-field">
                                                                         <div class="slds-truncate">
                                                                             {row.selectedPhoneField}</div>
                                                                     </td>
@@ -257,13 +261,17 @@
 
                                         <template if:true={isContactEditMode}>
                                             <div class="exp-table-content exp-accordion-table-content">
-                                                <table class="slds-table custom-table">
+                                                <table class="slds-table custom-table chat-config-table">
+                                                    <colgroup>
+                                                        <col class="col-chat-object" />
+                                                        <col class="col-chat-field" />
+                                                    </colgroup>
                                                     <thead>
                                                         <tr>
-                                                            <th scope="col" style="width:50%">
+                                                            <th scope="col" class="col-chat-object">
                                                                 <div class="slds-truncate">Object</div>
                                                             </th>
-                                                            <th scope="col" style="width:50%">
+                                                            <th scope="col" class="col-chat-field">
                                                                 <div class="slds-truncate">Phone Field</div>
                                                             </th>
                                                         </tr>
@@ -271,17 +279,18 @@
                                                     <tbody>
                                                         <template for:each={chatWindowRows} for:item="row">
                                                             <tr key={row.id}>
-                                                                <td>
+                                                                <td class="col-chat-object">
                                                                     <div class="slds-truncate object-static-label">
                                                                         {row.selectedObject}</div>
                                                                 </td>
-                                                                <td>
+                                                                <td class="col-chat-field">
                                                                     <lightning-combobox variant="label-hidden"
                                                                         data-row-id={row.id}
                                                                         value={row.selectedPhoneField}
                                                                         options={row.phoneFieldOptions}
                                                                         onchange={handleChatPhoneFieldChange}
-                                                                        placeholder="Select Phone Field">
+                                                                        placeholder="Select Phone Field"
+                                                                        dropdown-alignment="auto">
                                                                     </lightning-combobox>
                                                                 </td>
                                                             </tr>
@@ -323,16 +332,21 @@
                                     <div class="accordion-panel">
                                         <template if:false={isContactEditMode}>
                                             <div class="exp-table-content exp-accordion-table-content">
-                                                <table class="slds-table">
+                                                <table class="slds-table webhook-config-table">
+                                                    <colgroup>
+                                                        <col class="col-webhook-name" />
+                                                        <col class="col-webhook-type" />
+                                                        <col class="col-webhook-val" />
+                                                    </colgroup>
                                                     <thead>
                                                         <tr>
-                                                            <th scope="col" style="width:33%">
+                                                            <th scope="col" class="col-webhook-name">
                                                                 <div class="slds-truncate">Field API Name</div>
                                                             </th>
-                                                            <th scope="col" style="width:33%">
+                                                            <th scope="col" class="col-webhook-type">
                                                                 <div class="slds-truncate">Field Type</div>
                                                             </th>
-                                                            <th scope="col" style="width:33%">
+                                                            <th scope="col" class="col-webhook-val">
                                                                 <div class="slds-truncate">Default Value</div>
                                                             </th>
                                                         </tr>
@@ -341,13 +355,13 @@
                                                         <template if:true={requiredFields.length}>
                                                             <template for:each={requiredFields} for:item="field">
                                                                 <tr key={field.name}>
-                                                                    <td>
+                                                                    <td class="col-webhook-name">
                                                                         <div class="slds-truncate">{field.name}</div>
                                                                     </td>
-                                                                    <td>
+                                                                    <td class="col-webhook-type">
                                                                         <div class="slds-truncate">{field.type}</div>
                                                                     </td>
-                                                                    <td>
+                                                                    <td class="col-webhook-val">
                                                                         <div class="slds-truncate">
                                                                             <template
                                                                                 if:true={field.isReference}>{field.relatedRecordName}</template>
@@ -371,16 +385,21 @@
 
                                         <template if:true={isContactEditMode}>
                                             <div class="exp-table-content exp-accordion-table-content">
-                                                <table class="slds-table">
+                                                <table class="slds-table webhook-config-table">
+                                                    <colgroup>
+                                                        <col class="col-webhook-name" />
+                                                        <col class="col-webhook-type" />
+                                                        <col class="col-webhook-val" />
+                                                    </colgroup>
                                                     <thead>
                                                         <tr>
-                                                            <th scope="col" style="width:33%">
+                                                            <th scope="col" class="col-webhook-name">
                                                                 <div class="slds-truncate">Field API Name</div>
                                                             </th>
-                                                            <th scope="col" style="width:33%">
+                                                            <th scope="col" class="col-webhook-type">
                                                                 <div class="slds-truncate">Field Type</div>
                                                             </th>
-                                                            <th scope="col" style="width:33%">
+                                                            <th scope="col" class="col-webhook-val">
                                                                 <div class="slds-truncate">Default Value</div>
                                                             </th>
                                                         </tr>
@@ -389,13 +408,13 @@
                                                         <template if:true={requiredFields.length}>
                                                             <template for:each={requiredFields} for:item="field">
                                                                 <tr key={field.name}>
-                                                                    <td>
+                                                                    <td class="col-webhook-name">
                                                                         <div class="slds-truncate">{field.name}</div>
                                                                     </td>
-                                                                    <td>
+                                                                    <td class="col-webhook-type">
                                                                         <div class="slds-truncate">{field.type}</div>
                                                                     </td>
-                                                                    <td>
+                                                                    <td class="col-webhook-val">
                                                                         <template if:true={field.isString}>
                                                                             <lightning-input variant="label-hidden"
                                                                                 type="text" data-field={field.name}
@@ -441,7 +460,8 @@
                                                                                 data-field={field.name}
                                                                                 value={field.value}
                                                                                 options={field.picklistValues}
-                                                                                onchange={handleRequiredFieldChange}></lightning-combobox>
+                                                                                onchange={handleRequiredFieldChange}
+                                                                                dropdown-alignment="auto"></lightning-combobox>
                                                                         </template>
                                                                         <template if:true={field.isBoolean}>
                                                                             <lightning-input variant="label-hidden"
@@ -464,26 +484,31 @@
                                             </div>
                                             <div class="exp-table-content exp-accordion-table-content"
                                                 style="margin-top: 1rem;">
-                                                <table class="slds-table">
+                                                <table class="slds-table webhook-phone-table">
+                                                    <colgroup>
+                                                        <col class="col-webhook-phone-label" />
+                                                        <col class="col-webhook-phone-field" />
+                                                    </colgroup>
                                                     <thead>
                                                         <tr>
-                                                            <th scope="col" style="width:50%">
+                                                            <th scope="col" class="col-webhook-phone-label">
                                                                 <div class="slds-truncate">Phone Field for Incoming
                                                                     WhatsApp Messages</div>
                                                             </th>
-                                                            <th scope="col" style="width:50%"></th>
+                                                            <th scope="col" class="col-webhook-phone-field"></th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr>
-                                                            <td><span>Phone Field</span></td>
-                                                            <td>
+                                                            <td class="col-webhook-phone-label"><span>Phone Field</span></td>
+                                                            <td class="col-webhook-phone-field">
                                                                 <template if:true={webhookPhoneFieldOptions.length}>
                                                                     <lightning-combobox variant="label-hidden"
                                                                         value={selectedPhoneFieldVal}
                                                                         options={webhookPhoneFieldOptions}
                                                                         onchange={handleWebhookPhoneComboChange}
-                                                                        placeholder="Select Phone Field">
+                                                                        placeholder="Select Phone Field"
+                                                                        dropdown-alignment="auto">
                                                                     </lightning-combobox>
                                                                 </template>
                                                                 <template if:false={webhookPhoneFieldOptions.length}>

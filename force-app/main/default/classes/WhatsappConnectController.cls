@@ -129,7 +129,6 @@ public with sharing class WhatsappConnectController {
     }
 
     @AuraEnabled
-    @RemoteAction
     public static Boolean unlinkAccount() {
         try {
             Boolean isSuccess = saveMetaData(null, null, null, null);
@@ -140,7 +139,6 @@ public with sharing class WhatsappConnectController {
         }
     }
 
-    @AuraEnabled
     @RemoteAction
     public static Boolean saveManualDetails(String accessToken, String phoneId, String wabaId, String appId) {
         try {
@@ -154,7 +152,6 @@ public with sharing class WhatsappConnectController {
         }
     }
 
-    @AuraEnabled
     @RemoteAction
     public static String saveFBLoginDetails(String sAccessToken, String phoneId, String wabaId, String appId) {
         try {
@@ -244,7 +241,6 @@ public with sharing class WhatsappConnectController {
      * @return Map<String, Object> containing phone fields, required fields, and saved configuration.
      */
     @AuraEnabled
-    @RemoteAction
     public static Map<String, Object> getContactObjectConfig() {
         Map<String, Object> result = new Map<String, Object>();
         try {
@@ -330,7 +326,6 @@ public with sharing class WhatsappConnectController {
      * @return String 'Success' or error message
      */
     @AuraEnabled
-    @RemoteAction
     public static String saveContactObjectConfig(String webhookJson, String chatJson) {
         try {
             String devName = 'objectConfigInfo';

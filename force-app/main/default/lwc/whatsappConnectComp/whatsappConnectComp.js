@@ -7,7 +7,6 @@ import saveContactObjectConfig from '@salesforce/apex/WhatsappConnectController.
 import getRecordName from '@salesforce/apex/WhatsappConnectController.getRecordName';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/leadassignmentcss';
 import GlobalStylesCss from '@salesforce/resourceUrl/globalStyles';
 
 export default class WhatsappConnectComp extends NavigationMixin(LightningElement) {
@@ -23,7 +22,7 @@ export default class WhatsappConnectComp extends NavigationMixin(LightningElemen
     @track isDeactivateModalOpen = false;
     @track isContactEditMode = false;
     @track isContactDirty = false;
-    @track activeSections = ['chatWindowConfig'];
+    @track activeSections = [];
     @track phoneFields = [];
     @track selectedPhoneFieldVal = '';
     @track selectedPhoneFieldLabel = '';
@@ -58,12 +57,7 @@ export default class WhatsappConnectComp extends NavigationMixin(LightningElemen
     async connectedCallback() {
         try {
             this.isLoading = true;
-            Promise.all([
-                loadStyle(this, MulishFontCss),
-                loadStyle(this, GlobalStylesCss)
-            ]).catch(err => {
-                console.error('Error loading styles in WhatsappConnectComp:', err);
-            });
+            loadStyle(this, GlobalStylesCss);
 
             await this.loadIntegration();
             await this.loadContactConfiguration();
@@ -211,6 +205,8 @@ export default class WhatsappConnectComp extends NavigationMixin(LightningElemen
         };
         this.isContactEditMode = true;
         this.isContactDirty = false;
+        // Open both accordions if both or either is closed
+        this.activeSections = ['chatWindowConfig', 'webhookConfig'];
     }
 
     handleContactCancel() {

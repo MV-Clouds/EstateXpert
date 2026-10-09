@@ -3,6 +3,7 @@ import globalStyles from "@salesforce/resourceUrl/globalStyles";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
 import checkConnectionStatus from '@salesforce/apex/MetaAdsTokenController.checkConnectionStatus';
+import getIntegrationConfig from '@salesforce/apex/WhatsappConnectController.getIntegrationConfig';
 
 export default class EstateXpertControlCenter extends NavigationMixin(LightningElement) {
     currentView = 'controlCenter';
@@ -22,6 +23,8 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     // Lead capture state
     integrationType = null; // 'Google' or 'Meta'
 
+    currentPageRef = null;
+
     /**
      * Method Name: getStateParameters
      * @description: Retrieves and processes the current page reference parameters
@@ -30,12 +33,15 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      */
     @wire(CurrentPageReference)
     getStateParameters(currentPageReference) {
+        this.currentPageRef = currentPageReference;
         if (currentPageReference && currentPageReference.state) {
             const target = currentPageReference.state.c__openComponent;
             if (target === 'storageIntegration') {
                 this.generalIntegrationMethod();
             } else if (target === 'metaAdsMapping') {
                 this.metaAdsMethod();
+            } else if (target === 'whatsappConnect') {
+                this.whatsappEmbeddedSignuprMethod();
             }
         }
     }
@@ -132,16 +138,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     }
 
     /**
-     * Method Name: isPortalMappingLandingPageComponent
-     * @description: Checks if PortalMappingLandingPage component is selected
-     * Date: 23/09/2026
-     * Created By: Vyom Soni
-     */
-    get isPortalMappingLandingPageComponent() {
-        return this.selectedComponent === 'portalMappingLandingPage';
-    }
-
-    /**
      * Method Name: isGoogleAdsMappingComponent
      * @description: Checks if GoogleAdsMapping component is selected
      * Date: 1/10/2026
@@ -149,6 +145,10 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      */
     get isGoogleAdsMappingComponent() {
         return this.selectedComponent === 'googleAdsMapping';
+    }
+
+    get isWhatsappConnectComponent() {
+        return this.selectedComponent === 'whatsappConnect';
     }
 
     /**
@@ -273,12 +273,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             this.portalName = null;
             this.portalIconUrl = null;
             this.portalStatus = null;
-            
-            // Tell the portal mapping component to go back to its main view
-            const portalCmp = this.template.querySelector('c-portal-mapping-component');
-            if (portalCmp) {
-                portalCmp.resetView();
-            }
         }
     }
 
@@ -414,22 +408,70 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     }
 
     /**
-     * Method Name: handlePortalNavigation
-     * @description: Handles navigation from portalMapping to portalMappingLandingPage
-     * Date: 17/02/2026
+     * Method Name: whatsappEmbeddedSignuprMethod
+     * @description: Used to open WhatsApp Embedded Signup or WhatsApp Business configuration based on connection status.
+     * Date: 07/10/2026
      * Created By: Karan Singh
      */
-    handlePortalNavigation(event) {
-        const { portalId, portalGen, portalName, portalIconUrl, portalStatus, isXMLForPF } = event.detail;
-        this.portalId = portalId;
-        this.portalGen = portalGen;
-        this.portalName = portalName;
-        this.portalIconUrl = portalIconUrl;
-        this.portalStatus = portalStatus;
-        this.isXMLForPF = isXMLForPF;
-        this.parentComponentTitle = 'Portal Integration';
-        this.selectedComponent = 'portalMapping';
-        this.selectedComponentTitle = portalName;
-        this.currentView = 'childComponent';
+    async whatsappEmbeddedSignuprMethod(event) {
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
+        try {
+            let hasUrlWaba = false;
+            if (this.currentPageRef && this.currentPageRef.state) {
+                hasUrlWaba = !!(this.currentPageRef.state.c__wabaId || this.currentPageRef.state.c__businessAccountId);
+            }
+            if (!hasUrlWaba) {
+                try {
+                    const searchParams = new URLSearchParams(window.location.search);
+                    hasUrlWaba = !!(searchParams.get('c__wabaId') || searchParams.get('c__businessAccountId'));
+                } catch (e) {
+                    // Ignore window.location errors
+                }
+            }
+
+            const config = await getIntegrationConfig();
+            if ((config && config.isConnected) || hasUrlWaba) {
+                this.openComponent(
+                    'whatsappConnect',
+                    'WhatsApp Business',
+                    'The "WhatsApp Business" connects your WhatsApp Business Account with Salesforce to enable the chat feature directly from Salesforce. Start conversations, send messages, and manage customer communications without leaving your CRM platform.'
+                );
+            } else {
+                this.handleWhatsappDeactivated();
+            }
+        } catch (error) {
+            console.error('Error checking WhatsApp connection:', error);
+            let hasUrlWaba = false;
+            try {
+                const searchParams = new URLSearchParams(window.location.search);
+                hasUrlWaba = !!(searchParams.get('c__wabaId') || searchParams.get('c__businessAccountId'));
+            } catch (e) {
+                // Ignore window.location errors
+            }
+            if (hasUrlWaba) {
+                this.openComponent(
+                    'whatsappConnect',
+                    'WhatsApp Business',
+                    'The "WhatsApp Business" connects your WhatsApp Business Account with Salesforce to enable the chat feature directly from Salesforce. Start conversations, send messages, and manage customer communications without leaving your CRM platform.'
+                );
+            } else {
+                this.handleWhatsappDeactivated();
+            }
+        }
+    }
+
+    /**
+     * Method Name: handleWhatsappDeactivated
+     * @description: Navigates to the WhatsApp Connect SDK Visualforce page when not connected or on deactivation.
+     */
+    handleWhatsappDeactivated() {
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: '/apex/WhatsappConnectSDK'
+            }
+        });
     }
 }

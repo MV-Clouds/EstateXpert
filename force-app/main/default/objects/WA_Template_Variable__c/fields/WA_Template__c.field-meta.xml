@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>WA_Template__c</fullName>
+    <label>WA Template</label>
+    <referenceTo>WA_Template__c</referenceTo>
+    <relationshipLabel>WA Template Variables</relationshipLabel>
+    <relationshipName>WA_Template_Variables</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

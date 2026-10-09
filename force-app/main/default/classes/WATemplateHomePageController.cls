@@ -22,13 +22,9 @@ public with sharing class WATemplateHomePageController {
                 return mockConfig;
             }
             List<OAuth_Configuration__mdt> configs = [SELECT Id, DeveloperName, MasterLabel, Client_Id__c, Client_Secret__c, Config_Id__c, API_Version__c, 
-                       Authorization_Endpoint__c, Token_Endpoint__c, Access_Token__c, Client_App_ID__c, Client_Business_Account_ID__c,
-                       Client_Phone_Number_ID__c, Connected_Date__c, SystemModstamp 
-                FROM OAuth_Configuration__mdt
-                WHERE DeveloperName = :CONFIG_DEV_NAME 
-                WITH USER_MODE 
-                LIMIT 1
-            ];
+                                                        Authorization_Endpoint__c, Token_Endpoint__c, Access_Token__c, Client_App_ID__c, Client_Business_Account_ID__c,
+                                                        Client_Phone_Number_ID__c, Connected_Date__c, SystemModstamp FROM OAuth_Configuration__mdt
+                                                        WHERE DeveloperName = :CONFIG_DEV_NAME WITH USER_MODE LIMIT 1];
             return configs.isEmpty() ? null : configs[0];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WATemplateHomePageController', 'getConfig', e.getMessage());
@@ -57,15 +53,9 @@ public with sharing class WATemplateHomePageController {
     @AuraEnabled
     public static List<WA_Template__c> getWhatsAppTemplates() {
         try {
-            List<WA_Template__c> templates = [
-                SELECT Id, Name, Template_Name__c, Template_Category__c, 
-                       toLabel(Language__c) LanguageLabel, File_Name__c, 
-                       Image_Header_Handle__c, Status__c, LastModifiedById, 
-                       LastModifiedDate, CreatedDate 
-                FROM WA_Template__c 
-                WITH USER_MODE 
-                ORDER BY LastModifiedDate DESC
-            ];
+            List<WA_Template__c> templates = [SELECT Id, Name, Template_Name__c, Template_Category__c, toLabel(Language__c) LanguageLabel, File_Name__c, 
+                                                Image_Header_Handle__c, Status__c, LastModifiedById, LastModifiedDate, CreatedDate FROM WA_Template__c 
+                                                WITH USER_MODE ORDER BY LastModifiedDate DESC LIMIT 50000];
             return templates;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WATemplateHomePageController', 'getWhatsAppTemplates', e.getMessage());
@@ -111,13 +101,7 @@ public with sharing class WATemplateHomePageController {
     @AuraEnabled
     public static String deleteTemplete(String templateId) {
         try {
-            WA_Template__c wbTempRec = [
-                SELECT Id, Name, Template_Name__c, Status__c, Template_Id__c 
-                FROM WA_Template__c 
-                WHERE Id = :templateId 
-                WITH USER_MODE 
-                LIMIT 1
-            ];
+            WA_Template__c wbTempRec = [SELECT Id, Name, Template_Name__c, Status__c, Template_Id__c FROM WA_Template__c WHERE Id = :templateId WITH USER_MODE LIMIT 1];
 
             // If template is Draft or has no Meta ID, delete directly from Salesforce
             if (wbTempRec.Status__c == 'Draft' || wbTempRec.Status__c == 'DRAFT' || String.isBlank(wbTempRec.Template_Id__c) || wbTempRec.Template_Id__c == 'DRAFT') {
@@ -198,19 +182,11 @@ public with sharing class WATemplateHomePageController {
             String escapedTemplateId = String.escapeSingleQuotes(templateId);
             String escapedNewName    = String.escapeSingleQuotes(newName);
 
-            List<WA_Template__c> sourceTemplates = [
-                SELECT Id, Template_Name__c, Template_Category__c, Language__c, Header_Type__c, 
-                       Header_Body__c, File_Name__c, Image_Header_Handle__c, Template_Body__c, 
-                       Footer_Body__c, Button_Body__c, Button_Label__c, Button_Type__c,
-                       Template_Miscellaneous_Data__c,
-                       (SELECT Name, Object_Name__c, Field_Name__c, Type__c, Alternate_Text__c 
-                        FROM WA_Template_Variables__r 
-                        ORDER BY Name ASC)
-                FROM WA_Template__c 
-                WHERE Id = :escapedTemplateId 
-                WITH USER_MODE 
-                LIMIT 1
-            ];
+            List<WA_Template__c> sourceTemplates = [SELECT Id, Template_Name__c, Template_Category__c, Language__c, Header_Type__c, Header_Body__c, File_Name__c, 
+                                                        Image_Header_Handle__c, Template_Body__c, Footer_Body__c, Button_Body__c, Button_Label__c, Button_Type__c,
+                                                        Template_Miscellaneous_Data__c, (SELECT Name, Object_Name__c, Field_Name__c, Type__c, Alternate_Text__c 
+                                                        FROM WA_Template_Variables__r ORDER BY Name ASC) FROM WA_Template__c WHERE Id = :escapedTemplateId 
+                                                        WITH USER_MODE LIMIT 1];
 
             if (sourceTemplates.isEmpty()) {
                 result.put('status',  'error');

@@ -1,0 +1,1674 @@
+<!--
+  @description       : WhatsApp Connect SDK Page - Embedded Signup and Integration Management
+  @author            : EstateXpert
+  @last modified on  : 10-07-2026
+-->
+<apex:page showHeader="false" sidebar="false" controller="WhatsappConnectController">
+    <apex:styleSheet value="{!URLFOR($Resource.globalStyles)}" />
+    <html>
+
+    <head>
+        <script>
+            // Initialize Meta JavaScript SDK with Client ID
+            window.fbAsyncInit = function () {
+                var appId = '{!JSENCODE(clientId)}';
+                console.log('[WhatsApp] Initializing FB SDK with Client ID:', appId);
+                if (appId) {
+                    FB.init({
+                        appId: appId,
+                        autoLogAppEvents: true,
+                        xfbml: true,
+                        version: '{!JSENCODE(apiVersion)}' || 'v26.0'
+                    });
+                    console.log('[WhatsApp] FB SDK Initialized successfully.');
+                } else {
+                    console.error('[WhatsApp] Missing Client ID. Cannot initialize SDK.');
+                }
+            };
+        </script>
+        <script crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js" async="true"
+            defer="true"></script>
+    </head>
+
+    <body>
+        <style>
+            * {
+                font-family: 'Mulish';
+                user-select: none;
+            }
+
+            html,
+            body {
+                height: 100%;
+                width: 100%;
+                margin: 0;
+                padding: unset !important;
+                overflow: hidden;
+            }
+
+            .mainContainer {
+                width: 100%;
+                height: 100vh;
+                background: #f5f7fa;
+                overflow: hidden;
+            }
+
+            .subContainer {
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Breadcrumb Navigation */
+            .breadcrumb-navigation {
+                padding: 0.75rem 1.5rem;
+                background: #ffffff;
+                border-bottom: 1px solid #e5e9f0;
+                flex-shrink: 0;
+            }
+
+            .breadcrumb-container {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .breadcrumb-item {
+                display: flex;
+                align-items: center;
+                gap: 0.375rem;
+                font-size: 14px;
+                font-weight: 500;
+                color: #6b7c93;
+                transition: all 0.2s ease;
+            }
+
+            .breadcrumb-item.clickable {
+                cursor: pointer;
+                color: #0176D3;
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+            }
+
+            .breadcrumb-item.clickable:hover {
+                background: #f0f7ff;
+                color: #014a8f;
+            }
+
+            .breadcrumb-item.active {
+                color: #2c3e50;
+                font-weight: 500;
+            }
+
+            .breadcrumb-item svg {
+                color: currentColor;
+            }
+
+            .breadcrumb-separator {
+                color: #b8c5d6;
+                flex-shrink: 0;
+            }
+
+            /* Split Layout Container */
+            .control-center-layout {
+                display: flex;
+                flex: 1;
+                overflow: hidden;
+            }
+
+            /* Main Content Area */
+            .child-component-container {
+                width: 100%;
+                flex: 1;
+                background: aliceblue;
+                overflow-y: auto;
+                min-height: 0;
+                padding: 1.5rem;
+                display: flex;
+                justify-content: center;
+            }
+
+            .config-card {
+                background: #ffffff;
+                border-radius: 0.75rem;
+                padding: 2rem;
+                width: 100%;
+                max-width: 71.875rem;
+                height: max-content;
+                box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.02);
+                border: 1px solid #e5e9f0;
+                box-sizing: border-box;
+                margin-top: 2rem;
+                margin-bottom: 2rem;
+            }
+
+            .page-title {
+                font-size: 1.125rem;
+                font-weight: 600;
+                color: #0f1419;
+                margin: 0;
+                margin-bottom: 0.25rem;
+                letter-spacing: 0.3px;
+            }
+
+            .page-subtitle {
+                font-size: 1rem;
+                color: #536471;
+                margin: 0;
+                line-height: 1.5;
+            }
+
+            .page-header {
+                display: flex;
+                align-items: flex-start;
+                gap: 0.5rem;
+                margin-bottom: 1.5rem;
+                border-bottom: 1px solid #e5e9f0;
+                padding-bottom: 1.5rem;
+            }
+
+            .page-header-content {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+            }
+
+            .page-header-icon-container {
+                background: #E8F8F0;
+                color: #25D366;
+                border-radius: 0.75rem;
+                width: 3.5rem;
+                height: 3.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                margin-right: 1rem;
+            }
+
+            .input-group {
+                margin-bottom: 1rem;
+            }
+
+            .input-label {
+                display: block;
+                font-size: 14px;
+                font-weight: 700;
+                color: #536471;
+                margin-bottom: 10px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .input-field {
+                width: 100%;
+                padding: 12px 16px;
+                font-size: 14px;
+                border: 1px solid #CFD9DE;
+                border-radius: 4px;
+                box-sizing: border-box;
+                background: #ffffff;
+                transition: all 0.25s ease;
+                user-select: text;
+            }
+
+            .input-field:focus {
+                outline: none;
+                border-color: #25D366;
+                box-shadow: 0 3px 12px rgba(37, 211, 102, 0.2);
+                background: #ffffff;
+            }
+
+            .input-field.input-error {
+                border-color: #EF4444 !important;
+                box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+                background: #fffafa;
+            }
+
+            .input-field.input-error:focus {
+                border-color: #EF4444 !important;
+                box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
+            }
+
+            .info-box {
+                display: flex;
+                gap: 0.75rem;
+                padding: 1rem;
+                background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+                border-radius: 0.5rem;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 0.125rem 0.375rem rgba(24, 119, 242, 0.1);
+                border: 1px solid rgba(24, 119, 242, 0.1);
+            }
+
+            .info-icon {
+                flex-shrink: 0;
+                width: 1.25rem;
+                height: 1.25rem;
+                color: #0176D3;
+            }
+
+            .info-content {
+                flex: 1;
+            }
+
+            .info-title {
+                font-size: 0.875rem;
+                font-weight: 500;
+                color: #131314;
+                margin: 0 0 0.25rem 0;
+            }
+
+            .info-text {
+                font-size: 0.875rem;
+                color: #636363;
+                margin: 0;
+                line-height: 1.5;
+            }
+
+            .error-box {
+                background: #FEF2F2;
+                border-color: #F87171;
+            }
+
+            .error-icon {
+                color: #EF4444;
+            }
+
+            .error-title {
+                color: #991B1B;
+                font-size: 1rem;
+            }
+
+            .error-text {
+                color: #991B1B;
+                font-size: 0.875rem;
+            }
+
+            .setup-form-container {
+                display: flex;
+                gap: 1.5rem;
+                width: 100%;
+            }
+
+            .flex-1 {
+                flex: 1;
+            }
+
+            .flex-1-2 {
+                flex: 1.2;
+            }
+
+            .btn-icon {
+                margin-right: 0.25rem;
+            }
+
+            .redirect-info {
+                text-align: center;
+                margin-top: 0.75rem;
+                font-size: 0.875rem;
+                color: #8C9BAB;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.375rem;
+            }
+
+            .info-panel {
+                background: #F0F7FF;
+                border: 1px solid #D1E5FF;
+                border-radius: 0.5rem;
+                padding: 1.25rem;
+            }
+
+            .info-panel-header {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-weight: 600;
+                color: #014486;
+                font-size: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .info-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .info-list-item {
+                display: flex;
+                gap: 0.625rem;
+                font-size: 0.875rem;
+                color: #536471;
+                line-height: 1.5;
+                align-items: flex-start;
+            }
+
+            .info-list-icon {
+                flex-shrink: 0;
+                margin-top: 0.125rem;
+            }
+
+            .note-box {
+                background: #FFF8E1;
+                border: 1px solid #FFE082;
+                border-radius: 0.375rem;
+                padding: 0.625rem 0.875rem;
+                margin-top: 7.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.84375rem;
+                color: #663C00;
+                line-height: 1.4;
+            }
+
+            .note-icon {
+                flex-shrink: 0;
+            }
+
+            .connect-btn {
+                width: 100%;
+                height: 2.75rem;
+                padding: 0 1.5rem;
+                font-size: 0.875rem;
+                font-weight: 600;
+                background: #0176D3;
+                color: white;
+                border: none;
+                border-radius: 0.25rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                box-shadow: 0 0.125rem 0.5rem rgba(1, 118, 211, 0.3);
+            }
+
+            .connect-btn:hover {
+                background: #014a8f;
+                transform: translateY(-1px);
+                box-shadow: 0 0.25rem 0.75rem rgba(1, 118, 211, 0.4);
+            }
+
+            .connect-btn:disabled {
+                background: #9ca3af;
+                cursor: not-allowed;
+                transform: none;
+                box-shadow: none;
+            }
+
+            /* Inline Error Alert Banner */
+            .inline-error-banner {
+                display: none;
+                align-items: center;
+                gap: 10px;
+                margin-top: 14px;
+                padding: 10px 14px;
+                background: #fef2f2;
+                border: 1px solid #fecaca;
+                border-left: 4px solid #dc2626;
+                border-radius: 6px;
+                box-shadow: 0 1px 3px rgba(220, 38, 38, 0.08);
+                animation: fadeInSlide 0.25s ease-out;
+            }
+
+            .inline-error-banner.fade-out {
+                animation: fadeOutSlide 0.25s ease-out forwards;
+            }
+
+            @keyframes fadeInSlide {
+                from {
+                    opacity: 0;
+                    transform: translateY(-6px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes fadeOutSlide {
+                from {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+
+                to {
+                    opacity: 0;
+                    transform: translateY(-6px);
+                }
+            }
+
+            .inline-error-icon {
+                flex-shrink: 0;
+                color: #dc2626;
+            }
+
+            .inline-error-text {
+                flex: 1;
+                font-size: 13px;
+                color: #991b1b;
+                font-weight: 500;
+                line-height: 1.4;
+            }
+
+            .inline-error-close {
+                background: none;
+                border: none;
+                font-size: 18px;
+                color: #991b1b;
+                cursor: pointer;
+                padding: 0 4px;
+                line-height: 1;
+                opacity: 0.7;
+                transition: opacity 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .inline-error-close:hover {
+                opacity: 1;
+            }
+            /* Loading Spinner Overlay */
+            .spinner-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.92);
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+                z-index: 2000;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .spinner-overlay.show {
+                display: flex;
+            }
+
+            .spinner-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .spinner-big {
+                width: 48px;
+                height: 48px;
+                border: 4px solid #E5E7EB;
+                border-top: 4px solid #0176D3;
+                border-radius: 50%;
+                animation: spin-big 1s linear infinite;
+            }
+
+            @keyframes spin-big {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .spinner-text {
+                font-size: 14px;
+                font-weight: 500;
+                color: #636363;
+            }
+
+            /* Button spinner */
+            .spinner {
+                display: none;
+                width: 20px;
+                height: 20px;
+                border: 3px solid rgba(255, 255, 255, 0.4);
+                border-top: 3px solid white;
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            /* Manual Configuration Modal (Matches EstateXpert Standard Pop-ups) */
+            .manual-modal-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.45);
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+                z-index: 2000;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .manual-modal-overlay.show {
+                display: flex;
+            }
+
+            .manual-modal-container {
+                background: #ffffff;
+                border-radius: 0.75rem;
+                max-width: 36.25rem;
+                width: 92%;
+                box-shadow: 0 1.25rem 1.5625rem -0.3125rem rgba(0, 0, 0, 0.1), 0 0.625rem 0.625rem -0.3125rem rgba(0, 0, 0, 0.04);
+                border: 1px solid #E5E7EB;
+                overflow: hidden;
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                max-height: 90vh;
+                animation: popUpFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            @keyframes popUpFadeIn {
+                from {
+                    opacity: 0;
+                    transform: scale(0.96);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+
+            .manual-modal-header {
+                background: #ffffff;
+                padding: 1.125rem 1.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid #E5E7EB;
+                border-top-left-radius: 0.75rem;
+                border-top-right-radius: 0.75rem;
+            }
+
+            .manual-header-left {
+                display: flex;
+                align-items: center;
+                gap: 0.875rem;
+            }
+
+            .manual-header-icon-box {
+                width: 2.75rem;
+                height: 2.75rem;
+                border-radius: 0.625rem;
+                background-color: #EBF5FF;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+
+            .manual-header-text {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .manual-modal-title {
+                font-size: 1.0625rem;
+                font-weight: 700;
+                color: #0F172A;
+                margin: 0;
+                line-height: 1.25;
+            }
+
+            .manual-modal-subtitle {
+                font-size: 0.8125rem;
+                font-weight: 400;
+                color: #64748B;
+                margin: 0.1875rem 0 0 0;
+                line-height: 1.35;
+            }
+
+            .manual-modal-close {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+                width: 2rem;
+                height: 2rem;
+                border-radius: 0.375rem;
+                background: transparent;
+                border: none;
+                color: #64748B;
+                transition: all 0.2s ease;
+                padding: 0;
+            }
+
+            .manual-modal-close:hover {
+                background: #F1F5F9;
+                color: #0F172A;
+            }
+
+            .manual-modal-close svg {
+                width: 1.25rem;
+                height: 1.25rem;
+            }
+
+            .manual-modal-body {
+                background-color: #FFFFFF;
+                padding: 20px;
+                overflow-y: auto;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            .manual-intro-note {
+                background: #F0F7FF;
+                border: 1px solid #BAE0FD;
+                border-radius: 6px;
+                padding: 10px 14px;
+                font-size: 13px;
+                color: #014486;
+                line-height: 1.4;
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                white-space: nowrap;
+            }
+
+            .manual-intro-note svg {
+                flex-shrink: 0;
+            }
+
+            .manual-field-group {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .manual-field-label {
+                font-size: 12px;
+                font-weight: 700;
+                color: #1e293b;
+                letter-spacing: 0.3px;
+                text-transform: uppercase;
+                display: flex;
+                align-items: center;
+            }
+
+            .manual-field-label .required-star {
+                color: #dc2626;
+                margin-left: 2px;
+                font-weight: bold;
+            }
+
+            .manual-field-input {
+                width: 100%;
+                padding: 8px 12px;
+                font-size: 13.5px;
+                color: #1e293b;
+                background: #ffffff;
+                border: 1px solid #cbd5e1;
+                border-radius: 6px;
+                outline: none;
+                transition: all 0.2s ease;
+                box-sizing: border-box;
+            }
+
+            .manual-field-input:focus {
+                border-color: #0176D3;
+                box-shadow: 0 0 0 3px rgba(1, 118, 211, 0.15);
+            }
+
+            .manual-field-input.input-error {
+                border-color: #ef4444 !important;
+                background-color: #fef2f2 !important;
+            }
+
+            .manual-field-input.input-error:focus {
+                border-color: #dc2626 !important;
+                box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+            }
+
+            .manual-field-textarea {
+                min-height: 68px;
+                resize: vertical;
+                font-size: 12.5px;
+                line-height: 1.4;
+            }
+
+            .manual-error-alert {
+                display: none;
+                background: #FEF2F2;
+                border: 1px solid #FECACA;
+                color: #991B1B;
+                padding: 8px 12px;
+                border-radius: 6px;
+                font-size: 13px;
+                line-height: 1.4;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .manual-error-alert.show {
+                display: flex;
+            }
+
+            .manual-modal-footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 16px 24px;
+                width: 100%;
+                background: #FFFFFF;
+                border-top: 1px solid #E5E7EB;
+                flex-shrink: 0;
+                box-sizing: border-box;
+                border-bottom-left-radius: 12px;
+                border-bottom-right-radius: 12px;
+            }
+
+            /* Divider and Manual Entry Button */
+            .manual-divider-wrap {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                margin: 16px 0 12px 0;
+                gap: 12px;
+            }
+
+            .manual-divider-line {
+                flex: 1;
+                height: 1px;
+                background-color: #E2E8F0;
+            }
+
+            .manual-divider-text {
+                font-size: 12px;
+                font-weight: 600;
+                color: #94A3B8;
+                letter-spacing: 0.5px;
+            }
+
+            .manual-trigger-btn {
+                width: 100%;
+                height: 2.625rem;
+                padding: 0 1.25rem;
+                font-size: 0.875rem;
+                font-weight: 600;
+                background: #ffffff;
+                color: #0176D3;
+                border: 1.5px solid #0176D3;
+                border-radius: 0.375rem;
+                cursor: pointer;
+                transition: all 0.25s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                box-sizing: border-box;
+            }
+
+            .manual-trigger-btn:hover {
+                background: #EAF4FD;
+                border-color: #0156A3;
+                color: #0156A3;
+                transform: translateY(-1px);
+                box-shadow: 0 0.125rem 0.375rem rgba(1, 118, 211, 0.15);
+            }
+
+            .exp-blue-btn-css {
+                margin: unset;
+                background: #0176D3;
+                font-weight: unset;
+                cursor: pointer;
+            }
+
+            .exp-red-btn-css {
+                margin: unset;
+                background: #B3261E;
+                font-weight: unset;
+                cursor: pointer;
+            }
+
+            .exp-white-btn-css {
+                margin: unset;
+                background: unset;
+                font-weight: unset;
+                cursor: pointer;
+            }
+
+            @media (max-width: 64rem) {
+                .config-card {
+                    width: 100%;
+                    max-width: 100%;
+                    padding: 1.5rem;
+                    margin-top: 1rem;
+                    margin-bottom: 1rem;
+                }
+
+                .setup-form-container {
+                    flex-direction: column;
+                }
+            }
+
+            @media (max-width: 48rem) {
+                .child-component-container {
+                    padding: 1rem;
+                }
+
+                .config-card {
+                    padding: 1.25rem;
+                    border-radius: 0.5rem;
+                }
+
+                .page-header {
+                    gap: 0.75rem;
+                    margin-bottom: 1.25rem;
+                    padding-bottom: 1.25rem;
+                }
+
+                .page-header-icon-container {
+                    width: 3rem;
+                    height: 3rem;
+                    margin-right: 0;
+                }
+
+                .note-box {
+                    margin-top: 2rem;
+                }
+            }
+
+            @media (max-width: 30rem) {
+                .child-component-container {
+                    padding: 0.5rem;
+                }
+
+                .config-card {
+                    padding: 0.875rem;
+                    border-radius: 0.375rem;
+                }
+
+                .manual-modal-container {
+                    width: 96%;
+                }
+            }
+        </style>
+
+        <div class="mainContainer">
+            <div class="subContainer">
+                <!-- Breadcrumb Navigation -->
+                <div class="breadcrumb-navigation">
+                    <div class="breadcrumb-container">
+                        <span class="breadcrumb-item clickable" onclick="backToControlCenter()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            Control Center
+                        </span>
+                        <svg class="breadcrumb-separator" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        <span class="breadcrumb-item active">
+                            WhatsApp Business
+                        </span>
+                    </div>
+                </div>
+
+                <div class="control-center-layout">
+                    <!-- Main Content Area -->
+                    <div class="child-component-container">
+                        <div class="config-card">
+                            <!-- Page Header -->
+                            <div class="page-header">
+                                <div class="page-header-icon-container">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                            d="M12 2C6.477 2 2 6.477 2 12C2 13.819 2.484 15.524 3.328 17L2 22L7.155 20.697C8.601 21.527 10.252 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM8.889 7.667C8.694 7.234 8.489 7.225 8.305 7.217C8.155 7.21 7.983 7.21 7.811 7.21C7.639 7.21 7.362 7.275 7.126 7.533C6.89 7.79 6.22 8.417 6.22 9.697C6.22 10.977 7.148 12.213 7.277 12.385C7.406 12.557 9.07 15.228 11.688 16.273C13.864 17.142 14.307 16.969 14.779 16.926C15.251 16.883 16.303 16.304 16.518 15.698C16.733 15.093 16.733 14.577 16.668 14.47C16.604 14.363 16.432 14.298 16.174 14.17C15.916 14.041 14.649 13.418 14.413 13.332C14.177 13.246 14.005 13.203 13.833 13.461C13.661 13.719 13.167 14.298 13.017 14.47C12.866 14.642 12.716 14.663 12.458 14.535C12.2 14.406 11.369 14.134 10.384 13.256C9.617 12.573 9.099 11.73 8.948 11.472C8.798 11.214 8.932 11.074 9.062 10.946C9.178 10.83 9.321 10.643 9.45 10.493C9.579 10.343 9.622 10.235 9.708 10.063C9.794 9.892 9.751 9.741 9.686 9.613C9.622 9.484 9.106 8.148 8.889 7.667Z"
+                                            fill="#25D366" />
+                                    </svg>
+                                </div>
+                                <div class="page-header-content">
+                                    <h1 class="page-title">Connect WhatsApp Business</h1>
+                                    <p class="page-subtitle">Link your WhatsApp Business account to send and receive
+                                        messages directly within this workspace. You'll need your Meta Application ID to
+                                        get started.</p>
+                                </div>
+                            </div>
+
+                            <apex:outputPanel rendered="{!ISBLANK(clientId)}">
+                                <div class="info-box error-box">
+                                    <svg class="info-icon error-icon" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <div class="info-content">
+                                        <p class="info-title error-title">Configuration Missing</p>
+                                        <p class="info-text error-text">The WhatsApp Business integration configuration
+                                            is
+                                            missing. Please ask your administrator to configure the Tech Provider App
+                                            credentials in Custom Metadata (OAuth_Configuration__mdt) first.</p>
+                                    </div>
+                                </div>
+                            </apex:outputPanel>
+
+                            <!-- Setup Form (shown when not configured) -->
+                            <div id="setup-form-div" class="setup-form-container">
+                                <!-- Left Column -->
+                                <div class="flex-1">
+                                    <div class="input-group">
+                                        <label class="input-label" for="app-id-input">META APPLICATION ID</label>
+                                        <input type="text" id="app-id-input" class="input-field"
+                                            placeholder="Enter your Meta Application ID" />
+                                    </div>
+
+                                    <div class="info-box">
+                                        <svg class="info-icon" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        <div class="info-content">
+                                            <p class="info-title">How to find your Application ID:</p>
+                                            <p class="info-text">Go to Meta for Developers → My Apps → Select your app
+                                                → Copy your Application ID</p>
+                                        </div>
+                                    </div>
+
+                                    <button type="button" class="connect-btn" id="connect-btn"
+                                        onclick="launchWhatsAppSignup()">
+                                        <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                d="M12 2C6.477 2 2 6.477 2 12C2 13.819 2.484 15.524 3.328 17L2 22L7.155 20.697C8.601 21.527 10.252 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM8.889 7.667C8.694 7.234 8.489 7.225 8.305 7.217C8.155 7.21 7.983 7.21 7.811 7.21C7.639 7.21 7.362 7.275 7.126 7.533C6.89 7.79 6.22 8.417 6.22 9.697C6.22 10.977 7.148 12.213 7.277 12.385C7.406 12.557 9.07 15.228 11.688 16.273C13.864 17.142 14.307 16.969 14.779 16.926C15.251 16.883 16.303 16.304 16.518 15.698C16.733 15.093 16.733 14.577 16.668 14.47C16.604 14.363 16.432 14.298 16.174 14.17C15.916 14.041 14.649 13.418 14.413 13.332C14.177 13.246 14.005 13.203 13.833 13.461C13.661 13.719 13.167 14.298 13.017 14.47C12.866 14.642 12.716 14.663 12.458 14.535C12.2 14.406 11.369 14.134 10.384 13.256C9.617 12.573 9.099 11.73 8.948 11.472C8.798 11.214 8.932 11.074 9.062 10.946C9.178 10.83 9.321 10.643 9.45 10.493C9.579 10.343 9.622 10.235 9.708 10.063C9.794 9.892 9.751 9.741 9.686 9.613C9.622 9.484 9.106 8.148 8.889 7.667Z"
+                                                fill="#ffffff" />
+                                        </svg>
+                                        <span id="btn-text">Connect with WhatsApp</span>
+                                        <div class="spinner" id="btn-spinner"></div>
+                                    </button>
+
+                                    <div class="redirect-info">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                        </svg>
+                                        You will be redirected to Meta to authorize WhatsApp Business access.
+                                    </div>
+
+                                    <div class="manual-divider-wrap">
+                                        <div class="manual-divider-line"></div>
+                                        <span class="manual-divider-text">OR</span>
+                                        <div class="manual-divider-line"></div>
+                                    </div>
+
+                                    <button type="button" class="manual-trigger-btn" onclick="openManualConfigModal()">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                        </svg>
+                                        Enter Credentials Manually
+                                    </button>
+
+                                    <!-- Inline Error Alert Banner -->
+                                    <div class="inline-error-banner" id="error-message-container">
+                                        <svg class="inline-error-icon" width="16" height="16" viewBox="0 0 20 20"
+                                            fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        <span class="inline-error-text" id="error-message"></span>
+                                        <button type="button" class="inline-error-close" onclick="hideError()"
+                                            title="Dismiss">&#215;</button>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column -->
+                                <div class="flex-1-2">
+                                    <div class="info-panel">
+                                        <div class="info-panel-header">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                            </svg>
+                                            What happens when you connect?
+                                        </div>
+
+                                        <ul class="info-list">
+                                            <li class="info-list-item">
+                                                <svg class="info-list-icon" width="16" height="16" viewBox="0 0 24 24"
+                                                    fill="none" stroke="#0176D3" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                                </svg>
+                                                Connect your WhatsApp Business Account (WABA) seamlessly to your
+                                                workspace.
+                                            </li>
+                                            <li class="info-list-item">
+                                                <svg class="info-list-icon" width="16" height="16" viewBox="0 0 24 24"
+                                                    fill="none" stroke="#0176D3" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                                </svg>
+                                                Send and receive customer messages directly from Salesforce in real
+                                                time.
+                                            </li>
+                                            <li class="info-list-item">
+                                                <svg class="info-list-icon" width="16" height="16" viewBox="0 0 24 24"
+                                                    fill="none" stroke="#0176D3" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                                </svg>
+                                                Automatic webhook events keep message delivery, read receipts, and
+                                                status updated.
+                                            </li>
+                                        </ul>
+
+                                        <div class="note-box">
+                                            <svg class="note-icon" width="16" height="16" viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                            </svg>
+                                            <span><strong>Note:</strong> Changes may take 3-5 minutes to save and
+                                                process.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Configuration Modal (Matches Uploaded Image UI) -->
+        <div id="manual-config-modal" class="manual-modal-overlay">
+            <div class="manual-modal-container">
+                <div class="manual-modal-header">
+                    <div class="manual-header-left">
+                        <div class="manual-header-icon-box">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                    d="M12 2C6.477 2 2 6.477 2 12C2 13.819 2.484 15.524 3.328 17L2 22L7.155 20.697C8.601 21.527 10.252 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM8.889 7.667C8.694 7.234 8.489 7.225 8.305 7.217C8.155 7.21 7.983 7.21 7.811 7.21C7.639 7.21 7.362 7.275 7.126 7.533C6.89 7.79 6.22 8.417 6.22 9.697C6.22 10.977 7.148 12.213 7.277 12.385C7.406 12.557 9.07 15.228 11.688 16.273C13.864 17.142 14.307 16.969 14.779 16.926C15.251 16.883 16.303 16.304 16.518 15.698C16.733 15.093 16.733 14.577 16.668 14.47C16.604 14.363 16.432 14.298 16.174 14.17C15.916 14.041 14.649 13.418 14.413 13.332C14.177 13.246 14.005 13.203 13.833 13.461C13.661 13.719 13.167 14.298 13.017 14.47C12.866 14.642 12.716 14.663 12.458 14.535C12.2 14.406 11.369 14.134 10.384 13.256C9.617 12.573 9.099 11.73 8.948 11.472C8.798 11.214 8.932 11.074 9.062 10.946C9.178 10.83 9.321 10.643 9.45 10.493C9.579 10.343 9.622 10.235 9.708 10.063C9.794 9.892 9.751 9.741 9.686 9.613C9.622 9.484 9.106 8.148 8.889 7.667Z"
+                                    fill="#25D366" />
+                            </svg>
+                        </div>
+                        <div class="manual-header-text">
+                            <h3 class="manual-modal-title">Manual WhatsApp Configuration</h3>
+                            <p class="manual-modal-subtitle">Connect your account directly using your Meta credentials
+                            </p>
+                        </div>
+                    </div>
+                    <button type="button" class="manual-modal-close" onclick="closeManualConfigModal()" title="Close">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="manual-modal-body">
+                    <div class="manual-intro-note">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0176D3" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <span>Enter your Meta credentials below to connect your account directly.</span>
+                    </div>
+
+                    <div id="manual-error-alert" class="manual-error-alert">
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <span id="manual-error-text">Please fill in all required fields.</span>
+                    </div>
+
+                    <div class="manual-field-group">
+                        <label class="manual-field-label" for="manual-app-id">
+                            Meta Application ID <span class="required-star">*</span>
+                        </label>
+                        <input type="text" id="manual-app-id" class="manual-field-input"
+                            placeholder="e.g., 1234567890123456" value="{!appId}" />
+                    </div>
+
+                    <div class="manual-field-group">
+                        <label class="manual-field-label" for="manual-waba-id">
+                            WhatsApp Business Account ID (WABA ID) <span class="required-star">*</span>
+                        </label>
+                        <input type="text" id="manual-waba-id" class="manual-field-input"
+                            placeholder="e.g., 1234567890123456" value="{!businessAccountId}" />
+                    </div>
+
+                    <div class="manual-field-group">
+                        <label class="manual-field-label" for="manual-phone-id">
+                            Phone Number ID <span class="required-star">*</span>
+                        </label>
+                        <input type="text" id="manual-phone-id" class="manual-field-input"
+                            placeholder="e.g., 1234567890123456" value="{!phoneNumberId}" />
+                    </div>
+
+                    <div class="manual-field-group">
+                        <label class="manual-field-label" for="manual-access-token">
+                            Permanent Access Token <span class="required-star">*</span>
+                        </label>
+                        <textarea id="manual-access-token" class="manual-field-input manual-field-textarea"
+                            placeholder="Enter System User / Permanent Access Token">{!accessToken}</textarea>
+                    </div>
+                </div>
+                <div class="manual-modal-footer">
+                    <button type="button" class="exp-white-btn-css" onclick="closeManualConfigModal()">
+                        <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="currentColor" />
+                        </svg>
+                        Cancel
+                    </button>
+                    <button type="button" class="exp-blue-btn-css" id="manual-save-btn"
+                        onclick="saveManualConfiguration()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
+                        </svg>
+                        Save Configuration
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner Full Page -->
+        <div id="loading-spinner" class="spinner-overlay">
+            <div class="spinner-container">
+                <div class="spinner-big"></div>
+                <div class="spinner-text">Loading...</div>
+            </div>
+        </div>
+
+        <script>
+            let phoneNumberId = '';
+            let wabaId = '{!JSENCODE(businessAccountId)}';
+            let appId = '{!JSENCODE(appId)}';
+            let accessToken = '';
+            let apiVersion = '{!JSENCODE(apiVersion)}';
+            let apiEndpoint = '{!JSENCODE(apiEndpoint)}';
+
+            function formatCurrentDateTime() {
+                var now = new Date();
+                var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+                var month = pad(now.getMonth() + 1);
+                var day = pad(now.getDate());
+                var year = now.getFullYear();
+                var hours = now.getHours();
+                var minutes = pad(now.getMinutes());
+                var seconds = pad(now.getSeconds());
+                var ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? pad(hours) : '12';
+                return month + '/' + day + '/' + year + ', ' + hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+            }
+
+            function redirectToConnectedLwc(targetWabaId, targetAppId, targetLastEdited) {
+                var params = new URLSearchParams();
+                params.set('c__openComponent', 'whatsappConnect');
+                if (targetWabaId) {
+                    params.set('c__businessAccountId', targetWabaId);
+                    params.set('c__wabaId', targetWabaId);
+                }
+                if (targetAppId) {
+                    params.set('c__applicationId', targetAppId);
+                    params.set('c__appId', targetAppId);
+                }
+                if (targetLastEdited) {
+                    params.set('c__lastEdited', targetLastEdited);
+                }
+                window.top.location.href = '/lightning/n/Control_Center_Dev?' + params.toString();
+            }
+
+            var errorDismissTimer = null;
+
+            function showError(msg, isInputError) {
+                if (!msg) {
+                    hideError();
+                    return;
+                }
+
+                // Update text in inline error message element
+                var errorEl = document.getElementById("error-message");
+                if (errorEl) {
+                    errorEl.textContent = msg;
+                }
+
+                // Highlight input field if it is an input validation error
+                if (isInputError) {
+                    var inputEl = document.getElementById("app-id-input");
+                    if (inputEl) {
+                        inputEl.classList.add("input-error");
+                    }
+                }
+
+                // Show inline banner below form
+                var banner = document.getElementById("error-message-container");
+                if (banner) {
+                    banner.classList.remove("fade-out");
+                    banner.style.display = "flex";
+                }
+
+                // Reset button loading state
+                resetButton();
+
+                // Auto hide after at least 5 seconds
+                if (errorDismissTimer) {
+                    clearTimeout(errorDismissTimer);
+                }
+                errorDismissTimer = setTimeout(function () {
+                    hideError();
+                }, 5000);
+            }
+
+            function hideError() {
+                if (errorDismissTimer) {
+                    clearTimeout(errorDismissTimer);
+                    errorDismissTimer = null;
+                }
+
+                var banner = document.getElementById("error-message-container");
+                if (banner && banner.style.display !== "none") {
+                    banner.classList.add("fade-out");
+                    setTimeout(function () {
+                        banner.style.display = "none";
+                        banner.classList.remove("fade-out");
+                    }, 250);
+                }
+
+                var inputEl = document.getElementById("app-id-input");
+                if (inputEl) {
+                    inputEl.classList.remove("input-error");
+                }
+            }
+
+            function setLoading(loading, msg) {
+                var btn = document.getElementById('connect-btn');
+                var btnText = document.getElementById('btn-text');
+                var spinner = document.getElementById('btn-spinner');
+                var overlay = document.getElementById('loading-spinner');
+
+                if (loading) {
+                    if (msg) {
+                        overlay.classList.add('show');
+                        var txtEl = overlay.querySelector('.spinner-text');
+                        if (txtEl) txtEl.textContent = msg;
+                    } else {
+                        if (btn) btn.disabled = true;
+                        if (btnText) btnText.textContent = 'Connecting...';
+                        if (spinner) spinner.style.display = 'block';
+                    }
+                } else {
+                    overlay.classList.remove('show');
+                    if (btn) btn.disabled = false;
+                    if (btnText) btnText.textContent = 'Connect with WhatsApp';
+                    if (spinner) spinner.style.display = 'none';
+                }
+            }
+
+            function resetButton() {
+                setLoading(false);
+            }
+
+            function showSpinner(message) {
+                setLoading(true, message || 'Loading...');
+            }
+
+            function hideSpinner() {
+                setLoading(false);
+            }
+
+            function clearManualFieldErrors() {
+                var fieldIds = ['manual-app-id', 'manual-waba-id', 'manual-phone-id', 'manual-access-token'];
+                for (var i = 0; i < fieldIds.length; i++) {
+                    var el = document.getElementById(fieldIds[i]);
+                    if (el) el.classList.remove('input-error');
+                }
+                var errorAlert = document.getElementById('manual-error-alert');
+                if (errorAlert) errorAlert.classList.remove('show');
+            }
+
+            function showManualError(msg, fieldKey) {
+                clearManualFieldErrors();
+                var errorAlert = document.getElementById('manual-error-alert');
+                var errorText = document.getElementById('manual-error-text');
+                if (errorText) errorText.textContent = msg;
+                if (errorAlert) errorAlert.classList.add('show');
+
+                if (fieldKey === 'app') {
+                    var el = document.getElementById('manual-app-id');
+                    if (el) el.classList.add('input-error');
+                } else if (fieldKey === 'waba') {
+                    var el = document.getElementById('manual-waba-id');
+                    if (el) el.classList.add('input-error');
+                } else if (fieldKey === 'phone') {
+                    var el = document.getElementById('manual-phone-id');
+                    if (el) el.classList.add('input-error');
+                } else if (fieldKey === 'token') {
+                    var el = document.getElementById('manual-access-token');
+                    if (el) el.classList.add('input-error');
+                }
+            }
+
+            function openManualConfigModal() {
+                const modal = document.getElementById('manual-config-modal');
+                const manualAppIdInput = document.getElementById('manual-app-id');
+                const existingAppId = document.getElementById('app-id-input') ? document.getElementById('app-id-input').value.trim() : '';
+                if (existingAppId && manualAppIdInput && !manualAppIdInput.value) {
+                    manualAppIdInput.value = existingAppId;
+                }
+                clearManualFieldErrors();
+                const saveBtn = document.getElementById('manual-save-btn');
+                if (saveBtn) saveBtn.disabled = false;
+                if (modal) modal.classList.add('show');
+            }
+
+            function closeManualConfigModal() {
+                const modal = document.getElementById('manual-config-modal');
+                if (modal) modal.classList.remove('show');
+                const saveBtn = document.getElementById('manual-save-btn');
+                if (saveBtn) saveBtn.disabled = false;
+            }
+
+            function verifyManualCredentials(appIdVal, wabaIdVal, phoneIdVal, tokenVal, callback) {
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.WhatsappConnectController.verifyManualCredentials}',
+                    tokenVal, phoneIdVal, wabaIdVal, appIdVal,
+                    function (result, event) {
+                        if (event.status && result) {
+                            callback(result);
+                        } else {
+                            callback({
+                                isValid: false,
+                                field: 'general',
+                                message: event.message || 'Error communicating with server during credential verification.'
+                            });
+                        }
+                    },
+                    {
+                        escape: false
+                    }
+                );
+            }
+
+            function saveManualConfiguration() {
+                var appIdInput = document.getElementById('manual-app-id');
+                var wabaIdInput = document.getElementById('manual-waba-id');
+                var phoneIdInput = document.getElementById('manual-phone-id');
+                var tokenInput = document.getElementById('manual-access-token');
+
+                var appIdVal = appIdInput ? appIdInput.value.trim() : '';
+                var wabaIdVal = wabaIdInput ? wabaIdInput.value.trim() : '';
+                var phoneIdVal = phoneIdInput ? phoneIdInput.value.trim() : '';
+                var tokenVal = tokenInput ? tokenInput.value.trim() : '';
+
+                clearManualFieldErrors();
+
+                if (!appIdVal || !wabaIdVal || !phoneIdVal || !tokenVal) {
+                    if (!appIdVal && appIdInput) appIdInput.classList.add('input-error');
+                    if (!wabaIdVal && wabaIdInput) wabaIdInput.classList.add('input-error');
+                    if (!phoneIdVal && phoneIdInput) phoneIdInput.classList.add('input-error');
+                    if (!tokenVal && tokenInput) tokenInput.classList.add('input-error');
+                    showManualError('Please fill in all 4 fields (Meta App ID, WABA ID, Phone Number ID, and Access Token).');
+                    return;
+                }
+
+                var saveBtn = document.getElementById('manual-save-btn');
+                if (saveBtn) saveBtn.disabled = true;
+                showSpinner('Verifying credentials via Apex callout...');
+
+                verifyManualCredentials(appIdVal, wabaIdVal, phoneIdVal, tokenVal, function (verification) {
+                    if (!verification.isValid) {
+                        hideSpinner();
+                        if (saveBtn) saveBtn.disabled = false;
+                        showManualError(verification.message, verification.field);
+                        return;
+                    }
+
+                    // Credentials verified successfully! Now save via Salesforce remoting
+                    showSpinner('Credentials verified! Saving WhatsApp credentials...');
+                    closeManualConfigModal();
+
+                    Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.WhatsappConnectController.saveManualDetails}',
+                        tokenVal, phoneIdVal, wabaIdVal, appIdVal,
+                        function (result, event) {
+                            if (saveBtn) saveBtn.disabled = false;
+                            if (event.status && result) {
+                                var spinner = document.getElementById('loading-spinner');
+                                var spinnerText = spinner ? spinner.querySelector('.spinner-text') : null;
+                                var spinnerIcon = spinner ? (spinner.querySelector('.spinner-big') || spinner.querySelector('.spinner')) : null;
+
+                                if (spinnerIcon) spinnerIcon.style.borderTopColor = '#16a34a';
+                                if (spinnerText) spinnerText.textContent = 'WhatsApp credentials saved successfully! Redirecting...';
+
+                                var formattedDate = formatCurrentDateTime();
+                                setTimeout(function () {
+                                    redirectToConnectedLwc(wabaIdVal, appIdVal, formattedDate);
+                                }, 2000);
+                            } else {
+                                hideSpinner();
+                                showError("Error saving WhatsApp credentials. Please try again.");
+                            }
+                        },
+                        {
+                            escape: true
+                        }
+                    );
+                });
+            }
+
+            window.addEventListener('click', function (e) {
+                const manualModal = document.getElementById('manual-config-modal');
+                if (e.target === manualModal) {
+                    closeManualConfigModal();
+                }
+            });
+
+            window.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closeManualConfigModal();
+                }
+            });
+
+            function backToControlCenter() {
+                window.top.location.href = '/lightning/n/Control_Center_Dev';
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                var appInput = document.getElementById("app-id-input");
+                if (appInput) {
+                    appInput.addEventListener("input", function () {
+                        if (this.value && this.value.trim().length > 0) {
+                            this.classList.remove("input-error");
+                            hideError();
+                        }
+                    });
+                }
+
+                var manualFields = ['manual-app-id', 'manual-waba-id', 'manual-phone-id', 'manual-access-token'];
+                manualFields.forEach(function (id) {
+                    var el = document.getElementById(id);
+                    if (el) {
+                        el.addEventListener('input', function () {
+                            this.classList.remove('input-error');
+                            var alert = document.getElementById('manual-error-alert');
+                            if (alert) alert.classList.remove('show');
+                        });
+                    }
+                });
+
+                if (wabaId) {
+                    // When WhatsApp is already connected, redirect directly to Control Center to show the connected LWC component
+                    var currentAppId = '{!JSENCODE(appId)}';
+                    var currentLastEdited = '{!JSENCODE(lastModifiedDate)}';
+                    redirectToConnectedLwc(wabaId, currentAppId, currentLastEdited);
+                }
+            });
+
+            window.addEventListener('message', (event) => {
+                if (event.origin !== "https://www.facebook.com" && event.origin !== "https://web.facebook.com") {
+                    return;
+                }
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'WA_EMBEDDED_SIGNUP') {
+                        if (data.event === 'FINISH') {
+                            const { phone_number_id, waba_id } = data.data;
+                            phoneNumberId = phone_number_id;
+                            wabaId = waba_id;
+                        } else if (data.event === 'CANCEL') {
+                            showError("Please complete all the steps.");
+                        } else if (data.event === 'ERROR') {
+                            console.error('Embedded Signup Error:', data);
+                            const { error_message } = data.data;
+                            showError(error_message || "There was an error during WhatsApp Embedded Signup.");
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error parsing message event:', err, event.data);
+                    if (typeof event.data === 'string' && event.data.includes('error=')) {
+                        showError("Could not log you in, please try again...");
+                    }
+                }
+            });
+
+            const fbLoginCallback = (response) => {
+                if (response.status === 'connected') {
+                    FB.getLoginStatus(function (response) {
+                        if (response.status === 'connected') {
+                            accessToken = response.authResponse.accessToken;
+                            validateAndSubmit();
+                        }
+                    }, true);
+                } else {
+                    console.error('Facebook Login failed or was cancelled.', response);
+                    showError("Could not authorize with Facebook, please try again...");
+                }
+            };
+
+            function validateAndSubmit() {
+                showSpinner('Validating configuration...');
+                appId = document.getElementById("app-id-input").value.trim();
+                fetch(apiEndpoint + "/" + apiVersion + "/" + appId + "?access_token=" + accessToken)
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.error) {
+                            console.error('Validation API returned an error:', result.error);
+                            hideSpinner();
+                            showError("The Application ID is incorrect! Please validate it.", true);
+                        } else {
+                            if (!phoneNumberId.length || !wabaId.length || !appId.length || !accessToken.length) {
+                                hideSpinner();
+                                showError("Could not complete login, please try again...");
+                                return;
+                            }
+
+                            Visualforce.remoting.Manager.invokeAction(
+                                '{!$RemoteAction.WhatsappConnectController.saveFBLoginDetails}', accessToken, phoneNumberId, wabaId, appId,
+                                function (result, event) {
+                                    if (event.status && result) {
+                                        showSpinner('Saving configuration...');
+                                        var formattedDate = formatCurrentDateTime();
+                                        setTimeout(() => {
+                                            redirectToConnectedLwc(wabaId, appId, formattedDate);
+                                        }, 2500);
+                                    } else {
+                                        console.error('Remoting Action Failed:', event.message, event);
+                                        hideSpinner();
+                                        showError("Error saving configuration, please try again...");
+                                    }
+                                },
+                                {
+                                    escape: true
+                                }
+                            );
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Network or fetch error during validation:', error);
+                        hideSpinner();
+                        showError("Could not validate Application ID! Please try again.", true);
+                    });
+            }
+
+            const launchWhatsAppSignup = () => {
+                appId = document.getElementById("app-id-input").value.trim();
+                if (!appId) {
+                    showError("Please enter Meta Application ID to proceed.", true);
+                    return;
+                }
+                hideError();
+                if (!'{!clientId}') {
+                    showError("Could not fetch the configuration data.");
+                    return;
+                }
+                if (typeof FB === 'undefined') {
+                    showError("Meta SDK is still loading... please wait a few seconds and try again.");
+                    return;
+                }
+                setLoading(true);
+                FB.login(fbLoginCallback, {
+                    config_id: '{!configurationId}',
+                    response_type: 'code',
+                    override_default_response_type: true,
+                    extras: {
+                        setup: {},
+                        featureType: '',
+                        sessionInfoVersion: '2',
+                    }
+                });
+            };
+        </script>
+    </body>
+
+    </html>
+</apex:page>

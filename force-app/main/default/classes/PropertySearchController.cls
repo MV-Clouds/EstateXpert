@@ -602,7 +602,7 @@ public with sharing class PropertySearchController {
 
             settingToSave.MVEX__Fields_Data__c = checklistData;
 
-            upsert settingToSave;
+            upsert as user settingToSave;
 
             return 'Success';
 

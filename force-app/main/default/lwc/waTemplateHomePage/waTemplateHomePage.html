@@ -4,449 +4,365 @@
     </template>
 
     <template if:true={hasBusinessAccountConfigured}>
-        <template if:true={isTemplateVisible}>
-            <div class={fullPageContainerClass}>
-                <div class="exp-main-tab-container">
-                    <template if:false={isMobileOrTablet}>
-                        <div class="sub-main-header-css">
-                            <div class="header-block-css">
-                                Message Templates
-                            </div>
+        <div class="full-page-container">
+            <div class="exp-main-tab-container">
+                <template if:false={isMobileOrTablet}>
+                    <div class="sub-main-header-css">
+                        <div class="header-block-css">
+                            Message Templates
+                        </div>
 
-                            <div class="header-buttons">
-                                <div class="header-search-bar-css">
-                                    <lightning-input variant="label-hidden" class="filter search-div" name="searchInput"
-                                        type="search" placeholder="Search Template Name..." value={searchInput}
-                                        onchange={handleChange}></lightning-input>
-                                </div>
-                                <button class="exp-blue-btn-css" onclick={showCreateTemplate} title="Create Template">
-                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                        <div class="header-buttons">
+                            <div class="header-search-bar-css">
+                                <lightning-input variant="label-hidden" class="filter search-div" name="searchInput"
+                                    type="search" placeholder="Search Template Name..." value={searchInput}
+                                    onchange={handleChange}></lightning-input>
+                            </div>
+                            <button class="exp-blue-btn-css" onclick={showCreateTemplate} title="Create Template">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
+                                </svg>
+                                Create Template
+                            </button>
+                            <div class="filter-tab-wrapper">
+                                <div class={filterBtnClass} onclick={toggleFilterVisibility} title="Filter templates">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M12 6.75H6.75V12H5.25V6.75H0V5.25H5.25V0H6.75V5.25H12V6.75Z" fill="white" />
+                                        <g id="SVGRepo_bgCarrier" stroke-width="1.5"></g>
+                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path d="M0 3H16V1H0V3Z" fill={filterIconColor}></path>
+                                            <path d="M2 7H14V5H2V7Z" fill={filterIconColor}></path>
+                                            <path d="M4 11H12V9H4V11Z" fill={filterIconColor}></path>
+                                            <path d="M10 15H6V13H10V15Z" fill={filterIconColor}></path>
+                                        </g>
                                     </svg>
-                                    Create Template
-                                </button>
-                                <div class="filter-icon-container" onclick={toggleFilterVisibility} title="Filter templates">
-                                    <template if:false={showFilters}>
-                                        <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20"
-                                            fill="none" xmlns="http://www.w3.org/2000/svg" role="img"
-                                            aria-label="Show filters">
-                                            <path
-                                                d="M2.5 4.16666C2.5 3.70642 2.8731 3.33333 3.33333 3.33333H16.6667C17.1269 3.33333 17.5 3.70642 17.5 4.16666C17.5 4.37407 17.4227 4.57403 17.2833 4.7275L12.5 9.98833V15C12.5 15.2869 12.3522 15.5536 12.1085 15.7062L8.77516 17.7895C8.21834 18.1375 7.5 17.7374 7.5 17.0833V9.98833L2.71667 4.7275C2.5773 4.57403 2.5 4.37407 2.5 4.16666Z"
-                                                fill="currentColor" />
-                                        </svg>
-                                    </template>
-                                    <template if:true={showFilters}>
-                                        <svg class="filter-trigger-icon" width="16" height="16" viewBox="0 0 20 20"
-                                            fill="none" xmlns="http://www.w3.org/2000/svg" role="img"
-                                            aria-label="Hide filters">
-                                            <path
-                                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                                fill="currentColor" />
-                                        </svg>
-                                    </template>
                                     <template if:true={isFilterApplied}>
                                         <span class="filter-applied-dot" title="Filter Applied"></span>
                                     </template>
                                 </div>
-                                <template if:true={showFilters}>
-                                    <div class="filter-backdrop" onclick={toggleFilterVisibility}></div>
-                                    <div class="filter-dropdown-box">
-                                        <div class="filter-section">
-                                            <label class="filter-label">Category</label>
-                                            <select name="category" class="filter filter-dropdown" onchange={handleChange}>
-                                                <template for:each={categoryOptionsList} for:item="option">
-                                                    <option key={option.value} value={option.value} class="filter-option"
-                                                        selected={option.selected}>
-                                                        {option.label}</option>
-                                                </template>
-                                            </select>
-                                        </div>
-                                        <div class="filter-section">
-                                            <label class="filter-label">Status</label>
-                                            <select name="status" class="filter filter-dropdown" onchange={handleChange}>
-                                                <template for:each={statusOptionsList} for:item="option">
-                                                    <option key={option.value} value={option.value} class="filter-option"
-                                                        selected={option.selected}>
-                                                        {option.label}</option>
-                                                </template>
-                                            </select>
-                                        </div>
-                                        <div class="filter-section">
-                                            <label class="filter-label">Time Period</label>
-                                            <select name="timePeriod" class="filter filter-dropdown" onchange={handleChange}>
-                                                <template for:each={timePeriodOptionsList} for:item="option">
-                                                    <option key={option.value} value={option.value} class="filter-option"
-                                                        selected={option.selected}>
-                                                        {option.label}</option>
-                                                </template>
-                                            </select>
-                                        </div>
+                            </div>
+                            <template if:true={showFilters}>
+                                <div class="filter-backdrop" onclick={toggleFilterVisibility}></div>
+                                <div class="filter-dropdown-box">
+                                    <div class="filter-section">
+                                        <label class="filter-label">Category</label>
+                                        <select name="category" class="filter filter-dropdown" onchange={handleChange}>
+                                            <template for:each={categoryOptionsList} for:item="option">
+                                                <option key={option.value} value={option.value} class="filter-option"
+                                                    selected={option.selected}>
+                                                    {option.label}</option>
+                                            </template>
+                                        </select>
                                     </div>
-                                </template>
-                            </div>
+                                    <div class="filter-section">
+                                        <label class="filter-label">Status</label>
+                                        <select name="status" class="filter filter-dropdown" onchange={handleChange}>
+                                            <template for:each={statusOptionsList} for:item="option">
+                                                <option key={option.value} value={option.value} class="filter-option"
+                                                    selected={option.selected}>
+                                                    {option.label}</option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div class="filter-section">
+                                        <label class="filter-label">Time Period</label>
+                                        <select name="timePeriod" class="filter filter-dropdown" onchange={handleChange}>
+                                            <template for:each={timePeriodOptionsList} for:item="option">
+                                                <option key={option.value} value={option.value} class="filter-option"
+                                                    selected={option.selected}>
+                                                    {option.label}</option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
-                    </template>
+                    </div>
+                </template>
 
-                    <div class="exp-content-container">
-                        <div class="inner-div-2 exp-main-content-cls">
-                            <template if:true={filteredRecords.length}>
-                                <div class="exp-table-content" id="exp-table-content">
-                            <table aria-multiselectable="true"
-                                class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid"
-                                aria-label="Message Templates">
-                                <thead>
-                                    <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
-                                        <th class="header-cell slds-cell_action-mode column-1" scope="col">
-                                            <div class="slds-truncate" title="No.">No.</div>
-                                        </th>
-                                        <th aria-sort="none" data-id="Template_Name__c" onclick={sortClick}
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header"
-                                            scope="col">
-                                            <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
-                                                <span class="slds-assistive-text">Sort by: </span>
-                                                <div class="slds-has-flexi-truncate">
-                                                    <span class="slds-truncate" title="Template Name">Template Name</span>
-                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="Template_Name__c" class="exp-arrow-icon"
-                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                            <path
-                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                        </svg>
-                                                    </span>
+                <div class="exp-content-container">
+                    <div class="inner-div-2 exp-main-content-cls">
+                        <template if:true={filteredRecords.length}>
+                            <div class="exp-table-content" id="exp-table-content">
+                                <table aria-multiselectable="true"
+                                    class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid"
+                                    aria-label="Message Templates">
+                                    <thead>
+                                        <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
+                                            <th class="header-cell slds-cell_action-mode column-1" scope="col">
+                                                <div class="slds-truncate" title="No.">No.</div>
+                                            </th>
+                                            <th aria-sort="none" data-id="Template_Name__c" onclick={sortClick}
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header"
+                                                scope="col">
+                                                <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                                                    <span class="slds-assistive-text">Sort by: </span>
+                                                    <div class="slds-has-flexi-truncate">
+                                                        <span class="slds-truncate" title="Template Name">Template Name</span>
+                                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                            <svg data-index="Template_Name__c" class="exp-arrow-icon"
+                                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                            </svg>
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </th>
-                                        <th aria-sort="none" data-id="Template_Category__c" onclick={sortClick}
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header"
-                                            scope="col">
-                                            <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
-                                                <span class="slds-assistive-text">Sort by: </span>
-                                                <div class="slds-has-flexi-truncate">
-                                                    <span class="slds-truncate" title="Category">Category</span>
-                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="Template_Category__c" class="exp-arrow-icon"
-                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                            <path
-                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                        </svg>
-                                                    </span>
+                                            </th>
+                                            <th aria-sort="none" data-id="Template_Category__c" onclick={sortClick}
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header"
+                                                scope="col">
+                                                <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                                                    <span class="slds-assistive-text">Sort by: </span>
+                                                    <div class="slds-has-flexi-truncate">
+                                                        <span class="slds-truncate" title="Category">Category</span>
+                                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                            <svg data-index="Template_Category__c" class="exp-arrow-icon"
+                                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                            </svg>
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </th>
-                                        <th aria-sort="none" data-id="LanguageLabel" onclick={sortClick}
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header"
-                                            scope="col">
-                                            <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
-                                                <span class="slds-assistive-text">Sort by: </span>
-                                                <div class="slds-has-flexi-truncate">
-                                                    <span class="slds-truncate" title="Language">Language</span>
-                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="LanguageLabel" class="exp-arrow-icon"
-                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                            <path
-                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                        </svg>
-                                                    </span>
+                                            </th>
+                                            <th aria-sort="none" data-id="LanguageLabel" onclick={sortClick}
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header"
+                                                scope="col">
+                                                <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                                                    <span class="slds-assistive-text">Sort by: </span>
+                                                    <div class="slds-has-flexi-truncate">
+                                                        <span class="slds-truncate" title="Language">Language</span>
+                                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                            <svg data-index="LanguageLabel" class="exp-arrow-icon"
+                                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                            </svg>
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </th>
-                                        <th aria-sort="none" data-id="Status__c" onclick={sortClick}
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header"
-                                            scope="col">
-                                            <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
-                                                <span class="slds-assistive-text">Sort by: </span>
-                                                <div class="slds-has-flexi-truncate">
-                                                    <span class="slds-truncate" title="Status">Status</span>
-                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="Status__c" class="exp-arrow-icon"
-                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                            <path
-                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                        </svg>
-                                                    </span>
+                                            </th>
+                                            <th aria-sort="none" data-id="Status__c" onclick={sortClick}
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header"
+                                                scope="col">
+                                                <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                                                    <span class="slds-assistive-text">Sort by: </span>
+                                                    <div class="slds-has-flexi-truncate">
+                                                        <span class="slds-truncate" title="Status">Status</span>
+                                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                            <svg data-index="Status__c" class="exp-arrow-icon"
+                                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                            </svg>
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </th>
-                                        <th aria-sort="none" data-id="LastModifiedDate" onclick={sortClick}
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header"
-                                            scope="col">
-                                            <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
-                                                <span class="slds-assistive-text">Sort by: </span>
-                                                <div class="slds-has-flexi-truncate">
-                                                    <span class="slds-truncate" title="Last Modified Date">Last Modified Date</span>
-                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="LastModifiedDate" class="exp-arrow-icon"
-                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                            <path
-                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                        </svg>
-                                                    </span>
+                                            </th>
+                                            <th aria-sort="none" data-id="LastModifiedDate" onclick={sortClick}
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header"
+                                                scope="col">
+                                                <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                                                    <span class="slds-assistive-text">Sort by: </span>
+                                                    <div class="slds-has-flexi-truncate">
+                                                        <span class="slds-truncate" title="Last Modified Date">Last Modified Date</span>
+                                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                            <svg data-index="LastModifiedDate" class="exp-arrow-icon"
+                                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                            </svg>
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </th>
-                                        <th aria-sort="none" data-id="CreatedDate" onclick={sortClick}
-                                            class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header"
-                                            scope="col">
-                                            <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
-                                                <span class="slds-assistive-text">Sort by: </span>
-                                                <div class="slds-has-flexi-truncate">
-                                                    <span class="slds-truncate" title="Created Date">Created Date</span>
-                                                    <span class="slds-icon_container slds-icon-utility-arrowdown">
-                                                        <svg data-index="CreatedDate" class="exp-arrow-icon"
-                                                            viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
-                                                            <path
-                                                                d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
-                                                        </svg>
-                                                    </span>
+                                            </th>
+                                            <th aria-sort="none" data-id="CreatedDate" onclick={sortClick}
+                                                class="slds-is-resizable slds-is-sortable slds-cell_action-mode exp-sorting-header"
+                                                scope="col">
+                                                <div class="slds-text-link_reset exp-sort-cover" role="button" tabindex="0">
+                                                    <span class="slds-assistive-text">Sort by: </span>
+                                                    <div class="slds-has-flexi-truncate">
+                                                        <span class="slds-truncate" title="Created Date">Created Date</span>
+                                                        <span class="slds-icon_container slds-icon-utility-arrowdown">
+                                                            <svg data-index="CreatedDate" class="exp-arrow-icon"
+                                                                viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                                                                <path
+                                                                    d="M374.6 246.6C368.4 252.9 360.2 256 352 256s-16.38-3.125-22.62-9.375L224 141.3V448c0 17.69-14.33 31.1-31.1 31.1S160 465.7 160 448V141.3L54.63 246.6c-12.5 12.5-32.75 12.5-45.25 0s-12.5-32.75 0-45.25l160-160c12.5-12.5 32.75-12.5 45.25 0l160 160C387.1 213.9 387.1 234.1 374.6 246.6z" />
+                                                            </svg>
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </th>
-                                        <th scope="col" class="header-cell slds-cell_action-mode actions-header">
-                                            <div class="slds-truncate" title="Actions">Actions</div>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template for:each={visibleRecords} for:item="record">
-                                        <tr key={record.id} class={record.rowClass}>
-                                            <td class="slds-cell_action-mode column-1" role="gridcell" data-label="No.">
-                                                <div class="slds-truncate">{record.serialNumber}</div>
-                                            </td>
-                                            <td class="slds-cell_action-mode exp-truncate-css" role="gridcell"
-                                                data-label="Template Name" title={record.Template_Name__c}>
-                                                <div class="slds-truncate">{record.Template_Name__c}</div>
-                                            </td>
-                                            <td class="slds-cell_action-mode exp-truncate-css" role="gridcell"
-                                                data-label="Category" title={record.Template_Category__c}>
-                                                <div class="slds-truncate">{record.Template_Category__c}</div>
-                                            </td>
-                                            <td class="slds-cell_action-mode exp-truncate-css" role="gridcell"
-                                                data-label="Language" title={record.LanguageLabel}>
-                                                <div class="slds-truncate">{record.LanguageLabel}</div>
-                                            </td>
-                                            <td class="slds-cell_action-mode exp-table-status-col" role="gridcell"
-                                                data-label="Status">
-                                                <span class={record.statusClass}>{record.Status__c}</span>
-                                            </td>
-                                            <td class="slds-cell_action-mode exp-truncate-css" role="gridcell"
-                                                data-label="Last Modified Date" title={record.LastModifiedDate}>
-                                                <div class="slds-truncate">{record.LastModifiedDate}</div>
-                                            </td>
-                                            <td class="slds-cell_action-mode exp-truncate-css" role="gridcell"
-                                                data-label="Created Date" title={record.CreatedDate}>
-                                                <div class="slds-truncate">{record.CreatedDate}</div>
-                                            </td>
-                                            <td class="slds-cell_action-mode actions-cell" role="gridcell" data-label="Actions">
-                                                <div class="action-dropdown-wrapper">
-                                                    <button class={record.actionButtonClass}
-                                                        data-id={record.id}
-                                                        onclick={toggleActionMenu}
-                                                        aria-haspopup="true"
-                                                        aria-expanded={record.isActionMenuOpen}
-                                                        title="Actions">
-                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                                            <circle cx="12" cy="5" r="2.25"></circle>
-                                                            <circle cx="12" cy="12" r="2.25"></circle>
-                                                            <circle cx="12" cy="19" r="2.25"></circle>
-                                                        </svg>
-                                                    </button>
-                                                    <template if:true={record.isActionMenuOpen}>
-                                                        <div class={record.actionMenuClass} onclick={handleDropdownClick}>
-                                                            <div class="exp-action-menu-item" data-id={record.id} data-action="Preview" onclick={handleActionClick}>
-                                                                <div class="exp-menu-icon exp-menu-icon-preview">
-                                                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#212529" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                                                        <circle cx="12" cy="12" r="3" stroke="#212529" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                                                    </svg>
-                                                                </div>
-                                                                <span class="exp-menu-label">Preview</span>
-                                                            </div>
-                                                            <div class="exp-action-menu-item" data-id={record.id} data-action="Edit" onclick={handleActionClick}>
-                                                                <div class="exp-menu-icon exp-menu-icon-edit">
-                                                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="#212529" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="#212529" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                                                    </svg>
-                                                                </div>
-                                                                <span class="exp-menu-label">Edit</span>
-                                                            </div>
-                                                            <div class="exp-action-menu-item" data-id={record.id} data-action="Clone" onclick={handleActionClick}>
-                                                                <div class="exp-menu-icon exp-menu-icon-clone">
-                                                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                        <rect x="9" y="9" width="13" height="13" rx="2" stroke="#212529" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="#212529" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                                                    </svg>
-                                                                </div>
-                                                                <span class="exp-menu-label">Clone</span>
-                                                            </div>
-                                                            <div class="exp-action-menu-item exp-action-menu-item-delete" data-id={record.id} data-action="Delete" onclick={handleActionClick}>
-                                                                <div class="exp-menu-icon exp-menu-icon-delete">
-                                                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                                                    </svg>
-                                                                </div>
-                                                                <span class="exp-menu-label">Delete</span>
-                                                            </div>
-                                                        </div>
-                                                    </template>
-                                                </div>
-                                            </td>
+                                            </th>
+                                            <th scope="col" class="header-cell slds-cell_action-mode actions-header">
+                                                <div class="slds-truncate" title="Actions">Actions</div>
+                                            </th>
                                         </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Footer / Pagination -->
-                        <div class="exp-pagination-div">
-                            <div class="exp-page-size-container">
-                                <label class="exp-page-size-label">Rows per page : </label>
-                                <select class="exp-page-size-select" onchange={handlePageSizeChange}>
-                                    <template for:each={pageSizeOptions} for:item="opt">
-                                        <option key={opt.value} value={opt.value} selected={opt.isSelected}>
-                                            {opt.label}
-                                        </option>
-                                    </template>
-                                </select>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={visibleRecords} for:item="record">
+                                            <tr key={record.id} class={record.rowClass}>
+                                                <td class="slds-cell_action-mode column-1" role="gridcell" data-label="No.">
+                                                    <div class="slds-truncate">{record.serialNumber}</div>
+                                                </td>
+                                                <td class="slds-cell_action-mode exp-truncate-css" role="gridcell"
+                                                    data-label="Template Name" title={record.Template_Name__c}>
+                                                    <div class="slds-truncate">{record.Template_Name__c}</div>
+                                                </td>
+                                                <td class="slds-cell_action-mode exp-truncate-css" role="gridcell"
+                                                    data-label="Category" title={record.Template_Category__c}>
+                                                    <div class="slds-truncate">{record.Template_Category__c}</div>
+                                                </td>
+                                                <td class="slds-cell_action-mode exp-truncate-css" role="gridcell"
+                                                    data-label="Language" title={record.LanguageLabel}>
+                                                    <div class="slds-truncate">{record.LanguageLabel}</div>
+                                                </td>
+                                                <td class="slds-cell_action-mode exp-table-status-col" role="gridcell"
+                                                    data-label="Status">
+                                                    <span class={record.statusClass}>{record.Status__c}</span>
+                                                </td>
+                                                <td class="slds-cell_action-mode exp-truncate-css" role="gridcell"
+                                                    data-label="Last Modified Date" title={record.LastModifiedDate}>
+                                                    <div class="slds-truncate">{record.LastModifiedDate}</div>
+                                                </td>
+                                                <td class="slds-cell_action-mode exp-truncate-css" role="gridcell"
+                                                    data-label="Created Date" title={record.CreatedDate}>
+                                                    <div class="slds-truncate">{record.CreatedDate}</div>
+                                                </td>
+                                                <td class="slds-cell_action-mode actions-cell" role="gridcell" data-label="Actions">
+                                                    <div class="action-dropdown-wrapper">
+                                                        <button class={record.actionButtonClass}
+                                                            data-id={record.id}
+                                                            onclick={toggleActionMenu}
+                                                            aria-haspopup="true"
+                                                            aria-expanded={record.isActionMenuOpen}
+                                                            title="Actions">
+                                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                                                <circle cx="12" cy="5" r="2.25"></circle>
+                                                                <circle cx="12" cy="12" r="2.25"></circle>
+                                                                <circle cx="12" cy="19" r="2.25"></circle>
+                                                            </svg>
+                                                        </button>
+                                                        <template if:true={record.isActionMenuOpen}>
+                                                            <div class={record.actionMenuClass} onclick={handleDropdownClick}>
+                                                                <div class="exp-action-menu-item" data-id={record.id} data-action="Preview" onclick={handleActionClick}>
+                                                                    <div class="exp-menu-icon exp-menu-icon-preview">
+                                                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#212529" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                                                            <circle cx="12" cy="12" r="3" stroke="#212529" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                                                        </svg>
+                                                                    </div>
+                                                                    <span class="exp-menu-label">Preview</span>
+                                                                </div>
+                                                                <div class="exp-action-menu-item" data-id={record.id} data-action="Edit" onclick={handleActionClick}>
+                                                                    <div class="exp-menu-icon exp-menu-icon-edit">
+                                                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="#212529" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="#212529" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                                                        </svg>
+                                                                    </div>
+                                                                    <span class="exp-menu-label">Edit</span>
+                                                                </div>
+                                                                <div class="exp-action-menu-item" data-id={record.id} data-action="Clone" onclick={handleActionClick}>
+                                                                    <div class="exp-menu-icon exp-menu-icon-clone">
+                                                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                            <rect x="9" y="9" width="13" height="13" rx="2" stroke="#212529" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="#212529" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                                                        </svg>
+                                                                    </div>
+                                                                    <span class="exp-menu-label">Clone</span>
+                                                                </div>
+                                                                <div class="exp-action-menu-item exp-action-menu-item-delete" data-id={record.id} data-action="Delete" onclick={handleActionClick}>
+                                                                    <div class="exp-menu-icon exp-menu-icon-delete">
+                                                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                                                        </svg>
+                                                                    </div>
+                                                                    <span class="exp-menu-label">Delete</span>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
                             </div>
 
-                            <div class="exp-pagination-right">
-                                <span class="exp-results-info">{recordCountInfo}</span>
-
-                                <div class="exp-btn-cover">
-                                    <div class="exp-pagination-container">
-                                        <button class="exp-pagination-btn-css" disabled={isFirstPage}
-                                            onclick={handlePrevious} title="Previous Page">
-                                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
-                                                viewBox="0 0 520 520" fill="#fff">
-                                                <path
-                                                    d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
-                                            </svg>
-                                        </button>
-
-                                        <template for:each={pageNumbers} for:item="page">
-                                            <template if:false={page.isEllipsis}>
-                                                <button key={page.number} data-id={page.number} class={page.className}
-                                                    onclick={handlePageChange}>
-                                                    {page.number}
-                                                </button>
-                                            </template>
-                                            <template if:true={page.isEllipsis}>
-                                                <span key={page.number} class="exp-pagination-ellipsis">...</span>
-                                            </template>
+                            <!-- Footer / Pagination -->
+                            <div class="exp-pagination-div">
+                                <div class="exp-page-size-container">
+                                    <label class="exp-page-size-label">Rows per page : </label>
+                                    <select class="exp-page-size-select" onchange={handlePageSizeChange}>
+                                        <template for:each={pageSizeOptions} for:item="opt">
+                                            <option key={opt.value} value={opt.value} selected={opt.isSelected}>
+                                                {opt.label}
+                                            </option>
                                         </template>
+                                    </select>
+                                </div>
 
-                                        <button class="exp-pagination-btn-css" disabled={isLastPage}
-                                            onclick={handleNext} title="Next Page">
-                                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
-                                                viewBox="0 0 520 520" fill="#fff">
-                                                <path
-                                                    d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
-                                            </svg>
-                                        </button>
+                                <div class="exp-pagination-right">
+                                    <span class="exp-results-info">{recordCountInfo}</span>
+
+                                    <div class="exp-btn-cover">
+                                        <div class="exp-pagination-container">
+                                            <button class="exp-pagination-btn-css" disabled={isFirstPage}
+                                                onclick={handlePrevious} title="Previous Page">
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                    viewBox="0 0 520 520" fill="#fff">
+                                                    <path
+                                                        d="M342 477 134 272c-6-6-6-16 0-22L342 45c6-6 16-6 22 0l22 22c6 6 6 16 0 22L221 250c-6 6-6 16 0 22l163 161c6 6 6 16 0 22l-22 22c-5 5-14 5-20 0z" />
+                                                </svg>
+                                            </button>
+
+                                            <template for:each={pageNumbers} for:item="page">
+                                                <template if:false={page.isEllipsis}>
+                                                    <button key={page.number} data-id={page.number} class={page.className}
+                                                        onclick={handlePageChange}>
+                                                        {page.number}
+                                                    </button>
+                                                </template>
+                                                <template if:true={page.isEllipsis}>
+                                                    <span key={page.number} class="exp-pagination-ellipsis">...</span>
+                                                </template>
+                                            </template>
+
+                                            <button class="exp-pagination-btn-css" disabled={isLastPage}
+                                                onclick={handleNext} title="Next Page">
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52"
+                                                    viewBox="0 0 520 520" fill="#fff">
+                                                    <path
+                                                        d="m179 44 207 205c6 6 6 16 0 22L179 476c-6 6-16 6-22 0l-22-22c-6-6-6-16 0-22l163-161c6-6 6-16 0-22L136 88c-6-6-6-16 0-22l22-22c6-5 15-5 21 0z" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </template>
+                        </template>
 
-                    <template if:false={filteredRecords.length}>
-                        <div class="noresult">
-                            <div class="no-data-container">
-                                <img src={emptyStateUrl} alt="No templates found" draggable="false" class="no-data-image" />
-                                <div class="no-data-message">No Templates Found</div>
-                                <p class="no-data-hint">We did not find any message templates matching your current criteria.</p>
+                        <template if:false={filteredRecords.length}>
+                            <div class="noresult">
+                                <div class="no-data-container">
+                                    <img src={emptyStateUrl} alt="No templates found" draggable="false" class="no-data-image" />
+                                    <div class="no-data-message">No Templates Found</div>
+                                    <p class="no-data-hint">We did not find any message templates matching your current criteria.</p>
+                                </div>
                             </div>
-                        </div>
-                    </template>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-        </template>
-
-        <!-- Clone Modal -->
-        <template if:true={isCloneModalOpen}>
-            <section role="dialog" tabindex="-1" aria-labelledby="wb-clone-modal-heading" aria-modal="true"
-                aria-describedby="wb-clone-modal-content" class="slds-modal slds-fade-in-open slds-modal_small">
-                <div class="slds-modal__container">
-                    <!-- Close button -->
-                    <div class="slds-modal__close exp-close-icon-css" onclick={handleCloneModalClose}>
-                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                fill="currentColor" />
-                        </svg>
-                    </div>
-
-                    <!-- Header -->
-                    <div class="slds-modal__header clone-blue-header">
-                        <h1 id="wb-clone-modal-heading" class="slds-modal__title slds-hyphenate" tabindex="-1">Clone Template</h1>
-                    </div>
-
-                    <!-- Body -->
-                    <div class="slds-modal__content clone-modalbody" id="wb-clone-modal-content">
-                        <div class="clone-content_body">
-                            <p class="clone-modal-subtitle">
-                                Enter a unique name for the cloned message template. The template content,
-                                components, and configuration will be duplicated as a new Draft — allowing you
-                                to customize it independently without affecting the original. Template names
-                                must be lowercase, alphanumeric, and may contain underscores only.
-                            </p>
-                            <div class="clone-name-field">
-                                <label class="clone-name-label" for="wbCloneTemplateNameInput">
-                                    <span class="clone-red">*</span> New Template Name
-                                </label>
-                                <div class="clone-input-container">
-                                    <lightning-input id="wbCloneTemplateNameInput"
-                                        placeholder="Enter name for the cloned template" name="wbCloneTemplateName"
-                                        value={cloneTemplateName} variant="label-hidden" onchange={handleCloneNameChange}
-                                        maxlength="255">
-                                    </lightning-input>
-                                    <template if:true={cloneNameError}>
-                                        <p class="clone-name-error clone-red">{cloneNameError}</p>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Footer buttons -->
-                        <div class="clone-footerbtns">
-                            <button onclick={handleCloneModalClose} class="exp-white-btn-css">
-                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                        fill="currentColor" />
-                                </svg>
-                                Cancel
-                            </button>
-                            <button onclick={handleCloneConfirm} class="exp-blue-btn-css" disabled={isCloneDisabled}>
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="8" y="8" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.8"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                    <path
-                                        d="M16 8V5C16 3.89543 15.1046 3 14 3H5C3.89543 3 3 3.89543 3 5V14C3 15.1046 3.89543 16 5 16H8"
-                                        stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
-                                Clone
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <div class="slds-backdrop slds-backdrop_open"></div>
-        </template>
-
-        <c-message-popup onconfirmation={handleConfirmation}></c-message-popup>
     </template>
 
     <!-- State when WhatsApp Business Account is NOT configured -->
     <template if:false={hasBusinessAccountConfigured}>
-        <div class={mainContainerClass}>
+        <div class="main-unconfigured-container">
             <div class="custom-card">
                 <div class="content-wrapper">
                     <div class="icon-container">

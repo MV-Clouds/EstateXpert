@@ -1,8 +1,6 @@
-import { LightningElement, track, api } from 'lwc';
+import { LightningElement, track } from 'lwc';
 import getWhatsAppTemplates from '@salesforce/apex/WATemplateHomePageController.getWhatsAppTemplates';
 import getCategoryAndStatusPicklistValues from '@salesforce/apex/WATemplateHomePageController.getCategoryAndStatusPicklistValues';
-import deleteTemplete from '@salesforce/apex/WATemplateHomePageController.deleteTemplete';
-import cloneWBTemplate from '@salesforce/apex/WATemplateHomePageController.cloneWBTemplate';
 import hasBusinessAccountId from '@salesforce/apex/WATemplateHomePageController.hasBusinessAccountId';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
@@ -13,8 +11,6 @@ import emptyState from '@salesforce/resourceUrl/emptyState';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class WaTemplateHomePage extends NavigationMixin(LightningElement) {
-    @api isInsideControlCenter = false;
-    @track isTemplateVisible = false;
     @track hasBusinessAccountConfigured = false;
     @track categoryValue = '';
     @track timePeriodValue = '';
@@ -27,35 +23,18 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
     @track filteredRecords = [];
     @track visibleRecords = [];
     @track openActionMenuId = null;
-    @track selectedTemplateId = '';
-    @track showPopup = false; 
-    @track editTemplateId = '';
+    @track openActionMenuUpwards = false;
     @track subscription = null;
     @track sortField = 'LastModifiedDate';
     @track sortOrder = 'desc';
-    @track isCloneModalOpen = false;
-    @track cloneTemplateName = '';
-    @track cloneNameError = '';
-    @track selectedCloneTemplateId;
     @track showFilters = false;
     channelName = '/event/MVEX__Template_Update__e';
-    @track showConfigPopup = false;
     emptyStateUrl = emptyState || '/resource/MVEX__emptyState';
 
     // Pagination properties
     @track pageSize = 20;
     @track currentPage = 1;
     @track visiblePages = 5;
-
-    get fullPageContainerClass() {
-        return 'full-page-container' +
-            (this.isInsideControlCenter ? ' inside-control-center' : '');
-    }
-
-    get mainContainerClass() {
-        return 'main-unconfigured-container' +
-            (this.isInsideControlCenter ? ' inside-control-center' : '');
-    }
 
     get totalItems() {
         return this.filteredRecords.length;
@@ -82,7 +61,7 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
     }
 
     get filterIconColor() {
-        return this.showFilters ? '#ffffff' : '#000000';
+        return this.showFilters ? '#ffffff' : '#445058';
     }
 
     get filterBtnClass() {
@@ -153,51 +132,6 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
         }
     }
 
-    updateShownData() {
-        const startIndex = (this.currentPage - 1) * this.pageSize;
-        const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
-        const pagedList = this.filteredRecords.slice(startIndex, endIndex);
-        this.visibleRecords = pagedList.map((item, index) => {
-            const isActionMenuOpen = this.openActionMenuId === item.id;
-            const isNearBottom = (pagedList.length > 2) && (index >= pagedList.length - 2);
-            return {
-                ...item,
-                isActionMenuOpen,
-                actionButtonClass: `exp-action-dots-btn ${isActionMenuOpen ? 'active' : ''}`,
-                actionMenuClass: `exp-action-dropdown-menu ${isNearBottom ? 'open-upwards' : 'open-downwards'}`,
-                rowClass: `table-tr ${isActionMenuOpen ? 'has-open-menu' : ''}`
-            };
-        });
-    }
-
-    handlePageSizeChange(event) {
-        this.pageSize = parseInt(event.target.value, 10);
-        this.currentPage = 1;
-        this.updateShownData();
-    }
-
-    handlePrevious() {
-        if (this.currentPage > 1) {
-            this.currentPage--;
-            this.updateShownData();
-        }
-    }
-
-    handleNext() {
-        if (this.currentPage < this.totalPages) {
-            this.currentPage++;
-            this.updateShownData();
-        }
-    }
-
-    handlePageChange(event) {
-        const selectedPage = parseInt(event.currentTarget.dataset.id, 10);
-        if (selectedPage && selectedPage !== this.currentPage) {
-            this.currentPage = selectedPage;
-            this.updateShownData();
-        }
-    }
-
     get timePeriodOptions() {
         return [
             { label: 'All', value: '' },
@@ -236,11 +170,8 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
         try {
             window?.globalThis?.addEventListener('click', this.handleDocumentClick);
             loadStyle(this, globalStyles)
-                .then(() => {
-                    console.log('Global Styles Loaded');
-                })
                 .catch(error => {
-                    console.error('Error occurring during loading globalStyles:', error);
+                    console.error('Error loading globalStyles:', error);
                 });
 
             await this.checkBusinessAccountConfig();
@@ -249,12 +180,11 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                 return;
             }
 
-            this.isTemplateVisible = true;
             this.fetchCategoryAndStatusOptions();
             this.fetchAllTemplate(true);
             this.registerPlatformEventListener();
         } catch (e) {
-            console.error('Error in connectedCallback:::', e.message);
+            console.error('Error in connectedCallback:', e.message);
         }
     }
 
@@ -286,6 +216,7 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
     handleDocumentClick = () => {
         if (this.openActionMenuId) {
             this.openActionMenuId = null;
+            this.openActionMenuUpwards = false;
             this.updateShownData();
         }
     };
@@ -293,7 +224,24 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
     toggleActionMenu(event) {
         event.stopPropagation();
         const recId = event.currentTarget.dataset.id;
-        this.openActionMenuId = this.openActionMenuId === recId ? null : recId;
+        if (this.openActionMenuId === recId) {
+            this.openActionMenuId = null;
+            this.openActionMenuUpwards = false;
+        } else {
+            this.openActionMenuId = recId;
+            const button = event.currentTarget;
+            const container = this.template.querySelector('.exp-table-content');
+            if (button && container) {
+                const btnRect = button.getBoundingClientRect();
+                const contRect = container.getBoundingClientRect();
+                const spaceBelow = contRect.bottom - btnRect.bottom;
+                const spaceAbove = btnRect.top - contRect.top;
+                // Only open upwards if it does NOT fit below (spaceBelow < 170px) AND fits above (spaceAbove >= 170px)
+                this.openActionMenuUpwards = spaceBelow < 170 && spaceAbove >= 170;
+            } else {
+                this.openActionMenuUpwards = false;
+            }
+        }
         this.updateShownData();
     }
 
@@ -304,6 +252,7 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
     handleActionClick(event) {
         event.stopPropagation();
         this.openActionMenuId = null;
+        this.openActionMenuUpwards = false;
         this.updateShownData();
         this.showWorkInProgressToast();
     }
@@ -358,13 +307,10 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
     updateRecord(templateId, newStatus) {
         const recordIndex = this.allRecords.findIndex((record) => record.Id === templateId);
         if (recordIndex !== -1) {
-            const isInReview = newStatus === 'In-Review';
             const updatedRecord = { 
                 ...this.allRecords[recordIndex], 
                 Status__c: newStatus,
-                statusClass: this.getStatusClass(newStatus),
-                isButtonDisabled: isInReview,
-                editRestrictionMessage: isInReview ? 'Template is under review' : 'Edit Template'
+                statusClass: this.getStatusClass(newStatus)
             };
 
             this.allRecords[recordIndex] = updatedRecord;
@@ -395,8 +341,6 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                     if (data) {
                         this.allRecords = data.map((record, index) => {
                             const statusVal = record.Status__c || '';
-                            const isInReview = statusVal === 'In-Review';
-                            
                             return {
                                 ...record,
                                 id: record.Id,
@@ -409,8 +353,6 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                                 rawCreatedDate: record.CreatedDate,
                                 LastModifiedDate: this.formatDate(record.LastModifiedDate),
                                 CreatedDate: this.formatDate(record.CreatedDate),
-                                isButtonDisabled: isInReview,
-                                editRestrictionMessage: isInReview ? 'Template is under review' : 'Edit Template',
                                 statusClass: this.getStatusClass(statusVal)
                             };
                         });
@@ -557,117 +499,48 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
         }
     }
 
-    deleteTemplate(event) {
-        this.showWorkInProgressToast();
+    updateShownData() {
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
+        const pagedList = this.filteredRecords.slice(startIndex, endIndex);
+        this.visibleRecords = pagedList.map((item) => {
+            const isActionMenuOpen = this.openActionMenuId === item.id;
+            const openUpwards = isActionMenuOpen && this.openActionMenuUpwards;
+            return {
+                ...item,
+                isActionMenuOpen,
+                actionButtonClass: `exp-action-dots-btn ${isActionMenuOpen ? 'active' : ''}`,
+                actionMenuClass: `exp-action-dropdown-menu ${openUpwards ? 'open-upwards' : 'open-downwards'}`,
+                rowClass: `table-tr ${isActionMenuOpen ? 'has-open-menu' : ''}`
+            };
+        });
     }
 
-    previewTemplate(event) {
-        this.showWorkInProgressToast();
+    handlePageSizeChange(event) {
+        this.pageSize = parseInt(event.target.value, 10);
+        this.currentPage = 1;
+        this.updateShownData();
     }
 
-    editTemplate(event) {
-        this.showWorkInProgressToast();
-    }
-
-    handlePopupClose() {
-        this.showPopup = false; 
-    }
-
-    handleCloneClick(event) {
-        this.showWorkInProgressToast();
-    }
-
-    handleCloneModalClose() {
-        try {
-            this.isCloneModalOpen = false;
-            this.cloneTemplateName = '';
-            this.cloneNameError = '';
-            this.selectedCloneTemplateId = null;
-        } catch (error) {
-            console.log('Error in handleCloneModalClose ==> ', error.stack);
+    handlePrevious() {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+            this.updateShownData();
         }
     }
 
-    handleCloneNameChange(event) {
-        const formatted = event.target.value.replace(/\s+/g, '_').toLowerCase();
-        this.cloneTemplateName = formatted;
-
-        if (!formatted || formatted.trim() === '') {
-            this.cloneNameError = '';
-            return;
+    handleNext() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage++;
+            this.updateShownData();
         }
-
-        if (!/^[a-z0-9_]+$/.test(formatted)) {
-            this.cloneNameError = 'Name can only contain lowercase letters, numbers, and underscores.';
-            return;
-        }
-
-        const nameExists = (this.allRecords || []).some(
-            r => r.Template_Name__c && r.Template_Name__c !== '-' && r.Template_Name__c.toLowerCase() === formatted
-        );
-        if (nameExists) {
-            this.cloneNameError = 'A template with this name already exists.';
-            return;
-        }
-
-        this.cloneNameError = '';
     }
 
-    get isCloneDisabled() {
-        return !this.cloneTemplateName ||
-               this.cloneTemplateName.trim() === '' ||
-               !!this.cloneNameError;
-    }
-
-    handleCloneConfirm() {
-        try {
-            if (!this.cloneTemplateName || this.cloneTemplateName.trim() === '') {
-                this.showToastError('Please enter a name for the cloned template.');
-                return;
-            }
-            if (this.cloneNameError) {
-                this.showToastError(this.cloneNameError);
-                return;
-            }
-            this.isLoading = true;
-            this.isCloneModalOpen = false;
-            const clonedName = this.cloneTemplateName.trim();
-            cloneWBTemplate({
-                templateId: this.selectedCloneTemplateId,
-                newName: clonedName
-            })
-                .then(result => {
-                    this.isLoading = false;
-                    if (result && result.status === 'success') {
-                        this.showToastSuccess(`Template cloned as '${clonedName}' successfully.`);
-                        let cmpDef = {
-                            componentDef: 'MVEX:wbTemplateParent',
-                            attributes: {
-                                edittemplateid: result.clonedId
-                            }
-                        };
-                        let encodedDef = btoa(JSON.stringify(cmpDef));
-                        this[NavigationMixin.Navigate]({
-                            type: 'standard__webPage',
-                            attributes: {
-                                url: '/one/one.app#' + encodedDef
-                            }
-                        });
-                    } else {
-                        this.showToastError((result && result.message) ? result.message : 'Error cloning template.');
-                    }
-                    this.cloneTemplateName = '';
-                    this.selectedCloneTemplateId = null;
-                })
-                .catch(error => {
-                    this.isLoading = false;
-                    this.showToastError(error?.body?.message || 'Error cloning template.');
-                    this.cloneTemplateName = '';
-                    this.selectedCloneTemplateId = null;
-                });
-        } catch (error) {
-            this.isLoading = false;
-            console.log('Error in handleCloneConfirm ==> ', error.stack);
+    handlePageChange(event) {
+        const selectedPage = parseInt(event.currentTarget.dataset.id, 10);
+        if (selectedPage && selectedPage !== this.currentPage) {
+            this.currentPage = selectedPage;
+            this.updateShownData();
         }
     }
 
@@ -678,23 +551,6 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
             variant: 'error'
         });
         this.dispatchEvent(toastEvent);
-    }
-
-    backToControlCenter(event) {
-        try {
-            if (event) event.preventDefault();
-            this.dispatchEvent(new CustomEvent('backtocontrolcenter'));
-            if (!this.isInsideControlCenter) {
-                this[NavigationMixin.Navigate]({
-                    type: "standard__navItemPage",
-                    attributes: {
-                        apiName: "MVEX__Control_Center",
-                    },
-                });
-            }
-        } catch (error) {
-            console.log('error--> ', error);
-        }
     }
 
     showToastSuccess(message) {
@@ -708,85 +564,6 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
 
     toggleFilterVisibility() {
         this.showFilters = !this.showFilters;
-    }
-
-    handleRefresh() {
-        try {
-            this.searchInput = '';
-            this.categoryValue = '';
-            this.statusValues = '';
-            this.timePeriodValue = '';
-            this.currentPage = 1;
-            this.fetchAllTemplate(true);
-        } catch (error) {
-            console.error('Error in handleRefresh:', error);
-        }
-    }
-
-    handleOpenConfigPopup() {
-        try {
-            this.showConfigPopup = true;
-        } catch (error) {
-            console.error('Error in handleOpenConfigPopup:', error);
-        }
-    }
-
-    handleCloseConfigPopup() {
-        try {
-            this.showConfigPopup = false;
-        } catch (error) {
-            console.error('Error in handleCloseConfigPopup:', error);
-        }
-    }
-
-    showMessagePopup(Status, Title, Message) {
-        const messageContainer = this.template.querySelector('c-message-popup');
-        if (messageContainer) {
-            messageContainer.showMessagePopup({
-                status: Status,
-                title: Title,
-                message: Message,
-            });
-        }
-    }
-
-    handleConfirmation(event) {
-        if (event.detail === true) {
-            this.isLoading = true;
-            const recordId = this.editTemplateId;
-            if (recordId !== undefined) {
-                deleteTemplete({ templateId: recordId })
-                    .then(data => {
-                        if (data === 'Template deleted successfully' || (data && data.includes('deleted from Salesforce successfully'))) {
-                            this.showToastSuccess('Template deleted successfully');
-                            this.allRecords = this.allRecords.filter(record => record.Id !== recordId); 
-                            this.allRecords = this.allRecords.map((record, index) => ({
-                                ...record,
-                                serialNumber: index + 1
-                            }));   
-                            this.filteredRecords = [...this.allRecords];                    
-                            this.currentPage = 1;
-                            this.updateShownData();
-                            this.isLoading = false;
-                        } else {
-                            this.showToastError('Error in deleting template');
-                            this.isLoading = false;
-                        }
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        this.showToastError('Error in deleting template');
-                        this.isLoading = false;
-                        this.editTemplateId = '';
-                    });
-            } else {
-                this.showToastError('Template not found');
-                this.isLoading = false;
-                this.editTemplateId = '';
-            }
-        } else {
-            this.editTemplateId = '';
-        }
     }
 
     sortClick(event) {

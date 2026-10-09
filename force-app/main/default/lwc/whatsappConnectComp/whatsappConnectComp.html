@@ -1,12 +1,8 @@
 <template>
+    <template if:true={isLoading}>
+        <c-spinner-component></c-spinner-component>
+    </template>
     <div class="whatsapp-connect-wrapper">
-        <!-- Main Loading Spinner -->
-        <template if:true={isLoading}>
-            <div class="scoped-spinner-backdrop">
-                <lightning-spinner alternative-text="Loading" size="medium" variant="brand"></lightning-spinner>
-            </div>
-        </template>
-
         <div class="config-card">
             <!-- Page Header -->
             <div class="page-header">

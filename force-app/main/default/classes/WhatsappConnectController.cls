@@ -139,6 +139,133 @@ public with sharing class WhatsappConnectController {
         }
     }
 
+    /**
+     * Method Name : verifyManualCredentials
+     * @description : Validates WhatsApp credentials (Access Token, Phone Number ID, WABA ID, App ID)
+     *                by making an HTTP Callout to Meta Graph API from Apex.
+     * @param accessToken Meta Permanent Access Token
+     * @param phoneId Phone Number ID
+     * @param wabaId WhatsApp Business Account ID
+     * @param appId Meta Application ID
+     * @return Map<String, Object> validation result with isValid flag, field key, and message.
+     */
+    @RemoteAction
+    public static Map<String, Object> verifyManualCredentials(String accessToken, String phoneId, String wabaId, String appId) {
+        Map<String, Object> response = new Map<String, Object>();
+        try {
+            if (String.isBlank(accessToken) || String.isBlank(phoneId) || String.isBlank(wabaId) || String.isBlank(appId)) {
+                response.put('isValid', false);
+                response.put('field', 'general');
+                response.put('message', 'Please fill in all 4 fields (Meta App ID, WABA ID, Phone Number ID, and Access Token).');
+                return response;
+            }
+
+            accessToken = accessToken.trim();
+            phoneId = phoneId.trim();
+            wabaId = wabaId.trim();
+            appId = appId.trim();
+
+            OAuth_Configuration__mdt config = getConfig();
+            String baseEndpoint = (config != null && String.isNotBlank(config.Authorization_Endpoint__c)) 
+                ? config.Authorization_Endpoint__c.trim() 
+                : 'https://graph.facebook.com';
+            String apiVer = (config != null && String.isNotBlank(config.API_Version__c)) 
+                ? config.API_Version__c.trim() 
+                : 'v21.0';
+            if (!apiVer.startsWith('v')) {
+                apiVer = 'v' + apiVer;
+            }
+
+            Http http = new Http();
+
+            // 1. Verify Phone Number ID & Access Token
+            HttpRequest phoneReq = new HttpRequest();
+            phoneReq.setEndpoint(baseEndpoint + '/' + apiVer + '/' + EncodingUtil.urlEncode(phoneId, 'UTF-8') + '?fields=id,display_phone_number,whatsapp_business_account&access_token=' + EncodingUtil.urlEncode(accessToken, 'UTF-8'));
+            phoneReq.setMethod('GET');
+            phoneReq.setTimeout(15000);
+            HttpResponse phoneRes = http.send(phoneReq);
+
+            if (phoneRes.getStatusCode() != 200) {
+                Map<String, Object> errBody = (Map<String, Object>) JSON.deserializeUntyped(phoneRes.getBody());
+                Map<String, Object> errMap = (errBody != null && errBody.containsKey('error')) ? (Map<String, Object>) errBody.get('error') : null;
+                Integer errCode = (errMap != null && errMap.containsKey('code')) ? (Integer) errMap.get('code') : 0;
+                String errMsg = (errMap != null && errMap.containsKey('message')) ? (String) errMap.get('message') : phoneRes.getStatus();
+
+                if (errCode == 190 || (errMsg != null && errMsg.toLowerCase().contains('access token'))) {
+                    response.put('isValid', false);
+                    response.put('field', 'token');
+                    response.put('message', 'The Permanent Access Token is invalid or expired. Please check your token.');
+                    return response;
+                }
+
+                response.put('isValid', false);
+                response.put('field', 'phone');
+                response.put('message', 'The Phone Number ID is invalid or cannot be accessed with this token.');
+                return response;
+            }
+
+            // 2. Verify WhatsApp Business Account ID (WABA ID)
+            HttpRequest wabaReq = new HttpRequest();
+            wabaReq.setEndpoint(baseEndpoint + '/' + apiVer + '/' + EncodingUtil.urlEncode(wabaId, 'UTF-8') + '?access_token=' + EncodingUtil.urlEncode(accessToken, 'UTF-8'));
+            wabaReq.setMethod('GET');
+            wabaReq.setTimeout(15000);
+            HttpResponse wabaRes = http.send(wabaReq);
+
+            if (wabaRes.getStatusCode() != 200) {
+                Map<String, Object> errBody = (Map<String, Object>) JSON.deserializeUntyped(wabaRes.getBody());
+                Map<String, Object> errMap = (errBody != null && errBody.containsKey('error')) ? (Map<String, Object>) errBody.get('error') : null;
+                Integer errCode = (errMap != null && errMap.containsKey('code')) ? (Integer) errMap.get('code') : 0;
+                String errMsg = (errMap != null && errMap.containsKey('message')) ? (String) errMap.get('message') : wabaRes.getStatus();
+
+                if (errCode == 190 || (errMsg != null && errMsg.toLowerCase().contains('access token'))) {
+                    response.put('isValid', false);
+                    response.put('field', 'token');
+                    response.put('message', 'The Permanent Access Token is invalid or expired. Please check your token.');
+                    return response;
+                }
+
+                response.put('isValid', false);
+                response.put('field', 'waba');
+                response.put('message', 'The WhatsApp Business Account ID (WABA ID) is invalid or not accessible with this token.');
+                return response;
+            }
+
+            // 3. Verify Meta Application ID
+            HttpRequest appReq = new HttpRequest();
+            appReq.setEndpoint(baseEndpoint + '/' + apiVer + '/' + EncodingUtil.urlEncode(appId, 'UTF-8') + '?access_token=' + EncodingUtil.urlEncode(accessToken, 'UTF-8'));
+            appReq.setMethod('GET');
+            appReq.setTimeout(15000);
+            HttpResponse appRes = http.send(appReq);
+
+            if (appRes.getStatusCode() != 200) {
+                Map<String, Object> errBody = (Map<String, Object>) JSON.deserializeUntyped(appRes.getBody());
+                Map<String, Object> errMap = (errBody != null && errBody.containsKey('error')) ? (Map<String, Object>) errBody.get('error') : null;
+                String errMsg = (errMap != null && errMap.containsKey('message')) ? (String) errMap.get('message') : 'Please check your App ID.';
+
+                response.put('isValid', false);
+                response.put('field', 'app');
+                response.put('message', 'The Meta Application ID is incorrect: ' + errMsg);
+                return response;
+            }
+
+            response.put('isValid', true);
+            return response;
+
+        } catch (System.CalloutException ce) {
+            ErrorHandler.insertErrorData(ce, 'WhatsappConnectController', 'verifyManualCredentials', ce.getMessage());
+            response.put('isValid', false);
+            response.put('field', 'general');
+            response.put('message', 'Callout error during verification: ' + ce.getMessage());
+            return response;
+        } catch (Exception e) {
+            ErrorHandler.insertErrorData(e, 'WhatsappConnectController', 'verifyManualCredentials', e.getMessage());
+            response.put('isValid', false);
+            response.put('field', 'general');
+            response.put('message', 'Error verifying credentials: ' + e.getMessage());
+            return response;
+        }
+    }
+
     @RemoteAction
     public static Boolean saveManualDetails(String accessToken, String phoneId, String wabaId, String appId) {
         try {

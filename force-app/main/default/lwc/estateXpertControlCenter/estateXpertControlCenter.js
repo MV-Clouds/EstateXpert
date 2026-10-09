@@ -23,6 +23,8 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     // Lead capture state
     integrationType = null; // 'Google' or 'Meta'
 
+    currentPageRef = null;
+
     /**
      * Method Name: getStateParameters
      * @description: Retrieves and processes the current page reference parameters
@@ -31,6 +33,7 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      */
     @wire(CurrentPageReference)
     getStateParameters(currentPageReference) {
+        this.currentPageRef = currentPageReference;
         if (currentPageReference && currentPageReference.state) {
             const target = currentPageReference.state.c__openComponent;
             if (target === 'storageIntegration') {
@@ -415,8 +418,21 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             event.preventDefault();
         }
         try {
+            let hasUrlWaba = false;
+            if (this.currentPageRef && this.currentPageRef.state) {
+                hasUrlWaba = !!(this.currentPageRef.state.c__wabaId || this.currentPageRef.state.c__businessAccountId);
+            }
+            if (!hasUrlWaba) {
+                try {
+                    const searchParams = new URLSearchParams(window.location.search);
+                    hasUrlWaba = !!(searchParams.get('c__wabaId') || searchParams.get('c__businessAccountId'));
+                } catch (e) {
+                    // Ignore window.location errors
+                }
+            }
+
             const config = await getIntegrationConfig();
-            if (config && config.isConnected) {
+            if ((config && config.isConnected) || hasUrlWaba) {
                 this.openComponent(
                     'whatsappConnect',
                     'WhatsApp Business',
@@ -427,7 +443,22 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             }
         } catch (error) {
             console.error('Error checking WhatsApp connection:', error);
-            this.handleWhatsappDeactivated();
+            let hasUrlWaba = false;
+            try {
+                const searchParams = new URLSearchParams(window.location.search);
+                hasUrlWaba = !!(searchParams.get('c__wabaId') || searchParams.get('c__businessAccountId'));
+            } catch (e) {
+                // Ignore window.location errors
+            }
+            if (hasUrlWaba) {
+                this.openComponent(
+                    'whatsappConnect',
+                    'WhatsApp Business',
+                    'The "WhatsApp Business" connects your WhatsApp Business Account with Salesforce to enable the chat feature directly from Salesforce. Start conversations, send messages, and manage customer communications without leaving your CRM platform.'
+                );
+            } else {
+                this.handleWhatsappDeactivated();
+            }
         }
     }
 

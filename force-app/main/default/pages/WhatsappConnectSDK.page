@@ -132,29 +132,29 @@
 
             .config-card {
                 background: #ffffff;
-                border-radius: 12px;
-                padding: 32px;
+                border-radius: 0.75rem;
+                padding: 2rem;
                 width: 100%;
-                max-width: 1150px;
+                max-width: 71.875rem;
                 height: max-content;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.02);
+                box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.02);
                 border: 1px solid #e5e9f0;
                 box-sizing: border-box;
-                margin-top: 32px;
-                margin-bottom: 32px;
+                margin-top: 2rem;
+                margin-bottom: 2rem;
             }
 
             .page-title {
-                font-size: 18px;
+                font-size: 1.125rem;
                 font-weight: 600;
                 color: #0f1419;
                 margin: 0;
-                margin-bottom: 4px;
+                margin-bottom: 0.25rem;
                 letter-spacing: 0.3px;
             }
 
             .page-subtitle {
-                font-size: 16px;
+                font-size: 1rem;
                 color: #536471;
                 margin: 0;
                 line-height: 1.5;
@@ -163,10 +163,10 @@
             .page-header {
                 display: flex;
                 align-items: flex-start;
-                gap: 8px;
-                margin-bottom: 24px;
+                gap: 0.5rem;
+                margin-bottom: 1.5rem;
                 border-bottom: 1px solid #e5e9f0;
-                padding-bottom: 24px;
+                padding-bottom: 1.5rem;
             }
 
             .page-header-content {
@@ -178,18 +178,18 @@
             .page-header-icon-container {
                 background: #E8F8F0;
                 color: #25D366;
-                border-radius: 12px;
-                width: 56px;
-                height: 56px;
+                border-radius: 0.75rem;
+                width: 3.5rem;
+                height: 3.5rem;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 flex-shrink: 0;
-                margin-right: 16px;
+                margin-right: 1rem;
             }
 
             .input-group {
-                margin-bottom: 16px;
+                margin-bottom: 1rem;
             }
 
             .input-label {
@@ -234,19 +234,19 @@
 
             .info-box {
                 display: flex;
-                gap: 12px;
-                padding: 16px;
+                gap: 0.75rem;
+                padding: 1rem;
                 background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
-                border-radius: 8px;
+                border-radius: 0.5rem;
                 margin-bottom: 1.5rem;
-                box-shadow: 0 2px 6px rgba(24, 119, 242, 0.1);
+                box-shadow: 0 0.125rem 0.375rem rgba(24, 119, 242, 0.1);
                 border: 1px solid rgba(24, 119, 242, 0.1);
             }
 
             .info-icon {
                 flex-shrink: 0;
-                width: 20px;
-                height: 20px;
+                width: 1.25rem;
+                height: 1.25rem;
                 color: #0176D3;
             }
 
@@ -255,14 +255,14 @@
             }
 
             .info-title {
-                font-size: 14px;
+                font-size: 0.875rem;
                 font-weight: 500;
                 color: #131314;
-                margin: 0 0 4px 0;
+                margin: 0 0 0.25rem 0;
             }
 
             .info-text {
-                font-size: 14px;
+                font-size: 0.875rem;
                 color: #636363;
                 margin: 0;
                 line-height: 1.5;
@@ -279,17 +279,18 @@
 
             .error-title {
                 color: #991B1B;
-                font-size: 16px;
+                font-size: 1rem;
             }
 
             .error-text {
                 color: #991B1B;
-                font-size: 14px;
+                font-size: 0.875rem;
             }
 
             .setup-form-container {
                 display: flex;
-                gap: 24px;
+                gap: 1.5rem;
+                width: 100%;
             }
 
             .flex-1 {
@@ -301,35 +302,35 @@
             }
 
             .btn-icon {
-                margin-right: 4px;
+                margin-right: 0.25rem;
             }
 
             .redirect-info {
                 text-align: center;
-                margin-top: 12px;
-                font-size: 14px;
+                margin-top: 0.75rem;
+                font-size: 0.875rem;
                 color: #8C9BAB;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 6px;
+                gap: 0.375rem;
             }
 
             .info-panel {
                 background: #F0F7FF;
                 border: 1px solid #D1E5FF;
-                border-radius: 8px;
-                padding: 20px;
+                border-radius: 0.5rem;
+                padding: 1.25rem;
             }
 
             .info-panel-header {
                 display: flex;
                 align-items: center;
-                gap: 8px;
+                gap: 0.5rem;
                 font-weight: 600;
                 color: #014486;
-                font-size: 16px;
-                margin-bottom: 16px;
+                font-size: 1rem;
+                margin-bottom: 1rem;
             }
 
             .info-list {
@@ -338,13 +339,13 @@
                 margin: 0;
                 display: flex;
                 flex-direction: column;
-                gap: 12px;
+                gap: 0.75rem;
             }
 
             .info-list-item {
                 display: flex;
-                gap: 10px;
-                font-size: 14px;
+                gap: 0.625rem;
+                font-size: 0.875rem;
                 color: #536471;
                 line-height: 1.5;
                 align-items: flex-start;
@@ -352,19 +353,19 @@
 
             .info-list-icon {
                 flex-shrink: 0;
-                margin-top: 2px;
+                margin-top: 0.125rem;
             }
 
             .note-box {
                 background: #FFF8E1;
                 border: 1px solid #FFE082;
-                border-radius: 6px;
-                padding: 10px 14px;
+                border-radius: 0.375rem;
+                padding: 0.625rem 0.875rem;
                 margin-top: 7.5rem;
                 display: flex;
                 align-items: center;
-                gap: 8px;
-                font-size: 13.5px;
+                gap: 0.5rem;
+                font-size: 0.84375rem;
                 color: #663C00;
                 line-height: 1.4;
             }
@@ -375,27 +376,27 @@
 
             .connect-btn {
                 width: 100%;
-                height: 44px;
-                padding: 0 24px;
-                font-size: 14px;
+                height: 2.75rem;
+                padding: 0 1.5rem;
+                font-size: 0.875rem;
                 font-weight: 600;
                 background: #0176D3;
                 color: white;
                 border: none;
-                border-radius: 4px;
+                border-radius: 0.25rem;
                 cursor: pointer;
                 transition: all 0.3s ease;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 8px;
-                box-shadow: 0 2px 8px rgba(1, 118, 211, 0.3);
+                gap: 0.5rem;
+                box-shadow: 0 0.125rem 0.5rem rgba(1, 118, 211, 0.3);
             }
 
             .connect-btn:hover {
                 background: #014a8f;
                 transform: translateY(-1px);
-                box-shadow: 0 4px 12px rgba(1, 118, 211, 0.4);
+                box-shadow: 0 0.25rem 0.75rem rgba(1, 118, 211, 0.4);
             }
 
             .connect-btn:disabled {
@@ -574,10 +575,10 @@
 
             .manual-modal-container {
                 background: #ffffff;
-                border-radius: 12px;
-                max-width: 580px;
+                border-radius: 0.75rem;
+                max-width: 36.25rem;
                 width: 92%;
-                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                box-shadow: 0 1.25rem 1.5625rem -0.3125rem rgba(0, 0, 0, 0.1), 0 0.625rem 0.625rem -0.3125rem rgba(0, 0, 0, 0.04);
                 border: 1px solid #E5E7EB;
                 overflow: hidden;
                 position: relative;
@@ -601,25 +602,25 @@
 
             .manual-modal-header {
                 background: #ffffff;
-                padding: 18px 24px;
+                padding: 1.125rem 1.5rem;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 border-bottom: 1px solid #E5E7EB;
-                border-top-left-radius: 12px;
-                border-top-right-radius: 12px;
+                border-top-left-radius: 0.75rem;
+                border-top-right-radius: 0.75rem;
             }
 
             .manual-header-left {
                 display: flex;
                 align-items: center;
-                gap: 14px;
+                gap: 0.875rem;
             }
 
             .manual-header-icon-box {
-                width: 44px;
-                height: 44px;
-                border-radius: 10px;
+                width: 2.75rem;
+                height: 2.75rem;
+                border-radius: 0.625rem;
                 background-color: #EBF5FF;
                 display: flex;
                 align-items: center;
@@ -633,7 +634,7 @@
             }
 
             .manual-modal-title {
-                font-size: 17px;
+                font-size: 1.0625rem;
                 font-weight: 700;
                 color: #0F172A;
                 margin: 0;
@@ -641,10 +642,10 @@
             }
 
             .manual-modal-subtitle {
-                font-size: 13px;
+                font-size: 0.8125rem;
                 font-weight: 400;
                 color: #64748B;
-                margin: 3px 0 0 0;
+                margin: 0.1875rem 0 0 0;
                 line-height: 1.35;
             }
 
@@ -653,9 +654,9 @@
                 justify-content: center;
                 align-items: center;
                 cursor: pointer;
-                width: 32px;
-                height: 32px;
-                border-radius: 6px;
+                width: 2rem;
+                height: 2rem;
+                border-radius: 0.375rem;
                 background: transparent;
                 border: none;
                 color: #64748B;
@@ -669,8 +670,8 @@
             }
 
             .manual-modal-close svg {
-                width: 20px;
-                height: 20px;
+                width: 1.25rem;
+                height: 1.25rem;
             }
 
             .manual-modal-body {
@@ -741,6 +742,16 @@
                 box-shadow: 0 0 0 3px rgba(1, 118, 211, 0.15);
             }
 
+            .manual-field-input.input-error {
+                border-color: #ef4444 !important;
+                background-color: #fef2f2 !important;
+            }
+
+            .manual-field-input.input-error:focus {
+                border-color: #dc2626 !important;
+                box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+            }
+
             .manual-field-textarea {
                 min-height: 68px;
                 resize: vertical;
@@ -803,20 +814,20 @@
 
             .manual-trigger-btn {
                 width: 100%;
-                height: 42px;
-                padding: 0 20px;
-                font-size: 14px;
+                height: 2.625rem;
+                padding: 0 1.25rem;
+                font-size: 0.875rem;
                 font-weight: 600;
                 background: #ffffff;
                 color: #0176D3;
                 border: 1.5px solid #0176D3;
-                border-radius: 6px;
+                border-radius: 0.375rem;
                 cursor: pointer;
                 transition: all 0.25s ease;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                gap: 8px;
+                gap: 0.5rem;
                 box-sizing: border-box;
             }
 
@@ -825,7 +836,7 @@
                 border-color: #0156A3;
                 color: #0156A3;
                 transform: translateY(-1px);
-                box-shadow: 0 2px 6px rgba(1, 118, 211, 0.15);
+                box-shadow: 0 0.125rem 0.375rem rgba(1, 118, 211, 0.15);
             }
 
             .exp-blue-btn-css {
@@ -849,14 +860,59 @@
                 cursor: pointer;
             }
 
-            @media (max-width: 1024px) {
+            @media (max-width: 64rem) {
                 .config-card {
                     width: 100%;
                     max-width: 100%;
+                    padding: 1.5rem;
+                    margin-top: 1rem;
+                    margin-bottom: 1rem;
                 }
 
                 .setup-form-container {
                     flex-direction: column;
+                }
+            }
+
+            @media (max-width: 48rem) {
+                .child-component-container {
+                    padding: 1rem;
+                }
+
+                .config-card {
+                    padding: 1.25rem;
+                    border-radius: 0.5rem;
+                }
+
+                .page-header {
+                    gap: 0.75rem;
+                    margin-bottom: 1.25rem;
+                    padding-bottom: 1.25rem;
+                }
+
+                .page-header-icon-container {
+                    width: 3rem;
+                    height: 3rem;
+                    margin-right: 0;
+                }
+
+                .note-box {
+                    margin-top: 2rem;
+                }
+            }
+
+            @media (max-width: 30rem) {
+                .child-component-container {
+                    padding: 0.5rem;
+                }
+
+                .config-card {
+                    padding: 0.875rem;
+                    border-radius: 0.375rem;
+                }
+
+                .manual-modal-container {
+                    width: 96%;
                 }
             }
         </style>
@@ -1175,11 +1231,42 @@
         <script>
             let phoneNumberId = '';
             let wabaId = '{!JSENCODE(businessAccountId)}';
-
-            let appId = '';
+            let appId = '{!JSENCODE(appId)}';
             let accessToken = '';
             let apiVersion = '{!JSENCODE(apiVersion)}';
             let apiEndpoint = '{!JSENCODE(apiEndpoint)}';
+
+            function formatCurrentDateTime() {
+                var now = new Date();
+                var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+                var month = pad(now.getMonth() + 1);
+                var day = pad(now.getDate());
+                var year = now.getFullYear();
+                var hours = now.getHours();
+                var minutes = pad(now.getMinutes());
+                var seconds = pad(now.getSeconds());
+                var ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? pad(hours) : '12';
+                return month + '/' + day + '/' + year + ', ' + hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+            }
+
+            function redirectToConnectedLwc(targetWabaId, targetAppId, targetLastEdited) {
+                var params = new URLSearchParams();
+                params.set('c__openComponent', 'whatsappConnect');
+                if (targetWabaId) {
+                    params.set('c__businessAccountId', targetWabaId);
+                    params.set('c__wabaId', targetWabaId);
+                }
+                if (targetAppId) {
+                    params.set('c__applicationId', targetAppId);
+                    params.set('c__appId', targetAppId);
+                }
+                if (targetLastEdited) {
+                    params.set('c__lastEdited', targetLastEdited);
+                }
+                window.top.location.href = '/lightning/n/Control_Center_Dev?' + params.toString();
+            }
 
             var errorDismissTimer = null;
 
@@ -1279,6 +1366,38 @@
                 setLoading(false);
             }
 
+            function clearManualFieldErrors() {
+                var fieldIds = ['manual-app-id', 'manual-waba-id', 'manual-phone-id', 'manual-access-token'];
+                for (var i = 0; i < fieldIds.length; i++) {
+                    var el = document.getElementById(fieldIds[i]);
+                    if (el) el.classList.remove('input-error');
+                }
+                var errorAlert = document.getElementById('manual-error-alert');
+                if (errorAlert) errorAlert.classList.remove('show');
+            }
+
+            function showManualError(msg, fieldKey) {
+                clearManualFieldErrors();
+                var errorAlert = document.getElementById('manual-error-alert');
+                var errorText = document.getElementById('manual-error-text');
+                if (errorText) errorText.textContent = msg;
+                if (errorAlert) errorAlert.classList.add('show');
+
+                if (fieldKey === 'app') {
+                    var el = document.getElementById('manual-app-id');
+                    if (el) el.classList.add('input-error');
+                } else if (fieldKey === 'waba') {
+                    var el = document.getElementById('manual-waba-id');
+                    if (el) el.classList.add('input-error');
+                } else if (fieldKey === 'phone') {
+                    var el = document.getElementById('manual-phone-id');
+                    if (el) el.classList.add('input-error');
+                } else if (fieldKey === 'token') {
+                    var el = document.getElementById('manual-access-token');
+                    if (el) el.classList.add('input-error');
+                }
+            }
+
             function openManualConfigModal() {
                 const modal = document.getElementById('manual-config-modal');
                 const manualAppIdInput = document.getElementById('manual-app-id');
@@ -1286,58 +1405,105 @@
                 if (existingAppId && manualAppIdInput && !manualAppIdInput.value) {
                     manualAppIdInput.value = existingAppId;
                 }
-                const errorAlert = document.getElementById('manual-error-alert');
-                if (errorAlert) errorAlert.classList.remove('show');
+                clearManualFieldErrors();
+                const saveBtn = document.getElementById('manual-save-btn');
+                if (saveBtn) saveBtn.disabled = false;
                 if (modal) modal.classList.add('show');
             }
 
             function closeManualConfigModal() {
                 const modal = document.getElementById('manual-config-modal');
                 if (modal) modal.classList.remove('show');
+                const saveBtn = document.getElementById('manual-save-btn');
+                if (saveBtn) saveBtn.disabled = false;
             }
 
-            function saveManualConfiguration() {
-                const appIdVal = document.getElementById('manual-app-id').value.trim();
-                const wabaIdVal = document.getElementById('manual-waba-id').value.trim();
-                const phoneIdVal = document.getElementById('manual-phone-id').value.trim();
-                const tokenVal = document.getElementById('manual-access-token').value.trim();
-                const errorAlert = document.getElementById('manual-error-alert');
-                const errorText = document.getElementById('manual-error-text');
-
-                if (!appIdVal || !wabaIdVal || !phoneIdVal || !tokenVal) {
-                    if (errorText) errorText.textContent = 'Please fill in all 4 fields (Meta App ID, WABA ID, Phone Number ID, and Access Token).';
-                    if (errorAlert) errorAlert.classList.add('show');
-                    return;
-                }
-
-                if (errorAlert) errorAlert.classList.remove('show');
-                closeManualConfigModal();
-                showSpinner('Saving WhatsApp credentials...');
-
+            function verifyManualCredentials(appIdVal, wabaIdVal, phoneIdVal, tokenVal, callback) {
                 Visualforce.remoting.Manager.invokeAction(
-                    '{!$RemoteAction.WhatsappConnectController.saveManualDetails}',
+                    '{!$RemoteAction.WhatsappConnectController.verifyManualCredentials}',
                     tokenVal, phoneIdVal, wabaIdVal, appIdVal,
                     function (result, event) {
                         if (event.status && result) {
-                            const spinner = document.getElementById('loading-spinner');
-                            const spinnerText = spinner ? spinner.querySelector('.spinner-text') : null;
-                            const spinnerIcon = spinner ? (spinner.querySelector('.spinner-big') || spinner.querySelector('.spinner')) : null;
-
-                            if (spinnerIcon) spinnerIcon.style.borderTopColor = '#16a34a';
-                            if (spinnerText) spinnerText.textContent = 'WhatsApp credentials saved successfully! Redirecting...';
-
-                            setTimeout(() => {
-                                window.top.location.href = '/lightning/n/Control_Center_Dev?c__openComponent=whatsappConnect';
-                            }, 2000);
+                            callback(result);
                         } else {
-                            hideSpinner();
-                            showError("Error saving WhatsApp credentials. Please try again.");
+                            callback({
+                                isValid: false,
+                                field: 'general',
+                                message: event.message || 'Error communicating with server during credential verification.'
+                            });
                         }
                     },
                     {
-                        escape: true
+                        escape: false
                     }
                 );
+            }
+
+            function saveManualConfiguration() {
+                var appIdInput = document.getElementById('manual-app-id');
+                var wabaIdInput = document.getElementById('manual-waba-id');
+                var phoneIdInput = document.getElementById('manual-phone-id');
+                var tokenInput = document.getElementById('manual-access-token');
+
+                var appIdVal = appIdInput ? appIdInput.value.trim() : '';
+                var wabaIdVal = wabaIdInput ? wabaIdInput.value.trim() : '';
+                var phoneIdVal = phoneIdInput ? phoneIdInput.value.trim() : '';
+                var tokenVal = tokenInput ? tokenInput.value.trim() : '';
+
+                clearManualFieldErrors();
+
+                if (!appIdVal || !wabaIdVal || !phoneIdVal || !tokenVal) {
+                    if (!appIdVal && appIdInput) appIdInput.classList.add('input-error');
+                    if (!wabaIdVal && wabaIdInput) wabaIdInput.classList.add('input-error');
+                    if (!phoneIdVal && phoneIdInput) phoneIdInput.classList.add('input-error');
+                    if (!tokenVal && tokenInput) tokenInput.classList.add('input-error');
+                    showManualError('Please fill in all 4 fields (Meta App ID, WABA ID, Phone Number ID, and Access Token).');
+                    return;
+                }
+
+                var saveBtn = document.getElementById('manual-save-btn');
+                if (saveBtn) saveBtn.disabled = true;
+                showSpinner('Verifying credentials via Apex callout...');
+
+                verifyManualCredentials(appIdVal, wabaIdVal, phoneIdVal, tokenVal, function (verification) {
+                    if (!verification.isValid) {
+                        hideSpinner();
+                        if (saveBtn) saveBtn.disabled = false;
+                        showManualError(verification.message, verification.field);
+                        return;
+                    }
+
+                    // Credentials verified successfully! Now save via Salesforce remoting
+                    showSpinner('Credentials verified! Saving WhatsApp credentials...');
+                    closeManualConfigModal();
+
+                    Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.WhatsappConnectController.saveManualDetails}',
+                        tokenVal, phoneIdVal, wabaIdVal, appIdVal,
+                        function (result, event) {
+                            if (saveBtn) saveBtn.disabled = false;
+                            if (event.status && result) {
+                                var spinner = document.getElementById('loading-spinner');
+                                var spinnerText = spinner ? spinner.querySelector('.spinner-text') : null;
+                                var spinnerIcon = spinner ? (spinner.querySelector('.spinner-big') || spinner.querySelector('.spinner')) : null;
+
+                                if (spinnerIcon) spinnerIcon.style.borderTopColor = '#16a34a';
+                                if (spinnerText) spinnerText.textContent = 'WhatsApp credentials saved successfully! Redirecting...';
+
+                                var formattedDate = formatCurrentDateTime();
+                                setTimeout(function () {
+                                    redirectToConnectedLwc(wabaIdVal, appIdVal, formattedDate);
+                                }, 2000);
+                            } else {
+                                hideSpinner();
+                                showError("Error saving WhatsApp credentials. Please try again.");
+                            }
+                        },
+                        {
+                            escape: true
+                        }
+                    );
+                });
             }
 
             window.addEventListener('click', function (e) {
@@ -1368,9 +1534,23 @@
                     });
                 }
 
+                var manualFields = ['manual-app-id', 'manual-waba-id', 'manual-phone-id', 'manual-access-token'];
+                manualFields.forEach(function (id) {
+                    var el = document.getElementById(id);
+                    if (el) {
+                        el.addEventListener('input', function () {
+                            this.classList.remove('input-error');
+                            var alert = document.getElementById('manual-error-alert');
+                            if (alert) alert.classList.remove('show');
+                        });
+                    }
+                });
+
                 if (wabaId) {
                     // When WhatsApp is already connected, redirect directly to Control Center to show the connected LWC component
-                    window.top.location.href = '/lightning/n/Control_Center_Dev?c__openComponent=whatsappConnect';
+                    var currentAppId = '{!JSENCODE(appId)}';
+                    var currentLastEdited = '{!JSENCODE(lastModifiedDate)}';
+                    redirectToConnectedLwc(wabaId, currentAppId, currentLastEdited);
                 }
             });
 
@@ -1437,8 +1617,9 @@
                                 function (result, event) {
                                     if (event.status && result) {
                                         showSpinner('Saving configuration...');
+                                        var formattedDate = formatCurrentDateTime();
                                         setTimeout(() => {
-                                            window.top.location.href = '/lightning/n/Control_Center_Dev?c__openComponent=whatsappConnect';
+                                            redirectToConnectedLwc(wabaId, appId, formattedDate);
                                         }, 2500);
                                     } else {
                                         console.error('Remoting Action Failed:', event.message, event);

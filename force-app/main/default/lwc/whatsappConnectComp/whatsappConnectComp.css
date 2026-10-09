@@ -47,25 +47,25 @@
 
 .config-card {
     background: #ffffff;
-    border-radius: 12px;
-    padding: 32px;
+    border-radius: 0.75rem;
+    padding: 2rem;
     width: 100%;
-    max-width: 1150px;
+    max-width: 71.875rem;
     height: max-content;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05), 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.02);
     border: 1px solid #e5e9f0;
     box-sizing: border-box;
-    margin-top: 32px;
-    margin-bottom: 32px;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
 }
 
 .page-header {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
-    margin-bottom: 24px;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
     border-bottom: 1px solid #e5e9f0;
-    padding-bottom: 24px;
+    padding-bottom: 1.5rem;
 }
 
 .page-header-content {
@@ -77,27 +77,27 @@
 .page-header-icon-container {
     background: #E8F8F0;
     color: #25D366;
-    border-radius: 12px;
-    width: 56px;
-    height: 56px;
+    border-radius: 0.75rem;
+    width: 3.5rem;
+    height: 3.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-right: 16px;
+    margin-right: 1rem;
 }
 
 .page-title {
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 600;
     color: #0f1419;
     margin: 0;
-    margin-bottom: 4px;
+    margin-bottom: 0.25rem;
     letter-spacing: 0.3px;
 }
 
 .page-subtitle {
-    font-size: 16px;
+    font-size: 1rem;
     color: #536471;
     margin: 0;
     line-height: 1.5;
@@ -105,34 +105,37 @@
 
 .connected-layout-container {
     display: flex;
-    gap: 24px;
+    gap: 1.5rem;
     align-items: flex-start;
+    width: 100%;
 }
 
 .connected-left-col {
-    flex: 1;
-    min-width: 270px;
-    max-width: 360px;
+    flex: 1 1 18rem;
+    min-width: 16.875rem;
+    max-width: 22.5rem;
+    width: 100%;
 }
 
 .connected-right-col {
-    flex: 1.4;
+    flex: 1.4 1 25rem;
     min-width: 0;
-    max-width: 700px;
+    max-width: 43.75rem;
+    width: 100%;
 }
 
 .status-badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
+    gap: 0.375rem;
+    padding: 0.375rem 0.875rem;
     background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%);
-    border-radius: 16px;
-    font-size: 14px;
+    border-radius: 1rem;
+    font-size: 0.875rem;
     font-weight: 500;
     color: #0176D3;
-    margin-bottom: 16px;
-    box-shadow: 0 1px 3px rgba(1, 118, 211, 0.1);
+    margin-bottom: 1rem;
+    box-shadow: 0 0.0625rem 0.1875rem rgba(1, 118, 211, 0.1);
 }
 
 .status-dot {
@@ -154,26 +157,26 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px;
+    padding: 1rem;
     background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
     border: 1px solid #E5E7EB;
-    border-radius: 8px;
+    border-radius: 0.5rem;
     margin-bottom: 1rem;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.06);
 }
 
 .account-box-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 0.75rem;
     flex: 1;
 }
 
 .shield-icon {
-    width: 40px;
-    height: 40px;
+    width: 2.5rem;
+    height: 2.5rem;
     background: #0176D3;
-    border-radius: 8px;
+    border-radius: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -181,8 +184,8 @@
 }
 
 .shield-icon svg {
-    width: 24px;
-    height: 24px;
+    width: 1.5rem;
+    height: 1.5rem;
     fill: white;
 }
 
@@ -191,26 +194,26 @@
 }
 
 .account-id {
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 500;
     color: #131314;
-    margin: 0 0 4px 0;
+    margin: 0 0 0.25rem 0;
 }
 
 .account-status {
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #10B981;
     margin: 0;
 }
 
 .copy-btn {
-    padding: 8px 12px;
+    padding: 0.5rem 0.75rem;
     background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
     border: 1px solid #e5e7eb;
-    border-radius: 6px;
+    border-radius: 0.375rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.06);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -220,37 +223,37 @@
     background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
     border-color: #0176D3;
     transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(1, 118, 211, 0.2);
+    box-shadow: 0 0.125rem 0.375rem rgba(1, 118, 211, 0.2);
 }
 
 .copy-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 1.125rem;
+    height: 1.125rem;
 }
 
 .deactivate-btn {
     width: 100%;
-    padding: 12px 24px;
-    font-size: 16px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
     font-weight: 500;
     background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
     color: #DC2626;
     border: 1px solid #DC2626;
-    border-radius: 8px;
+    border-radius: 0.5rem;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 0.5rem;
     margin-top: 1rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.06);
 }
 
 .deactivate-btn:hover {
     background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
     transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+    box-shadow: 0 0.125rem 0.375rem rgba(239, 68, 68, 0.2);
 }
 
 .section-title {
@@ -372,26 +375,26 @@
 
 .manual-modal-header {
     background: #ffffff;
-    padding: 16px 20px;
+    padding: 1rem 1.25rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid #E5E7EB;
-    border-top-left-radius: 8px !important;
-    border-top-right-radius: 8px !important;
+    border-top-left-radius: 0.5rem !important;
+    border-top-right-radius: 0.5rem !important;
     text-align: left;
 }
 
 .manual-header-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 0.75rem;
 }
 
 .manual-header-icon-box {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.625rem;
     background-color: #EBF5FF;
     display: flex;
     align-items: center;
@@ -410,7 +413,7 @@
 }
 
 .manual-modal-title {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 700;
     color: #0F172A;
     margin: 0;
@@ -418,19 +421,19 @@
 }
 
 .manual-modal-subtitle {
-    font-size: 13px;
+    font-size: 0.8125rem;
     color: #64748B;
-    margin: 2px 0 0 0;
+    margin: 0.125rem 0 0 0;
     text-align: left;
 }
 
 .modal-body {
-    padding: 20px;
+    padding: 1.25rem;
     background: #ffffff;
 }
 
 .modal-message {
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #475569;
     line-height: 1.55;
     margin: 0;
@@ -441,15 +444,15 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 10px;
-    padding: 14px 20px;
+    gap: 0.625rem;
+    padding: 0.875rem 1.25rem;
     border-top: 1px solid #E5E7EB;
     background: #F8FAFC;
-    border-bottom-left-radius: 8px !important;
-    border-bottom-right-radius: 8px !important;
+    border-bottom-left-radius: 0.5rem !important;
+    border-bottom-right-radius: 0.5rem !important;
 }
 
-@media (max-width: 992px) {
+@media (max-width: 64rem) {
     .connected-layout-container {
         flex-direction: column;
     }
@@ -458,12 +461,58 @@
     .connected-right-col {
         max-width: 100%;
         width: 100%;
+        flex: 1 1 100%;
     }
 
     .config-card {
-        padding: 20px;
-        margin-top: 16px;
-        margin-bottom: 16px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 48rem) {
+    .whatsapp-connect-wrapper {
+        padding: 1rem;
+    }
+
+    .config-card {
+        padding: 1.25rem;
+        border-radius: 0.5rem;
+    }
+
+    .page-header {
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1.25rem;
+    }
+
+    .page-header-icon-container {
+        width: 3rem;
+        height: 3rem;
+        margin-right: 0;
+    }
+}
+
+@media (max-width: 30rem) {
+    .whatsapp-connect-wrapper {
+        padding: 0.5rem;
+    }
+
+    .config-card {
+        padding: 0.875rem;
+        border-radius: 0.375rem;
+    }
+
+    .config-top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .config-top-actions {
+        width: 100%;
+        justify-content: flex-end;
     }
 }
 
@@ -560,7 +609,7 @@
     border: 0;
     background: #ffffff;
     color: #1f2937;
-    min-height: 48px;
+    min-height: 3rem;
     padding: 0.75rem 1rem;
     display: flex;
     align-items: center;
@@ -568,7 +617,7 @@
     gap: 1rem;
     cursor: pointer;
     transition: background 0.2s ease;
-    border-radius: 8px;
+    border-radius: 0.5rem;
 }
 
 .accordion-header-btn:hover {
@@ -593,13 +642,13 @@
     justify-content: center;
     width: 1.6rem;
     height: 1.6rem;
-    border-radius: 6px;
+    border-radius: 0.375rem;
     background: #eef6ff;
     border: 1px solid #cfe5fb;
 }
 
 .accordion-title {
-    font-size: 14.5px;
+    font-size: 0.90625rem;
     font-weight: 600;
 }
 
@@ -607,9 +656,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.375rem;
     background: #ffffff;
     border: 1px solid #d7dee7;
 }
@@ -626,14 +675,14 @@
     padding: 1rem;
     background: #ffffff;
     border-top: 1px solid #edf1f6;
-    border-bottom-left-radius: 7px;
-    border-bottom-right-radius: 7px;
+    border-bottom-left-radius: 0.4375rem;
+    border-bottom-right-radius: 0.4375rem;
     overflow: visible !important;
-    min-height: 140px;
+    min-height: 8.75rem;
 }
 
 .object-static-label {
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 600;
     color: #1f2937;
 }
@@ -646,9 +695,9 @@
 .exp-accordion-table-content {
     overflow-x: auto !important;
     overflow-y: auto !important;
-    max-height: 320px !important;
-    min-height: 80px;
-    border-radius: 6px !important;
+    max-height: 20rem !important;
+    min-height: 5rem;
+    border-radius: 0.375rem !important;
     border: 1px solid #e5e9f2 !important;
     background: #ffffff !important;
     position: relative !important;
@@ -660,14 +709,14 @@
 /* Ensure edit-mode table box has ample clearance */
 .accordion-panel:has(.custom-table) .exp-accordion-table-content,
 .exp-accordion-table-content:has(lightning-combobox) {
-    min-height: 140px;
+    min-height: 8.75rem;
 }
 
 /* Enforce fixed table layout and minimum width for horizontal scrollability */
 .exp-accordion-table-content table.slds-table {
     table-layout: fixed !important;
     width: 100% !important;
-    min-width: 540px !important;
+    min-width: 33.75rem !important;
     border-collapse: separate !important;
     border-spacing: 0 !important;
     background: #ffffff !important;
@@ -681,15 +730,15 @@
     background: #f0f8ff !important;
     color: #1e3a8a !important;
     text-transform: uppercase !important;
-    font-size: 12px !important;
+    font-size: 0.75rem !important;
     font-weight: 700 !important;
-    height: 40px !important;
+    height: 2.5rem !important;
     border-top: none !important;
     border-left: none !important;
     border-right: none !important;
     border-bottom: 2px solid #0176D3 !important;
     text-align: left !important;
-    padding: 0 16px !important;
+    padding: 0 1rem !important;
     vertical-align: middle !important;
 }
 
@@ -709,9 +758,9 @@
 .exp-accordion-table-content table.slds-table td {
     background: #ffffff !important;
     height: auto !important;
-    min-height: 48px !important;
+    min-height: 3rem !important;
     max-width: none !important;
-    padding: 8px 16px !important;
+    padding: 0.5rem 1rem !important;
     border-top: none !important;
     border-left: none !important;
     border-right: none !important;
@@ -731,46 +780,46 @@
 .col-webhook-name {
     width: 35% !important;
     max-width: 35% !important;
-    min-width: 140px !important;
+    min-width: 8.75rem !important;
 }
 
 .col-webhook-type {
     width: 25% !important;
     max-width: 25% !important;
-    min-width: 110px !important;
+    min-width: 6.875rem !important;
 }
 
 /* Default Value column remains strictly fixed at 40% in any scenario */
 .col-webhook-val {
     width: 40% !important;
     max-width: 40% !important;
-    min-width: 180px !important;
+    min-width: 11.25rem !important;
 }
 
 /* ── Chat Window Configuration Table Columns ────────────────────── */
 .col-chat-object {
     width: 45% !important;
     max-width: 45% !important;
-    min-width: 160px !important;
+    min-width: 10rem !important;
 }
 
 .col-chat-field {
     width: 55% !important;
     max-width: 55% !important;
-    min-width: 200px !important;
+    min-width: 12.5rem !important;
 }
 
 /* ── Webhook Phone Field Table Columns ──────────────────────────── */
 .col-webhook-phone-label {
     width: 45% !important;
     max-width: 45% !important;
-    min-width: 160px !important;
+    min-width: 10rem !important;
 }
 
 .col-webhook-phone-field {
     width: 55% !important;
     max-width: 55% !important;
-    min-width: 200px !important;
+    min-width: 12.5rem !important;
 }
 
 /* ── Form Inputs Inside Table Cells ─────────────────────────────── */

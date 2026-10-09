@@ -1,5 +1,5 @@
-import { LightningElement, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
+import { LightningElement, track, wire } from 'lwc';
+import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import getIntegrationConfig from '@salesforce/apex/WhatsappConnectController.getIntegrationConfig';
 import unlinkAccount from '@salesforce/apex/WhatsappConnectController.unlinkAccount';
 import getContactObjectConfig from '@salesforce/apex/WhatsappConnectController.getContactObjectConfig';
@@ -29,6 +29,54 @@ export default class WhatsappConnectComp extends NavigationMixin(LightningElemen
     @track chatWindowRows = [];
     @track requiredFields = [];
     originalStateSnapshot = null;
+    currentPageRef;
+
+    @wire(CurrentPageReference)
+    wirePageRef(pageRef) {
+        this.currentPageRef = pageRef;
+        this.extractUrlParameters();
+    }
+
+    extractUrlParameters() {
+        let wabaId = '';
+        let appId = '';
+        let lastEdited = '';
+
+        if (this.currentPageRef && this.currentPageRef.state) {
+            const state = this.currentPageRef.state;
+            wabaId = state.c__businessAccountId || state.c__wabaId || '';
+            appId = state.c__applicationId || state.c__appId || '';
+            lastEdited = state.c__lastEdited || state.c__lastModifiedDate || '';
+        }
+
+        if (!wabaId || !appId || !lastEdited) {
+            try {
+                const searchParams = new URLSearchParams(window.location.search);
+                if (!wabaId) {
+                    wabaId = searchParams.get('c__businessAccountId') || searchParams.get('c__wabaId') || '';
+                }
+                if (!appId) {
+                    appId = searchParams.get('c__applicationId') || searchParams.get('c__appId') || '';
+                }
+                if (!lastEdited) {
+                    lastEdited = searchParams.get('c__lastEdited') || searchParams.get('c__lastModifiedDate') || '';
+                }
+            } catch (e) {
+                // Ignore window.location access issues
+            }
+        }
+
+        if (wabaId && !this.businessAccountId) {
+            this.businessAccountId = wabaId;
+            this.isConnected = true;
+        }
+        if (appId && !this.appId) {
+            this.appId = appId;
+        }
+        if (lastEdited && !this.lastModifiedDate) {
+            this.lastModifiedDate = lastEdited;
+        }
+    }
 
     get isChatSectionOpen() {
         return this.activeSections.includes('chatWindowConfig');
@@ -57,6 +105,7 @@ export default class WhatsappConnectComp extends NavigationMixin(LightningElemen
     async connectedCallback() {
         try {
             this.isLoading = true;
+            this.extractUrlParameters();
             loadStyle(this, GlobalStylesCss);
 
             await this.loadIntegration();
@@ -70,14 +119,16 @@ export default class WhatsappConnectComp extends NavigationMixin(LightningElemen
 
     async loadIntegration() {
         try {
+            this.extractUrlParameters();
+
             const data = await getIntegrationConfig();
             if (data) {
-                this.appId = data.appId || '';
-                this.businessAccountId = data.businessAccountId || '';
-                this.phoneNumberId = data.phoneNumberId || '';
-                this.accessToken = data.accessToken || '';
-                this.lastModifiedDate = data.lastModifiedDate || '';
-                this.isConnected = data.isConnected || false;
+                this.appId = data.appId || this.appId || '';
+                this.businessAccountId = data.businessAccountId || this.businessAccountId || '';
+                this.phoneNumberId = data.phoneNumberId || this.phoneNumberId || '';
+                this.accessToken = data.accessToken || this.accessToken || '';
+                this.lastModifiedDate = data.lastModifiedDate || this.lastModifiedDate || '';
+                this.isConnected = data.isConnected || !!this.businessAccountId;
 
                 if (!this.isConnected) {
                     this[NavigationMixin.Navigate]({
@@ -87,9 +138,24 @@ export default class WhatsappConnectComp extends NavigationMixin(LightningElemen
                         }
                     });
                 }
+            } else if (!this.isConnected) {
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: {
+                        url: '/apex/WhatsappConnectSDK'
+                    }
+                });
             }
         } catch (error) {
             console.error('Error fetching integration config:', error);
+            if (!this.isConnected) {
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: {
+                        url: '/apex/WhatsappConnectSDK'
+                    }
+                });
+            }
         }
     }
 

@@ -201,14 +201,14 @@ public with sharing class SiteAndBookingController {
             }
 
             if (!showingsToInsert.isEmpty()) {
-                insert showingsToInsert;
+                insert as user showingsToInsert;
                 for (Event s : showingsToInsert) {
                     showingIds.add(s.Id);
                     contactToShowing.put(s.MVEX__Buyer__c, s);
                 }
             }
             if (!showingsToUpdate.isEmpty()) {
-                update showingsToUpdate;
+                update as user showingsToUpdate;
             }
 
             result.put('showingIds', showingIds);
@@ -242,7 +242,7 @@ public with sharing class SiteAndBookingController {
                 StartDateTime = rescheduleDateTime,
                 EndDateTime = rescheduleDateTime.addMinutes(durationMins)
             );
-            update showing;
+            update as user showing;
             return true;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'updateShowing', e.getMessage());
@@ -260,7 +260,7 @@ public with sharing class SiteAndBookingController {
                 Id = showingId,
                 MVEX__Status__c = 'Completed'
             );
-            update showing;
+            update as user showing;
             return true;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SiteAndBookingController', 'markShowingAsCompleted', e.getMessage());

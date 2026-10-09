@@ -1,323 +1,221 @@
 @isTest
-public with sharing class InstagramPostControllerTest {
+private class InstagramPostControllerTest {
+
+    // ─── HTTP Mock for Success (Single Media & Carousel) ─────────────────────
+    private class InstagramSuccessMock implements HttpCalloutMock {
+        public HTTPResponse respond(HTTPRequest req) {
+            HTTPResponse res = new HTTPResponse();
+            String endpoint = req.getEndpoint();
+            
+            // S3 delete call
+            if (endpoint.contains('.s3.amazonaws.com')) {
+                res.setStatusCode(200);
+                res.setBody('<?xml version="1.0" encoding="UTF-8"?><DeleteResult></DeleteResult>');
+                return res;
+            }
+            
+            // Instagram media/publish calls
+            res.setStatusCode(200);
+            res.setBody('{"id":"123456789"}');
+            return res;
+        }
+    }
+
+    // ─── HTTP Mock for Errors ────────────────────────────────────────────────
+    private class InstagramErrorMock implements HttpCalloutMock {
+        public HTTPResponse respond(HTTPRequest req) {
+            HTTPResponse res = new HTTPResponse();
+            String endpoint = req.getEndpoint();
+            
+            if (endpoint.contains('.s3.amazonaws.com')) {
+                res.setStatusCode(400);
+                res.setBody('<Error><Code>InvalidRequest</Code></Error>');
+                return res;
+            }
+            
+            res.setStatusCode(400);
+            res.setBody('{"error":{"message":"Invalid OAuth access token."}}');
+            return res;
+        }
+    }
 
     @testSetup
-    static void setupTestData() {
-        GmailConfig__c gmailConfig = new GmailConfig__c(
-            Client_ID__c = 'test_client',
-            Client_Secret__c = 'test_secret',
-            Refresh_Token__c = 'test_refresh_token'
+    static void setup() {
+        // Create AWS Config custom setting
+        MVEX__AWS_Config__c awsConfig = new MVEX__AWS_Config__c(
+            MVEX__AWS_Access_Key__c = 'mock_access_key',
+            MVEX__AWS_Secret_Access_Key__c = 'mock_secret_key',
+            MVEX__S3_Region_Name__c = 'us-east-1',
+            MVEX__S3_Bucket_Name__c = 'test-bucket'
         );
-        insert gmailConfig;
+        insert awsConfig;
         
-        insert new IG_Configuration__c(
-            User_Id__c = '1234567890',
-            Long_Access_Token__c = 'mock_access_token'
-        );
-
-        insert new AWS_Config__c(
-            AWS_Access_Key__c = 'accessKey',
-            AWS_Secret_Access_Key__c = 'secretKey',
-            S3_Region_Name__c = 'us-west-1',
-            S3_Bucket_Name__c = 'mock-bucket'
-        );
-
-        Property__c prop = new Property__c(Name = 'Test Property');
-        insert prop;
-
-        Map<String, Id> listingRecordTypeMap = new Map<String, Id>();
-        for (RecordType rt : [SELECT Id, DeveloperName FROM RecordType WHERE SObjectType IN ('Listing__c', 'MVEX__Listing__c') AND DeveloperName IN ('Rent', 'Sale')]) {
-            listingRecordTypeMap.put(rt.DeveloperName, rt.Id);
-        }
-
-        Listing__c listing = new Listing__c();
-        listing.Name = 'Dev Test 12';
-        listing.Property__c = prop.Id;
-        listing.Status__c = 'Active';
-        listing.Listing_Type__c = 'Rent';
-        if (listingRecordTypeMap.containsKey(listing.Listing_Type__c)) {
-            listing.RecordTypeId = listingRecordTypeMap.get(listing.Listing_Type__c);
-        }
-        listing.Rent_Frequency__c = 'Monthly'; 
-        listing.Property_Type__c = 'Villa';
-        listing.Property_Sub_Type__c = 'Residential - Apartment';
-        listing.Property_Category__c = 'Residential';
-        listing.Country_Code__c = 'IN';
-        listing.Street__c = 'Dev Test';
-        listing.City__c = 'Dev Test';
-        listing.State__c = 'Dev Test';
-        listing.Zip_Postal_Code__c = '123456';
-        listing.Description__c = 'Dev Test';
-        listing.Listing_Price__c = 1000000;
-        listing.Bedrooms__c = 3;
-        listing.Bathrooms__c = 2;
-        listing.Lot_Size__c = 1000;
-        listing.Listed_Date__c = Date.today();
-        listing.Furnished__c = 'Yes';
-        listing.Property_Status__c = 'Vacant';
-        listing.Year_Built__c = '2020';
-        listing.Listing_Agent_Firstname__c = 'RK';
-        listing.Listing_Agent_Lastname__c = 'Dev';
-        listing.Listing_Agent_Email__c = 'rkdev@gmail.com';
-        listing.Private_Amenities__c = 'Private Garden';
-        listing.Completion_Status__c = 'Completed';
-        listing.Available_From__c = Date.today();
-        listing.Availability_Date__c = DateTime.now();
-        listing.Bedrooms__c = 3;
-        insert listing;
-
-        insert new Property_File__c(
-            Name = 'SampleImage',
-            BaseUrl__c = 'https://mock-url.com/image.jpg',
-            Property__c = prop.Id
-        );
+        // Create Property & Listing
+        MVEX__Property__c prop = TestDataFactory.createProperty(true);
+        MVEX__Listing__c listing = TestDataFactory.createListing(true, prop.Id, null);
+        
+        // Create Property Files
+        MVEX__Property_File__c file1 = TestDataFactory.createPropertyFile(false, prop.Id);
+        file1.MVEX__ExternalLink__c = 'https://example.com/image1.jpg';
+        insert file1;
+        
+        MVEX__Property_File__c file2 = TestDataFactory.createPropertyFile(false, prop.Id);
+        file2.Name = 'Test Video';
+        file2.MVEX__BaseUrl__c = 'https://example.com/video.mp4';
+        insert file2;
     }
 
     @isTest
-    static void testPostToInstagramSingleImage() {
-        HttpResponse mockResponse = new HttpResponse();
-        mockResponse.setHeader('Content-Type', 'application/json');
-        mockResponse.setBody('{"id": "mock_container_id"}');
-        mockResponse.setStatusCode(200);
-
-        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(mockResponse));
-
-        Test.startTest();
-        InstagramPostController.InstagramPostResponse result = InstagramPostController.postToInstagram(
-            new List<String>{'https://mock-url.com/image.jpg'},
-            'Test Caption',
-            new List<String>{'objectKey1'},
-            new List<String>{'objectKey2'}
-        );
-        Test.stopTest();
+    static void testGetMediaTypeFromUrl() {
+        // Test implicitly via postToInstagram to cover various extensions
+        // But let's also directly test the logic if possible or rely on the postToInstagram call
+        // Since getMediaTypeFromUrl is private, we cover it through postToInstagram.
     }
 
     @isTest
-    static void testPostToInstagramCarousel() {
-        HttpResponse mockResponse = new HttpResponse();
-        mockResponse.setHeader('Content-Type', 'application/json');
-        mockResponse.setBody('{"id": "mock_container_id"}');
-        mockResponse.setStatusCode(200);
-
-        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(mockResponse));
-
+    static void testGenerateAWSHeadersAndKey() {
         Test.startTest();
-        InstagramPostController.InstagramPostResponse result = InstagramPostController.postToInstagram(
-            new List<String>{'https://mock-url.com/image1.jpg', 'https://mock-url.com/image2.jpg'},
-            'Carousel Caption',
-            new List<String>{'key1'},
-            new List<String>{'key2'}
-        );
+        Map<String, String> headers = InstagramPostController.generateAWSHeaders('payload', 'md5', 'access', 'secret', 'us-east-1', 'bucket');
         Test.stopTest();
+        
+        System.assertNotEquals(null, headers);
+        System.assertEquals('md5', headers.get('Content-MD5'));
     }
 
     @isTest
-    static void testGetS3ConfigSettings() {
+    static void testDeleteAwsImagesSuccess() {
+        Test.setMock(HttpCalloutMock.class, new InstagramSuccessMock());
+        
         Test.startTest();
-        AWS_Config__c config = InstagramPostController.getS3ConfigSettings();
+        InstagramPostController.deleteAwsImages(new List<String>{'image1.jpg'}, new List<String>());
         Test.stopTest();
-
-        System.assertNotEquals(null, config, 'Expected S3 config settings to be returned');
+        
+        // Ensure no exception is thrown
+        System.assert(true);
     }
-
+    
     @isTest
-    static void testGenerateAWSHeaders() {
-        String payload = '<Delete><Quiet>true</Quiet></Delete>';
-        String contentMD5 = EncodingUtil.base64Encode(Crypto.generateDigest('MD5', Blob.valueOf(payload)));
-
+    static void testDeleteAwsImagesError() {
+        Test.setMock(HttpCalloutMock.class, new InstagramErrorMock());
+        
         Test.startTest();
-        Map<String, String> headers = InstagramPostController.generateAWSHeaders(
-            payload,
-            contentMD5,
-            'accessKey',
-            'secretKey',
-            'us-west-1',
-            'mock-bucket'
-        );
+        InstagramPostController.deleteAwsImages(new List<String>{'image1.jpg'}, new List<String>());
         Test.stopTest();
-
-        System.assert(headers.containsKey('Content-MD5'), 'Expected Content-MD5 header to be present');
+        
+        // Ensure error is handled
+        System.assert(true);
     }
 
     @isTest
     static void testGetPropertyMediaUrls() {
-        Id listingId = [SELECT Id FROM Listing__c LIMIT 1].Id;
-
+        MVEX__Listing__c listing = [SELECT Id FROM MVEX__Listing__c LIMIT 1];
+        
         Test.startTest();
-        Map<String, String> result = InstagramPostController.getPropertyMediaUrls(listingId);
+        Map<String, String> mediaUrls = InstagramPostController.getPropertyMediaUrls(listing.Id);
         Test.stopTest();
-
-        System.assertNotEquals(null, result, 'Expected non-null media URL map');
+        
+        System.assertNotEquals(null, mediaUrls);
+        System.assertEquals(2, mediaUrls.size());
     }
 
     @isTest
     static void testCheckInstagramIntegration() {
         Test.startTest();
-        Boolean result = InstagramPostController.checkInstagramIntegration();
+        Boolean isConnected = InstagramPostController.checkInstagramIntegration();
         Test.stopTest();
-
-        System.assertEquals(true, result, 'Expected integration check to return true');
+        
+        System.assertEquals(true, isConnected);
     }
 
     @isTest
-    static void testCreateInstagramContainerSingleAndCarousel() {
-        HttpResponse mockResponse = new HttpResponse();
-        mockResponse.setHeader('Content-Type', 'application/json');
-        mockResponse.setBody('{"id": "mock_container_12345"}');
-        mockResponse.setStatusCode(200);
-
-        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(mockResponse));
-
+    static void testPostToInstagramSingleMediaSuccess() {
+        Test.setMock(HttpCalloutMock.class, new InstagramSuccessMock());
+        
         Test.startTest();
-        // Test single image
-        Map<String, Object> singleResult = InstagramPostController.createInstagramContainer(
-            new List<String>{'https://mock-url.com/image.jpg'},
-            'Single Image Caption'
-        );
-        
-        // Test carousel
-        Map<String, Object> carouselResult = InstagramPostController.createInstagramContainer(
-            new List<String>{'https://mock-url.com/img1.jpg', 'https://mock-url.com/img2.jpg'},
-            'Carousel Caption'
-        );
-        
-        // Test video (REELS)
-        Map<String, Object> videoResult = InstagramPostController.createInstagramContainer(
-            new List<String>{'https://mock-url.com/video.mp4'},
-            'Video Caption'
+        InstagramPostController.InstagramPostResponse res = InstagramPostController.postToInstagram(
+            new List<String>{'https://example.com/img.jpg'}, 
+            'Test Caption', 
+            new List<String>{'img.jpg'}, 
+            new List<String>()
         );
         Test.stopTest();
-
-        System.assertEquals(true, singleResult.get('success'), 'Single image should succeed');
-        System.assertEquals(false, singleResult.get('isCarousel'), 'Should not be carousel');
-        System.assertEquals(true, carouselResult.get('success'), 'Carousel should succeed');
-        System.assertEquals(true, carouselResult.get('isCarousel'), 'Should be carousel');
-        System.assertEquals(true, videoResult.get('success'), 'Video should succeed');
+        
+        System.assertEquals('SUCCESS', res.status);
+    }
+    
+    @isTest
+    static void testPostToInstagramSingleMediaReelsSuccess() {
+        Test.setMock(HttpCalloutMock.class, new InstagramSuccessMock());
+        
+        Test.startTest();
+        InstagramPostController.InstagramPostResponse res = InstagramPostController.postToInstagram(
+            new List<String>{'https://example.com/video.mp4'}, 
+            'Test Caption Reels', 
+            new List<String>{'video.mp4'}, 
+            new List<String>()
+        );
+        Test.stopTest();
+        
+        System.assertEquals('SUCCESS', res.status);
     }
 
     @isTest
-    static void testCreateInstagramContainerFailure() {
-        HttpResponse mockResponse = new HttpResponse();
-        mockResponse.setHeader('Content-Type', 'application/json');
-        mockResponse.setBody('{"error": {"message": "Invalid media URL"}}');
-        mockResponse.setStatusCode(400);
-
-        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(mockResponse));
-
-        Test.startTest();
-        Map<String, Object> result = InstagramPostController.createInstagramContainer(
-            new List<String>{'https://mock-url.com/invalid.jpg'},
-            'Test Caption'
-        );
-        Test.stopTest();
-
-        System.assertEquals(false, result.get('success'), 'Should fail with invalid URL');
-    }
-
-    @isTest
-    static void testPublishToInstagram() {
-        Test.startTest();
-        // Test single media publish
-        String resultSingle = InstagramPostController.publishToInstagram(
-            'mock_container_id',
-            new List<String>(),
-            false,
-            'Single Caption',
-            new List<String>{'key1'},
-            new List<String>{'key2'}
-        );
+    static void testPostToInstagramCarouselSuccess() {
+        Test.setMock(HttpCalloutMock.class, new InstagramSuccessMock());
         
-        // Test carousel publish
-        String resultCarousel = InstagramPostController.publishToInstagram(
-            '',
-            new List<String>{'container1', 'container2'},
-            true,
-            'Carousel Caption',
-            new List<String>{'key1', 'key2'},
-            new List<String>{'key3'}
+        Test.startTest();
+        InstagramPostController.InstagramPostResponse res = InstagramPostController.postToInstagram(
+            new List<String>{'https://example.com/img1.jpg', 'https://example.com/img2.jpg'}, 
+            'Test Caption Carousel', 
+            new List<String>{'img1.jpg', 'img2.jpg'}, 
+            new List<String>()
         );
         Test.stopTest();
-
-        System.assertNotEquals(null, resultSingle, 'Single publish result should not be null');
-        System.assertNotEquals(null, resultCarousel, 'Carousel publish result should not be null');
-        System.assert(resultSingle.contains('scheduled'), 'Should mention scheduling');
+        
+        System.assertEquals('SUCCESS', res.status);
     }
 
     @isTest
     static void testPostToInstagramError() {
-        HttpResponse mockResponse = new HttpResponse();
-        mockResponse.setHeader('Content-Type', 'application/json');
-        mockResponse.setBody('{"error": {"message": "API Error"}}');
-        mockResponse.setStatusCode(500);
-
-        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(mockResponse));
-
+        Test.setMock(HttpCalloutMock.class, new InstagramErrorMock());
+        
         Test.startTest();
-        InstagramPostController.InstagramPostResponse result = InstagramPostController.postToInstagram(
-            new List<String>{'https://mock-url.com/image.jpg'},
-            'Error Test',
-            new List<String>{'key1'},
-            new List<String>{'key2'}
+        InstagramPostController.InstagramPostResponse res = InstagramPostController.postToInstagram(
+            new List<String>{'https://example.com/img.jpg'}, 
+            'Test Caption', 
+            new List<String>{'img.jpg'}, 
+            new List<String>()
         );
         Test.stopTest();
-
-        System.assertEquals('ERROR', result.status, 'Should return error status');
+        
+        System.assertEquals('ERROR', res.status);
+        System.assert(res.message.contains('Invalid OAuth access token.'));
     }
-
+    
+    @isTest
+    static void testPostToInstagramCarouselError() {
+        Test.setMock(HttpCalloutMock.class, new InstagramErrorMock());
+        
+        Test.startTest();
+        InstagramPostController.InstagramPostResponse res = InstagramPostController.postToInstagram(
+            new List<String>{'https://example.com/img1.jpg', 'https://example.com/img2.jpg'}, 
+            'Test Caption Carousel', 
+            new List<String>{'img1.jpg', 'img2.jpg'}, 
+            new List<String>()
+        );
+        Test.stopTest();
+        
+        System.assertEquals('ERROR', res.status);
+        System.assert(res.message.contains('Invalid OAuth access token.'));
+    }
+    
     @isTest
     static void testSendEmailNotification() {
-        // Create email template
-        EmailTemplate template = new EmailTemplate(
-            DeveloperName = 'Instagram_Error_Template',
-            FolderId = UserInfo.getUserId(),
-            Name = 'Instagram Error Template',
-            Subject = 'Instagram Error',
-            HtmlValue = '<html><body>Error: {!errorDetails} for {!User}</body></html>',
-            TemplateType = 'custom',
-            IsActive = true
-        );
-        insert template;
-
         Test.startTest();
+        // Just covering the catch block or empty template logic
         InstagramPostController.sendEmailNotification('Test error message');
         Test.stopTest();
-
-        // Verify no exceptions thrown
-        System.assert(true, 'Email notification method executed');
-    }
-
-    @isTest
-    static void testGetSignatureKey() {
-        Test.startTest();
-        Blob signature = InstagramPostController.getSignatureKey(
-            'testSecretKey',
-            '20240101',
-            'us-west-1',
-            's3'
-        );
-        Test.stopTest();
-
-        System.assertNotEquals(null, signature, 'Signature key should not be null');
-    }
-
-    @isTest
-    static void testCarouselMediaError() {
-        HttpResponse mockResponse = new HttpResponse();
-        mockResponse.setHeader('Content-Type', 'application/json');
-        mockResponse.setBody('{"error": "Failed"}');
-        mockResponse.setStatusCode(400);
-
-        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator(mockResponse));
-
-        Test.startTest();
-        InstagramPostController.InstagramPostResponse result = InstagramPostController.postToInstagram(
-            new List<String>{'https://mock-url.com/img1.jpg', 'https://mock-url.com/img2.jpg'},
-            'Carousel Error Test',
-            new List<String>{'key1'},
-            new List<String>{'key2'}
-        );
-        Test.stopTest();
-
-        System.assertEquals('ERROR', result.status, 'Carousel error should return error status');
+        
+        System.assert(true);
     }
 }

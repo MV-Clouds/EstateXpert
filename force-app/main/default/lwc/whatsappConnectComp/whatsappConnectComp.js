@@ -1,52 +1,58 @@
 import { LightningElement, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
 import getIntegrationConfig from '@salesforce/apex/WhatsappConnectController.getIntegrationConfig';
 import unlinkAccount from '@salesforce/apex/WhatsappConnectController.unlinkAccount';
-import saveManualDetails from '@salesforce/apex/WhatsappConnectController.saveManualDetails';
-import saveFBLoginDetails from '@salesforce/apex/WhatsappConnectController.saveFBLoginDetails';
+import getContactObjectConfig from '@salesforce/apex/WhatsappConnectController.getContactObjectConfig';
+import saveContactObjectConfig from '@salesforce/apex/WhatsappConnectController.saveContactObjectConfig';
+import getRecordName from '@salesforce/apex/WhatsappConnectController.getRecordName';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
+import { loadStyle } from 'lightning/platformResourceLoader';
 import MulishFontCss from '@salesforce/resourceUrl/leadassignmentcss';
 import GlobalStylesCss from '@salesforce/resourceUrl/globalStyles';
 
-export default class WhatsappConnectComp extends LightningElement {
+export default class WhatsappConnectComp extends NavigationMixin(LightningElement) {
     @track isLoading = false;
-    @track isConnecting = false;
     @track isSubmitting = false;
-
-    // Integration state
     @track isConnected = false;
-    @track clientId = '';
-    @track configurationId = '';
-    @track apiVersion = '26.0';
-    @track apiEndpoint = 'https://graph.facebook.com';
     @track appId = '';
     @track businessAccountId = '';
     @track phoneNumberId = '';
     @track accessToken = '';
     @track lastModifiedDate = '';
-
-    // Setup input state
-    @track appIdInput = '';
-    @track errorMessage = '';
     @track isCopied = false;
-
-    // Modals
     @track isDeactivateModalOpen = false;
-    @track isManualModalOpen = false;
-    @track manualErrorText = '';
-    @track manualForm = {
-        appId: '',
-        wabaId: '',
-        phoneId: '',
-        accessToken: ''
-    };
+    @track isContactEditMode = false;
+    @track isContactDirty = false;
+    @track activeSections = ['chatWindowConfig'];
+    @track phoneFields = [];
+    @track selectedPhoneFieldVal = '';
+    @track selectedPhoneFieldLabel = '';
+    @track chatWindowRows = [];
+    @track requiredFields = [];
+    originalStateSnapshot = null;
 
-    get isMissingConfig() {
-        return !this.clientId;
+    get isChatSectionOpen() {
+        return this.activeSections.includes('chatWindowConfig');
     }
 
-    get isConnectBtnDisabled() {
-        return this.isConnecting || !this.appIdInput;
+    get isWebhookSectionOpen() {
+        return this.activeSections.includes('webhookConfig');
+    }
+
+    get chatSectionClass() {
+        return `accordion-item ${this.isChatSectionOpen ? 'open' : ''}`;
+    }
+
+    get webhookSectionClass() {
+        return `accordion-item ${this.isWebhookSectionOpen ? 'open' : ''}`;
+    }
+
+    get webhookPhoneFieldOptions() {
+        return this.phoneFields || [];
+    }
+
+    get isContactSaveDisabled() {
+        return !this.isContactDirty || this.isSubmitting;
     }
 
     async connectedCallback() {
@@ -56,27 +62,22 @@ export default class WhatsappConnectComp extends LightningElement {
                 loadStyle(this, MulishFontCss),
                 loadStyle(this, GlobalStylesCss)
             ]).catch(err => {
-                console.error('Error loading fonts / styles in WhatsappConnectComp:', err);
+                console.error('Error loading styles in WhatsappConnectComp:', err);
             });
 
-            await this.loadIntegrationConfig();
-            this.loadMetaSdk();
+            await this.loadIntegration();
+            await this.loadContactConfiguration();
         } catch (error) {
-            console.error('Error in connectedCallback of WhatsappConnectComp:', error);
+            console.error('Error initializing WhatsappConnectComp:', error);
         } finally {
             this.isLoading = false;
         }
     }
 
-    // ── Fetch saved integration credentials and status ───────────────────────
-    async loadIntegrationConfig() {
+    async loadIntegration() {
         try {
             const data = await getIntegrationConfig();
             if (data) {
-                this.clientId = data.clientId || '';
-                this.configurationId = data.configurationId || '';
-                this.apiVersion = data.apiVersion || '26.0';
-                this.apiEndpoint = data.apiEndpoint || 'https://graph.facebook.com';
                 this.appId = data.appId || '';
                 this.businessAccountId = data.businessAccountId || '';
                 this.phoneNumberId = data.phoneNumberId || '';
@@ -84,142 +85,254 @@ export default class WhatsappConnectComp extends LightningElement {
                 this.lastModifiedDate = data.lastModifiedDate || '';
                 this.isConnected = data.isConnected || false;
 
-                if (this.appId) {
-                    this.appIdInput = this.appId;
+                if (!this.isConnected) {
+                    this[NavigationMixin.Navigate]({
+                        type: 'standard__webPage',
+                        attributes: {
+                            url: '/apex/WhatsappConnectSDK'
+                        }
+                    });
                 }
             }
         } catch (error) {
             console.error('Error fetching integration config:', error);
-            this.showToast('Error', 'Unable to fetch WhatsApp configuration data.', 'error');
         }
     }
 
-    // ── Load Meta / Facebook JS SDK ──────────────────────────────────────────
-    loadMetaSdk() {
-        if (window.FB) {
-            this.initFbSdk();
-            return;
-        }
-
-        window.fbAsyncInit = () => {
-            this.initFbSdk();
-        };
-
-        // Inject Meta SDK script if not already in document
-        if (!document.getElementById('facebook-jssdk')) {
-            const script = document.createElement('script');
-            script.id = 'facebook-jssdk';
-            script.src = 'https://connect.facebook.net/en_US/sdk.js';
-            script.async = true;
-            script.defer = true;
-            script.crossOrigin = 'anonymous';
-            document.head.appendChild(script);
-        }
-    }
-
-    initFbSdk() {
+    async loadContactConfiguration() {
         try {
-            if (window.FB && this.clientId) {
-                window.FB.init({
-                    appId: this.clientId,
-                    cookie: true,
-                    xfbml: true,
-                    version: `v${this.apiVersion}`
-                });
-            }
-        } catch (e) {
-            console.error('Error initializing FB SDK:', e);
-        }
-    }
+            const res = await getContactObjectConfig();
+            if (res && res.success) {
+                this.phoneFields = res.phoneFields || [];
+                const rawRequiredFields = res.requiredFields || [];
+                const savedConfig = res.savedConfig || {};
 
-    // ── Setup Form Handlers ──────────────────────────────────────────────────
-    handleAppIdInputChange(event) {
-        this.appIdInput = event.target.value;
-        if (this.errorMessage && this.appIdInput) {
-            this.errorMessage = '';
-        }
-    }
-
-    hideError() {
-        this.errorMessage = '';
-    }
-
-    showError(msg) {
-        this.errorMessage = msg;
-    }
-
-    launchWhatsAppSignup() {
-        this.hideError();
-
-        if (!this.appIdInput || !this.appIdInput.trim()) {
-            this.showError('Please enter your Meta Application ID to proceed.');
-            return;
-        }
-
-        if (!this.clientId) {
-            this.showError('Could not find OAuth Tech Provider configuration. Please check Custom Metadata settings.');
-            return;
-        }
-
-        if (typeof window.FB === 'undefined') {
-            this.showError('Meta SDK is still initializing... please wait a few seconds and try again, or use manual configuration.');
-            return;
-        }
-
-        this.isConnecting = true;
-
-        try {
-            window.FB.login((response) => {
-                this.handleFbLoginResponse(response);
-            }, {
-                config_id: this.configurationId,
-                response_type: 'code',
-                override_default_response_type: true,
-                extras: {
-                    setup: {},
-                    featureType: '',
-                    sessionInfoVersion: '2'
+                // Parse Chat Window config
+                let savedChatField = '';
+                try {
+                    const parsedChat = JSON.parse(savedConfig.ChatWindowConfigInfo || '{}');
+                    if (parsedChat && parsedChat.Contact) {
+                        savedChatField = parsedChat.Contact;
+                    }
+                } catch (e) {
+                    console.error('Error parsing ChatWindowConfigInfo:', e);
                 }
-            });
-        } catch (e) {
-            console.error('Error initiating FB login:', e);
-            this.isConnecting = false;
-            this.showError('Failed to launch Meta login. You can enter credentials manually.');
-        }
-    }
 
-    async handleFbLoginResponse(response) {
-        try {
-            if (response && response.authResponse && response.authResponse.accessToken) {
-                this.isLoading = true;
-                const token = response.authResponse.accessToken;
-                // Callback details from FB window message or response
-                const result = await saveFBLoginDetails({
-                    sAccessToken: token,
-                    phoneId: this.phoneNumberId || '',
-                    wabaId: this.businessAccountId || '',
-                    appId: this.appIdInput.trim()
-                });
+                // Chat window rows (always Contact)
+                this.chatWindowRows = [{
+                    id: 'chat_row_contact',
+                    selectedObject: 'Contact',
+                    selectedPhoneField: savedChatField || (this.phoneFields.length ? this.phoneFields[0].value : ''),
+                    phoneFieldOptions: this.phoneFields
+                }];
 
-                if (result && result !== 'Failure') {
-                    this.showToast('Success', 'WhatsApp Business connected successfully!', 'success');
-                    await this.loadIntegrationConfig();
-                } else {
-                    this.showError('Error connecting account via Meta SDK. Please try manual entry.');
+                // Parse Webhook config
+                let savedWebhookPhone = '';
+                let savedFieldValues = {};
+                try {
+                    const parsedWebhook = JSON.parse(savedConfig.ObjectConfigInfo || '{}');
+                    if (parsedWebhook && parsedWebhook.phoneField) {
+                        savedWebhookPhone = parsedWebhook.phoneField;
+                    }
+                    if (parsedWebhook && parsedWebhook.requiredFields) {
+                        parsedWebhook.requiredFields.forEach(f => {
+                            savedFieldValues[f.name] = f.value;
+                        });
+                    }
+                } catch (e) {
+                    console.error('Error parsing ObjectConfigInfo:', e);
                 }
-            } else {
-                console.log('User cancelled FB login or authorization failed.');
+
+                this.selectedPhoneFieldVal = savedWebhookPhone || (this.phoneFields.length ? this.phoneFields[0].value : '');
+                this.updatePhoneFieldLabel();
+
+                // Build rich required fields with type flags and default values
+                const processedFields = await Promise.all(rawRequiredFields.map(async field => {
+                    const savedVal = savedFieldValues[field.name];
+                    const val = savedVal !== undefined ? savedVal : (field.value || '');
+                    let recordName = '';
+
+                    if (field.type === 'REFERENCE' && val && field.relatedObject) {
+                        try {
+                            recordName = await getRecordName({ objectApiName: field.relatedObject, recordId: val });
+                        } catch (e) {
+                            console.error('Error fetching record name:', e);
+                        }
+                    }
+
+                    return {
+                        name: field.name,
+                        label: field.label,
+                        type: field.type,
+                        value: val,
+                        relatedObject: field.relatedObject || '',
+                        relatedRecordName: recordName,
+                        picklistValues: field.picklistValues || [],
+                        isString: field.type === 'STRING' || field.type === 'URL' || field.type === 'EMAIL' || field.type === 'PHONE',
+                        isNumber: field.type === 'INTEGER' || field.type === 'DOUBLE' || field.type === 'CURRENCY' || field.type === 'PERCENT',
+                        isDate: field.type === 'DATE',
+                        isDateTime: field.type === 'DATETIME',
+                        isReference: field.type === 'REFERENCE',
+                        isTextArea: field.type === 'TEXTAREA',
+                        isPicklist: field.type === 'PICKLIST',
+                        isBoolean: field.type === 'BOOLEAN'
+                    };
+                }));
+
+                this.requiredFields = processedFields;
             }
         } catch (error) {
-            console.error('Error processing login response:', error);
-            this.showError('Failed to exchange login token with Salesforce.');
-        } finally {
-            this.isConnecting = false;
-            this.isLoading = false;
+            console.error('Error loading contact configuration:', error);
         }
     }
 
-    // ── Copy WABA ID ─────────────────────────────────────────────────────────
+    updatePhoneFieldLabel() {
+        const match = this.phoneFields.find(p => p.value === this.selectedPhoneFieldVal);
+        this.selectedPhoneFieldLabel = match ? match.label : this.selectedPhoneFieldVal;
+    }
+
+    handleToggleSection(event) {
+        const section = event.currentTarget.dataset.section;
+        if (!section) return;
+
+        if (this.activeSections.includes(section)) {
+            this.activeSections = this.activeSections.filter(s => s !== section);
+        } else {
+            this.activeSections = [...this.activeSections, section];
+        }
+    }
+
+    handleContactEdit() {
+        this.originalStateSnapshot = {
+            chatWindowRows: JSON.parse(JSON.stringify(this.chatWindowRows)),
+            requiredFields: JSON.parse(JSON.stringify(this.requiredFields)),
+            selectedPhoneFieldVal: this.selectedPhoneFieldVal,
+            selectedPhoneFieldLabel: this.selectedPhoneFieldLabel
+        };
+        this.isContactEditMode = true;
+        this.isContactDirty = false;
+    }
+
+    handleContactCancel() {
+        if (this.originalStateSnapshot) {
+            this.chatWindowRows = this.originalStateSnapshot.chatWindowRows;
+            this.requiredFields = this.originalStateSnapshot.requiredFields;
+            this.selectedPhoneFieldVal = this.originalStateSnapshot.selectedPhoneFieldVal;
+            this.selectedPhoneFieldLabel = this.originalStateSnapshot.selectedPhoneFieldLabel;
+        }
+        this.isContactEditMode = false;
+        this.isContactDirty = false;
+    }
+
+    async handleContactSave() {
+        try {
+            this.isSubmitting = true;
+            this.isLoading = true;
+
+            // Build webhook config JSON
+            const webhookConfig = {
+                object: 'Contact',
+                phoneField: this.selectedPhoneFieldVal,
+                requiredFields: this.requiredFields.map(f => ({
+                    name: f.name,
+                    value: f.value !== undefined ? f.value : ''
+                }))
+            };
+
+            // Build chat window config JSON
+            const chatConfig = {};
+            this.chatWindowRows.forEach(row => {
+                chatConfig[row.selectedObject] = row.selectedPhoneField;
+            });
+
+            const res = await saveContactObjectConfig({
+                webhookJson: JSON.stringify(webhookConfig),
+                chatJson: JSON.stringify(chatConfig)
+            });
+
+            if (res === 'Success') {
+                this.showToast('Success', 'Contact configuration saved successfully!', 'success');
+                this.isContactEditMode = false;
+                this.isContactDirty = false;
+                this.updatePhoneFieldLabel();
+                // Allow metadata deployment to settle and refresh
+                setTimeout(async () => {
+                    await this.loadContactConfiguration();
+                    this.isLoading = false;
+                }, 1200);
+            } else {
+                this.showToast('Error', res || 'Failed to save configuration.', 'error');
+                this.isLoading = false;
+            }
+        } catch (error) {
+            console.error('Error saving contact configuration:', error);
+            this.showToast('Error', error.body?.message || error.message || 'Error saving contact configuration.', 'error');
+            this.isLoading = false;
+        } finally {
+            this.isSubmitting = false;
+        }
+    }
+
+    handleChatPhoneFieldChange(event) {
+        const val = event.detail.value;
+        this.chatWindowRows = this.chatWindowRows.map(row => ({
+            ...row,
+            selectedPhoneField: val
+        }));
+        this.isContactDirty = true;
+    }
+
+    handleWebhookPhoneComboChange(event) {
+        this.selectedPhoneFieldVal = event.detail.value;
+        this.updatePhoneFieldLabel();
+        this.isContactDirty = true;
+    }
+
+    handleRequiredFieldChange(event) {
+        const fieldName = event.target.dataset.field;
+        const val = event.target.value;
+        this.updateRequiredFieldValue(fieldName, val);
+    }
+
+    handleRequiredCheckboxChange(event) {
+        const fieldName = event.target.dataset.field;
+        const checked = event.target.checked;
+        this.updateRequiredFieldValue(fieldName, checked);
+    }
+
+    async handleRecordPickerSelection(event) {
+        const fieldName = event.target.dataset.field;
+        const recordId = event.detail.recordId;
+        const field = this.requiredFields.find(f => f.name === fieldName);
+        let recordName = '';
+
+        if (recordId && field && field.relatedObject) {
+            try {
+                recordName = await getRecordName({ objectApiName: field.relatedObject, recordId });
+            } catch (e) {
+                console.error('Error retrieving record name:', e);
+            }
+        }
+
+        this.requiredFields = this.requiredFields.map(f => {
+            if (f.name === fieldName) {
+                return { ...f, value: recordId || '', relatedRecordName: recordName };
+            }
+            return f;
+        });
+        this.isContactDirty = true;
+    }
+
+    updateRequiredFieldValue(fieldName, value) {
+        this.requiredFields = this.requiredFields.map(f => {
+            if (f.name === fieldName) {
+                return { ...f, value };
+            }
+            return f;
+        });
+        this.isContactDirty = true;
+    }
+
     copyWabaId() {
         if (!this.businessAccountId) return;
         try {
@@ -248,7 +361,6 @@ export default class WhatsappConnectComp extends LightningElement {
         }
     }
 
-    // ── Deactivate Modal ─────────────────────────────────────────────────────
     openDeactivateModal() {
         this.isDeactivateModalOpen = true;
     }
@@ -264,8 +376,15 @@ export default class WhatsappConnectComp extends LightningElement {
             const success = await unlinkAccount();
             if (success) {
                 this.closeDeactivateModal();
-                this.showToast('Disconnected', 'WhatsApp integration disconnected successfully.', 'success');
-                await this.loadIntegrationConfig();
+                this.showToast('Disconnected', 'WhatsApp integration deactivated successfully.', 'success');
+                this.dispatchEvent(new CustomEvent('whatsappdeactivated'));
+                // Navigate immediately to the VF page to connect again
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: {
+                        url: '/apex/WhatsappConnectSDK'
+                    }
+                });
             } else {
                 this.showToast('Error', 'Failed to deactivate WhatsApp integration. Please try again.', 'error');
             }
@@ -278,73 +397,6 @@ export default class WhatsappConnectComp extends LightningElement {
         }
     }
 
-    // ── Manual Configuration Modal ───────────────────────────────────────────
-    openManualConfigModal() {
-        this.manualForm = {
-            appId: this.appId || this.appIdInput || '',
-            wabaId: this.businessAccountId || '',
-            phoneId: this.phoneNumberId || '',
-            accessToken: this.accessToken || ''
-        };
-        this.manualErrorText = '';
-        this.isManualModalOpen = true;
-    }
-
-    closeManualConfigModal() {
-        this.isManualModalOpen = false;
-        this.manualErrorText = '';
-    }
-
-    handleManualFieldChange(event) {
-        const field = event.target.dataset.field;
-        if (field) {
-            this.manualForm[field] = event.target.value;
-            if (this.manualErrorText) {
-                this.manualErrorText = '';
-            }
-        }
-    }
-
-    async saveManualConfig() {
-        const { appId, wabaId, phoneId, accessToken } = this.manualForm;
-
-        if (!appId || !appId.trim() || !wabaId || !wabaId.trim() || !phoneId || !phoneId.trim() || !accessToken || !accessToken.trim()) {
-            this.manualErrorText = 'Please fill in all required fields to continue.';
-            return;
-        }
-
-        try {
-            this.isSubmitting = true;
-            this.isLoading = true;
-            const success = await saveManualDetails({
-                accessToken: accessToken.trim(),
-                phoneId: phoneId.trim(),
-                wabaId: wabaId.trim(),
-                appId: appId.trim()
-            });
-
-            if (success) {
-                this.closeManualConfigModal();
-                this.showToast('Success', 'WhatsApp credentials saved successfully!', 'success');
-                // Allow metadata deployment a moment to process
-                setTimeout(async () => {
-                    await this.loadIntegrationConfig();
-                    this.isLoading = false;
-                }, 1500);
-            } else {
-                this.manualErrorText = 'Failed to save configuration. Please verify credentials.';
-                this.isLoading = false;
-            }
-        } catch (error) {
-            console.error('Error saving manual config:', error);
-            this.manualErrorText = error.body?.message || error.message || 'Error saving credentials.';
-            this.isLoading = false;
-        } finally {
-            this.isSubmitting = false;
-        }
-    }
-
-    // ── Toast Helper ─────────────────────────────────────────────────────────
     showToast(title, message, variant) {
         this.dispatchEvent(new ShowToastEvent({
             title,

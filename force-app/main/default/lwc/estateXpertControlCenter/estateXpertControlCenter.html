@@ -223,7 +223,8 @@
                                 <c-google-ads-form-mapping></c-google-ads-form-mapping>
                             </template>
                             <template if:true={isWhatsappConnectComponent}>
-                                <c-whatsapp-connect-comp></c-whatsapp-connect-comp>
+                                <c-whatsapp-connect-comp
+                                    onwhatsappdeactivated={handleWhatsappDeactivated}></c-whatsapp-connect-comp>
                             </template>
                         </div>
                     </template>

@@ -154,7 +154,7 @@ public with sharing class CreateOfferFromListingController {
                 return false;
             }
 
-            update offer;
+            update as user offer;
             return true;
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'CreateOfferFromListingController', 'updateOfferRecord', e.getMessage());

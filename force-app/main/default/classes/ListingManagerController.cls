@@ -337,7 +337,7 @@ public with sharing class ListingManagerController {
 
             config.MVEX__Fields_Data__c = fieldsJson;
 
-            upsert config;
+            upsert as user config;
 
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'ListingManagerController', 'saveStaticFields', e.getMessage());

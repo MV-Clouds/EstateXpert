@@ -243,6 +243,7 @@ public with sharing class WhatsappConnectController {
      * @description : Retrieves Contact phone fields, required fields, and saved MVEX__Object_Config__mdt configuration.
      * @return Map<String, Object> containing phone fields, required fields, and saved configuration.
      */
+    @AuraEnabled
     @RemoteAction
     public static Map<String, Object> getContactObjectConfig() {
         Map<String, Object> result = new Map<String, Object>();
@@ -328,6 +329,7 @@ public with sharing class WhatsappConnectController {
      * @param chatJson JSON string for Chat Window configuration
      * @return String 'Success' or error message
      */
+    @AuraEnabled
     @RemoteAction
     public static String saveContactObjectConfig(String webhookJson, String chatJson) {
         try {
@@ -369,6 +371,20 @@ public with sharing class WhatsappConnectController {
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'WhatsappConnectController', 'saveContactObjectConfig', e.getMessage());
             return 'Error: ' + e.getMessage();
+        }
+    }
+
+    @AuraEnabled
+    public static String getRecordName(String objectApiName, String recordId) {
+        try {
+            if (String.isBlank(objectApiName) || String.isBlank(recordId)) {
+                return '';
+            }
+            String query = 'SELECT Name FROM ' + String.escapeSingleQuotes(objectApiName) + ' WHERE Id = \'' + String.escapeSingleQuotes(recordId) + '\' WITH USER_MODE LIMIT 1';
+            SObject record = Database.query(query);
+            return (String) record.get('Name');
+        } catch (Exception e) {
+            return '';
         }
     }
 }

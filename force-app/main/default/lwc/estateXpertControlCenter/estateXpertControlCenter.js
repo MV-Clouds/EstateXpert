@@ -2,8 +2,8 @@ import { LightningElement, wire } from "lwc";
 import globalStyles from "@salesforce/resourceUrl/globalStyles";
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
-import FORM_FACTOR from "@salesforce/client/formFactor";
 import checkConnectionStatus from '@salesforce/apex/MetaAdsTokenController.checkConnectionStatus';
+import getIntegrationConfig from '@salesforce/apex/WhatsappConnectController.getIntegrationConfig';
 
 export default class EstateXpertControlCenter extends NavigationMixin(LightningElement) {
     currentView = 'controlCenter';
@@ -37,6 +37,8 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
                 this.generalIntegrationMethod();
             } else if (target === 'metaAdsMapping') {
                 this.metaAdsMethod();
+            } else if (target === 'whatsappConnect') {
+                this.whatsappEmbeddedSignuprMethod();
             }
         }
     }
@@ -404,18 +406,41 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
 
     /**
      * Method Name: whatsappEmbeddedSignuprMethod
-     * @description: Used to open WhatsApp Embedded Signup.
+     * @description: Used to open WhatsApp Embedded Signup or WhatsApp Business configuration based on connection status.
      * Date: 07/10/2026
      * Created By: Karan Singh
      */
-    whatsappEmbeddedSignuprMethod(event) {
+    async whatsappEmbeddedSignuprMethod(event) {
         if (event && typeof event.preventDefault === 'function') {
             event.preventDefault();
         }
-        this.openComponent(
-            'whatsappConnect',
-            'WhatsApp Business',
-            'The "WhatsApp Business" connects your WhatsApp Business Account with Salesforce to enable the chat feature directly from Salesforce. Start conversations, send messages, and manage customer communications without leaving your CRM platform.'
-        );
+        try {
+            const config = await getIntegrationConfig();
+            if (config && config.isConnected) {
+                this.openComponent(
+                    'whatsappConnect',
+                    'WhatsApp Business',
+                    'The "WhatsApp Business" connects your WhatsApp Business Account with Salesforce to enable the chat feature directly from Salesforce. Start conversations, send messages, and manage customer communications without leaving your CRM platform.'
+                );
+            } else {
+                this.handleWhatsappDeactivated();
+            }
+        } catch (error) {
+            console.error('Error checking WhatsApp connection:', error);
+            this.handleWhatsappDeactivated();
+        }
+    }
+
+    /**
+     * Method Name: handleWhatsappDeactivated
+     * @description: Navigates to the WhatsApp Connect SDK Visualforce page when not connected or on deactivation.
+     */
+    handleWhatsappDeactivated() {
+        this[NavigationMixin.Navigate]({
+            type: "standard__webPage",
+            attributes: {
+                url: '/apex/WhatsappConnectSDK'
+            }
+        });
     }
 }

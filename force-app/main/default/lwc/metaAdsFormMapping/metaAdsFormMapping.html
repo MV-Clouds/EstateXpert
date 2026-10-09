@@ -28,7 +28,7 @@
                 <div class="meta-account-right">
                     <div class="webhook-btn-container">
                         <button class="action-outline-btn" onclick={toggleWebhookPopover}>
-                            <svg class="btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                            <svg class="btn-icon" width="12" height="12" viewBox="0 0 24 24" fill="none">
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
                                 <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                             </svg>
@@ -59,7 +59,7 @@
                                     <span class="webhook-url-text">{webhookEndpointPreview}</span>
                                 </div>
                                 <button class="webhook-copy-btn" onclick={handleCopyWebhook}>
-                                    <svg class="btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <svg class="btn-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                                     </svg>
@@ -69,7 +69,7 @@
                         </template>
                     </div>
                     <button class="disconnect-btn" onclick={handleDeactivateClick}>
-                        <svg class="btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="btn-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 22v-5"></path>
                             <path d="M9 8V2"></path>
                             <path d="M15 8V2"></path>
@@ -79,7 +79,7 @@
                         Disconnect
                     </button>
                     <button class="exp-blue-btn-css" onclick={openNewMappingModal}>
-                        <svg class="btn-icon" width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="btn-icon" width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                         New Mapping
@@ -107,7 +107,7 @@
 
             <!-- Custom Table -->
             <template if:true={hasMappings}>
-                <div class="exp-table-content exp-main-table-wrapper">
+                <div class="exp-table-content">
                     <table aria-multiselectable="true" class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid">
                         <thead>
                             <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
@@ -156,7 +156,7 @@
                                     <td data-label="Mapped Forms" class="slds-cell_action-mode" role="gridcell">
                                         <div class="slds-truncate center-trancate-text">
                                             <div class="mapped-forms-pill">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                                     <polyline points="14 2 14 8 20 8"></polyline>
                                                     <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -339,14 +339,27 @@
                 class="slds-modal slds-fade-in-open slds-modal_medium section_css">
                 <div class="slds-modal__container">
 
-                    <div class="slds-modal__close close-icon-css" onclick={closeModal}>
+                    <!-- Close -->
+                    <div class="slds-modal__close exp-close-icon-css" onclick={closeModal}>
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937" />
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="white" />
                         </svg>
                     </div>
 
-                    <div class="slds-modal__header blue-header">
-                        <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">Form Mapping Wizard</h1>
+                    <div class="slds-modal__header exp-popup-header">
+                        <div class="exp-popup-header-left">
+                            <div class="exp-popup-icon-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 6h16M4 12h16m-7 6h7" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="exp-popup-title-group">
+                                <h1 class="exp-popup-title" id="modal-heading-01" tabindex="-1">Form Mapping Wizard</h1>
+                                <p class="exp-popup-subtitle">Map your Meta Lead forms to Salesforce fields</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="slds-modal__content modalbody" id="modal-content-id-1">
@@ -507,7 +520,7 @@
                                         <div class="add-field-section">
                                             <template if:false={showAddField}>
                                                 <button type="button" class="add-field-btn" onclick={handleShowAddField}>
-                                                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                                                    <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
                                                         <path d="M10 2V18M2 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                                                     </svg>
                                                     Add Field
@@ -518,10 +531,10 @@
                                                     <div class="add-field-title">Add Salesforce Lead Field</div>
                                                     <div class="add-field-controls">
                                                         <lightning-combobox dropdown-alignment="auto" value={selectedAdditionalField} options={additionalFieldOptions} onchange={handleAdditionalFieldChange} placeholder="-- Select Salesforce Field --" variant="label-hidden" class="custom-combobox add-field-combobox"></lightning-combobox>
-                                                        <button type="button" class="save_btn_css" onclick={handleAddField} disabled={isAddFieldDisabled}>
+                                                        <button type="button" class="exp-blue-btn-css" onclick={handleAddField} disabled={isAddFieldDisabled}>
                                                             Add
                                                         </button>
-                                                        <button type="button" class="cancel_btn_css" onclick={handleCancelAddField}>
+                                                        <button type="button" class="exp-white-btn-css" onclick={handleCancelAddField}>
                                                             Cancel
                                                         </button>
                                                     </div>
@@ -556,14 +569,14 @@
                         </template>
 
                         <!-- Footer -->
-                        <div class="footerbtns">
-                            <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeModal}>
-                                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <div class="exp-popup-footer">
+                            <button class="exp-white-btn-css" aria-label="Cancel and close" onclick={closeModal}>
+                                <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
                                 </svg>
                                 Cancel
                             </button>
-                            <button class="save_btn_css" disabled={isSaveDisabled} onclick={saveMapping}>
+                            <button class="exp-blue-btn-css" disabled={isSaveDisabled} onclick={saveMapping}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
                                 </svg>
@@ -585,14 +598,28 @@
         <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-02" class="slds-modal slds-fade-in-open slds-modal_medium section_css">
             <div class="slds-modal__container">
 
-                <div class="slds-modal__close close-icon-css" onclick={closeFailedLeadsModal}>
+
+                <!-- Close -->
+                <div class="slds-modal__close exp-close-icon-css" onclick={closeFailedLeadsModal}>
                     <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937" />
+                        <path
+                            d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                            fill="white" />
                     </svg>
                 </div>
 
-                <div class="slds-modal__header blue-header">
-                    <h1 id="modal-heading-02" class="slds-modal__title slds-hyphenate" tabindex="-1">Failed Webhook Leads</h1>
+                <div class="slds-modal__header exp-popup-header">
+                    <div class="exp-popup-header-left">
+                        <div class="exp-popup-icon-box">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="exp-popup-title-group">
+                            <h1 class="exp-popup-title" id="modal-heading-02" tabindex="-1">Failed Webhook Leads</h1>
+                            <p class="exp-popup-subtitle">Review and manage failed lead submissions</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="slds-modal__content modalbody" id="modal-content-id-2">
@@ -603,31 +630,39 @@
                             <div class="failed-summary-container">
                                 <span class="failed-summary-label">{failedSummary}</span>
                             </div>
-                            <div class="exp-table-content table-content">
-                                <table class="slds-table full-width">
+                            <div class="exp-table-content exp-main-table-wrapper">
+                                <table aria-multiselectable="true" class="slds-table slds-table_fixed-layout slds-table_resizable-cols" role="grid">
                                     <thead>
-                                        <tr class="slds-line-height_reset fields-names exp-table-tr-cls">
-                                            <th class="col-checkbox header-cell-padding align-center">
+                                        <tr class="exp-table-tr-cls">
+                                            <th class="col-checkbox align-center">
                                                 <lightning-input type="checkbox" variant="label-hidden" label="Select all" onchange={handleSelectAllFailedLeads} checked={isAllFailedLeadsSelected}></lightning-input>
                                             </th>
-                                            <th class="header-cell-padding">No.</th>
-                                            <th class="header-cell-padding">Lead ID</th>
-                                            <th class="header-cell-padding">Received At</th>
-                                            <th class="header-cell-padding failure-reason">Failure Reason</th>
+                                            <th scope="col" class="column1">
+                                                <div class="slds-truncate" title="No.">No.</div>
+                                            </th>
+                                            <th scope="col" class="column1">
+                                                <div class="slds-truncate" title="Lead ID">Lead ID</div>
+                                            </th>
+                                            <th scope="col" class="column1">
+                                                <div class="slds-truncate" title="Received At">Received At</div>
+                                            </th>
+                                            <th scope="col" class="column1 failure-reason">
+                                                <div class="slds-truncate" title="Failure Reason">Failure Reason</div>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <template for:each={failedLeads} for:item="lead">
-                                            <tr key={lead.Id}>
-                                                <td class="align-center header-cell-padding">
+                                            <tr key={lead.Id} class="exp-table-tr-cls">
+                                                <td class="align-center">
                                                     <lightning-input type="checkbox" variant="label-hidden" label="Select lead" data-id={lead.Id} checked={lead.selected} onchange={handleFailedLeadSelection}></lightning-input>
                                                 </td>
-                                                <td class="header-cell-padding">{lead.index}</td>
-                                                <td class="header-cell-padding">
+                                                <td>{lead.index}</td>
+                                                <td>
                                                     <div class="slds-truncate" title={lead.leadId}>{lead.leadId}</div>
                                                 </td>
-                                                <td class="header-cell-padding">{lead.Date}</td>
-                                                <td class="header-cell-padding">
+                                                <td>{lead.Date}</td>
+                                                <td>
                                                     <div class="slds-truncate" title={lead.reason}>{lead.reason}</div>
                                                 </td>
                                             </tr>
@@ -646,34 +681,36 @@
 
                     
                     <!-- Footer -->
-                    <div class="footerbtns">
+                    <div class="exp-popup-footer">
                         <template if:true={isFailedWizardStep1}>
-                            <button class="white-btn-css" onclick={closeFailedLeadsModal}>
+                            <button class="exp-white-btn-css" onclick={closeFailedLeadsModal}>
                                 <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
                                 </svg>
                                 Close
                             </button>
-                            <button class="white-btn-css red-text-btn" disabled={isFailedActionDisabled} onclick={discardSelectedFailedLeads}>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" height="14" width="14">
-                                    <path d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z" stroke-width="0.0625"></path>
-                                </svg>
-                                Discard Selected
-                            </button>
-                            <button class="white-btn-css" disabled={isEditMappingDisabled} onclick={reviewSelectedFailedLead}>
-                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                                Edit Mapping &amp; Retry
-                            </button>
-                            <button class="blue-btn-css" disabled={isFailedActionDisabled} onclick={retrySelectedFailedLeads}>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="23 4 23 10 17 10"></polyline>
-                                    <polyline points="1 20 1 14 7 14"></polyline>
-                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                                </svg>
-                                Retry Selected
-                            </button>
+                            <div class="exp-popup-footer-right">
+                                <button class="exp-red-btn-css" disabled={isFailedActionDisabled} onclick={discardSelectedFailedLeads}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" height="12" width="12">
+                                        <path d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z" stroke-width="0.0625"></path>
+                                    </svg>
+                                    Discard Selected
+                                </button>
+                                <button class="exp-white-btn-css" disabled={isEditMappingDisabled} onclick={reviewSelectedFailedLead}>
+                                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    Edit Mapping &amp; Retry
+                                </button>
+                                <button class="exp-blue-btn-css" disabled={isFailedActionDisabled} onclick={retrySelectedFailedLeads}>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <polyline points="1 20 1 14 7 14"></polyline>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                    </svg>
+                                    Retry Selected
+                                </button>
+                            </div>
                         </template>
                     </div>
                 </div>

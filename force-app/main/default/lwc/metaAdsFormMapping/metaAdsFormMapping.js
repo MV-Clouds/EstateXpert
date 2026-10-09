@@ -14,7 +14,7 @@ import retryMultipleFailedLeads from '@salesforce/apex/MetaAdsFormMappingControl
 import deleteFailedLeads from '@salesforce/apex/MetaAdsFormMappingController.deleteFailedLeads';
 import getActiveSites from '@salesforce/apex/MetaAdsFormMappingController.getActiveSites';
 import { loadStyle } from 'lightning/platformResourceLoader';
-import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
+// import MulishFontCss from '@salesforce/resourceUrl/MulishFontCss';
 import globalStyles from '@salesforce/resourceUrl/globalStyles';
 
 const SOURCE_META = 'Meta Form Field';
@@ -439,7 +439,7 @@ export default class MetaAdsFormMapping extends LightningElement {
     connectedCallback() {
         try {
             Promise.all([
-                loadStyle(this, MulishFontCss),
+                // loadStyle(this, MulishFontCss),
                 loadStyle(this, globalStyles)
             ]).catch(error => {
                 console.error('Error loading styles', error);
@@ -748,12 +748,6 @@ export default class MetaAdsFormMapping extends LightningElement {
                     const isAlreadyMapped = savedFieldKeys.includes(key);
 
                     return (required || isDefault || isAlreadyMapped);
-                }).sort((a, b) => {
-                    const aReq = a.required === 'true';
-                    const bReq = b.required === 'true';
-                    if (aReq && !bReq) return -1;
-                    if (!aReq && bReq) return 1;
-                    return 0;
                 });
 
                 this.currentFormFields = fieldsToDisplay.map(sf => {

@@ -125,24 +125,6 @@
 
 /* RED BUTTON CSS END HERE */
 
-/* CLOSE ICON CSS START HERE */
-.exp-close-icon-css {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  width: 30px;
-  height: 30px;
-  min-height: 30px;
-  border-radius: 6px;
-  background: #ffffff;
-  transition: all 0.2s ease;
-}
-
-.exp-close-icon-css svg path {
-  fill: #1F2937;
-}
-
 /* CLOSE ICON CSS END HERE */
 
 /* PAGINATION BUTTON CSS START HERE */
@@ -1020,23 +1002,22 @@
     font-weight: 400;
 }
 
-.exp-popup-close-btn {
-    cursor: pointer;
-    background: transparent;
-    border: none;
-    padding: 8px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* CLOSE ICON CSS START HERE */
+.exp-close-icon-css {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  border-radius: 8px;
+  background: #ffffff;
+  transition: all 0.2s ease;
 }
 
-.exp-popup-close-btn:hover {
-    background-color: aliceblue;
-}
-
-.exp-popup-close-btn lightning-icon {
-    --sds-c-icon-color-foreground-default: #4b5563;
+.exp-close-icon-css svg path {
+  fill: #1F2937;
 }
 
 .exp-popup-footer {

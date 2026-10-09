@@ -9,8 +9,9 @@ public with sharing class SinglePropertyViewCmpController {
     @AuraEnabled
     public static Wrapper getListingData(Id recordId) {
         try {
-            List<MVEX__Listing__c> listing = [SELECT Id, Name, MVEX__Availability_Date__c, MVEX__Available_From__c, MVEX__Available_to__c, MVEX__Bathrooms__c, MVEX__Bedrooms__c,
-                                        MVEX__Broker_s_Listing_ID__c, MVEX__City__c, MVEX__Completion_Date__c, MVEX__Completion_Status__c, MVEX__Description__c, MVEX__Floor__c,
+            List<MVEX__Listing__c> listing = [SELECT Id, Name, OwnerId, CurrencyIsoCode,
+                                        MVEX__Availability_Date__c, MVEX__Available_From__c, MVEX__Available_to__c, MVEX__Bathrooms__c, MVEX__Bedrooms__c,
+                                        MVEX__Broker_s_Listing_ID__c, MVEX__Listing_Auto_ID__c, MVEX__City__c, MVEX__Completion_Date__c, MVEX__Completion_Status__c, MVEX__Description__c, MVEX__Floor__c,
                                         MVEX__Furnished__c, MVEX__House_Office_No__c, MVEX__Listed_Date__c, MVEX__Listing_Address__c, MVEX__Listing_Address__City__s,
                                         MVEX__Listing_Address__CountryCode__s, MVEX__Listing_Address__GeocodeAccuracy__s, MVEX__Listing_Address__Latitude__s,
                                         MVEX__Listing_Address__Longitude__s, MVEX__Listing_Address__PostalCode__s, MVEX__Listing_Address__StateCode__s,
@@ -19,11 +20,17 @@ public with sharing class SinglePropertyViewCmpController {
                                         MVEX__Number_of_Cheques__c, MVEX__Off_Market_Date__c, MVEX__Off_Plan__c, MVEX__On_Market_Date__c, MVEX__Parking_Available__c,
                                         MVEX__Parking_Spaces__c, MVEX__Private_Amenities__c, MVEX__Property__c, MVEX__Property_Category__c, MVEX__Property_Status__c, MVEX__Property_Sub_Type__c,
                                         MVEX__Property_Type__c, MVEX__Rent_Frequency__c, MVEX__Rental_Price__c, MVEX__RERA_Permit_Number__c, MVEX__Sale_Date__c, MVEX__Sale_Price__c, MVEX__Service_Charge__c,
-                                        MVEX__Lot_Size__c, MVEX__Sq_Ft__c, MVEX__Status__c, MVEX__Taxes__c, MVEX__Year_Built__c FROM MVEX__Listing__c WHERE Id = :recordId AND MVEX__Status__c = 'Active' LIMIT 1];
+                                        MVEX__Lot_Size__c, MVEX__Sq_Ft__c, MVEX__Status__c, MVEX__Taxes__c, MVEX__Year_Built__c,
+                                        MVEX__Latitude__c, MVEX__Longitude__c, MVEX__Community__c, MVEX__Subcommunity__c, MVEX__Facing__c, MVEX__Possession_Status__c,
+                                        MVEX__HOA_Fees__c, MVEX__Application_Fee__c, MVEX__Negotiable__c, MVEX__IS_New_Construction__c, MVEX__Units__c,
+                                        MVEX__Share_Accommodation__c, MVEX__Commercial_Amenities__c, MVEX__Country__c, MVEX__State__c, MVEX__Street__c, MVEX__Zip_Postal_Code__c, Agent_Photo_URL__c
+                                        FROM MVEX__Listing__c WHERE Id = :recordId AND MVEX__Status__c = 'Active' LIMIT 1];
 
+            ConnectApi.Photo photo = ConnectApi.UserProfiles.getPhoto(null, listing[0].OwnerId);
+            listing[0].Agent_Photo_URL__c = photo.largePhotoUrl;
             List<MVEX__Property_File__c> media = new List<MVEX__Property_File__c>();
             if (!listing.isEmpty()) {
-                media = [SELECT Id, Name, MVEX__BaseUrl__c FROM MVEX__Property_File__c WHERE MVEX__Property__c = :listing[0].MVEX__Property__c];
+                media = [SELECT Id, Name, MVEX__BaseUrl__c, MVEX__ExternalLink__c, MVEX__MimeType__c FROM MVEX__Property_File__c WHERE MVEX__Property__c = :listing[0].MVEX__Property__c];
             }
 
             Wrapper wr = new Wrapper();
@@ -43,7 +50,8 @@ public with sharing class SinglePropertyViewCmpController {
     public static Event getShowingData(String showingId) {
         try {
             List<Event> showings = [
-                SELECT Id, Subject, MVEX__Buyer__c, MVEX__Listing__c, MVEX__Status__c, MVEX__Scheduled_Date__c, MVEX__Reschedule_Date__c
+                SELECT Id, Subject, MVEX__Buyer__c, MVEX__Listing__c, MVEX__Status__c, MVEX__Scheduled_Date__c, MVEX__Reschedule_Date__c,
+                       MVEX__Showing_Duration__c, MVEX__Cancellation_Reason__c
                 FROM Event
                 WHERE Id = :showingId
                 ORDER BY CreatedDate DESC LIMIT 1

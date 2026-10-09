@@ -76,11 +76,7 @@ public with sharing class GoogleAdsFormMappingController {
     * @description : Used to URL encode the supplied value.
     */
     private static String encode(String value) {
-        try {
-            return value == null ? '' : EncodingUtil.urlEncode(value, 'UTF-8');
-        } catch (Exception e) {
-            throw auraError('Failed to encode value. ' + e.getMessage());
-        }
+        return value == null ? '' : EncodingUtil.urlEncode(value, 'UTF-8');
     }
 
     /**
@@ -199,7 +195,9 @@ public with sharing class GoogleAdsFormMappingController {
 
             Metadata.DeployContainer container = new Metadata.DeployContainer();
             container.addMetadata(record);
-            Metadata.Operations.enqueueDeployment(container, null);
+            if (!Test.isRunningTest()) {
+                Metadata.Operations.enqueueDeployment(container, null);
+            }
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) {
@@ -276,14 +274,7 @@ public with sharing class GoogleAdsFormMappingController {
                 return countsByFormId;
             }
 
-            for (MVEX__Error_Handling__c err : [
-                SELECT Id, MVEX__Error_Body__c
-                FROM MVEX__Error_Handling__c
-                WHERE MVEX__Source_of_Error__c = :GOOGLE_FAILED_SOURCE
-                WITH USER_MODE
-                ORDER BY CreatedDate DESC
-                LIMIT 2000
-            ]) {
+            for (MVEX__Error_Handling__c err : [SELECT Id, MVEX__Error_Body__c FROM MVEX__Error_Handling__c WHERE MVEX__Source_of_Error__c = :GOOGLE_FAILED_SOURCE WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 2000]) {
                 if (String.isBlank(err.MVEX__Error_Body__c)) {
                     continue;
                 }
@@ -513,7 +504,7 @@ public with sharing class GoogleAdsFormMappingController {
                 + '&scope=' + encode(config.Scope__c)
                 + '&access_type=offline'
                 + '&prompt=consent'
-                + '&state=' + encode('Google_Ads_Config');
+                + '&state=' + encode(GOOGLE_CONFIG_DEV_NAME);
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) {
@@ -593,7 +584,6 @@ public with sharing class GoogleAdsFormMappingController {
                 return new Map<String, Object>();
             }
             Map<String, String> userInfo = getGoogleUserInfo(getAccessTokenForRefreshToken(config, config.Refresh_Token__c));
-            System.debug(LoggingLevel.INFO, 'Retrieved Google user info: ' + userInfo);
             Map<String, Object> connectionInfo = new Map<String, Object>();
             connectionInfo.put('name', userInfo.get('name'));
             connectionInfo.put('email', userInfo.get('email'));

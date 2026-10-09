@@ -71,45 +71,13 @@ public class InstagramPostScheduler implements Schedulable {
         try {
             HttpResponse publishResponse = http.send(publishReq);
 
-            if (publishResponse.getStatusCode() == 200) {
-                MVEX__AWS_Config__c awsData = MVEX__AWS_Config__c.getOrgDefaults();
-                String awsAccessKey = awsData.MVEX__AWS_Access_Key__c;
-                String awsSecretKey = awsData.MVEX__AWS_Secret_Access_Key__c;
-                String awsRegion = awsData.MVEX__S3_Region_Name__c;
-                String awsBucketName = awsData.MVEX__S3_Bucket_Name__c;
-
-                String endpoint = 'https://' + awsBucketName + '.s3.amazonaws.com/';
-                String payload = '<Delete><Quiet>true</Quiet>';
-
-                for(String objectKey : awsObjectKeys) {
-                    if(!awsObjectKeysToPreserve.contains(objectKey)){
-                        payload += '<Object><Key>' + objectKey + '</Key></Object>';
-                    }
-                }
-
-                payload += '</Delete>';
-
-                String contentMD5 = EncodingUtil.base64Encode(Crypto.generateDigest('MD5', Blob.valueOf(payload)));
-                Map<String, String> headers = InstagramPostController.generateAWSHeaders(payload, contentMD5, awsAccessKey, awsSecretKey, awsRegion, awsBucketName);
-
-                HttpRequest req = new HttpRequest();
-                req.setEndpoint(endpoint + '?delete');
-                req.setMethod('POST');
-                req.setHeader('Content-Type', 'application/xml');
-                req.setHeader('Content-MD5', contentMD5);
-                
-                for(String key : headers.keySet()){
-                    req.setHeader(key, headers.get(key));
-                }
-                
-                req.setBody(payload);
-                
-                Http http2 = new Http();
-                HttpResponse res = http2.send(req);
-
+            if (publishResponse.getStatusCode() != 200) {
+                ErrorHandler.insertErrordata(null, 'InstagramPostScheduler', 'publishPost', 'Failed to publish post: ' + publishResponse.getBody());
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'InstagramPostScheduler', 'publishPost', 'Error while publishing post.');
+        } finally {
+            InstagramPostController.deleteAwsImages(awsObjectKeys, awsObjectKeysToPreserve);
         }
     }
 
@@ -121,7 +89,7 @@ public class InstagramPostScheduler implements Schedulable {
             Http http = new Http();
 
             HttpRequest albumReq = new HttpRequest();
-            albumReq.setEndpoint('https://graph.instagram.com/v25.0/' + userId + '/media');
+            albumReq.setEndpoint(INSTAGRAM_ENDPOINT + 'v25.0/' + userId + '/media');
             albumReq.setMethod('POST');
             albumReq.setHeader('Content-Type', 'application/json');
 
@@ -139,14 +107,25 @@ public class InstagramPostScheduler implements Schedulable {
                 MediaResponse albumResponseData = (MediaResponse) JSON.deserialize(albumResponse.getBody(), MediaResponse.class);
                 String albumContainerId = albumResponseData.id;
 
-                InstagramMediaPublisher job = new InstagramMediaPublisher(userId, accessToken, albumContainerId, awsObjectKeys, awsObjectKeysToPreserve);    
+                Map<String, Object> params = new Map<String, Object>{
+                    'userId' => userId,
+                    'accessToken' => accessToken,
+                    'creationId' => albumContainerId,
+                    'isCarousel' => false,
+                    'awsObjectKeys' => awsObjectKeys,
+                    'awsObjectKeysToPreserve' => awsObjectKeysToPreserve
+                };
+                InstagramPostScheduler job = new InstagramPostScheduler(params);    
                 String cronExpression = System.now().addMinutes(1).format('s m H d M \'?\' yyyy');
                 System.schedule('Publish Instagram Media' + albumContainerId, cronExpression, job);
-
-
-            } 
+                return;
+            } else {
+                ErrorHandler.insertErrordata(null, 'InstagramPostScheduler', 'publishPostWithContainer', 'Failed to create album container: ' + albumResponse.getBody());
+            }
         }catch(Exception e){
             ErrorHandler.insertErrordata(e, 'InstagramPostScheduler', 'publishPostWithContainer', 'Error while publishing post with container.');
+        } finally {
+            InstagramPostController.deleteAwsImages(awsObjectKeys, awsObjectKeysToPreserve);
         }
     }
 }

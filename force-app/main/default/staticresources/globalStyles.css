@@ -145,17 +145,6 @@
 
 /* CLOSE ICON CSS END HERE */
 
-/* POP UP HEADER CSS START HERE */
-.exp-pop-up-header-css {
-  background-color: #0176D3;
-  color: white;
-  border-bottom-style: unset;
-  border-top-left-radius: 8px !important;
-  border-top-right-radius: 8px !important;
-}
-
-/* POP UP HEADER CSS END HERE */
-
 /* PAGINATION BUTTON CSS START HERE */
 .exp-pagination-btn-css {
   background-color: #ffffff;
@@ -1103,3 +1092,96 @@
 .exp-table-content tbody tr.accordion-row:nth-child(odd) {
     background-color: #ffffff !important;
 }
+/* NEW UNIVERSAL POPUP UI CSS (Header & Footer) */
+.exp-popup-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 16px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    background-color: #ffffff !important;
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+    text-align: left !important;
+}
+
+.exp-popup-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.exp-popup-icon-box {
+    width: 42px;
+    height: 42px;
+    background-color: aliceblue; /* soft blue */
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.exp-popup-icon-box svg {
+    width: 24px;
+    height: 24px;
+}
+
+.exp-popup-title-group {
+    display: flex;
+    flex-direction: column;
+    text-align: left !important;
+}
+
+.exp-popup-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: rgb(3 45 96); /* dark blue */
+    margin: 0;
+    line-height: 1.2;
+}
+
+.exp-popup-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin-top: 4px;
+    font-weight: 400;
+}
+
+.exp-popup-close-btn {
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.exp-popup-close-btn:hover {
+    background-color: aliceblue;
+}
+
+.exp-popup-close-btn lightning-icon {
+    --sds-c-icon-color-foreground-default: #4b5563;
+}
+
+.exp-popup-footer {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 16px 24px !important;
+    border-top: 1px solid #e5e7eb !important;
+    background-color: #ffffff !important;
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+    box-shadow: none !important;
+}
+
+.exp-popup-footer-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+

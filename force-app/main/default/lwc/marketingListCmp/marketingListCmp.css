@@ -556,4 +556,4 @@
 
 .custom-checkbox input[type="checkbox"]:checked+.checkmark::before {
     display: block;
-}
+}

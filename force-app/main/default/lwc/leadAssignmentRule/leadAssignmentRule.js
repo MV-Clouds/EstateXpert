@@ -30,6 +30,7 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
     // Default Assignee state
     @track defaultAssignee = null;           // { Id, selectedUser, selectedUserName } or null
     @track showDefaultAssigneePopup = false;
+    @track showDefaultAssigneeDeleteConfirmation = false;
     @track defaultAssigneeUser = '';         // staging value inside the popup
     @track defaultAssigneeUserName = '';
 
@@ -64,8 +65,8 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
         return (this.currentRule?.conditions?.length || 0) < 10;
     }
 
-    get canDeleteCondition() {
-        return (this.currentRule?.conditions?.length || 0) > 1;
+    get isDeleteDisabled() {
+        return (this.currentRule?.conditions?.length || 0) <= 1;
     }
 
     get isConditionLimitReached() {
@@ -461,6 +462,19 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
             });
     }
 
+    openDeleteDefaultAssigneeConfirmation() {
+        this.showDefaultAssigneeDeleteConfirmation = true;
+    }
+
+    closeDeleteDefaultAssigneeConfirmation() {
+        this.showDefaultAssigneeDeleteConfirmation = false;
+    }
+
+    confirmRemoveDefaultAssignee() {
+        this.closeDeleteDefaultAssigneeConfirmation();
+        this.removeDefaultAssignee();
+    }
+
     removeDefaultAssignee() {
         if (!this.hasDefaultAssignee) return;
         this.isLoading = true;
@@ -732,7 +746,13 @@ export default class LeadAssignmentRule extends NavigationMixin(LightningElement
     }
 
     deleteCondition(event) {
+        if (this.isDeleteDisabled || !this.currentRule?.conditions || this.currentRule.conditions.length <= 1) {
+            return;
+        }
         const conditionIndex = parseInt(event.currentTarget.dataset.conditionIndex, 10);
+        if (isNaN(conditionIndex) || conditionIndex < 0 || conditionIndex >= this.currentRule.conditions.length) {
+            return;
+        }
         this.currentRule.conditions = this.currentRule.conditions
             .filter((_, cIndex) => cIndex !== conditionIndex)
             .map((condition, index) => ({ ...condition, order: index + 1 }));

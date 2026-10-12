@@ -135,7 +135,7 @@
                                         stroke-linejoin="round" />
                                 </svg>
                             </button>
-                            <button class="delete-div" onclick={removeDefaultAssignee} title="Remove Default Assignee">
+                            <button class="delete-div" onclick={openDeleteDefaultAssigneeConfirmation} title="Remove Default Assignee">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#212529"
                                     stroke="#212529" stroke-width="0.6" stroke-linejoin="round" width="15" height="15">
                                     <path
@@ -171,9 +171,20 @@
                                 fill="#1F2937" />
                         </svg>
                     </div>
-                    <div class="slds-modal__header blue-header">
-                        <h1 id="default-modal-heading" class="slds-modal__title slds-hyphenate" tabindex="-1">
-                            {defaultAssigneePopupTitle}</h1>
+
+                    <div class="slds-modal__header exp-popup-header">
+                        <div class="exp-popup-header-left">
+                            <div class="exp-popup-icon-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#0176D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <circle cx="12" cy="7" r="4" stroke="#0176D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="exp-popup-title-group">
+                                <h1 id="default-modal-heading" class="exp-popup-title" tabindex="-1">{defaultAssigneePopupTitle}</h1>
+                                <p class="exp-popup-subtitle">Configure fallback user for unmatched rules</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="slds-modal__content modalbody">
                         <div class="content_body">
@@ -192,13 +203,16 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="footerbtns">
-                            <button class="exp-white-btn-css" onclick={closeDefaultAssigneePopup}>
-                                <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
-                                </svg>
-                                Cancel
-                            </button>
+                    </div>
+
+                    <div class="slds-modal__footer exp-popup-footer">
+                        <button class="exp-white-btn-css" onclick={closeDefaultAssigneePopup}>
+                            <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
+                            </svg>
+                            Cancel
+                        </button>
+                        <div class="exp-popup-footer-right">
                             <button class="exp-blue-btn-css" onclick={saveDefaultAssignee}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -206,6 +220,67 @@
                                         fill="currentColor" />
                                 </svg>
                                 Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+        </template>
+
+        <!-- Remove Default Assignee Confirmation Popup -->
+        <template if:true={showDefaultAssigneeDeleteConfirmation}>
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="default-assignee-delete-heading"
+                class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <div class="slds-modal__close exp-close-icon-css" onclick={closeDeleteDefaultAssigneeConfirmation}>
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                fill="#1F2937" />
+                        </svg>
+                    </div>
+
+                    <div class="slds-modal__header exp-popup-header">
+                        <div class="exp-popup-header-left">
+                            <div class="exp-popup-icon-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="exp-popup-title-group">
+                                <h1 id="default-assignee-delete-heading" class="exp-popup-title" tabindex="-1">Confirmation</h1>
+                                <p class="exp-popup-subtitle">Remove default assignee</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slds-modal__content modalbody">
+                        <div class="content_body map-confirm-content">
+                            <p class="slds-text-align_center con-msg">Are you sure you want to remove the default assignee?</p>
+                        </div>
+                    </div>
+
+                    <div class="slds-modal__footer exp-popup-footer">
+                        <button class="exp-white-btn-css" onclick={closeDeleteDefaultAssigneeConfirmation}>
+                            <svg width="12" height="12" viewBox="0 0 20 20" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                    fill="currentColor" />
+                            </svg>
+                            Cancel
+                        </button>
+                        <div class="exp-popup-footer-right">
+                            <button class="exp-red-btn-css" onclick={confirmRemoveDefaultAssignee}>
+                                <svg class="confirm-delete-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
+                                        stroke="#FFFFFF" stroke-width="1.25" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                                Delete
                             </button>
                         </div>
                     </div>
@@ -226,8 +301,18 @@
                                 fill="#1F2937" />
                         </svg>
                     </div>
-                    <div class="slds-modal__header blue-header">
-                        <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">{rulePopupTitle}</h1>
+                    <div class="slds-modal__header exp-popup-header">
+                        <div class="exp-popup-header-left">
+                            <div class="exp-popup-icon-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-6 9l2 2 4-4" stroke="#0176D3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="exp-popup-title-group">
+                                <h1 class="exp-popup-title" id="modal-heading-01" tabindex="-1">{rulePopupTitle}</h1>
+                                <p class="exp-popup-subtitle">Configure rule conditions and assignee</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="slds-modal__content modalbody">
                         <div class="content_body">
@@ -346,22 +431,14 @@
                                                             </td>
                                                             <td data-label="Actions">
                                                                 <div class="action-btn">
-                                                                    <template if:true={canDeleteCondition}>
-                                                                        <button class="exp-delete-icon-css"
-                                                                            data-condition-index={conditionIndex}
-                                                                            onclick={deleteCondition}>
-                                                                            <svg width="14" height="14"
-                                                                                viewBox="0 0 14 14" fill="none"
-                                                                                xmlns="http://www.w3.org/2000/svg">
-                                                                                <path
-                                                                                    d="M2.62502 3.45834L3.32598 11.5194C3.40087 12.3807 4.12187 13.0417 4.98638 13.0417H9.01369C9.87819 13.0417 10.5992 12.3807 10.674 11.5194L11.375 3.45834M5.12502 3.25V2.625C5.12502 1.70453 5.87119 0.958336 6.79169 0.958336H7.20835C8.12885 0.958336 8.87502 1.70453 8.87502 2.625V3.25M1.16669 3.45834H12.8334"
-                                                                                    stroke="currentColor"
-                                                                                    stroke-width="1.25"
-                                                                                    stroke-linecap="round"
-                                                                                    stroke-linejoin="round" />
-                                                                            </svg>
-                                                                        </button>
-                                                                    </template>
+                                                                    <button class="exp-delete-icon-css"
+                                                                        data-condition-index={conditionIndex}
+                                                                        disabled={isDeleteDisabled}
+                                                                        onclick={deleteCondition}>
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="#000000" height="16" width="16">
+                                                                            <path d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875ZM6.61646875 6.77019375v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Zm3.6894125 0v4.91921875c0 0.3550125 -0.3843125 0.5769 -0.6917625 0.3993875 -0.1426875 -0.08238125 -0.2305875 -0.234625 -0.2305875 -0.3993875v-4.91921875c0 -0.3550125 0.3843125 -0.57689375 0.6917625 -0.3993875 0.1426875 0.08238125 0.2305875 0.234625 0.2305875 0.3993875Z" stroke-width="0.0625"></path>
+                                                                        </svg>
+                                                                    </button>
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -391,16 +468,19 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="footerbtns">
-                            <button class="exp-white-btn-css" onclick={closeRulePopup}>
-                                <svg width="12" height="12" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                        fill="currentColor" />
-                                </svg>
-                                Cancel
-                            </button>
+                    </div>
+
+                    <div class="slds-modal__footer exp-popup-footer">
+                        <button class="exp-white-btn-css" onclick={closeRulePopup}>
+                            <svg width="12" height="12" viewBox="0 0 20 20" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                    fill="currentColor" />
+                            </svg>
+                            Cancel
+                        </button>
+                        <div class="exp-popup-footer-right">
                             <button class="exp-blue-btn-css" onclick={saveRule}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -418,7 +498,7 @@
 
         <!-- Delete Confirmation Popup -->
         <template if:true={showDeleteConfirmation}>
-            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+            <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-delete"
                 class="slds-modal slds-fade-in-open">
                 <div class="slds-modal__container">
                     <div class="slds-modal__close exp-close-icon-css" onclick={closeDeleteConfirmation}>
@@ -428,24 +508,37 @@
                                 fill="#1F2937" />
                         </svg>
                     </div>
-                    <div class="slds-modal__header blue-header">
-                        <h1 class="slds-modal__title slds-hyphenate" tabindex="-1">Confirmation</h1>
+                    <div class="slds-modal__header exp-popup-header">
+                        <div class="exp-popup-header-left">
+                            <div class="exp-popup-icon-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="exp-popup-title-group">
+                                <h1 id="modal-heading-delete" class="exp-popup-title" tabindex="-1">Confirmation</h1>
+                                <p class="exp-popup-subtitle">Delete assignment rule</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="slds-modal__content modalbody map-confirm-modal delete_modal_font_css"
-                        id="modal-content-id-1">
+
+                    <div class="slds-modal__content modalbody" id="modal-content-id-1">
                         <div class="content_body map-confirm-content">
                             <p class="slds-text-align_center con-msg">Are you sure you want to delete this rule?</p>
                         </div>
-                        <div class="footerbtns">
-                            <button class="exp-white-btn-css" onclick={closeDeleteConfirmation}>
-                                <svg width="12" height="12" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
-                                        fill="currentColor" />
-                                </svg>
-                                Cancel
-                            </button>
+                    </div>
+
+                    <div class="slds-modal__footer exp-popup-footer">
+                        <button class="exp-white-btn-css" onclick={closeDeleteConfirmation}>
+                            <svg width="12" height="12" viewBox="0 0 20 20" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                    fill="currentColor" />
+                            </svg>
+                            Cancel
+                        </button>
+                        <div class="exp-popup-footer-right">
                             <button class="exp-red-btn-css" onclick={confirmDelete}>
                                 <svg class="confirm-delete-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">

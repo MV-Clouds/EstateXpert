@@ -165,10 +165,11 @@
 }
 
 .con-msg {
-    margin: 16px;
-    font-size: 16px;
+    margin: 0;
+    font-size: 15px;
     font-weight: 500;
-    line-height: 12.64px;
+    color: #374151;
+    line-height: 1.5;
 }
 
 .save-btn {
@@ -551,9 +552,7 @@
 }
 
 .modalbody {
-    background-color: #F9FAFB !important;
-    border-bottom-left-radius: 8px !important;
-    border-bottom-right-radius: 8px !important;
+    background-color: #ffffff !important;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -561,11 +560,12 @@
 
 .content_body {
     flex: 1;
-    padding: 1.5rem;
+    padding: 2rem 1.5rem;
     overflow-y: auto;
     display: flex;
     align-items: center;
     justify-content: center;
+    background-color: #ffffff;
 }
 
 .full-page-container {

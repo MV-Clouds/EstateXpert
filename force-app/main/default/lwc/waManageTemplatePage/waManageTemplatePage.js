@@ -177,7 +177,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     isfilename = false;
     NoFileSelected = true;
     filePreview = '';
-    selectedObject = '';
+    selectedObject = 'Contact';
     richTextZip = richTextZip;
     buttonIconsZip = buttonIconsZip;
     isDropdownOpen = false;
@@ -219,7 +219,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     @track customButtonList = [];
     @track languageOptions = [];
     @track countryType = [];
-    @track availableObjects = [];
+    @track availableObjects = [
+        { label: 'Contact', value: 'Contact' },
+        { label: 'Listing', value: 'Listing__c' }
+    ];
     @track fields = [];
     @track emojiCategories = [];
     @track allTemplates = [];
@@ -449,8 +452,12 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
 
     get availableObjectsWithSelection() {
-        // Highlight the selected object
-        return this.availableObjects.map(obj => ({
+        // Highlight the selected object and restrict to Contact and Listing
+        let objects = [...this.availableObjects];
+        if (this.selectedObject && !objects.some(obj => obj.value === this.selectedObject)) {
+            objects.push({ label: this.selectedObject, value: this.selectedObject });
+        }
+        return objects.map(obj => ({
             ...obj,
             isSelected: obj.value === this.selectedObject
         }));
@@ -656,16 +663,22 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
      * Simplified version since wbMergeFieldSelector component now handles the picker logic
      */
     computeVariableFields(varItem, isHeaderVariable = false) {
-        const fieldOptions = this.fields || [];
+        const fieldOptions = (this.fields && this.fields.length > 0) ? this.fields : (varItem.options || []);
         const selectedField = fieldOptions.find(field => field.value === varItem.field);
-        const fieldLabel = varItem.fieldLabel || selectedField?.label || varItem.field || 'Search fields...';
+        const fieldLabel = varItem.fieldLabel || selectedField?.label || varItem.field || 'Select field';
+
+        let options = fieldOptions.map(field => ({
+            label: field.label,
+            value: field.value
+        }));
+
+        if (varItem.field && !options.some(opt => opt.value === varItem.field)) {
+            options = [{ label: fieldLabel, value: varItem.field }, ...options];
+        }
 
         return {
             fieldLabel,
-            options: fieldOptions.map(field => ({
-                ...field,
-                isSelected: field.value === varItem.field
-            }))
+            options
         };
     }
 
@@ -1050,16 +1063,26 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
         fields.forEach(field => {
             const displayLabel = parentLabel ? `${parentLabel} > ${field.label}` : field.label;
-            const displayValue = parentLabel ? `${parentLabel.replace(/ > /g, '.')}.${field.value}` : field.value;
 
-            if (!field.isRelationship) {
-                result.push({ label: displayLabel, value: displayValue });
+            if (!field.isRelationship && field.value && field.label) {
+                result.push({ label: displayLabel, value: field.value });
             }
 
             if (field.children && field.children.length > 0) {
                 result = result.concat(this.flattenFieldsForDropdown(field.children, displayLabel));
             }
         });
+
+        if (!parentLabel) {
+            const uniqueMap = new Map();
+            result.forEach(item => {
+                if (!uniqueMap.has(item.value)) {
+                    uniqueMap.set(item.value, item);
+                }
+            });
+            result = Array.from(uniqueMap.values());
+            result.sort((a, b) => (a.label || '').localeCompare(b.label || ''));
+        }
         return result;
     }
 
@@ -1216,20 +1239,20 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     fetchObjectsWithPhoneField() {
-        getObjectsWithPhoneField()
-            .then((result) => {
-                this.availableObjects = result;
-                // Only set default selectedObject for new templates, not in edit/clone mode
-                if (!this.isEditTemplate && !this.isTemplateClone) {
-                    this.selectedObject = this.availableObjects[0].value;
-                    this.isLoading = false;
-                    return this.loadObjectFields(this.selectedObject);
-                }
-                return Promise.resolve();
-            })
-            .catch((error) => {
-                this.showToast('Error fetching objects with phone field: ' + error.message, 'error');
-            })
+        this.availableObjects = [
+            { label: 'Contact', value: 'Contact' },
+            { label: 'Listing', value: 'Listing__c' }
+        ];
+        // Default selectedObject to Contact
+        if (!this.selectedObject) {
+            this.selectedObject = 'Contact';
+        }
+        // Only fetch fields for new templates (edit/clone fetches in fetchTemplateData)
+        if (!this.isEditTemplate && !this.isTemplateClone) {
+            this.isLoading = false;
+            return this.loadObjectFields(this.selectedObject);
+        }
+        return Promise.resolve();
     }
 
     fetchTemplateData() {
@@ -2537,16 +2560,24 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
     handleVarFieldChange(event) {
         try {
-            const variableIndex = String(event.target.dataset.index);
-            const fieldName = event.target.value;
-            this.variables = this.variables.map((varItem) =>
-                String(varItem.index) === variableIndex
-                    ? {
+            const variableIndex = String(event.currentTarget?.dataset?.index || event.target?.dataset?.index || '');
+            const variableId = String(event.currentTarget?.dataset?.id || event.target?.dataset?.id || '');
+            const fieldName = event.detail?.value !== undefined ? event.detail.value : event.target.value;
+            const selectedOption = this.fields?.find(f => f.value === fieldName);
+            const fieldLabel = selectedOption?.label || fieldName;
+
+            this.variables = this.variables.map((varItem) => {
+                const matchIndex = variableIndex && (String(varItem.index) === variableIndex || `{{${varItem.index}}}` === variableIndex);
+                const matchId = variableId && String(varItem.id) === variableId;
+                if (matchId || matchIndex) {
+                    return {
                         ...varItem,
                         field: fieldName,
-                    }
-                    : varItem
-            );
+                        fieldLabel: fieldLabel
+                    };
+                }
+                return varItem;
+            });
             this.formatedTempBody = this.formatText(this.tempBody);
             this.updatePreviewContent(this.formatedTempBody, 'body');
         } catch (error) {
@@ -3040,14 +3071,17 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
     handleFieldChange(event) {
         try {
-            // const variableId = event.target.dataset.id;
-            const variableId = String(event.target.dataset.id);
-            const fieldName = event.target.value;
+            const variableId = String(event.currentTarget?.dataset?.id || event.target?.dataset?.id || '');
+            const fieldName = event.detail?.value !== undefined ? event.detail.value : event.target.value;
+            const selectedOption = this.fields?.find(f => f.value === fieldName);
+            const fieldLabel = selectedOption?.label || fieldName;
+
             this.header_variables = this.header_variables.map(varItem =>
                 String(varItem.id) === variableId
                     ? {
                         ...varItem,
                         field: fieldName,
+                        fieldLabel: fieldLabel
                     }
                     : varItem
             );

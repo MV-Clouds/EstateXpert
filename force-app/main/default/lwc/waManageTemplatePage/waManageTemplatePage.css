@@ -64,41 +64,21 @@
 }
 
 /* Input Focus States with Theme Color */
-.main input:focus,
-.main textarea:focus,
-.main select:focus,
-.main .nameInput:focus,
-.main .con:focus,
-.main .text-btn:focus,
-.main .web-url:focus,
-.main .footerInput:focus,
-.main .var-input:focus,
-.main .expiretime:focus,
-.main .dropdown:focus,
-.main .alternate-text:focus {
+.main-container input:focus,
+.main-container textarea:focus,
+.main-container select:focus,
+.main-container .nameInput:focus,
+.main-container .con:focus,
+.main-container .text-btn:focus,
+.main-container .web-url:focus,
+.main-container .footerInput:focus,
+.main-container .var-input:focus,
+.main-container .expiretime:focus,
+.main-container .dropdown:focus,
+.main-container .alternate-text:focus {
     outline: 1px solid var(--color-primary);
     outline-offset: 0px;
     border-color: var(--color-primary);
-}
-
-/* Heading Background for Edit Template & Select Template Category */
-.template-page-header,
-.category-selection-header {
-    background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
-    padding: 20px 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    margin: -1%;
-    margin-bottom: 20px;
-}
-
-.template-page-header h1,
-.category-selection-header h1,
-.template-page-header .heading-text,
-.category-selection-header .heading-text {
-    color: white;
-    font-size: 1.5rem;
-    font-weight: 500;
-    margin: 0;
 }
 
 .main-container {
@@ -108,37 +88,17 @@
     min-height: 0;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: auto;
     position: relative;
     box-sizing: border-box;
-}
-
-.main {
-    border-radius: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    background: #F0F8FE;
-    background-attachment: fixed;
     padding: 1rem;
-    height: 100%;
-    width: 100%;
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    position: relative;
-    box-sizing: border-box;
-    margin: 0;
 }
-
 
 .preview-container {
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
-
     width: 280px;
     height: 500px;
     border: 1px solid #ccc;
@@ -160,9 +120,13 @@
 }
 
 .templatePreviewmain1 {
-    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    max-height: 500px;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
     border-radius: 12px;
+    background: #FFFFFF;
+    overflow: hidden;
 }
 
 .divcontainer {
@@ -760,32 +724,6 @@ textarea {
     margin-bottom: 0.3rem;
 }
 
-.custom-add-button {
-    width: 20%;
-    background-color: white;
-    border: none;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.custom-add-button:hover {
-    background-color: #F5F5F5;
-}
-
-.custom-add-button:disabled,
-.custom-add-button.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-.custom-add-button.hidden {
-    display: none;
-}
-
 .custom-button {
     display: inline-flex;
     justify-content: center;
@@ -920,38 +858,64 @@ textarea {
 
 .PreviewtemplateWP {
     background-color: #EBE8E2;
-    height: fit-content;
-    padding-top: 4%;
-    padding-left: 9%;
-    padding-bottom: 9%;
-    padding-right: 4%;
+    flex: 1;
+    min-height: 180px;
+    max-height: 480px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem 0.85rem 1rem 1.25rem;
     border-radius: 0px 0px 12px 12px;
     background-image: url('/resource/MVEX__wbiBg');
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
+    box-sizing: border-box;
+}
+
+.PreviewtemplateWP::-webkit-scrollbar {
+    width: 5px;
+}
+
+.PreviewtemplateWP::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+.PreviewtemplateWP::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 4px;
+}
+
+.PreviewtemplateWP::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.4);
 }
 
 .templatepreviewchildWP {
     height: fit-content;
-    width: fit-content;
-    border-radius: 15px;
-    margin-top: 2%;
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 2px;
     background-color: white;
-    max-width: 90%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .TextHeadingWP {
     color: black;
-    font-size: larger;
-    font-weight: 500;
-    word-wrap: break-word;
+    font-size: 14px;
+    font-weight: 600;
+    word-break: break-word;
     overflow-wrap: break-word;
     white-space: pre-wrap;
+    margin-bottom: 4px;
 }
 
 .TextBodyWP {
     color: black;
+    font-size: 13px;
+    line-height: 1.4;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .TextTimeWP {
@@ -969,8 +933,16 @@ textarea {
     background-color: #ccd0d5;
     border-radius: 4px;
     box-sizing: border-box;
-    min-width: 234px;
+    width: 100%;
+    min-width: 0;
     height: 140px;
+    overflow: hidden;
+}
+
+.imagedivWP img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
 }
 
 .pfooterWP {
@@ -982,22 +954,23 @@ textarea {
 .templateheadWP {
     background-color: white;
     border-radius: 12px 12px 0px 0px;
-    padding: 0.5rem;
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid #E2E8F0;
+    flex-shrink: 0;
 }
 
 .chatWP-bubble {
     border: 1px solid white;
-    border-radius: 5px;
-    padding-top: 6px;
-    padding-left: 7px;
-    padding-right: 7px;
-    padding-bottom: 0px;
-    width: auto;
-    max-width: 300px;
+    border-radius: 8px;
+    padding: 8px 10px 4px 10px;
+    width: 100%;
+    max-width: 100%;
     min-width: 150px;
     background-color: white;
     position: relative;
-    margin-right: 1rem;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
+    word-break: break-word;
 }
 
 .chatWP-bubble::before {
@@ -1078,11 +1051,19 @@ textarea {
     color: var(--color-text-primary);
 }
 
+.true-div .field-combobox {
+    flex: 1;
+    min-width: 160px;
+}
+
 .true-div .alternate-text {
+    flex: 1;
     min-width: 150px;
     padding: 0.5rem;
     border: 1px solid #c7c4c4;
     border-radius: 5px;
+    height: 32px;
+    box-sizing: border-box;
 }
 
 
@@ -1206,23 +1187,27 @@ textarea {
     align-items: center;
     text-align: center;
     position: relative;
-    margin-top: 3px;
-    max-width: 253px;
+    margin-top: 6px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .button-label-preview {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: auto;
+    width: 100%;
     font-size: 12px;
     cursor: pointer;
     border: 1px solid white;
-    border-radius: 5px;
-    padding: 2%;
-    margin-top: 6px;
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-top: 5px;
     background-color: white;
     color: #4194C2;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
 }
 
 
@@ -1486,57 +1471,6 @@ textarea {
     pointer-events: none;
 }
 
-/* ==================== FOOTER BUTTON STYLES ==================== */
-.template-footer-btn {
-    min-width: 100px;
-    padding: 0.3rem 0.7rem;
-    border-radius: 0.25rem;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    height: 34px;
-}
-
-.template-footer-btn-previous {
-    border: 1px solid #d8d8d8;
-    background: #ffffff;
-    color: #333;
-    margin-right: 0.5rem;
-}
-
-.template-footer-btn-previous:hover {
-    background-color: #f8f9fa;
-}
-
-.template-footer-btn-submit {
-    border: 1px solid var(--color-primary);
-    background: var(--color-primary);
-    color: #FFFFFF;
-}
-
-.template-footer-btn-submit:hover:not(:disabled) {
-    background-color: rgb(47 151 176);
-}
-
-.template-footer-btn-submit:disabled {
-    background-color: #c7c7c7;
-    border: 1px solid #c7c7c7;
-    cursor: not-allowed;
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-
-
-.native-add-icon {
-    width: 16px;
-    height: 16px;
-    fill: #6b6a6a;
-    margin-right: 0.4rem;
-    flex-shrink: 0;
-}
-
 .native-close-button {
     background: #f1f4f7;
     border: 1px solid #d8dde1;
@@ -1561,26 +1495,6 @@ textarea {
 
 .native-close-button:hover svg {
     fill: #201f1e;
-}
-
-.custom-add-button .native-add-icon,
-.custom-button .native-add-icon {
-    fill: #6b6a6a;
-}
-
-.custom-add-button:disabled .native-add-icon,
-.custom-button:disabled .native-add-icon {
-    fill: var(--color-text-muted);
-    opacity: 0.5;
-}
-
-.clone-blue-header {
-    background-color: #0176D3;
-    color: white;
-    border-bottom-style: unset;
-    border-top-left-radius: 8px !important;
-    border-top-right-radius: 8px !important;
-    padding: 1rem 1.25rem;
 }
 
 .clone-modalbody {
@@ -1623,20 +1537,6 @@ textarea {
     padding: 0.5rem 0;
 }
 
-/* ========================================= */
-/* Category Selection Card (Step 1 Embedded) */
-/* ========================================= */
-
-.category-selection-card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 1.25rem 1.5rem;
-    box-shadow: rgba(50, 50, 93, 0.15) 0px 2px 5px -1px, rgba(0, 0, 0, 0.08) 0px 1px 3px -1px;
-    border: 1px solid #E5E7EB;
-    margin-bottom: 1.25rem;
-    transition: all 0.2s ease-in-out;
-}
-
 .sidebar-preview-actions {
     display: flex;
     flex-direction: row;
@@ -1653,12 +1553,4 @@ textarea {
     font-size: 13px !important;
     font-weight: 600 !important;
     white-space: nowrap;
-}
-
-.form-action-btn {
-    height: 30px !important;
-    min-height: 30px !important;
-    padding: 0 20px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
 }

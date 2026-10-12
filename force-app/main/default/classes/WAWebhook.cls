@@ -10,37 +10,13 @@ global without sharing class WAWebhook {
 
     public static OAuth_Configuration__mdt getConfig() {
         try {
-            List<OAuth_Configuration__mdt> configs = [SELECT Id, DeveloperName, MasterLabel, API_Version__c, 
-                                                        Authorization_Endpoint__c, Access_Token__c, Client_Phone_Number_ID__c 
-                                                        FROM OAuth_Configuration__mdt 
-                                                        WHERE DeveloperName = :CONFIG_DEV_NAME LIMIT 1];
+            List<OAuth_Configuration__mdt> configs = [SELECT Id, DeveloperName, MasterLabel, API_Version__c, Authorization_Endpoint__c, Access_Token__c, 
+                                                        Client_Phone_Number_ID__c FROM OAuth_Configuration__mdt WHERE DeveloperName = :CONFIG_DEV_NAME LIMIT 1];
             return configs.isEmpty() ? null : configs[0];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WAWebhook', 'getConfig', e.getMessage());
             return null;
         }
-    }
-
-    public static String getAccessToken() {
-        OAuth_Configuration__mdt config = getConfig();
-        return (config != null && config.Access_Token__c != null) ? config.Access_Token__c : '';
-    }
-
-    public static String getApiEndpoint() {
-        OAuth_Configuration__mdt config = getConfig();
-        return (config != null && String.isNotBlank(config.Authorization_Endpoint__c)) 
-                ? config.Authorization_Endpoint__c.removeEnd('/') : 'https://graph.facebook.com';
-    }
-
-    public static String getApiVersion() {
-        OAuth_Configuration__mdt config = getConfig();
-        return (config != null && String.isNotBlank(config.API_Version__c)) 
-                ? (config.API_Version__c.trim().startsWithIgnoreCase('v') ? config.API_Version__c.trim() : 'v' + config.API_Version__c.trim()) : 'v24.0';
-    }
-
-    public static String getPhoneNumberId() {
-        OAuth_Configuration__mdt config = getConfig();
-        return (config != null && config.Client_Phone_Number_ID__c != null) ? config.Client_Phone_Number_ID__c : '';
     }
 
     @HttpGet
@@ -468,9 +444,19 @@ global without sharing class WAWebhook {
 
     public static Blob handleMediaAttachment(String documentId) {
         try {
-            String accessToken = getAccessToken();
-            String apiEndpoint = getApiEndpoint();
-            String apiVersion = getApiVersion();
+            List<OAuth_Configuration__mdt> configs = [SELECT Id, DeveloperName, MasterLabel, API_Version__c, 
+                                                        Authorization_Endpoint__c, Access_Token__c, Client_Phone_Number_ID__c 
+                                                        FROM OAuth_Configuration__mdt 
+                                                        WHERE DeveloperName = :CONFIG_DEV_NAME LIMIT 1];
+
+            if(configs.isEmpty()) {
+                return null;
+            }
+            
+            String accessToken = configs[0].Access_Token__c;
+            String apiEndpoint = configs[0].Authorization_Endpoint__c;
+            String apiVersion = configs[0].API_Version__c;
+            
             String mediaUrl = apiEndpoint + '/' + apiVersion + '/' + documentId;
             
             if (String.isNotBlank(accessToken)) {

@@ -26,14 +26,14 @@
                         </div>
                     </div>
                     <div class="account-right">
-                        <button class="action-outline-btn" onclick={openWebhookModal} disabled={isWebhookLocked} title={webhookButtonTitle}>
+                        <button class="exp-white-btn-css" onclick={openWebhookModal} disabled={isWebhookLocked} title={webhookButtonTitle}>
                             <svg class="btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none">
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
                                 <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
                             </svg>
                             Webhook Site
                         </button>
-                        <button class="disconnect-btn" onclick={handleDisconnectClick}>
+                        <button class="exp-red-btn-css" onclick={handleDisconnectClick}>
                             <svg class="btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 22v-5"></path>
                                 <path d="M9 8V2"></path>
@@ -147,6 +147,7 @@
                                                                         <th scope="col"><div class="slds-truncate header-cell-padding" title="Form Name">Form Name</div></th>
                                                                         <th scope="col" class="col-id"><div class="slds-truncate header-cell-padding" title="Form ID">Form ID</div></th>
                                                                         <th scope="col" class="col-count"><div class="slds-truncate header-cell-padding" title="Mapped Fields">Mapped Fields</div></th>
+                                                                        <th scope="col" class="col-count"><div class="slds-truncate header-cell-padding" title="Converted Leads">Converted Leads</div></th>
                                                                         <th scope="col" class="col-actions"><div class="slds-truncate header-cell-padding" title="Actions">Actions</div></th>
                                                                     </tr>
                                                                 </thead>
@@ -170,6 +171,7 @@
                                                                             </td>
                                                                             <td><div class="slds-truncate center-text">{form.formId}</div></td>
                                                                             <td><div class="slds-truncate center-text">{form.mappedCount}</div></td>
+                                                                            <td><div class="slds-truncate center-text">{form.convertedCount}</div></td>
                                                                             <td>
                                                                                 <div class="action-buttons-wrapper">
                                                                                     <button class="action-div" data-id={form.id} onclick={handleEditRow} title="Edit Mapping">
@@ -382,14 +384,24 @@
         <template if:true={isModalOpen}>
             <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="google-wizard-title" class="slds-modal slds-fade-in-open slds-modal_medium section_css">
                 <div class="slds-modal__container">
-                    <div class="slds-modal__close close-icon-css" role="button" aria-label="Close" onclick={closeModal}>
+                    <div class="slds-modal__close exp-close-icon-css" role="button" aria-label="Close" onclick={closeModal}>
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937" />
                         </svg>
                     </div>
 
-                    <div class="slds-modal__header blue-header">
-                        <h1 id="google-wizard-title" class="slds-modal__title slds-hyphenate">Form Mapping Wizard</h1>
+                    <div class="slds-modal__header exp-popup-header">
+                        <div class="exp-popup-header-left">
+                            <div class="exp-popup-icon-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 6h16M4 12h16m-7 6h7" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="exp-popup-title-group">
+                                <h1 class="exp-popup-title" id="google-wizard-title" tabindex="-1">Form Mapping Wizard</h1>
+                                <p class="exp-popup-subtitle">Map your Google Ads lead forms to Salesforce fields</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="slds-modal__content modalbody">
@@ -513,8 +525,8 @@
                                                     <div class="add-field-title">Add Salesforce Field</div>
                                                     <div class="add-field-controls">
                                                         <lightning-combobox value={selectedAdditionalField} options={additionalFieldOptions} onchange={handleAdditionalFieldChange} placeholder="-- Select Salesforce Field --" variant="label-hidden" class="custom-combobox add-field-combobox"></lightning-combobox>
-                                                        <button type="button" class="save_btn_css" onclick={handleAddField} disabled={isAddFieldDisabled}>Add</button>
-                                                        <button type="button" class="cancel_btn_css" onclick={handleCancelAddField}>Cancel</button>
+                                                        <button type="button" class="exp-blue-btn-css" onclick={handleAddField} disabled={isAddFieldDisabled}>Add</button>
+                                                        <button type="button" class="exp-white-btn-css" onclick={handleCancelAddField}>Cancel</button>
                                                     </div>
                                                     <template if:false={hasAdditionalFieldOptions}>
                                                         <div class="wizard-hint-muted">All available Salesforce fields have already been added.</div>
@@ -542,14 +554,14 @@
                             </div>
                         </template>
 
-                        <div class="footerbtns">
-                            <button class="cancel_btn_css" aria-label="Cancel and close" onclick={closeModal}>
+                        <div class="exp-popup-footer">
+                            <button class="exp-white-btn-css" aria-label="Cancel and close" onclick={closeModal}>
                                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
                                 </svg>
                                 Cancel
                             </button>
-                            <button class="save_btn_css" disabled={isSaveDisabled} onclick={saveMapping}>
+                            <button class="exp-blue-btn-css" disabled={isSaveDisabled} onclick={saveMapping}>
                                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor" />
                                 </svg>
@@ -566,13 +578,25 @@
         <template if:true={isWebhookModalOpen}>
             <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="google-webhook-title" class="slds-modal slds-fade-in-open slds-modal_small section_css">
                 <div class="slds-modal__container">
-                    <div class="slds-modal__close close-icon-css" role="button" aria-label="Close" onclick={closeWebhookModal}>
+                    <div class="slds-modal__close exp-close-icon-css" role="button" aria-label="Close" onclick={closeWebhookModal}>
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937" />
                         </svg>
                     </div>
-                    <div class="slds-modal__header blue-header">
-                        <h1 id="google-webhook-title" class="slds-modal__title slds-hyphenate">Webhook Site</h1>
+
+                    <div class="slds-modal__header exp-popup-header">
+                        <div class="exp-popup-header-left">
+                            <div class="exp-popup-icon-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" stroke="#4b5563" stroke-width="1.5"></circle>
+                                    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                            </div>
+                            <div class="exp-popup-title-group">
+                                <h1 class="exp-popup-title" id="google-webhook-title" tabindex="-1">Webhook Site</h1>
+                                <p class="exp-popup-subtitle">Select the Force.com site that receives Google leads</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="slds-modal__content modalbody">
                         <div class="content_body relative-position">
@@ -598,9 +622,9 @@
                                 </template>
                             </div>
                         </div>
-                        <div class="footerbtns">
-                            <button class="cancel_btn_css" onclick={closeWebhookModal}>Cancel</button>
-                            <button class="save_btn_css" disabled={isSaveWebhookDisabled} onclick={saveWebhookSite}>Save</button>
+                        <div class="exp-popup-footer">
+                            <button class="exp-white-btn-css" onclick={closeWebhookModal}>Cancel</button>
+                            <button class="exp-blue-btn-css" disabled={isSaveWebhookDisabled} onclick={saveWebhookSite}>Save</button>
                         </div>
                     </div>
                 </div>
@@ -612,13 +636,24 @@
         <template if:true={isFailedModalOpen}>
             <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="google-failed-title" class="slds-modal slds-fade-in-open slds-modal_medium section_css">
                 <div class="slds-modal__container">
-                    <div class="slds-modal__close close-icon-css" role="button" aria-label="Close" onclick={closeFailedModal}>
+                    <div class="slds-modal__close exp-close-icon-css" role="button" aria-label="Close" onclick={closeFailedModal}>
                         <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="#1F2937" />
                         </svg>
                     </div>
-                    <div class="slds-modal__header blue-header">
-                        <h1 id="google-failed-title" class="slds-modal__title slds-hyphenate">{failedModalTitle}</h1>
+
+                    <div class="slds-modal__header exp-popup-header">
+                        <div class="exp-popup-header-left">
+                            <div class="exp-popup-icon-box">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="exp-popup-title-group">
+                                <h1 class="exp-popup-title" id="google-failed-title" tabindex="-1">{failedModalTitle}</h1>
+                                <p class="exp-popup-subtitle">Review and manage failed lead submissions</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="slds-modal__content modalbody">
                         <div class="content_body relative-position min-height-200">
@@ -661,33 +696,35 @@
                                 <div class="wizard-disabled-box mt-40">No failed leads found for this form.</div>
                             </template>
                         </div>
-                        <div class="footerbtns">
-                            <button class="white-btn-css" onclick={closeFailedModal}>
+                        <div class="exp-popup-footer">
+                            <button class="exp-white-btn-css" onclick={closeFailedModal}>
                                 <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z" fill="currentColor" />
                                 </svg>
                                 Close
                             </button>
-                            <button class="white-btn-css red-text-btn" disabled={isFailedActionDisabled} onclick={handleDiscardSelected}>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" height="14" width="14">
-                                    <path d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875Z" stroke-width="0.0625"></path>
-                                </svg>
-                                Discard Selected
-                            </button>
-                            <button class="white-btn-css" disabled={isFailedActionDisabled} onclick={handleEditMappingAndRetry}>
-                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                                Edit Mapping &amp; Retry
-                            </button>
-                            <button class="blue-btn-css" disabled={isFailedActionDisabled} onclick={handleRetrySelected}>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="23 4 23 10 17 10"></polyline>
-                                    <polyline points="1 20 1 14 7 14"></polyline>
-                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                                </svg>
-                                Retry Selected
-                            </button>
+                            <div class="exp-popup-footer-right">
+                                <button class="exp-red-btn-css" disabled={isFailedActionDisabled} onclick={handleDiscardSelected}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" height="14" width="14">
+                                        <path d="M14.76391875 2.61960625H11.5356875v-0.768625c0 -0.93390625 -0.75708125 -1.69098125 -1.69098125 -1.69098125H6.15529375c-0.9339 0 -1.69098125 0.757075 -1.69098125 1.69098125v0.768625H1.23608125c-0.35501875 0.00001875 -0.57690625 0.38434375 -0.39938125 0.6917875 0.08238125 0.142675 0.234625 0.23056875 0.39938125 0.23056875h0.768625v11.22195625c0 0.59430625 0.481775 1.07608125 1.076075 1.07608125h9.83843125c0.59430625 0 1.07608125 -0.481775 1.07608125 -1.07608125V3.5419625h0.768625c0.35501875 0 0.5769 -0.38431875 0.39939375 -0.69176875 -0.08238125 -0.14268125 -0.2346375 -0.23058125 -0.39939375 -0.2305875Zm-9.37725 -0.768625c0 -0.4245 0.344125 -0.76863125 0.768625 -0.76863125h3.6894125c0.4245 0 0.768625 0.34413125 0.768625 0.76863125v0.768625H5.38666875Zm7.686275 12.9129375c0 0.0849 -0.06883125 0.153725 -0.15373125 0.15373125H3.08078125c-0.0849 0 -0.153725 -0.068825 -0.153725 -0.15373125V3.5419625h10.1458875Z" stroke-width="0.0625"></path>
+                                    </svg>
+                                    Discard Selected
+                                </button>
+                                <button class="exp-white-btn-css" disabled={isFailedActionDisabled} onclick={handleEditMappingAndRetry}>
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M13.0416 13.0417H8.45831M0.958313 13.0417L4.49998 12.2083L12.2441 4.46426C12.5695 4.13882 12.5695 3.61119 12.2441 3.28575L10.7142 1.75593C10.3888 1.43049 9.86115 1.43049 9.53573 1.75593L1.79165 9.50001L0.958313 13.0417Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    Edit Mapping &amp; Retry
+                                </button>
+                                <button class="exp-blue-btn-css" disabled={isFailedActionDisabled} onclick={handleRetrySelected}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <polyline points="1 20 1 14 7 14"></polyline>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                    </svg>
+                                    Retry Selected
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

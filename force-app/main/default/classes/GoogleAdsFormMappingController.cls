@@ -295,6 +295,43 @@ public with sharing class GoogleAdsFormMappingController {
         }
     }
 
+    /** 
+    * Method Name : getMappedContactCounts
+    * Created By : Salmanhaider Aghariya
+    * Last Modified Date : 09/10/2026
+    * Last Modified By : Salmanhaider Aghariya
+    * @param formNames List of Google Lead Form names
+    * @return Map of form name to mapped Contact count
+    * @description : Counts Contacts mapped to each form name using MVEX_GCLID__c.
+    */ 
+    @AuraEnabled
+    public static Map<String, Integer> getMappedContactCounts(List<String> formNames) {
+        try {
+            Map<String, Integer> countsByFormName = new Map<String, Integer>();
+            Set<String> requested = new Set<String>();
+            if (formNames != null) {
+                requested.addAll(formNames);
+            }
+            requested.remove(null);
+            requested.remove('');
+
+            for (String name : requested) {
+                countsByFormName.put(name, 0);
+            }
+            if (requested.isEmpty()) {
+                return countsByFormName;
+            }
+
+            for (AggregateResult r : [SELECT MVEX__GCLID__c formName, COUNT(Id) contactCount FROM Contact WHERE MVEX__GCLID__c IN :requested WITH USER_MODE GROUP BY MVEX__GCLID__c]) {
+                countsByFormName.put((String) r.get('formName'), (Integer) r.get('contactCount'));
+            }
+            return countsByFormName;
+        } catch (Exception e) {
+            logError(e, 'getMappedContactCounts');
+            throw auraError('Failed to retrieve converted lead counts.');
+        }
+    }
+
     /**
     * Method Name : retryFailedLeads
     * Created By : Salmanhaider Aghariya

@@ -86,6 +86,7 @@ global with sharing class GoogleLeadsWebhook {
                 throw new LeadProcessingException('Unable to populate "' + salesforceField + '": ' + ex.getMessage());
             }
         }
+        con.MVEX__GCLID__c = formConfiguration.formName;
         return con;
     }
 

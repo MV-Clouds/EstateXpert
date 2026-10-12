@@ -62,7 +62,7 @@ export default class MessagePopup extends LightningElement {
             this.statusIconColor = this.CSSvalues.info.statusIconColor;
         }
         return `
-            --designCurveColor : ${this.designCurveColor};
+            background-color : ${this.designCurveColor};
             --statusIconColor : ${this.statusIconColor};
         `;
     }
@@ -86,20 +86,28 @@ export default class MessagePopup extends LightningElement {
 
     handleConfirmation(event){
         try {
-            event.preventDefault();
-            var conform = event.currentTarget.dataset.name == 'conform' ? true : false;
-            this.closeModal(conform);
+            if (event) {
+                event.preventDefault();
+            }
+            const isConfirmed = event?.currentTarget?.dataset?.name === 'conform';
+            this.closeModal(isConfirmed);
         } catch (error) {
             console.error('error in handleConfirmation poupMessgae : ', error.stack);
         }
     }
 
     handleCloseModal(event){
-        const conform = event.currentTarget.dataset.type === 'popup' ? true : false;
-        this.closeModal(conform);
+        try {
+            if (event) {
+                event.preventDefault();
+            }
+            this.closeModal(false);
+        } catch (error) {
+            console.error('error in handleCloseModal poupMessgae : ', error.stack);
+        }
     }
 
-    closeModal(conform){
+    closeModal(conform = false){
         try {
             this.showPopup = false;
             this.status = '';
@@ -107,7 +115,7 @@ export default class MessagePopup extends LightningElement {
             this.message = '';
             this.type = '';
             this.dispatchEvent(new CustomEvent('confirmation',{
-                detail : conform
+                detail : conform === true
             }));
 
         } catch (error) {

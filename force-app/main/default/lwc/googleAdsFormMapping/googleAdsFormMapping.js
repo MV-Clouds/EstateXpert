@@ -19,6 +19,7 @@ import discardFailedLeads from '@salesforce/apex/GoogleAdsFormMappingController.
 import getActiveSites from '@salesforce/apex/GoogleAdsFormMappingController.getActiveSites';
 import getWebhookUrl from '@salesforce/apex/GoogleAdsFormMappingController.getWebhookUrl';
 import saveWebhookUrl from '@salesforce/apex/GoogleAdsFormMappingController.saveWebhookUrl';
+import getMappedContactCounts from '@salesforce/apex/GoogleAdsFormMappingController.getMappedContactCounts';
 import GlobalStyles from '@salesforce/resourceUrl/globalStyles';
 
 const SOURCE_GOOGLE = 'google';
@@ -52,6 +53,7 @@ export default class GoogleAdsFormMapping extends LightningElement {
     tableData = [];
     failedLeads = [];
     failedLeadCounts = {};
+    convertedLeadCounts = {};   // new
     siteOptions = [];
 
     selectedAccount = '';
@@ -252,6 +254,7 @@ export default class GoogleAdsFormMapping extends LightningElement {
         this.salesforceLeadFields = salesforceFields || [];
         this.webhookUrl = webhookUrl || '';
         await this.refreshFailedLeadCounts();
+        await this.refreshConvertedLeadCounts();
         this.buildTableData();
         this.isMappingDataLoaded = true;
     }
@@ -272,6 +275,23 @@ export default class GoogleAdsFormMapping extends LightningElement {
         this.failedLeadCounts = formIds
             ? { ...this.failedLeadCounts, ...counts }
             : counts;
+    }
+
+    async refreshConvertedLeadCounts() {
+        const names = Object.values(this.fullMappingJson || {}).flatMap(account =>
+            Object.values(account?.forms || {}).map(form => form?.formName)
+        ).filter(Boolean);
+
+        if (!names.length) {
+            this.convertedLeadCounts = {};
+            return;
+        }
+        try {
+            this.convertedLeadCounts = (await getMappedContactCounts({ formNames: [...new Set(names)] })) || {};
+        } catch (error) {
+            console.error('Could not load converted lead counts', error);
+            this.convertedLeadCounts = {};
+        }
     }
 
     /**
@@ -577,6 +597,7 @@ export default class GoogleAdsFormMapping extends LightningElement {
             this.fullMappingJson = {};
             this.currentPage = 1;
             this.showTokenInput = false;
+            this.convertedLeadCounts = {};
             this.isConnectionPending = false;
             this.isMappingDataLoaded = false;
             this.showToast('Success', 'Google Ads disconnected successfully.', 'success');
@@ -1076,6 +1097,7 @@ export default class GoogleAdsFormMapping extends LightningElement {
 
             this.fullMappingJson = JSON.parse(mappingJson);
             await this.refreshFailedLeadCounts();
+            await this.refreshConvertedLeadCounts();
             this.buildTableData();
             this.isModalOpen = false;
             this.showToast('Success', 'Google Ads form mapping saved successfully.', 'success');
@@ -1111,6 +1133,7 @@ export default class GoogleAdsFormMapping extends LightningElement {
                     formName: form?.formName || `Form ID: ${formId}`,
                     mappedCount: Object.keys(mappings).length,
                     failedCount: this.failedLeadCounts[formId] || 0,
+                    convertedCount: this.convertedLeadCounts[form?.formName] || 0,
                     mappings
                 };
             });
@@ -1505,6 +1528,7 @@ export default class GoogleAdsFormMapping extends LightningElement {
         try {
             await this.refreshFailedLeads();
             await this.refreshFailedLeadCounts([this.failedContext.formId]);
+            await this.refreshConvertedLeadCounts();
             this.buildTableData();
         } catch (error) {
             console.error('Failed to refresh failed leads', error);

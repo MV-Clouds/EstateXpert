@@ -132,16 +132,6 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     }
 
     /**
-     * Method Name: isPortalMappingLandingPageComponent
-     * @description: Checks if PortalMappingLandingPage component is selected
-     * Date: 23/09/2026
-     * Created By: Vyom Soni
-     */
-    get isPortalMappingLandingPageComponent() {
-        return this.selectedComponent === 'portalMappingLandingPage';
-    }
-
-    /**
      * Method Name: isGoogleAdsMappingComponent
      * @description: Checks if GoogleAdsMapping component is selected
      * Date: 1/10/2026

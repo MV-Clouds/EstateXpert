@@ -28,6 +28,42 @@ private class GoogleAdsFormMappingControllerTest {
     }
 
     @IsTest
+    static void testGetMappedContactCounts() {
+        insert new List<Contact>{
+            new Contact(LastName = 'Contact One', MVEX__GCLID__c = 'FormA'),
+            new Contact(LastName = 'Contact Two', MVEX__GCLID__c = 'FormA'),
+            new Contact(LastName = 'Contact Three', MVEX__GCLID__c = 'FormB')
+        };
+
+        Test.startTest();
+        Map<String, Integer> result = GoogleAdsFormMappingController.getMappedContactCounts(new List<String>{ 'FormA', 'FormB', 'FormC' });
+        Test.stopTest();
+
+        System.assertEquals(2, result.get('FormA'));
+        System.assertEquals(1, result.get('FormB'));
+        System.assertEquals(0, result.get('FormC'));
+        System.assertEquals(3, result.size());
+    }
+
+    @IsTest
+    static void testGetMappedContactCountsWithEmptyInput() {
+        Test.startTest();
+        Map<String, Integer> result = GoogleAdsFormMappingController.getMappedContactCounts(new List<String>());
+        Test.stopTest();
+
+        System.assertEquals(0, result.size());
+    }
+
+    @IsTest
+    static void testGetMappedContactCountsWithNullInput() {
+        Test.startTest();
+        Map<String, Integer> result = GoogleAdsFormMappingController.getMappedContactCounts(null);
+        Test.stopTest();
+
+        System.assertEquals(0, result.size());
+    }
+
+    @IsTest
     static void getFailedLeads_blankFormId_throws() {
         try {
             GoogleAdsFormMappingController.getFailedLeads(' ');
@@ -40,7 +76,7 @@ private class GoogleAdsFormMappingControllerTest {
     @IsTest
     static void getFailedLeads_returnsMatchingRecordsAndSkipsUnparsable() {
         insert new List<MVEX__Error_Handling__c>{
-            createError(envelope(FORM_ID,       'L1', 'boom',  leadPayload(FORM_ID,       'L1', true))),
+            createError(envelope(FORM_ID, 'L1', 'boom', leadPayload(FORM_ID, 'L1', true))),
             createError(JSON.serialize(leadPayload(FORM_ID, 'L2', true))),
             createError(envelope(OTHER_FORM_ID, 'L3', 'other', leadPayload(OTHER_FORM_ID, 'L3', true))),
             createError('not json')
@@ -65,7 +101,7 @@ private class GoogleAdsFormMappingControllerTest {
     @IsTest
     static void getFailedLeadCounts_countsPerRequestedForm() {
         insert new List<MVEX__Error_Handling__c>{
-            createError(envelope(FORM_ID,       'L1', 'x', leadPayload(FORM_ID,       'L1', true))),
+            createError(envelope(FORM_ID, 'L1', 'x', leadPayload(FORM_ID, 'L1', true))),
             createError(JSON.serialize(leadPayload(FORM_ID, 'L2', true))),  // raw format also counted
             createError(envelope(OTHER_FORM_ID, 'L3', 'x', leadPayload(OTHER_FORM_ID, 'L3', true))),
             createError('not json')                                          // ignored

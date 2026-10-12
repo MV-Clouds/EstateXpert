@@ -34,9 +34,10 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
     @wire(CurrentPageReference)
     getStateParameters(currentPageReference) {
         this.currentPageRef = currentPageReference;
-        if (currentPageReference && currentPageReference.state) {
-            const target = currentPageReference.state.c__openComponent || currentPageReference.state.c__view;
-            if (target && this.selectedComponent !== target) {
+        // On initial wire load, route to target if currently on controlCenter view and no component is active
+        if (currentPageReference && currentPageReference.state && this.currentView === 'controlCenter' && !this.selectedComponent) {
+            const target = this.getOpenComponentFromUrl();
+            if (target) {
                 this.routeToComponent(target, true);
             }
         }
@@ -88,15 +89,19 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
 
     getOpenComponentFromUrl() {
         try {
-            if (this.currentPageRef?.state?.c__openComponent) {
-                return this.currentPageRef.state.c__openComponent;
+            // Check window.location.search first as the immediate source of truth for the browser's active URL
+            if (typeof window !== 'undefined' && window.location) {
+                const search = window.location.search;
+                if (search && search.length > 1) {
+                    const searchParams = new URLSearchParams(search);
+                    return searchParams.get('c__openComponent') || searchParams.get('c__view') || searchParams.get('openComponent') || null;
+                }
+                return null;
             }
-            if (this.currentPageRef?.state?.c__view) {
-                return this.currentPageRef.state.c__view;
-            }
-            if (window?.location?.search) {
-                const searchParams = new URLSearchParams(window.location.search);
-                return searchParams.get('c__openComponent') || searchParams.get('c__view') || searchParams.get('openComponent');
+
+            // Fallback to currentPageRef state only during SSR or when window is not available
+            if (this.currentPageRef?.state) {
+                return this.currentPageRef.state.c__openComponent || this.currentPageRef.state.c__view || this.currentPageRef.state.openComponent || null;
             }
         } catch (e) {
             console.error('Error reading URL params:', e);
@@ -131,23 +136,49 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
 
     updateUrl(componentName) {
         try {
-            if (window?.history && window?.location) {
-                const url = new URL(window.location.href);
-                const currentParam = url.searchParams.get('c__openComponent') || url.searchParams.get('c__view');
+            if (typeof window === 'undefined' || !window.history || !window.location) {
+                return;
+            }
 
-                if (componentName) {
-                    if (currentParam !== componentName) {
-                        url.searchParams.set('c__openComponent', componentName);
-                        url.searchParams.delete('c__view');
-                        window.history.pushState({ openComponent: componentName }, '', url.toString());
+            const pathname = window.location.pathname;
+            const currentParam = this.getOpenComponentFromUrl();
+
+            if (componentName) {
+                // If already on this exact component in URL, avoid duplicate pushes
+                if (currentParam && currentParam.toLowerCase() === componentName.toLowerCase()) {
+                    return;
+                }
+
+                // Preserve any non-component query params that might already exist
+                const params = new URLSearchParams(window.location.search);
+                params.set('c__openComponent', componentName);
+                params.delete('c__view');
+                params.delete('openComponent');
+
+                // Preserve WhatsApp account params only when opening whatsappConnect
+                if (componentName === 'whatsappConnect') {
+                    const wabaId = params.get('c__wabaId') || params.get('c__businessAccountId');
+                    if (wabaId) {
+                        params.set('c__wabaId', wabaId);
+                        params.set('c__businessAccountId', wabaId);
                     }
-                } else {
-                    if (currentParam || url.searchParams.has('c__openComponent') || url.searchParams.has('c__view') || url.searchParams.has('openComponent')) {
-                        url.searchParams.delete('c__openComponent');
-                        url.searchParams.delete('c__view');
-                        url.searchParams.delete('openComponent');
-                        window.history.pushState({ openComponent: null }, '', url.toString());
-                    }
+                }
+
+                const targetUrl = `${pathname}?${params.toString()}`;
+                window.history.pushState({ openComponent: componentName }, '', targetUrl);
+            } else {
+                // If returning to Control Center, clean up component query parameters
+                const params = new URLSearchParams(window.location.search);
+                params.delete('c__openComponent');
+                params.delete('c__view');
+                params.delete('openComponent');
+
+                const remainingQuery = params.toString();
+                const targetUrl = remainingQuery ? `${pathname}?${remainingQuery}` : pathname;
+
+                // Replace URL if the URL currently has component query params
+                if (currentParam || (window.location.search && (window.location.search.includes('c__openComponent') || window.location.search.includes('c__view') || window.location.search.includes('openComponent')))) {
+                    window.history.replaceState({ openComponent: null }, '', targetUrl);
                 }
             }
         } catch (e) {
@@ -360,8 +391,12 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
      * Date: 17/02/2026
      * Created By: Karan Singh
      */
-    goToControlCenter(skipUrlUpdate = false) {
+    goToControlCenter(eventOrSkip = false) {
         try {
+            if (eventOrSkip && typeof eventOrSkip.preventDefault === 'function') {
+                eventOrSkip.preventDefault();
+            }
+            const skipUrl = (eventOrSkip === true);
             this.currentView = 'controlCenter';
             this.selectedComponent = null;
             this.selectedComponentTitle = '';
@@ -373,12 +408,12 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             this.portalIconUrl = null;
             this.portalStatus = null;
             this.integrationType = null;
-        
-            if (skipUrlUpdate !== true) {
+
+            if (!skipUrl) {
                 this.updateUrl(null);
             }
         } catch (e) {
-            console.error('Error in goToControlCenter:', e.stack);
+            console.error('Error in goToControlCenter:', e?.stack || e);
         }
     }
 
@@ -406,6 +441,17 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
                 portalCmp.resetView();
             }
             this.updateUrl('portalMapping');
+        } else if (this.parentComponentTitle === 'Message Templates') {
+            this.selectedComponent = 'whatsappTemplates';
+            this.selectedComponentTitle = 'Message Templates';
+            this.selectedComponentDescription = 'The "Message Templates" enables you to create different message templates for sending to users during marketing campaigns or regular chatting. Design reusable templates with dynamic content to maintain consistent and professional communication.';
+            this.parentComponentTitle = '';
+
+            const waHome = this.template.querySelector('c-wa-template-home-page');
+            if (waHome) {
+                waHome.resetView();
+            }
+            this.updateUrl('whatsappTemplates');
         }
     }
 
@@ -547,6 +593,23 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             this.portalIconUrl = portalIconUrl;
             this.portalStatus = portalStatus;
             this.isXMLForPF = isXMLForPF;
+        }
+    }
+
+    /**
+     * Method Name: handleTemplateNavigation
+     * @description: Handles navigation inside message templates component for breadcrumbs
+     */
+    handleTemplateNavigation(event) {
+        if (event && event.detail) {
+            const { title, parentTitle } = event.detail;
+            if (parentTitle) {
+                this.parentComponentTitle = parentTitle;
+                this.selectedComponentTitle = title || 'Template';
+            } else {
+                this.parentComponentTitle = '';
+                this.selectedComponentTitle = title || 'Message Templates';
+            }
         }
     }
 

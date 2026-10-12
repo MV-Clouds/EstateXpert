@@ -142,8 +142,10 @@ public with sharing class WhatsappConnectController {
     /**
      * Method Name : verifyManualCredentials
      * @description : Validates WhatsApp credentials (Access Token, Phone Number ID, WABA ID, App ID)
-     *                by making an HTTP Callout to Meta Graph API from Apex.
-     * @param accessToken Meta Permanent Access Token
+     *                using a SINGLE HTTP Callout to Meta Graph API Batch endpoint.
+     *                Bundles Phone Number check, WABA check, and App check into one request.
+     *                Supports Permanent, Temporary, System User, and Business Access Tokens.
+     * @param accessToken Meta Access Token (Permanent, Temporary, or System User)
      * @param phoneId Phone Number ID
      * @param wabaId WhatsApp Business Account ID
      * @param appId Meta Application ID
@@ -161,93 +163,198 @@ public with sharing class WhatsappConnectController {
             }
 
             accessToken = accessToken.trim();
-            phoneId = phoneId.trim();
-            wabaId = wabaId.trim();
-            appId = appId.trim();
+            phoneId = phoneId.replaceAll('\\s+', '');
+            wabaId = wabaId.replaceAll('\\s+', '');
+            appId = appId.replaceAll('\\s+', '');
+
+            if (!phoneId.isNumeric()) {
+                response.put('isValid', false);
+                response.put('field', 'phone');
+                response.put('message', 'The Phone Number ID must contain only digits (e.g., 105938472910).');
+                return response;
+            }
+
+            if (!wabaId.isNumeric()) {
+                response.put('isValid', false);
+                response.put('field', 'waba');
+                response.put('message', 'The WhatsApp Business Account ID (WABA ID) must contain only digits.');
+                return response;
+            }
+
+            if (!appId.isNumeric()) {
+                response.put('isValid', false);
+                response.put('field', 'app');
+                response.put('message', 'The Meta Application ID must contain only digits.');
+                return response;
+            }
 
             OAuth_Configuration__mdt config = getConfig();
             String baseEndpoint = (config != null && String.isNotBlank(config.Authorization_Endpoint__c)) 
-                ? config.Authorization_Endpoint__c.trim() 
+                ? config.Authorization_Endpoint__c.removeEnd('/') 
                 : 'https://graph.facebook.com';
             String apiVer = (config != null && String.isNotBlank(config.API_Version__c)) 
-                ? config.API_Version__c.trim() 
+                ? (config.API_Version__c.trim().startsWithIgnoreCase('v') ? config.API_Version__c.trim() : 'v' + config.API_Version__c.trim()) 
                 : 'v21.0';
-            if (!apiVer.startsWith('v')) {
-                apiVer = 'v' + apiVer;
-            }
+
+            // Build Batch operations to validate all credentials in a SINGLE callout:
+            // Op 0: Phone Number ID check (fields: id, display_phone_number)
+            // Op 1: WhatsApp Business Account ID check (fields: id, name)
+            // Op 2: Token's parent App introspection (/app)
+            // Op 3: Direct Meta App ID verification
+            List<Map<String, String>> batchOps = new List<Map<String, String>>();
+            batchOps.add(new Map<String, String>{
+                'method' => 'GET',
+                'relative_url' => phoneId + '?fields=id,display_phone_number'
+            });
+            batchOps.add(new Map<String, String>{
+                'method' => 'GET',
+                'relative_url' => wabaId + '?fields=id,name'
+            });
+            batchOps.add(new Map<String, String>{
+                'method' => 'GET',
+                'relative_url' => 'app'
+            });
+            batchOps.add(new Map<String, String>{
+                'method' => 'GET',
+                'relative_url' => appId
+            });
+
+            String batchPayload = 'include_headers=false&batch=' + EncodingUtil.urlEncode(JSON.serialize(batchOps), 'UTF-8');
+
+            HttpRequest req = new HttpRequest();
+            req.setEndpoint(baseEndpoint + '/' + apiVer);
+            req.setMethod('POST');
+            req.setHeader('Authorization', 'Bearer ' + accessToken);
+            req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+            req.setTimeout(20000);
+            req.setBody(batchPayload);
 
             Http http = new Http();
+            HttpResponse res = http.send(req);
 
-            // 1. Verify Phone Number ID & Access Token
-            HttpRequest phoneReq = new HttpRequest();
-            phoneReq.setEndpoint(baseEndpoint + '/' + apiVer + '/' + EncodingUtil.urlEncode(phoneId, 'UTF-8') + '?fields=id,display_phone_number,whatsapp_business_account&access_token=' + EncodingUtil.urlEncode(accessToken, 'UTF-8'));
-            phoneReq.setMethod('GET');
-            phoneReq.setTimeout(15000);
-            HttpResponse phoneRes = http.send(phoneReq);
-
-            if (phoneRes.getStatusCode() != 200) {
-                Map<String, Object> errBody = (Map<String, Object>) JSON.deserializeUntyped(phoneRes.getBody());
+            // Handle Top-Level HTTP Error (e.g. invalid/expired token or server error)
+            if (res.getStatusCode() != 200) {
+                Map<String, Object> errBody = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
                 Map<String, Object> errMap = (errBody != null && errBody.containsKey('error')) ? (Map<String, Object>) errBody.get('error') : null;
-                Integer errCode = (errMap != null && errMap.containsKey('code')) ? (Integer) errMap.get('code') : 0;
-                String errMsg = (errMap != null && errMap.containsKey('message')) ? (String) errMap.get('message') : phoneRes.getStatus();
+                String errMsg = (errMap != null && errMap.containsKey('message')) ? (String) errMap.get('message') : res.getStatus();
 
-                if (errCode == 190 || (errMsg != null && errMsg.toLowerCase().contains('access token'))) {
+                if (isTokenErrorMap(errMap)) {
                     response.put('isValid', false);
                     response.put('field', 'token');
-                    response.put('message', 'The Permanent Access Token is invalid or expired. Please check your token.');
+                    response.put('message', 'The Access Token is invalid or expired: ' + errMsg);
+                    return response;
+                }
+
+                response.put('isValid', false);
+                response.put('field', 'general');
+                response.put('message', 'Verification failed: ' + errMsg);
+                return response;
+            }
+
+            // Parse Batch Results Array
+            List<Object> batchResults = (List<Object>) JSON.deserializeUntyped(res.getBody());
+            if (batchResults == null || batchResults.isEmpty()) {
+                response.put('isValid', false);
+                response.put('field', 'general');
+                response.put('message', 'Empty verification response received from Meta.');
+                return response;
+            }
+
+            // 1. Evaluate Operation 0: Phone Number ID
+            Map<String, Object> phoneItem = (Map<String, Object>) batchResults.get(0);
+            Integer phoneCode = (Integer) phoneItem.get('code');
+            String phoneBodyStr = (String) phoneItem.get('body');
+            Map<String, Object> phoneBody = String.isNotBlank(phoneBodyStr) 
+                ? (Map<String, Object>) JSON.deserializeUntyped(phoneBodyStr) 
+                : new Map<String, Object>();
+
+            if (phoneCode != 200) {
+                Map<String, Object> errMap = phoneBody.containsKey('error') ? (Map<String, Object>) phoneBody.get('error') : null;
+                String errMsg = (errMap != null && errMap.containsKey('message')) ? (String) errMap.get('message') : 'HTTP ' + phoneCode;
+
+                if (isTokenErrorMap(errMap)) {
+                    response.put('isValid', false);
+                    response.put('field', 'token');
+                    response.put('message', 'The Access Token is invalid or expired: ' + errMsg);
                     return response;
                 }
 
                 response.put('isValid', false);
                 response.put('field', 'phone');
-                response.put('message', 'The Phone Number ID is invalid or cannot be accessed with this token.');
+                response.put('message', 'The Phone Number ID is invalid or cannot be accessed with this token: ' + errMsg);
                 return response;
             }
 
-            // 2. Verify WhatsApp Business Account ID (WABA ID)
-            HttpRequest wabaReq = new HttpRequest();
-            wabaReq.setEndpoint(baseEndpoint + '/' + apiVer + '/' + EncodingUtil.urlEncode(wabaId, 'UTF-8') + '?access_token=' + EncodingUtil.urlEncode(accessToken, 'UTF-8'));
-            wabaReq.setMethod('GET');
-            wabaReq.setTimeout(15000);
-            HttpResponse wabaRes = http.send(wabaReq);
+            // 2. Evaluate Operation 1: WhatsApp Business Account ID (WABA ID)
+            Map<String, Object> wabaItem = (Map<String, Object>) batchResults.get(1);
+            Integer wabaCode = (Integer) wabaItem.get('code');
+            String wabaBodyStr = (String) wabaItem.get('body');
+            Map<String, Object> wabaBody = String.isNotBlank(wabaBodyStr) 
+                ? (Map<String, Object>) JSON.deserializeUntyped(wabaBodyStr) 
+                : new Map<String, Object>();
 
-            if (wabaRes.getStatusCode() != 200) {
-                Map<String, Object> errBody = (Map<String, Object>) JSON.deserializeUntyped(wabaRes.getBody());
-                Map<String, Object> errMap = (errBody != null && errBody.containsKey('error')) ? (Map<String, Object>) errBody.get('error') : null;
-                Integer errCode = (errMap != null && errMap.containsKey('code')) ? (Integer) errMap.get('code') : 0;
-                String errMsg = (errMap != null && errMap.containsKey('message')) ? (String) errMap.get('message') : wabaRes.getStatus();
+            if (wabaCode != 200) {
+                Map<String, Object> errMap = wabaBody.containsKey('error') ? (Map<String, Object>) wabaBody.get('error') : null;
+                String errMsg = (errMap != null && errMap.containsKey('message')) ? (String) errMap.get('message') : 'HTTP ' + wabaCode;
 
-                if (errCode == 190 || (errMsg != null && errMsg.toLowerCase().contains('access token'))) {
+                if (isTokenErrorMap(errMap)) {
                     response.put('isValid', false);
                     response.put('field', 'token');
-                    response.put('message', 'The Permanent Access Token is invalid or expired. Please check your token.');
+                    response.put('message', 'The Access Token is invalid or expired: ' + errMsg);
                     return response;
                 }
 
                 response.put('isValid', false);
                 response.put('field', 'waba');
-                response.put('message', 'The WhatsApp Business Account ID (WABA ID) is invalid or not accessible with this token.');
+                response.put('message', 'The WhatsApp Business Account ID (WABA ID) is invalid or not accessible: ' + errMsg);
                 return response;
             }
 
-            // 3. Verify Meta Application ID
-            HttpRequest appReq = new HttpRequest();
-            appReq.setEndpoint(baseEndpoint + '/' + apiVer + '/' + EncodingUtil.urlEncode(appId, 'UTF-8') + '?access_token=' + EncodingUtil.urlEncode(accessToken, 'UTF-8'));
-            appReq.setMethod('GET');
-            appReq.setTimeout(15000);
-            HttpResponse appRes = http.send(appReq);
+            // 3. Evaluate Operation 2 & 3: Meta Application ID
+            Map<String, Object> appItem = (Map<String, Object>) batchResults.get(2);
+            Integer appCode = (Integer) appItem.get('code');
+            String appBodyStr = (String) appItem.get('body');
+            Map<String, Object> appBody = String.isNotBlank(appBodyStr) 
+                ? (Map<String, Object>) JSON.deserializeUntyped(appBodyStr) 
+                : new Map<String, Object>();
 
-            if (appRes.getStatusCode() != 200) {
-                Map<String, Object> errBody = (Map<String, Object>) JSON.deserializeUntyped(appRes.getBody());
-                Map<String, Object> errMap = (errBody != null && errBody.containsKey('error')) ? (Map<String, Object>) errBody.get('error') : null;
-                String errMsg = (errMap != null && errMap.containsKey('message')) ? (String) errMap.get('message') : 'Please check your App ID.';
+            if (appCode == 200) {
+                String tokenAppId = appBody.containsKey('id') ? String.valueOf(appBody.get('id')) : null;
+                if (String.isNotBlank(tokenAppId) && tokenAppId != appId) {
+                    response.put('isValid', false);
+                    response.put('field', 'app');
+                    response.put('message', 'The Access Token was generated under Meta App ID ' + tokenAppId + ', which does not match the entered App ID (' + appId + '). Please enter App ID: ' + tokenAppId);
+                    return response;
+                }
+            } else {
+                // If /app cannot be queried (e.g. some system user scopes), verify from direct app operation
+                if (batchResults.size() > 3) {
+                    Map<String, Object> directAppItem = (Map<String, Object>) batchResults.get(3);
+                    Integer directCode = (Integer) directAppItem.get('code');
+                    String directBodyStr = (String) directAppItem.get('body');
+                    Map<String, Object> directBody = String.isNotBlank(directBodyStr) 
+                        ? (Map<String, Object>) JSON.deserializeUntyped(directBodyStr) 
+                        : new Map<String, Object>();
 
-                response.put('isValid', false);
-                response.put('field', 'app');
-                response.put('message', 'The Meta Application ID is incorrect: ' + errMsg);
-                return response;
+                    if (directCode != 200) {
+                        Map<String, Object> errMap = directBody.containsKey('error') ? (Map<String, Object>) directBody.get('error') : null;
+                        Integer errCode = (errMap != null && errMap.containsKey('code')) ? (Integer) errMap.get('code') : 0;
+                        String errMsg = (errMap != null && errMap.containsKey('message')) ? (String) errMap.get('message') : '';
+
+                        // Error code 10 means app exists on Meta, but token lacks App Admin role (normal for System Users)
+                        if (errCode != 10 && !errMsg.containsIgnoreCase('capability')) {
+                            if (errMsg.containsIgnoreCase('does not exist') || errCode == 100) {
+                                response.put('isValid', false);
+                                response.put('field', 'app');
+                                response.put('message', 'The Meta Application ID does not exist: ' + errMsg);
+                                return response;
+                            }
+                        }
+                    }
+                }
             }
 
+            // All validations succeeded in the single callout
             response.put('isValid', true);
             return response;
 
@@ -266,13 +373,36 @@ public with sharing class WhatsappConnectController {
         }
     }
 
+    /**
+     * Helper method to determine if a Meta error map indicates an invalid/expired token.
+     */
+    private static Boolean isTokenErrorMap(Map<String, Object> err) {
+        if (err == null) {
+            return false;
+        }
+        Integer code = err.containsKey('code') ? (Integer) err.get('code') : 0;
+        String msg = err.containsKey('message') ? ((String) err.get('message')).toLowerCase() : '';
+
+        if (code == 190 || code == 102 || code == 104 || code == 2500) {
+            return true;
+        }
+        if (msg.contains('access token') || msg.contains('session has expired') 
+            || msg.contains('invalid oauth') || msg.contains('error validating access token')
+            || msg.contains('token was revoked') || msg.contains('malformed access token')
+            || msg.contains('could not be decrypted') || msg.contains('user has logged out')
+            || msg.contains('signature')) {
+            return true;
+        }
+        return false;
+    }
+
     @RemoteAction
     public static Boolean saveManualDetails(String accessToken, String phoneId, String wabaId, String appId) {
         try {
             if (String.isBlank(accessToken) || String.isBlank(phoneId) || String.isBlank(wabaId) || String.isBlank(appId)) {
                 return false;
             }
-            return saveMetaData(accessToken.trim(), phoneId.trim(), wabaId.trim(), appId.trim());
+            return saveMetaData(accessToken.trim(), phoneId.replaceAll('\\s+', ''), wabaId.replaceAll('\\s+', ''), appId.replaceAll('\\s+', ''));
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'WhatsappConnectController', 'saveManualDetails', e.getMessage());
             return false;

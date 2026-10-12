@@ -34,7 +34,6 @@
         <style>
             * {
                 font-family: 'Mulish';
-                user-select: none;
             }
 
             html,
@@ -480,6 +479,7 @@
             .inline-error-close:hover {
                 opacity: 1;
             }
+
             /* Loading Spinner Overlay */
             .spinner-overlay {
                 display: none;

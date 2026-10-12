@@ -1,7 +1,8 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 import getWhatsAppTemplates from '@salesforce/apex/WATemplateHomePageController.getWhatsAppTemplates';
 import getCategoryAndStatusPicklistValues from '@salesforce/apex/WATemplateHomePageController.getCategoryAndStatusPicklistValues';
 import hasBusinessAccountId from '@salesforce/apex/WATemplateHomePageController.hasBusinessAccountId';
+import deleteTemplete from '@salesforce/apex/WATemplateHomePageController.deleteTemplete';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { NavigationMixin } from 'lightning/navigation';
@@ -29,6 +30,9 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
     @track sortOrder = 'desc';
     @track showFilters = false;
     channelName = '/event/MVEX__Template_Update__e';
+    @track isManageTemplateView = false;
+    @track manageTemplateId = null;
+    @track isCloneMode = false;
     emptyStateUrl = emptyState || '/resource/MVEX__emptyState';
 
     // Pagination properties
@@ -251,10 +255,82 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
 
     handleActionClick(event) {
         event.stopPropagation();
+        const action = event.currentTarget.dataset.action;
+        const recordId = event.currentTarget.dataset.id;
         this.openActionMenuId = null;
         this.openActionMenuUpwards = false;
         this.updateShownData();
-        this.showWorkInProgressToast();
+
+        if (action === 'Edit') {
+            this.manageTemplateId = recordId;
+            this.isCloneMode = false;
+            this.isManageTemplateView = true;
+            this.dispatchEvent(new CustomEvent('templatenavigate', {
+                bubbles: true,
+                composed: true,
+                detail: { title: 'Edit Template', parentTitle: 'Message Templates' }
+            }));
+        } else if (action === 'Clone') {
+            this.manageTemplateId = recordId;
+            this.isCloneMode = true;
+            this.isManageTemplateView = true;
+            this.dispatchEvent(new CustomEvent('templatenavigate', {
+                bubbles: true,
+                composed: true,
+                detail: { title: 'Clone Template', parentTitle: 'Message Templates' }
+            }));
+        } else if (action === 'Preview') {
+            this.manageTemplateId = recordId;
+            this.isCloneMode = false;
+            this.isManageTemplateView = true;
+            this.dispatchEvent(new CustomEvent('templatenavigate', {
+                bubbles: true,
+                composed: true,
+                detail: { title: 'Preview Template', parentTitle: 'Message Templates' }
+            }));
+        } else if (action === 'Delete') {
+            this.handleDeleteTemplate(recordId);
+        }
+    }
+
+    handleDeleteTemplate(recordId) {
+        this.isLoading = true;
+        deleteTemplete({ templateId: recordId })
+            .then((result) => {
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Success',
+                    message: result || 'Template deleted successfully',
+                    variant: 'success'
+                }));
+                this.fetchAllTemplate(false);
+            })
+            .catch((error) => {
+                this.isLoading = false;
+                this.dispatchEvent(new ShowToastEvent({
+                    title: 'Error',
+                    message: (error.body && error.body.message) || error.message || 'Error deleting template',
+                    variant: 'error'
+                }));
+            });
+    }
+
+    handleCloseManageTemplate() {
+        this.isManageTemplateView = false;
+        this.manageTemplateId = null;
+        this.isCloneMode = false;
+        this.fetchAllTemplate(false);
+        this.dispatchEvent(new CustomEvent('templatenavigate', {
+            bubbles: true,
+            composed: true,
+            detail: { title: 'Message Templates', parentTitle: '' }
+        }));
+    }
+
+    @api
+    resetView() {
+        this.isManageTemplateView = false;
+        this.manageTemplateId = null;
+        this.isCloneMode = false;
     }
 
     showWorkInProgressToast() {
@@ -375,7 +451,14 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
     }
 
     showCreateTemplate() {
-        this.showWorkInProgressToast();
+        this.manageTemplateId = null;
+        this.isCloneMode = false;
+        this.isManageTemplateView = true;
+        this.dispatchEvent(new CustomEvent('templatenavigate', {
+            bubbles: true,
+            composed: true,
+            detail: { title: 'Create Template', parentTitle: 'Message Templates' }
+        }));
     }
 
     handleChange(event) {

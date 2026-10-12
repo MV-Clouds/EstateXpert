@@ -54,6 +54,7 @@ public with sharing class SinglePropertyViewCmpController {
                        MVEX__Showing_Duration__c, MVEX__Cancellation_Reason__c
                 FROM Event
                 WHERE Id = :showingId
+                WITH USER_MODE
                 ORDER BY CreatedDate DESC LIMIT 1
             ];
             if (showings.isEmpty()) {
@@ -69,13 +70,13 @@ public with sharing class SinglePropertyViewCmpController {
     @AuraEnabled
     public static void updateShowingStatus(String showingId, String status, String reason) {
         try {
-            List<Event> showing = [SELECT Id, MVEX__Status__c, MVEX__Cancellation_Reason__c FROM Event WHERE Id = :showingId LIMIT 1];
+            List<Event> showing = [SELECT Id, MVEX__Status__c, MVEX__Cancellation_Reason__c FROM Event WHERE Id = :showingId WITH USER_MODE LIMIT 1];
             if (!showing.isEmpty()) {
                 showing[0].MVEX__Status__c = status;
                 if (status == 'Cancelled') {
                     showing[0].MVEX__Cancellation_Reason__c = reason;
                 }
-                update showing;
+                update as user showing;
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SinglePropertyViewCmpController', 'updateShowingStatus', e.getMessage());
@@ -85,13 +86,13 @@ public with sharing class SinglePropertyViewCmpController {
     @AuraEnabled
     public static void updateShowingDate(String showingId, String status, Datetime newDate) {
         try {
-            Event showing = [SELECT Id, MVEX__Reschedule_Date__c, MVEX__Showing_Duration__c FROM Event WHERE Id = :showingId LIMIT 1];
+            Event showing = [SELECT Id, MVEX__Reschedule_Date__c, MVEX__Showing_Duration__c FROM Event WHERE Id = :showingId WITH USER_MODE LIMIT 1];
             showing.MVEX__Reschedule_Date__c = newDate;
             showing.StartDateTime = newDate;
             Integer duration = (Integer)showing.MVEX__Showing_Duration__c != null ? (Integer)showing.MVEX__Showing_Duration__c : 60;
             showing.EndDateTime = newDate.addMinutes(duration);
             showing.MVEX__Status__c = status;
-            update showing;
+            update as user showing;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'SinglePropertyViewCmpController', 'updateShowingDate', e.getMessage());
         }

@@ -5,7 +5,6 @@ public with sharing class InstagramController {
     public String errorMessage { get; set; }
     public String longLivedToken { get; set; }
     public String instagramUserId { get; set; }
-    public static final String instagramEndpoint = System.label.InstagramEndPoint;
     
     public InstagramController() {
         isRecordCreated = false;
@@ -122,9 +121,10 @@ public with sharing class InstagramController {
     public static Boolean getUserId(String accessToken, String longRefreshToken){
         try {
             String graphApiVersion = 'v24.0';
+            String baseUrl = '';
             try {
                 List<OAuth_Configuration__mdt> instaConfigs = [
-                    SELECT API_Version__c
+                    SELECT API_Version__c, Base_URL__c
                     FROM OAuth_Configuration__mdt
                     WHERE DeveloperName = 'Instagram_OAuth'
                     WITH USER_MODE
@@ -132,6 +132,9 @@ public with sharing class InstagramController {
                 ];
                 if (!instaConfigs.isEmpty() && String.isNotBlank(instaConfigs[0].API_Version__c)) {
                     graphApiVersion = instaConfigs[0].API_Version__c.trim();
+                }
+                if (!instaConfigs.isEmpty() && String.isNotBlank(instaConfigs[0].Base_URL__c)) {
+                    baseUrl = instaConfigs[0].Base_URL__c.trim();
                 }
             } catch (Exception e1) {
                 graphApiVersion = 'v24.0';
@@ -146,7 +149,7 @@ public with sharing class InstagramController {
             HttpRequest request = new HttpRequest();
             
             request.setMethod('GET');
-            request.setEndpoint(instagramEndpoint + graphApiVersion + '/me?fields=user_id,username&access_token=' + longRefreshToken);
+            request.setEndpoint(baseUrl + '/' + graphApiVersion + '/me?fields=user_id,username&access_token=' + longRefreshToken);
             
             HttpResponse response = http.send(request);
             

@@ -1201,7 +1201,7 @@ public with sharing class GoogleAdsFormMappingController {
                         }
                     }
                 }
-                revokeGoogleRefreshToken(config);
+                revokeGoogleRefreshToken(refreshToken);
             }
 
             if (setting != null) {
@@ -1226,13 +1226,13 @@ public with sharing class GoogleAdsFormMappingController {
     * @param refreshToken to store the Google refresh token
     * @description : Used to revoke the refresh token at Google.
     */
-    private static void revokeGoogleRefreshToken(OAuth_Configuration__mdt config) {
+    private static void revokeGoogleRefreshToken(String refreshToken) {
         try {
             HttpRequest request = new HttpRequest();
-            request.setEndpoint(config.Token_Endpoint__c.replace('/token', '/revoke'));
+            request.setEndpoint('https://oauth2.googleapis.com/revoke');
             request.setMethod('POST');
             request.setHeader('Content-Type', 'application/x-www-form-urlencoded');
-            request.setBody('token=' + encode(config.Refresh_Token__c));
+            request.setBody('token=' + encode(refreshToken));
             HttpResponse response = new Http().send(request);
 
             // 400 means the token is already revoked or invalid, which is acceptable here.

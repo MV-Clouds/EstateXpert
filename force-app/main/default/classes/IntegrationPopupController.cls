@@ -90,7 +90,7 @@ public with sharing class IntegrationPopupController {
                     if (String.isNotBlank(refreshTokenValue) && gmailOAuthList[0].Connected_At__c == null) {
                         Metadata.CustomMetadataValue cmtConnectedDate = new Metadata.CustomMetadataValue();
                         cmtConnectedDate.field = 'Connected_At__c';
-                        cmtConnectedDate.value = Datetime.now();
+                        cmtConnectedDate.value = Datetime.now().formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'');
                         cmtRecord.values.add(cmtConnectedDate);
                     }
 
@@ -145,7 +145,7 @@ public with sharing class IntegrationPopupController {
                     if (String.isNotBlank(accessTokenValue) && instaOAuthList[0].Connected_At__c == null) {
                         Metadata.CustomMetadataValue cmtConnectedDate = new Metadata.CustomMetadataValue();
                         cmtConnectedDate.field = 'Connected_At__c';
-                        cmtConnectedDate.value = Datetime.now();
+                        cmtConnectedDate.value = Datetime.now().formatGMT('yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\'');
                         cmtRecord.values.add(cmtConnectedDate);
                     }
 

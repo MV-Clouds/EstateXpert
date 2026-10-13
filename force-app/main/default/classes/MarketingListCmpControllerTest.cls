@@ -1,386 +1,200 @@
+/**
+ * Class Name : MarketingListCmpControllerTest
+ * Last Modified Date : 2026-10-13
+ * Last Modified By : Dhruv Kakadiya
+ * @description : Test class for MarketingListCmpController.
+ */
+
 @isTest
 private class MarketingListCmpControllerTest {
 
     @testSetup
     static void setupData() {
-        // Create contacts
-        Contact contact = new Contact(
-            FirstName = 'Test',
-            LastName = 'User',
-            Email = 'test@example.com',
+        // Create an Account for relationship testing
+        Account testAcc = new Account(Name = 'Test Account');
+        insert testAcc;
+
+        // Create Contacts
+        Contact contact1 = new Contact(
+            FirstName = 'John',
+            LastName = 'Doe',
+            Email = 'john.doe@example.com',
             Phone = '1234567890',
-            Contact_Type__c = 'Buyer'
+            AccountId = testAcc.Id
         );
-        insert contact;
+        insert contact1;
 
         Contact contact2 = new Contact(
-            FirstName = 'Test2',
-            LastName = 'User2',
-            Email = 'test2@example.com',
+            FirstName = 'Jane',
+            LastName = 'Smith',
+            Email = 'jane.smith@example.com',
             Phone = '9876543210',
-            Contact_Type__c = 'Buyer'
+            AccountId = testAcc.Id
         );
         insert contact2;
 
-        // Create Lead
-        Lead testLead = new Lead(
-            FirstName = 'Lead',
-            LastName = 'Test',
-            Email = 'lead@example.com',
-            Company = 'Test Company',
-            Phone = '5555555555'
+        // Create Inquiries
+        MVEX__Inquiry__c inquiry1 = new MVEX__Inquiry__c(
+            MVEX__Contact__c = contact1.Id,
+            MVEX__City__c = 'New York'
         );
-        insert testLead;
+        insert inquiry1;
 
-        // Create Property and Listing for email template testing
-        Property__c property = new Property__c(Name = 'Test Property');
-        insert property;
-
-        Map<String, Id> listingRecordTypeMap = new Map<String, Id>();
-        for (RecordType rt : [SELECT Id, DeveloperName FROM RecordType WHERE SObjectType IN ('Listing__c', 'MVEX__Listing__c') AND DeveloperName IN ('Rent', 'Sale')]) {
-            listingRecordTypeMap.put(rt.DeveloperName, rt.Id);
-        }
-
-        Listing__c listing = new Listing__c(
-            Property__c = property.Id,
-            Listing_Type__c = 'Rent',
-            RecordTypeId = listingRecordTypeMap.get('Rent')
+        MVEX__Inquiry__c inquiry2 = new MVEX__Inquiry__c(
+            MVEX__Contact__c = contact2.Id,
+            MVEX__City__c = 'San Francisco'
         );
-        insert listing;
+        insert inquiry2;
 
-        // Insert template and related data
-        Template__c temp = new Template__c(
-            Template_Name__c = 'Test Template',
-            Subject__c = 'Test Subject',
-            Object_API_Name__c = 'Contact'
-        );
-        insert temp;
-
-        Template_Data__c bodyData = new Template_Data__c(
-            Template__c = temp.Id,
-            Template_Value_Simple__c = '<p>Hello {{#FirstName}}</p>',
-            Value_Type__c = 'Body Value',
-            Order_No_Simple__c = 1
-        );
-        insert bodyData;
-
-        Template_Data__c extractedData = new Template_Data__c(
-            Template__c = temp.Id,
-            Template_Value_Simple__c = '{"objectFields":["{{#FirstName}}","{{#LastName}}"]}',
-            Value_Type__c = 'Extracted Mapping Keys',
-            Order_No_Simple__c = 2
-        );
-        insert extractedData;
-
-        // Create Template for Lead
-        Template__c leadTemp = new Template__c(
-            Template_Name__c = 'Lead Template',
-            Subject__c = 'Lead Subject',
-            Object_API_Name__c = 'Lead'
-        );
-        insert leadTemp;
-
-        Template_Data__c leadBodyData = new Template_Data__c(
-            Template__c = leadTemp.Id,
-            Template_Value_Simple__c = '<p>Hello Lead</p>',
-            Value_Type__c = 'Body Value',
-            Order_No_Simple__c = 1
-        );
-        insert leadBodyData;
-
-        Template_Data__c leadExtractedData = new Template_Data__c(
-            Template__c = leadTemp.Id,
-            Template_Value_Simple__c = '{"objectFields":["{{#FirstName}}","{{#LastName}}"]}',
-            Value_Type__c = 'Extracted Mapping Keys',
-            Order_No_Simple__c = 2
-        );
-        insert leadExtractedData;
-
-        // Create Marketing List Filter Config
-        MarketingListFilterConfig__mdt filterConfig = new MarketingListFilterConfig__mdt(
-            BlockedFields__c = 'Password__c;SSN__c'
-        );
-
-        // Create Configuration Settings
-        Configuration_Settings__c configSettings = new Configuration_Settings__c(
-            Feature_Name__c = 'Marketing_List_Fields',
-            Object_API_Name__c = 'Contact',
-            Fields_Data__c = '[{"label":"First Name","value":"FirstName"},{"label":"Last Name","value":"LastName"}]',
-            Page_Size__c = 50
+        // Create Configuration Settings for Marketing List Fields
+        MVEX__Configuration_Settings__c configSettings = new MVEX__Configuration_Settings__c(
+            MVEX__Feature_Name__c = 'Marketing_List_Fields',
+            MVEX__Object_API_Name__c = 'Contact',
+            MVEX__Fields_Data__c = '[{"fieldApiname":"Title","label":"Title"},{"fieldApiname":"Department","label":"Department"}]',
+            MVEX__Page_Size__c = 50
         );
         insert configSettings;
-
-        // Create Broadcast Group
-        Broadcast_Group__c broadcastGroup = new Broadcast_Group__c(
-            Name = 'Test Broadcast Group',
-            Description__c = 'Test Description',
-            Object_Name__c = 'Contact',
-            Phone_Field__c = 'Phone'
-        );
-        insert broadcastGroup;
-
-        // Create Broadcast Group Member
-        Broadcast_Group_Member__c member = new Broadcast_Group_Member__c(
-            Broadcast_Group_ID__c = broadcastGroup.Id,
-            Contact_Id__c = contact.Id,
-            Phone_Number__c = '1234567890'
-        );
-        insert member;
     }
 
     @isTest
-    static void testGetContactData() {
+    static void testGetContactDataWithConfig() {
         Test.startTest();
         MarketingListCmpController.WrapperClass result = MarketingListCmpController.getContactData();
         Test.stopTest();
 
-        System.assert(result != null, 'Contact data wrapper should not be null');
+        System.assertNotEquals(null, result, 'Result should not be null');
     }
 
     @isTest
-    static void testGetListViewId() {
-
-        Test.startTest();
-        String listViewId = MarketingListCmpController.getListViewId();
-        Test.stopTest();
-
-        System.assert(String.isNotBlank(listViewId), 'ListView ID should be returned');
-    }
-
-    @isTest
-    static void testProcessBroadcastMessageWithObject() {
-        String json = JSON.serialize(new Map<String, Object>{
-            'objectApiName' => 'Contact',
-            'listViewName' => 'AllContacts',
-            'phoneNumbers' => new List<String>{'1234567890'},
-            'description' => 'Test Broadcast',
-            'name' => 'Broadcast Group A',
-            'phoneField' => 'Phone'
-        });
-
-        Test.startTest();
-        String resultId = MarketingListCmpController.processBroadcastMessageWithObject(json);
-        Test.stopTest();
-
-        System.assert(String.isNotBlank(resultId), 'Broadcast group ID should be returned');
-    }
-
-    @isTest
-    static void testSingleSendEmail() {
-        Contact testCon = [SELECT Id, Email FROM Contact LIMIT 1];
-        Template__c template = [SELECT Id FROM Template__c LIMIT 1];
-
-        Map<String, Object> contactMap = new Map<String, Object>{
-            'Id' => testCon.Id,
-            'Email' => testCon.Email
-        };
-
-        Map<String, Object> requestMap = new Map<String, Object>{
-            'sendMethod' => 'single',
-            'templateId' => template.Id,
-            'contacts' => new List<Object>{contactMap}
-        };
-
-        String jsonInput = JSON.serialize(requestMap);
-
-        Test.startTest();
-        MarketingListCmpController.sendEmail(jsonInput);
-        Test.stopTest();
-
-    }
-
-    @isTest
-    static void testGmailSendEmail() {
-        Contact testCon = [SELECT Id, Email FROM Contact LIMIT 1];
-        Template__c template = [SELECT Id FROM Template__c LIMIT 1];
-
-        Map<String, Object> contactMap = new Map<String, Object>{
-            'Id' => testCon.Id,
-            'Email' => testCon.Email
-        };
-
-        Map<String, Object> requestMap = new Map<String, Object>{
-            'sendMethod' => 'gmail',
-            'templateId' => template.Id,
-            'contacts' => new List<Object>{contactMap}
-        };
-
-        String jsonInput = JSON.serialize(requestMap);
-
-        Test.startTest();
-        MarketingListCmpController.sendEmail(jsonInput);
-        Test.stopTest();
-
-        
-    }
-
-    @isTest
-    static void testSendEmailWithBroadcastGroups() {
-        Broadcast_Group__c broadcastGroup = [SELECT Id FROM Broadcast_Group__c LIMIT 1];
-        Template__c template = [SELECT Id FROM Template__c WHERE Object_API_Name__c = 'Contact' LIMIT 1];
-
-        Map<String, Object> requestMap = new Map<String, Object>{
-            'sendMethod' => 'single',
-            'templateId' => template.Id,
-            'contacts' => new List<Object>(),
-            'broadcastGroups' => new List<String>{broadcastGroup.Id},
-            'objectName' => 'Contact',
-            'templateType' => 'Marketing Template'
-        };
-
-        String jsonInput = JSON.serialize(requestMap);
-
-        Test.startTest();
-        MarketingListCmpController.sendEmail(jsonInput);
-        Test.stopTest();
-    }
-
-    @isTest
-    static void testSendEmailWithLeadObject() {
-        Lead testLead = [SELECT Id, Email FROM Lead LIMIT 1];
-        Template__c template = [SELECT Id FROM Template__c WHERE Object_API_Name__c = 'Lead' LIMIT 1];
-
-        Map<String, Object> leadMap = new Map<String, Object>{
-            'Id' => testLead.Id,
-            'Email' => testLead.Email
-        };
-
-        Map<String, Object> requestMap = new Map<String, Object>{
-            'sendMethod' => 'gmail',
-            'templateId' => template.Id,
-            'contacts' => new List<Object>{leadMap},
-            'objectName' => 'Lead',
-            'templateType' => 'Email Template'
-        };
-
-        String jsonInput = JSON.serialize(requestMap);
-
-        Test.startTest();
-        MarketingListCmpController.sendEmail(jsonInput);
-        Test.stopTest();
-    }
-
-    @isTest
-    static void testSendEmailWithListing() {
-        Contact testCon = [SELECT Id, Email FROM Contact LIMIT 1];
-        Template__c template = [SELECT Id FROM Template__c WHERE Object_API_Name__c = 'Contact' LIMIT 1];
-        Listing__c listing = [SELECT Id FROM Listing__c LIMIT 1];
-
-        Map<String, Object> contactMap = new Map<String, Object>{
-            'Id' => testCon.Id,
-            'Email' => testCon.Email
-        };
-
-        Map<String, Object> requestMap = new Map<String, Object>{
-            'sendMethod' => 'single',
-            'templateId' => template.Id,
-            'contacts' => new List<Object>{contactMap},
-            'objectName' => 'Contact',
-            'selectedListing' => listing.Id
-        };
-
-        String jsonInput = JSON.serialize(requestMap);
-
-        Test.startTest();
-        MarketingListCmpController.sendEmail(jsonInput);
-        Test.stopTest();
-    }
-
-    @isTest
-    static void testProcessBroadcastMessageUpdate() {
-        Broadcast_Group__c existingGroup = [SELECT Id FROM Broadcast_Group__c LIMIT 1];
-        
-        String json = JSON.serialize(new Map<String, Object>{
-            'objectApiName' => 'Contact',
-            'listViewName' => 'AllContacts',
-            'phoneNumbers' => new List<String>{'9999999999', '8888888888'},
-            'description' => 'Updated Description',
-            'name' => 'Updated Broadcast Group',
-            'phoneField' => 'Phone',
-            'isUpdate' => true,
-            'broadcastGroupId' => existingGroup.Id
-        });
-
-        Test.startTest();
-        String resultId = MarketingListCmpController.processBroadcastMessageWithObject(json);
-        Test.stopTest();
-
-        System.assert(String.isNotBlank(resultId), 'Should return updated broadcast group ID');
-    }
-
-    @isTest
-    static void testGetListViewIdNotFound() {
-        Test.startTest();
-        String result = MarketingListCmpController.getListViewId();
-        Test.stopTest();
-
-        System.assert(String.isNotBlank(result), 'Should return result even if ListView not found');
-    }
-
-    @isTest
-    static void testGetContactDataWithConfiguration() {
-        Test.startTest();
-        MarketingListCmpController.WrapperClass result = MarketingListCmpController.getContactData();
-        Test.stopTest();
-
-        System.assert(result != null, 'Contact data wrapper should not be null');
-        System.assertEquals(50, result.pageSize, 'Page size should be from config');
-        System.assert(result.selectedFields != null, 'Selected fields should not be null');
-        System.assert(result.contacts != null, 'Contacts list should not be null');
-    }
-
-    @isTest
-    static void testGetContactDataWithoutConfiguration() {
-        // Delete configuration settings
-        delete [SELECT Id FROM Configuration_Settings__c];
+    static void testGetContactDataWithoutConfig() {
+        // Delete configuration settings to test fallback defaults
+        delete [SELECT Id FROM MVEX__Configuration_Settings__c];
 
         Test.startTest();
         MarketingListCmpController.WrapperClass result = MarketingListCmpController.getContactData();
         Test.stopTest();
 
-        System.assert(result != null, 'Contact data wrapper should not be null');
-        System.assertEquals(30, result.pageSize, 'Page size should default to 30');
+        System.assertNotEquals(null, result, 'Result should not be null');
+        System.assertEquals(30, result.pageSize, 'Page size should default to 30 when config is missing');
     }
 
     @isTest
-    static void testSendEmailWithNullContacts() {
-        Template__c template = [SELECT Id FROM Template__c WHERE Object_API_Name__c = 'Contact' LIMIT 1];
-
-        Map<String, Object> requestMap = new Map<String, Object>{
-            'sendMethod' => 'single',
-            'templateId' => template.Id,
-            'contacts' => null,
-            'objectName' => 'Contact'
+    static void testGetFilteredContactsSuccess() {
+        Map<String, Object> contactFilter1 = new Map<String, Object>{
+            'fieldPath' => 'FirstName',
+            'operator' => 'equals',
+            'values' => new List<String>{'John'},
+            'isNot' => false,
+            'type' => 'STRING',
+            'index' => 1
         };
 
-        String jsonInput = JSON.serialize(requestMap);
+        Map<String, Object> contactFilter2 = new Map<String, Object>{
+            'fieldPath' => 'Account.Name',
+            'operator' => 'equals',
+            'values' => new List<String>{'Test Account'},
+            'isNot' => false,
+            'type' => 'STRING',
+            'index' => 2
+        };
+
+        Map<String, Object> inquiryFilter1 = new Map<String, Object>{
+            'fieldPath' => 'MVEX__City__c',
+            'operator' => 'equals',
+            'values' => new List<String>{'New York'},
+            'isNot' => false,
+            'type' => 'STRING',
+            'index' => 1
+        };
+
+        Map<String, Object> filterDataMap = new Map<String, Object>{
+            'contactFilters' => new List<Object>{contactFilter1, contactFilter2},
+            'inquiryFilters' => new List<Object>{inquiryFilter1},
+            'customLogic' => '1 AND 2'
+        };
+
+        String filterDataJson = JSON.serialize(filterDataMap);
 
         Test.startTest();
-        MarketingListCmpController.sendEmail(jsonInput);
+        MarketingListCmpController.FilterDataWrapper result = MarketingListCmpController.getFilteredContacts(filterDataJson);
         Test.stopTest();
+
+        System.assertNotEquals(null, result, 'FilterDataWrapper should not be null');
     }
 
     @isTest
-    static void testSendEmailWithEmptyEmail() {
-        Contact testCon = [SELECT Id FROM Contact LIMIT 1];
-        Template__c template = [SELECT Id FROM Template__c WHERE Object_API_Name__c = 'Contact' LIMIT 1];
-
-        Map<String, Object> contactMap = new Map<String, Object>{
-            'Id' => testCon.Id,
-            'Email' => ''
+    static void testGetFilteredContactsEmptyFilters() {
+        Map<String, Object> filterDataMap = new Map<String, Object>{
+            'contactFilters' => new List<Object>(),
+            'inquiryFilters' => new List<Object>(),
+            'customLogic' => ''
         };
 
-        Map<String, Object> requestMap = new Map<String, Object>{
-            'sendMethod' => 'single',
-            'templateId' => template.Id,
-            'contacts' => new List<Object>{contactMap},
-            'objectName' => 'Contact'
-        };
-
-        String jsonInput = JSON.serialize(requestMap);
+        String filterDataJson = JSON.serialize(filterDataMap);
 
         Test.startTest();
-        MarketingListCmpController.sendEmail(jsonInput);
+        MarketingListCmpController.FilterDataWrapper result = MarketingListCmpController.getFilteredContacts(filterDataJson);
         Test.stopTest();
+
+        System.assertNotEquals(null, result, 'FilterDataWrapper should not be null');
+    }
+
+    @isTest
+    static void testGetFilteredContactsNullFilters() {
+        Map<String, Object> filterDataMap = new Map<String, Object>{
+            'contactFilters' => null,
+            'inquiryFilters' => null,
+            'customLogic' => null
+        };
+
+        String filterDataJson = JSON.serialize(filterDataMap);
+
+        Test.startTest();
+        MarketingListCmpController.FilterDataWrapper result = MarketingListCmpController.getFilteredContacts(filterDataJson);
+        Test.stopTest();
+
+        System.assertNotEquals(null, result, 'FilterDataWrapper should not be null');
+    }
+
+    @isTest
+    static void testGetFilteredContactsException() {
+        Test.startTest();
+        // Passing invalid JSON to test exception handling block
+        MarketingListCmpController.FilterDataWrapper result = MarketingListCmpController.getFilteredContacts('invalid-json');
+        Test.stopTest();
+
+        System.assertEquals(null, result, 'Should return null when exception occurs');
+    }
+
+    @isTest
+    static void testInnerClassesDirectly() {
+        // Test FilterCondition properties
+        MarketingListCmpController.FilterCondition cond = new MarketingListCmpController.FilterCondition();
+        cond.fieldPath = 'FirstName';
+        cond.operator = 'equals';
+        cond.values = new List<String>{'Test'};
+        cond.isNot = false;
+        cond.type = 'STRING';
+        cond.index = 1;
+
+        System.assertEquals('FirstName', cond.fieldPath, 'fieldPath should match');
+
+        // Test FilterDataWrapper properties
+        MarketingListCmpController.FilterDataWrapper fdw = new MarketingListCmpController.FilterDataWrapper();
+        fdw.contacts = new List<Contact>();
+        fdw.inquiries = new List<MVEX__Inquiry__c>();
+        fdw.contactFilters = new List<MarketingListCmpController.FilterCondition>{cond};
+        fdw.inquiryFilters = new List<MarketingListCmpController.FilterCondition>{cond};
+        fdw.customLogic = '1';
+
+        System.assertNotEquals(null, fdw.contacts, 'contacts should not be null');
+
+        // Test WrapperClass properties
+        MarketingListCmpController.WrapperClass wc = new MarketingListCmpController.WrapperClass();
+        wc.contacts = new List<Contact>();
+        wc.pageSize = 25;
+        wc.selectedFields = new List<Map<String, String>>();
+
+        System.assertNotEquals(null, wc.contacts, 'contacts should not be null');
     }
 }

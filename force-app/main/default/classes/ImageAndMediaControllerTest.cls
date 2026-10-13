@@ -1,8 +1,8 @@
 /**
 * Class Name : ImageAndMediaControllerTest
 * Created By : Karan Singh
-* Last Modified Date : 24/06/2024
-* Last Modified By : Karan Singh
+* Last Modified Date : 2026/10/12
+* Last Modified By : Dhruv Kakadiya
 * @description : Test class for ImageAndMediaController.
 */
 @isTest
@@ -18,57 +18,73 @@ public with sharing class ImageAndMediaControllerTest {
             Contact contact = new Contact(LastName = 'Dev Test');
             insert contact;
 
-            Property__c property = new Property__c(Name = 'Dev Test');
+            MVEX__Property__c property = new MVEX__Property__c(Name = 'Dev Test');
             insert property;
 
-            Listing__c listing = new Listing__c();
+            Id saleRtId;
+            Map<String, Schema.RecordTypeInfo> rtMap = Schema.SObjectType.MVEX__Listing__c.getRecordTypeInfosByDeveloperName();
+            if (rtMap != null && rtMap.containsKey('Sale')) {
+                saleRtId = rtMap.get('Sale').getRecordTypeId();
+            }
+
+            MVEX__Listing__c listing = new MVEX__Listing__c();
             listing.Name = 'Dev Test';
-            listing.Property__c = property.Id;
-            listing.Status__c = 'Active';
-            listing.Listing_Type__c = 'Sale';
-            listing.Property_Type__c = 'Villa';
-            listing.Property_Sub_Type__c = 'Residential - Apartment';
-            listing.Property_Category__c = 'Residential';
-            listing.Country_Code__c = 'IN';
-            listing.Street__c = 'Dev Test';
-            listing.City__c = 'Dev Test';
-            listing.State__c = 'Dev Test';
-            listing.Zip_Postal_Code__c = '123456';
-            listing.Description__c = 'Dev Test';
-            listing.Listing_Price__c = 1000000;
-            listing.Bedrooms__c = 3;
-            listing.Bathrooms__c = 2;
-            listing.Lot_Size__c = 1000;
-            listing.Property_OwnerContact__c = contact.Id;
-            listing.Listed_Date__c = Date.today();
-            // listing.Unit_Number__c = '12345';
-            listing.Furnished__c = 'Yes';
-            listing.Property_Status__c = 'Vacant';
-            listing.Year_Built__c = '2020';
+            listing.MVEX__Property__c = property.Id;
+            listing.MVEX__Status__c = 'Active';
+            listing.MVEX__Listing_Type__c = 'Sale';
+            if (saleRtId != null) {
+                listing.RecordTypeId = saleRtId;
+            }
+            listing.MVEX__Property_Type__c = 'Villa';
+            listing.MVEX__Property_Sub_Type__c = 'Residential - Apartment';
+            listing.MVEX__Property_Category__c = 'Residential';
+            listing.MVEX__Country_Code__c = 'IN';
+            listing.MVEX__Street__c = 'Dev Test';
+            listing.MVEX__City__c = 'Dev Test';
+            listing.MVEX__State__c = 'Dev Test';
+            listing.MVEX__Zip_Postal_Code__c = '123456';
+            listing.MVEX__Description__c = 'Dev Test';
+            listing.MVEX__Listing_Price__c = 1000000;
+            listing.MVEX__Bedrooms__c = 3;
+            listing.MVEX__Bathrooms__c = 2;
+            listing.MVEX__Lot_Size__c = 1000;
+            listing.MVEX__Property_OwnerContact__c = contact.Id;
+            listing.MVEX__Listed_Date__c = Date.today();
+            listing.MVEX__Furnished__c = 'Yes';
+            listing.MVEX__Property_Status__c = 'Vacant';
+            listing.MVEX__Year_Built__c = '2020';
             insert listing;
 
-            Property_File__c propertyFile1 = new Property_File__c(
+            MVEX__Property_File__c propertyFile1 = new MVEX__Property_File__c(
                 Name = 'Test Image 1',
-                Property__c = property.Id,
-                BaseUrl__c = 'https://example.com/image1',
-                Size__c = 123.45,
-                IsOnPortalFeed__c = true,
-                IsOnWebsite__c = true,
-                IsOnExpose__c = true
+                MVEX__Property__c = property.Id,
+                MVEX__BaseUrl__c = 'https://example.com/image1',
+                MVEX__Size__c = 123.45,
+                MVEX__IsOnPortalFeed__c = true,
+                MVEX__IsOnWebsite__c = true,
+                MVEX__IsOnExpose__c = true
             );
 
-            Property_File__c propertyFile2 = new Property_File__c(
+            MVEX__Property_File__c propertyFile2 = new MVEX__Property_File__c(
                 Name = 'Test Image 2',
-                Property__c = property.Id,
-                BaseUrl__c = 'https://example.com/image2',
-                Size__c = 543.21,
-                IsOnPortalFeed__c = false,
-                IsOnWebsite__c = false,
-                IsOnExpose__c = false,
-                Tags__c = 'Interior'
+                MVEX__Property__c = property.Id,
+                MVEX__BaseUrl__c = 'https://example.com/image2',
+                MVEX__Size__c = 543.21,
+                MVEX__IsOnPortalFeed__c = false,
+                MVEX__IsOnWebsite__c = false,
+                MVEX__IsOnExpose__c = false,
+                MVEX__Tags__c = 'Interior'
             );
 
-            insert new List<Property_File__c> { propertyFile1, propertyFile2 };
+            insert new List<MVEX__Property_File__c> { propertyFile1, propertyFile2 };
+
+            MVEX__AWS_Config__c awsConfig = new MVEX__AWS_Config__c(
+                MVEX__AWS_Access_Key__c = 'testKey',
+                MVEX__AWS_Secret_Access_Key__c = 'testSecret',
+                MVEX__S3_Bucket_Name__c = 'testBucket',
+                MVEX__S3_Region_Name__c = 'us-east-1'
+            );
+            upsert awsConfig;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'setupTestData', 'Error while creating test data.');
         }
@@ -81,14 +97,14 @@ public with sharing class ImageAndMediaControllerTest {
     @isTest
     static void testFetchListingAndImages() {
         try {
-            Listing__c listing = [SELECT Id, Property__c FROM Listing__c LIMIT 1];
+            MVEX__Listing__c listing = [SELECT Id, MVEX__Property__c FROM MVEX__Listing__c LIMIT 1];
             Test.startTest();
             ImageAndMediaController.ListingWrapper result = ImageAndMediaController.fetchListingAndImages(listing.Id);
             ImageAndMediaController.ListingWrapper result1 = ImageAndMediaController.fetchListingAndImages(null);
             Test.stopTest();
 
             System.assertNotEquals(null, result, 'Result should not be null');
-            System.assertEquals(listing.Property__c, result.propertyId, 'Property Id should match');
+            System.assertEquals(listing.MVEX__Property__c, result.propertyId, 'Property Id should match');
             System.assertEquals(2, result.listingImages.size(), 'There should be 2 images');
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'testFetchListingAndImages', 'Error while fetching listing and images.');
@@ -102,7 +118,7 @@ public with sharing class ImageAndMediaControllerTest {
     @isTest
     static void testCreateMediaForListing() {
         try {
-            Listing__c listing = [SELECT Id FROM Listing__c LIMIT 1];
+            MVEX__Listing__c listing = [SELECT Id, MVEX__Property__c FROM MVEX__Listing__c LIMIT 1];
         
             ImageAndMediaController.MediaData media1 = new ImageAndMediaController.MediaData();
             media1.name = 'Morbi a metus. Phasellus enim erat, vestibulum vel, aliquam a, posuere eu, velit.';
@@ -125,7 +141,7 @@ public with sharing class ImageAndMediaControllerTest {
             List<ImageAndMediaController.MediaData> mediaList = new List<ImageAndMediaController.MediaData>{ media1, media2 };
 
             Test.startTest();
-            String result = ImageAndMediaController.createmediaforlisting(listing.Id, mediaList);
+            String result = ImageAndMediaController.createmediaforlisting(listing.MVEX__Property__c, mediaList);
             String result1 = ImageAndMediaController.createmediaforlisting(null, null);
             Test.stopTest();
 
@@ -154,23 +170,23 @@ public with sharing class ImageAndMediaControllerTest {
     }
 
     /**
-    * Method Name : testGetS3ConfigSettings
-    * @description : Used to test gets3configsettings method.
+    * Method Name : testUpdatePropertyFileRecords
+    * @description : Used to test updatePropertyFileRecords method.
     */
     @isTest
     static void testUpdatePropertyFileRecords() {
         try {
-            List<Property_File__c> propertyFiles = [SELECT Id, Name, Property__c, BaseUrl__c, Size__c, IsOnPortalFeed__c, IsOnWebsite__c, IsOnExpose__c, Tags__c FROM Property_File__c LIMIT 1];
+            List<MVEX__Property_File__c> propertyFiles = [SELECT Id, Name, MVEX__Property__c, MVEX__BaseUrl__c, MVEX__Size__c, MVEX__IsOnPortalFeed__c, MVEX__IsOnWebsite__c, MVEX__IsOnExpose__c, MVEX__Tags__c FROM MVEX__Property_File__c LIMIT 1];
 
             List<Map<String, Object>> propertyFileMaps = new List<Map<String, Object>>();
-            Property_File__c file  = [SELECT Id, Name, Property__c, BaseUrl__c, Size__c, IsOnPortalFeed__c, IsOnWebsite__c, IsOnExpose__c, Tags__c FROM Property_File__c LIMIT 1];
+            MVEX__Property_File__c file  = [SELECT Id, Name, MVEX__Property__c, MVEX__BaseUrl__c, MVEX__Size__c, MVEX__IsOnPortalFeed__c, MVEX__IsOnWebsite__c, MVEX__IsOnExpose__c, MVEX__Tags__c FROM MVEX__Property_File__c LIMIT 1];
             Map<String, Object> fileMap = new Map<String, Object>{
                 'Id' => file.Id,
                 'Name' => file.Name,
-                'IsOnPortalFeed__c' => file.IsOnPortalFeed__c,
-                'IsOnWebsite__c' => file.IsOnWebsite__c,
-                'IsOnExpose__c' => file.IsOnExpose__c,
-                'Tags__c' => file.Tags__c
+                'MVEX__IsOnPortalFeed__c' => file.MVEX__IsOnPortalFeed__c,
+                'MVEX__IsOnWebsite__c' => file.MVEX__IsOnWebsite__c,
+                'MVEX__IsOnExpose__c' => file.MVEX__IsOnExpose__c,
+                'MVEX__Tags__c' => file.MVEX__Tags__c
             };
             propertyFileMaps.add(fileMap);            
 
@@ -200,7 +216,7 @@ public with sharing class ImageAndMediaControllerTest {
             Test.stopTest();
            System.assert(cv != null, 'Contentversion inserted.');
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'testGetS3ConfigSettings', 'Error while getting S3 config settings.');
+            ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'testsaveFile', 'Error while saving file.');
         }
     }
 
@@ -211,14 +227,14 @@ public with sharing class ImageAndMediaControllerTest {
     @isTest
     static void testDeleteListingMediaSingleFile() {
         try {
-            Property_File__c propertyFile = [SELECT Id FROM Property_File__c LIMIT 1];
+            MVEX__Property_File__c propertyFile = [SELECT Id FROM MVEX__Property_File__c LIMIT 1];
             
             Test.startTest();
             Boolean result = ImageAndMediaController.deletelistingmedia(propertyFile.Id, null);
             Test.stopTest();
             
             System.assertEquals(true, result, 'Deletion should be successful');
-            List<Property_File__c> deletedFiles = [SELECT Id FROM Property_File__c WHERE Id = :propertyFile.Id];
+            List<MVEX__Property_File__c> deletedFiles = [SELECT Id FROM MVEX__Property_File__c WHERE Id = :propertyFile.Id];
             System.assertEquals(0, deletedFiles.size(), 'File should be deleted');
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'testDeleteListingMediaSingleFile', 'Error while deleting single file.');
@@ -232,15 +248,15 @@ public with sharing class ImageAndMediaControllerTest {
     @isTest
     static void testDeleteListingMediaAllFiles() {
         try {
-            Listing__c listing = [SELECT Id, Property__c FROM Listing__c LIMIT 1];
-            Integer initialCount = [SELECT COUNT() FROM Property_File__c WHERE Property__c = :listing.Property__c];
+            MVEX__Listing__c listing = [SELECT Id, MVEX__Property__c FROM MVEX__Listing__c LIMIT 1];
+            Integer initialCount = [SELECT COUNT() FROM MVEX__Property_File__c WHERE MVEX__Property__c = :listing.MVEX__Property__c];
             
             Test.startTest();
             Boolean result = ImageAndMediaController.deletelistingmedia(null, listing.Id);
             Test.stopTest();
             
             System.assertEquals(true, result, 'Deletion should be successful');
-            List<Property_File__c> remainingFiles = [SELECT Id FROM Property_File__c WHERE Property__c = :listing.Property__c];
+            List<MVEX__Property_File__c> remainingFiles = [SELECT Id FROM MVEX__Property_File__c WHERE MVEX__Property__c = :listing.MVEX__Property__c];
             System.assertEquals(0, remainingFiles.size(), 'All files should be deleted');
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'testDeleteListingMediaAllFiles', 'Error while deleting all files.');
@@ -254,7 +270,7 @@ public with sharing class ImageAndMediaControllerTest {
     @isTest
     static void testCreateMediaWithEmptyName() {
         try {
-            Listing__c listing = [SELECT Id FROM Listing__c LIMIT 1];
+            MVEX__Listing__c listing = [SELECT Id, MVEX__Property__c FROM MVEX__Listing__c LIMIT 1];
             
             ImageAndMediaController.MediaData media = new ImageAndMediaController.MediaData();
             media.name = '';
@@ -269,7 +285,7 @@ public with sharing class ImageAndMediaControllerTest {
             List<ImageAndMediaController.MediaData> mediaList = new List<ImageAndMediaController.MediaData>{ media };
 
             Test.startTest();
-            ImageAndMediaController.createmediaforlisting(listing.Id, mediaList);
+            ImageAndMediaController.createmediaforlisting(listing.MVEX__Property__c, mediaList);
             Test.stopTest();
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'testCreateMediaWithEmptyName', 'Error while creating media with empty name.');
@@ -283,7 +299,7 @@ public with sharing class ImageAndMediaControllerTest {
     @isTest
     static void testCreateMediaWithNullName() {
         try {
-            Listing__c listing = [SELECT Id FROM Listing__c LIMIT 1];
+            MVEX__Listing__c listing = [SELECT Id, MVEX__Property__c FROM MVEX__Listing__c LIMIT 1];
             
             ImageAndMediaController.MediaData media = new ImageAndMediaController.MediaData();
             media.name = null;
@@ -298,7 +314,7 @@ public with sharing class ImageAndMediaControllerTest {
             List<ImageAndMediaController.MediaData> mediaList = new List<ImageAndMediaController.MediaData>{ media };
 
             Test.startTest();
-            ImageAndMediaController.createmediaforlisting(listing.Id, mediaList);
+            ImageAndMediaController.createmediaforlisting(listing.MVEX__Property__c, mediaList);
             Test.stopTest();
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'testCreateMediaWithNullName', 'Error while creating media with null name.');
@@ -312,7 +328,7 @@ public with sharing class ImageAndMediaControllerTest {
     @isTest
     static void testCreateMediaWithShortName() {
         try {
-            Listing__c listing = [SELECT Id FROM Listing__c LIMIT 1];
+            MVEX__Listing__c listing = [SELECT Id, MVEX__Property__c FROM MVEX__Listing__c LIMIT 1];
             
             ImageAndMediaController.MediaData media = new ImageAndMediaController.MediaData();
             media.name = 'Short Name';
@@ -327,7 +343,7 @@ public with sharing class ImageAndMediaControllerTest {
             List<ImageAndMediaController.MediaData> mediaList = new List<ImageAndMediaController.MediaData>{ media };
 
             Test.startTest();
-            ImageAndMediaController.createmediaforlisting(listing.Id, mediaList);
+            ImageAndMediaController.createmediaforlisting(listing.MVEX__Property__c, mediaList);
             Test.stopTest();
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'testCreateMediaWithShortName', 'Error while creating media with short name.');
@@ -360,17 +376,17 @@ public with sharing class ImageAndMediaControllerTest {
     @isTest
     static void testUpdatePropertyFileRecordsMultipleFields() {
         try {
-            Property_File__c file = [SELECT Id FROM Property_File__c LIMIT 1];
+            MVEX__Property_File__c file = [SELECT Id FROM MVEX__Property_File__c LIMIT 1];
             
             Map<String, Object> fileMap = new Map<String, Object>{
                 'Id' => file.Id,
-                'IsOnPortalFeed__c' => true,
-                'IsOnWebsite__c' => true,
-                'IsOnExpose__c' => false,
-                'Tags__c' => 'Updated,Tag',
-                'Sort_on_Expose__c' => 5,
-                'Sort_on_Portal_Feed__c' => 3,
-                'Sort_on_Website__c' => 2
+                'MVEX__IsOnPortalFeed__c' => true,
+                'MVEX__IsOnWebsite__c' => true,
+                'MVEX__IsOnExpose__c' => false,
+                'MVEX__Tags__c' => 'Updated,Tag',
+                'MVEX__Sort_on_Expose__c' => 5,
+                'MVEX__Sort_on_Portal_Feed__c' => 3,
+                'MVEX__Sort_on_Website__c' => 2
             };
             
             Test.startTest();
@@ -470,5 +486,34 @@ public with sharing class ImageAndMediaControllerTest {
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'ImageAndMediaControllerTest', 'testGetS3ConfigSettingsWithoutWatermark', 'Error while testing config without watermark.');
         }
+    }
+
+    /**
+    * Method Name : testGetS3ConfigSettingsException
+    * @description : Used to test getS3ConfigSettings exception handling using ContentVersion link with null VersionData.
+    */
+    @isTest
+    static void testGetS3ConfigSettingsException() {
+        List<ContentVersion> existingCVs = [SELECT Id, ContentDocumentId FROM ContentVersion WHERE ExternalDocumentInfo1 = 'watermark3112'];
+        if (!existingCVs.isEmpty()) {
+            Set<Id> cdIds = new Set<Id>();
+            for (ContentVersion cv : existingCVs) {
+                cdIds.add(cv.ContentDocumentId);
+            }
+            delete [SELECT Id FROM ContentDocument WHERE Id IN :cdIds];
+        }
+
+        ContentVersion linkCv = new ContentVersion(
+            Title = 'Watermark Link',
+            ContentUrl = 'https://example.com/watermark.png',
+            ExternalDocumentInfo1 = 'watermark3112'
+        );
+        insert linkCv;
+
+        Test.startTest();
+        ImageAndMediaController.AWSWrapper config = ImageAndMediaController.getS3ConfigSettings();
+        Test.stopTest();
+
+        System.assertEquals(false, config.status, 'Status should be false on exception');
     }
 }

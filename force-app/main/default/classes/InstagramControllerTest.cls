@@ -1,3 +1,9 @@
+/**
+ * Class Name : InstagramControllerTest
+ * Last Modified Date : 2026-10-12
+ * Last Modified By : Dhruv Kakadiya
+ * @description : Test class for InstagramController with complete branch coverage and self-contained mocks.
+ */
 @isTest
 private class InstagramControllerTest {
     private static final String TOKEN_ENDPOINT = 'https://instagram.example.com/oauth/access_token';

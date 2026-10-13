@@ -1,6 +1,5 @@
-import { LightningElement, track, api } from 'lwc';
+import { LightningElement, track, api, wire } from 'lwc';
 import getWhatsAppTemplates from '@salesforce/apex/WATemplateHomePageController.getWhatsAppTemplates';
-import getCategoryAndStatusPicklistValues from '@salesforce/apex/WATemplateHomePageController.getCategoryAndStatusPicklistValues';
 import hasBusinessAccountId from '@salesforce/apex/WATemplateHomePageController.hasBusinessAccountId';
 import deleteTemplete from '@salesforce/apex/WATemplateHomePageController.deleteTemplete';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -9,6 +8,10 @@ import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import FORM_FACTOR from '@salesforce/client/formFactor';
+import { getObjectInfo, getPicklistValues } from 'lightning/uiObjectInfoApi';
+import WA_TEMPLATE_OBJECT from '@salesforce/schema/WA_Template__c';
+import TEMPLATE_CATEGORY_FIELD from '@salesforce/schema/WA_Template__c.Template_Category__c';
+import STATUS_FIELD from '@salesforce/schema/WA_Template__c.Status__c';
 
 export default class WaTemplateHomePage extends NavigationMixin(LightningElement) {
     @track hasBusinessAccountConfigured = false;
@@ -16,8 +19,18 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
     @track timePeriodValue = '';
     @track statusValues = '';
     @track searchInput = '';
-    @track categoryOptions = [];
-    @track statusOptions = [];
+    @track categoryOptions = [
+        { label: 'All', value: '' },
+        { label: 'Marketing', value: 'Marketing' },
+        { label: 'Utility', value: 'Utility' }
+    ];
+    @track statusOptions = [
+        { label: 'All', value: '' },
+        { label: 'Active-Quality Pending', value: 'Active-Quality Pending' },
+        { label: 'In-Review', value: 'In-Review' },
+        { label: 'Disabled', value: 'Disabled' },
+        { label: 'Rejected', value: 'Rejected' }
+    ];
     @track allRecords = [];
     @track isLoading = true;
     @track filteredRecords = [];
@@ -181,7 +194,6 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                 return;
             }
 
-            this.fetchCategoryAndStatusOptions();
             this.fetchAllTemplate(true);
             this.registerPlatformEventListener();
         } catch (e) {
@@ -423,22 +435,40 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
         }
     }
 
-    fetchCategoryAndStatusOptions() {
-        getCategoryAndStatusPicklistValues()
-            .then(data => {
-                if (data) {
-                    this.categoryOptions = [{ label: 'All', value: '' }, ...data.categories.map(cat => ({ label: cat, value: cat }))];
-                    const uniqueStatuses = [];
-                    data.statuses.forEach(st => {
-                        if (st === 'Pending') return;
-                        if (!uniqueStatuses.includes(st)) uniqueStatuses.push(st);
-                    });
-                    this.statusOptions = [{ label: 'All', value: '' }, ...uniqueStatuses.map(st => ({ label: st, value: st }))];
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching category and status picklist values: ', error);
-            });
+    @wire(getObjectInfo, { objectApiName: WA_TEMPLATE_OBJECT })
+    waTemplateMetadata;
+
+    @wire(getPicklistValues, {
+        recordTypeId: '$waTemplateMetadata.data.defaultRecordTypeId',
+        fieldApiName: TEMPLATE_CATEGORY_FIELD
+    })
+    wiredCategoryPicklistValues({ data, error }) {
+        if (data && data.values) {
+            this.categoryOptions = [
+                { label: 'All', value: '' },
+                ...data.values.map(item => ({ label: item.label, value: item.value }))
+            ];
+        } else if (error) {
+            console.error('Error fetching category picklist values: ', error);
+        }
+    }
+
+    @wire(getPicklistValues, {
+        recordTypeId: '$waTemplateMetadata.data.defaultRecordTypeId',
+        fieldApiName: STATUS_FIELD
+    })
+    wiredStatusPicklistValues({ data, error }) {
+        if (data && data.values) {
+            const uniqueStatuses = data.values
+                .filter(item => item.value !== 'Pending')
+                .map(item => ({ label: item.label, value: item.value }));
+            this.statusOptions = [
+                { label: 'All', value: '' },
+                ...uniqueStatuses
+            ];
+        } else if (error) {
+            console.error('Error fetching status picklist values: ', error);
+        }
     }
 
     fetchAllTemplate(showSpinner) {

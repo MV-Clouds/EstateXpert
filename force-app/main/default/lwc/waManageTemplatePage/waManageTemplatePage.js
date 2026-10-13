@@ -515,7 +515,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
             Promise.all(apexPromises)
                 .catch(error => {
-                    console.error('Error in parallel initialization:', error);
+                    console.error('Error in connector initialisation:', error);
                 })
                 .finally(() => {
                     this.isLoading = false;

@@ -64,35 +64,7 @@ public with sharing class WATemplateHomePageController {
         }
     }
 
-    /**
-     * @description : Returns picklist values for Template_Category__c and Status__c from WA_Template__c
-     * @return Map<String, List<String>>
-     */
-    @AuraEnabled(cacheable=true)
-    public static Map<String, List<String>> getCategoryAndStatusPicklistValues() {
-        Map<String, List<String>> picklistValues = new Map<String, List<String>>();
-        List<String> categoryValues = new List<String>();
-        List<String> statusValues = new List<String>();
 
-        try {
-            Schema.DescribeFieldResult categoryFieldResult = WA_Template__c.Template_Category__c.getDescribe();
-            for (Schema.PicklistEntry entry : categoryFieldResult.getPicklistValues()) {
-                categoryValues.add(entry.getLabel());
-            }
-
-            Schema.DescribeFieldResult statusFieldResult = WA_Template__c.Status__c.getDescribe();
-            for (Schema.PicklistEntry entry : statusFieldResult.getPicklistValues()) {
-                statusValues.add(entry.getLabel());
-            }
-
-            picklistValues.put('categories', categoryValues);
-            picklistValues.put('statuses', statusValues);
-            return picklistValues;
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WATemplateHomePageController', 'getCategoryAndStatusPicklistValues', e.getMessage());
-            return null;
-        }
-    }
 
     /**
      * @description : Method used to delete template from Meta API as well as from Salesforce.

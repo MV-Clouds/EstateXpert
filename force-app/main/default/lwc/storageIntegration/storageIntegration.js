@@ -2,19 +2,15 @@ import { LightningElement, track, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import globalStyles from '@salesforce/resourceUrl/globalStyles';
+import getAuthorizationUrl from '@salesforce/apex/IntegrationPopupController.getAuthorizationUrl';
 import getIntegrationDetails from '@salesforce/apex/IntegrationPopupController.getIntegrationDetails';
 import saveSettings from '@salesforce/apex/IntegrationPopupController.saveSettings';
-import getSettings from '@salesforce/apex/IntegrationPopupController.getSettings';
 import revokeAWSAccess from '@salesforce/apex/IntegrationPopupController.revokeAWSAccess';
 import revokeGmailAccess from '@salesforce/apex/IntegrationPopupController.revokeGmailAccess';
 import revokeInstagramAccess from '@salesforce/apex/IntegrationPopupController.revokeInstagramAccess';
 import validateIntegrationCredentials from '@salesforce/apex/IntegrationPopupController.validateIntegrationCredentials';
-import GMAIL_SENDING_ENDPOINT from '@salesforce/label/c.Gmail_Sending_Endpoint';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { errorDebugger } from 'c/globalProperties';
-import Google_Oauth_URL from '@salesforce/label/c.Google_Oauth_URL';
-import Gmail_Send_Scope from '@salesforce/label/c.Gmail_Send_Scope';
-import Insta_Oauth_URL from '@salesforce/label/c.Insta_Oauth_URL';
 
 export default class StorageIntegration extends NavigationMixin(LightningElement) {
     @track isDataLoaded = false;
@@ -38,10 +34,6 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     @track instagramLongToken = '';       // Long-Lived Access Token input
 
     integrationToDeactivate = null;
-
-    // Cached integration settings from Metadata (avoids redundant Apex getSettings calls)
-    gmailSettingsData = null;
-    instagramSettingsData = null;
 
     // Disable Save buttons until minimum required fields are filled
     get isGmailSaveDisabled() {
@@ -140,11 +132,11 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                     if (item.isValid) activeCount++;
                 } else if (item.integrationName === 'Gmail') {
                     const gData = { ...item.integrationData };
-                    // Email__c now exists directly on OAuth_Configuration__mdt
-                    gData.EmailAddress = gData.Email__c || '';
-                    // Format Connected_Date__c (stamped at first connect, cleared on revoke)
-                    if (gData.Connected_Date__c) {
-                        gData.ConnectedDate = this.formatDate(gData.Connected_Date__c);
+                    // Username__c now exists directly on OAuth_Configuration__mdt
+                    gData.EmailAddress = gData.Username__c || '';
+                    // Format Connected_At__c (stamped at first connect, cleared on revoke)
+                    if (gData.Connected_At__c) {
+                        gData.ConnectedDate = this.formatDate(gData.Connected_At__c);
                     }
                     this.gmailData = { ...item, integrationData: gData, showDetails: false };
                     if (item.isValid) activeCount++;
@@ -152,8 +144,8 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
                     const igData = { ...item.integrationData };
                     igData.Username__c = igData.Username__c || '';
                     igData.MVEX__User_Id__c = igData.User_Id__c || '';
-                    if (igData.Connected_Date__c) {
-                        igData.ConnectedDate = this.formatDate(igData.Connected_Date__c);
+                    if (igData.Connected_At__c) {
+                        igData.ConnectedDate = this.formatDate(igData.Connected_At__c);
                         igData.CreatedDate = igData.ConnectedDate;
                     }
                     this.instagramData = { ...item, integrationData: igData, showDetails: false };
@@ -381,71 +373,29 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
         }
     }
 
-    // ══ Integration Settings Cache Helper ════════════════════════════════════
-
-    /**
-    * Method Name: getIntegrationSettings
-    * @description: Retrieves integration configuration (Client ID, Secret, Redirect URI)
-    *               from Apex and caches it locally so it is not re-fetched redundantly on Save.
-    * @param {String} integrationType - 'Gmail' | 'Instagram'
-    * @return {Promise<Object>} Cached or newly fetched settings data.
-    */
-    async getIntegrationSettings(integrationType) {
-        if (integrationType === 'Gmail' && this.gmailSettingsData) {
-            return this.gmailSettingsData;
-        }
-        if (integrationType === 'Instagram' && this.instagramSettingsData) {
-            return this.instagramSettingsData;
-        }
-        const data = await getSettings({ integrationType });
-        if (integrationType === 'Gmail') {
-            this.gmailSettingsData = data;
-        } else if (integrationType === 'Instagram') {
-            this.instagramSettingsData = data;
-        }
-        return data;
-    }
-
     // ══ Gmail — Connect / Input section state ═════════════════════════════════
 
     /**
     * Method Name: handleGmailConnect
     * @description: Shown when Gmail is inactive. Redirects to Gmail OAuth login page
-    *               (same as integrationPopUp) and reveals the input section for manual token entry.
-    *               Uses cached getIntegrationSettings to retrieve Client ID / Secret / Redirect URI from Custom Metadata.
+    *               using an authorization URL generated by Apex and reveals the input section
+    *               for manual token entry.
     * Created Date: 16/03/2026
     * Created By: Karan Singh
     */
     async handleGmailConnect() {
         this.isSpinner = true;
         try {
-            const data = await this.getIntegrationSettings('Gmail');
-            if (!data || !data.objectData) {
-                this.showToast('Error', 'Missing Configuration (Metadata). Please check Custom Metadata configuration.', 'error');
-                return;
-            }
-            const fieldsData = data.objectData || {};
-            const clientId = fieldsData.Client_Id__c;
-            const clientSecret = fieldsData.Client_Secret__c;
-            const redirectUri = fieldsData.Redirect_URI__c || data.siteUrl;
-            if (!clientId || !clientSecret || !redirectUri) {
-                this.showToast('Error', 'Missing Configuration (Metadata). Please check Custom Metadata configuration.', 'error');
-                return;
-            }
+            const authorizationUrl = await getAuthorizationUrl({ integrationType: 'Gmail' });
             // Show the inline input section so the user can also paste manually
             this.showGmailInput = true;
-            // Redirect to Google OAuth — identical URL to integrationPopUp
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
-                attributes: {
-                    url: Google_Oauth_URL + 'client_id=' + clientId +
-                         '&redirect_uri=' + redirectUri +
-                         '&response_type=code&access_type=offline&prompt=consent&scope=' + Gmail_Send_Scope + '%20' + GMAIL_SENDING_ENDPOINT + 'auth/userinfo.email'
-                }
+                attributes: { url: authorizationUrl }
             });
         } catch (error) {
-            errorDebugger('StorageIntegration', 'handleGmailConnect', error, 'warn', 'Error fetching Gmail settings');
-            this.showToast('Error', 'Failed to load Gmail configuration.', 'error');
+            errorDebugger('StorageIntegration', 'handleGmailConnect', error, 'warn', 'Error generating Gmail authorization URL');
+            this.showToast('Error', error?.body?.message || 'Failed to load Gmail configuration.', 'error');
         } finally {
             this.isSpinner = false;
         }
@@ -464,9 +414,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
 
     /**
     * Method Name: saveGmailToken
-    * @description: Saves the Gmail refresh token together with Client ID, Client Secret and Redirect URI
-    *               fetched from Custom Metadata. All four fields are required by getIntegrationDetails.isValid.
-    *               Mirrors the full save pattern used in integrationPopUp.saveDetails.
+    * @description: Validates and saves a Gmail refresh token and the associated account email.
     * Created Date: 16/03/2026
     * Created By: Karan Singh
     */
@@ -479,18 +427,12 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
 
         this.isSpinner = true;
         try {
-            const data = await this.getIntegrationSettings('Gmail');
-            if (!data || !data.objectData) {
-                throw new Error('MISSING_CONFIG');
-            }
-            const fieldsData = data.objectData || {};
-            const clientId = fieldsData.Client_Id__c || '';
-
             // Validate Gmail refresh token before saving
-            const validationResult = await validateIntegrationCredentials({ integrationType: 'Gmail', credential1: token, credential2: clientId });
+            const validationResult = await validateIntegrationCredentials({ integrationType: 'Gmail', credential1: token, credential2: null });
             if (!validationResult || !validationResult.startsWith('SUCCESS')) {
                 const valError = new Error(validationResult);
-                valError.isValidationError = true;
+                valError.isConfigurationError = validationResult?.toLowerCase().includes('configuration is incomplete');
+                valError.isValidationError = !valError.isConfigurationError;
                 throw valError;
             }
             // Parse email from 'SUCCESS|email@example.com'
@@ -499,11 +441,10 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
 
             const payload = JSON.stringify({
                 Refresh_Token__c: token,
-                Email__c:         connectedEmail
+                Username__c:         connectedEmail
             });
 
             await saveSettings({ jsonData: payload, integrationType: 'Gmail' });
-            this.gmailSettingsData = null;
 
             const nowFormatted = this.formatDate(new Date().toISOString());
             this.gmailData = {
@@ -522,8 +463,8 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
             this.gmailRefreshToken = '';
             this.showToast('Success', 'Gmail has been authorized successfully.', 'success');
         } catch (error) {
-            if (error && error.message === 'MISSING_CONFIG') {
-                this.showToast('Error', 'Missing Gmail configuration. Please check Custom Metadata.', 'error');
+            if (error && error.isConfigurationError) {
+                this.showToast('Error', error.message, 'error');
             } else if (error && error.isValidationError) {
                 this.showToast('Error', 'Invalid credentials detected. Please check your Refresh Token and try again.', 'error');
             } else {
@@ -540,43 +481,23 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     /**
     * Method Name: handleInstagramConnect
     * @description: Shown when Instagram is inactive. Redirects to Instagram OAuth login page
-    *               (same as integrationPopUp) and reveals the input section.
-    *               Uses getSettings to retrieve Client ID / Secret / Redirect URI from Custom Metadata.
-    *               Field names mirror integrationPopUp.redirectToInstagramLoginPage: MVEX__ClientId__c (lowercase d).
+    *               using an authorization URL generated by Apex and reveals the input section.
     * Created Date: 16/03/2026
     * Created By: Karan Singh
     */
     async handleInstagramConnect() {
         this.isSpinner = true;
         try {
-            const data = await this.getIntegrationSettings('Instagram');
-            if (!data || !data.objectData) {
-                this.showToast('Error', 'Missing Configuration (Metadata). Please check Custom Metadata configuration.', 'error');
-                return;
-            }
-            const fieldsData = data.objectData || {};
-            // Field names support OAuth_Configuration__mdt as well as fallback
-            const clientId     = fieldsData.Client_Id__c;
-            const clientSecret = fieldsData.Client_Secret__c;
-            const redirectUri  = fieldsData.Redirect_URI__c || data.siteUrl;
-            if (!clientId || !clientSecret || !redirectUri) {
-                this.showToast('Error', 'Missing Configuration (Metadata). Please check Custom Metadata configuration.', 'error');
-                return;
-            }
+            const authorizationUrl = await getAuthorizationUrl({ integrationType: 'Instagram' });
             // Show the inline input section so user can also enter manually
             this.showInstagramInput = true;
-            // Redirect to Instagram OAuth — identical URL to integrationPopUp.redirectToInstagramLoginPage
             this[NavigationMixin.Navigate]({
                 type: 'standard__webPage',
-                attributes: {
-                    url: Insta_Oauth_URL + 'client_id=' + clientId +
-                         '&redirect_uri=' + redirectUri +
-                         '&response_type=code&scope=business_basic%2Cbusiness_manage_messages%2Cbusiness_manage_comments%2Cbusiness_content_publish'
-                }
+                attributes: { url: authorizationUrl }
             });
         } catch (error) {
-            errorDebugger('StorageIntegration', 'handleInstagramConnect', error, 'warn', 'Error fetching Instagram settings');
-            this.showToast('Error', 'Failed to load Instagram configuration.', 'error');
+            errorDebugger('StorageIntegration', 'handleInstagramConnect', error, 'warn', 'Error generating Instagram authorization URL');
+            this.showToast('Error', error?.body?.message || 'Failed to load Instagram configuration.', 'error');
         } finally {
             this.isSpinner = false;
         }
@@ -601,9 +522,7 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
 
     /**
     * Method Name: saveInstagramToken
-    * @description: Saves Instagram User ID + Long-Lived Access Token together with Client ID and
-    *               Client Secret fetched from Custom Metadata. All four fields are required by
-    *               getIntegrationDetails.isValid (checks ClientId__c and ClientSecret__c).
+    * @description: Validates and saves the Instagram User ID and Long-Lived Access Token.
     * Created Date: 16/03/2026
     * Created By: Karan Singh
     */
@@ -616,19 +535,6 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
         }
         this.isSpinner = true;
         try {
-            const data = await this.getIntegrationSettings('Instagram');
-            if (!data || !data.objectData) {
-                throw new Error('MISSING_CONFIG');
-            }
-            const fieldsData = data.objectData || {};
-            const clientId     = (fieldsData.Client_Id__c || '').trim();
-            const clientSecret = (fieldsData.Client_Secret__c || '').trim();
-            const redirectUri  = (fieldsData.Redirect_URI__c  || data.siteUrl || '').trim();
-
-            if (!clientId || !clientSecret || !redirectUri) {
-                throw new Error('MISSING_CONFIG');
-            }
-
             // Validate credentials with Instagram API
             const validationResult = await validateIntegrationCredentials({ integrationType: 'Instagram', credential1: userId, credential2: longToken });
             if (!validationResult || !validationResult.startsWith('SUCCESS')) {
@@ -642,21 +548,13 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
             const username = parts.length > 1 ? parts[1] : '';
 
             const payload = JSON.stringify({
-                Client_Id__c:               clientId,
-                Client_Secret__c:           clientSecret,
-                Redirect_URI__c:            redirectUri,
-                User_Id__c:                 userId,
-                Access_Token__c:            longToken,
-                MVEX__ClientId__c:          clientId,
-                MVEX__ClientSecret__c:      clientSecret,
-                MVEX__Redirect_URI__c:      redirectUri,
-                MVEX__User_Id__c:           userId,
-                MVEX__Long_Access_Token__c: longToken,
-                Username__c:          username
+                User_Id__c:     userId,
+                Access_Token__c: longToken,
+                Username__c:    username
             });
+            console.log(payload)
 
             await saveSettings({ jsonData: payload, integrationType: 'Instagram' });
-            this.instagramSettingsData = null;
 
             const nowFormatted = this.formatDate(new Date().toISOString());
             this.instagramData = {
@@ -678,9 +576,8 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
             this.instagramLongToken = '';
             this.showToast('Success', 'Instagram has been authorized successfully.', 'success');
         } catch (error) {
-            if (error && error.message === 'MISSING_CONFIG') {
-                this.showToast('Error', 'Missing Instagram configuration. Please check Custom Metadata.', 'error');
-            } else if (error && error.isValidationError) {
+            console.log(error)
+            if (error && error.isValidationError) {
                 this.showToast('Error', 'Invalid credentials detected. Please check your User ID and Access Token and try again.', 'error');
             } else {
                 errorDebugger('StorageIntegration', 'saveInstagramToken', error, 'warn', 'Error saving Instagram token');
@@ -702,10 +599,8 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     async deactivateGmail() {
         this.isSpinner = true;
         try {
-            const refreshToken = (this.gmailData.integrationData && this.gmailData.integrationData.Refresh_Token__c) || '';
-            const data = await revokeGmailAccess({ refreshToken: refreshToken, recordId: this.gmailData.integrationData.Id });
+            const data = await revokeGmailAccess();
             if (data === 'success') {
-                this.gmailSettingsData = null;
                 this.gmailData = {
                     isValid: false,
                     integrationName: 'Gmail',
@@ -735,9 +630,8 @@ export default class StorageIntegration extends NavigationMixin(LightningElement
     async deactivateInstagram() {
         this.isSpinner = true;
         try {
-            const data = await revokeInstagramAccess({ recordId: this.instagramData.integrationData.Id });
+            const data = await revokeInstagramAccess();
             if (data === 'success') {
-                this.instagramSettingsData = null;
                 this.instagramData = {
                     isValid: false,
                     integrationName: 'Instagram',

@@ -1,5 +1,8 @@
 public with sharing class InstagramController {
 
+    @TestVisible
+    private static OAuth_Configuration__mdt testInstagramConfiguration;
+
     public Boolean isRecordCreated { get; set; }
     public Boolean hasError { get; set; }
     public String errorMessage { get; set; }
@@ -12,6 +15,13 @@ public with sharing class InstagramController {
         errorMessage = '';
         longLivedToken = '';
         instagramUserId = '';
+    }
+
+    private static List<OAuth_Configuration__mdt> getInstagramConfiguration() {
+        if (Test.isRunningTest() && testInstagramConfiguration != null) {
+            return new List<OAuth_Configuration__mdt>{ testInstagramConfiguration };
+        }
+        return [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c, API_Version__c, Base_URL__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Instagram_OAuth' WITH USER_MODE LIMIT 1];
     }
 
      public PageReference getRefreshToken() {
@@ -30,7 +40,7 @@ public with sharing class InstagramController {
             String redirectUrl = '';
             String tokenUrl = '';
 
-            List<OAuth_Configuration__mdt> mdtList = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Instagram_OAuth' WITH USER_MODE LIMIT 1];
+            List<OAuth_Configuration__mdt> mdtList = getInstagramConfiguration();
             if(!mdtList.isEmpty()) {
                 clientId = mdtList[0].Client_Id__c;
                 clientSecret = mdtList[0].Client_Secret__c;
@@ -123,13 +133,7 @@ public with sharing class InstagramController {
             String graphApiVersion = 'v24.0';
             String baseUrl = '';
             try {
-                List<OAuth_Configuration__mdt> instaConfigs = [
-                    SELECT API_Version__c, Base_URL__c
-                    FROM OAuth_Configuration__mdt
-                    WHERE DeveloperName = 'Instagram_OAuth'
-                    WITH USER_MODE
-                    LIMIT 1
-                ];
+                List<OAuth_Configuration__mdt> instaConfigs = getInstagramConfiguration();
                 if (!instaConfigs.isEmpty() && String.isNotBlank(instaConfigs[0].API_Version__c)) {
                     graphApiVersion = instaConfigs[0].API_Version__c.trim();
                 }

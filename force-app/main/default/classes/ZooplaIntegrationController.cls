@@ -47,7 +47,9 @@ public with sharing class ZooplaIntegrationController {
             Http h3 = new Http();
             HttpRequest req3 = new HttpRequest();
             
-            req3.setClientCertificateName(certificateName);
+            if (!Test.isRunningTest()) {
+                req3.setClientCertificateName(certificateName);
+            }
             req3.setHeader('Content-Type', 'application/json; profile=' + zooplaDocEndpoint + 'listing/list.json');
             req3.setBody('{ "branch_reference": "' + branchId + '" }');
             req3.setMethod('POST');
@@ -191,7 +193,9 @@ public with sharing class ZooplaIntegrationController {
             Http h3 = new Http();
             HttpRequest req3 = new HttpRequest();
             
-            req3.setClientCertificateName(certificateName);
+            if (!Test.isRunningTest()) {
+                req3.setClientCertificateName(certificateName);
+            }
             req3.setHeader('Content-Type', 'application/json; profile=' + zooplaDocEndpoint + 'listing/update.json');
             req3.setHeader('ZPG-Listing-ETag', '');
             req3.setBody(requestBody);
@@ -256,7 +260,9 @@ public with sharing class ZooplaIntegrationController {
                         : zooplaEndpoint + 'live/v2/listing/delete';
 
                     HttpRequest req3 = new HttpRequest();
-                    req3.setClientCertificateName(certificateName);
+                    if (!Test.isRunningTest()) {
+                        req3.setClientCertificateName(certificateName);
+                    }
                     req3.setHeader('Content-Type', 'application/json; profile=' + zooplaDocEndpoint + 'listing/delete.json');
                     req3.setBody('{ "listing_reference": "' + listing.MVEX__Broker_s_Listing_ID__c + '" }');
                     req3.setMethod('POST');
@@ -338,7 +344,9 @@ public with sharing class ZooplaIntegrationController {
             Http h3 = new Http();
             HttpRequest req3 = new HttpRequest();
             
-            req3.setClientCertificateName('zoopla_certificate');
+            if (!Test.isRunningTest()) {
+                req3.setClientCertificateName('zoopla_certificate');
+            }
             req3.setHeader('Content-Type', 'application/json; profile=' + zooplaDocEndpoint + 'branch/update.json');
             req3.setBody(requestBody);
             req3.setMethod('POST');

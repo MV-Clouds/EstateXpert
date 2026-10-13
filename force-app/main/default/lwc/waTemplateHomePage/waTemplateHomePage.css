@@ -494,88 +494,25 @@
     font-weight: 500;
 }
 
-/* Delete Confirmation Modal Styles */
-.exp-delete-modal-container {
-    max-width: 500px;
+
+
+/* Disabled Action Menu Item */
+.exp-action-menu-item.exp-menu-item-disabled,
+.exp-action-menu-item[aria-disabled="true"] {
+    opacity: 0.45;
+    cursor: not-allowed !important;
+    color: #9CA3AF !important;
 }
 
-.exp-delete-modal-header {
-    border-bottom: 1px solid #E5E7EB;
-    padding: 18px 24px;
-    text-align: left;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.exp-action-menu-item.exp-menu-item-disabled:hover,
+.exp-action-menu-item[aria-disabled="true"]:hover {
+    background: transparent !important;
+    color: #9CA3AF !important;
 }
 
-.exp-delete-modal-title {
-    font-size: 17px;
-    font-weight: 700;
-    color: #111827;
-}
-
-.exp-modal-close-btn {
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.exp-delete-modal-content {
-    background: #ffffff;
-    padding: 22px 24px;
-    color: #374151;
-}
-
-.exp-delete-confirm-text {
-    margin-bottom: 14px;
-    font-size: 14px;
-    line-height: 1.5;
-    color: #374151;
-}
-
-.exp-delete-warning-box {
-    background: #FEF2F2;
-    border-left: 4px solid #EF4444;
-    padding: 12px 14px;
-    border-radius: 4px;
-}
-
-.exp-delete-warning-title {
-    color: #991B1B;
-    font-weight: 600;
-    font-size: 13px;
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.exp-delete-warning-desc {
-    color: #7F1D1D;
-    font-size: 12px;
-    line-height: 1.45;
-    margin: 0;
-}
-
-.exp-delete-modal-footer {
-    border-top: 1px solid #E5E7EB;
-    padding: 14px 24px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    background: #F9FAFB;
-}
-
-.exp-delete-confirm-btn {
-    background-color: #DC2626 !important;
-    border-color: #DC2626 !important;
-}
-
-.exp-delete-confirm-btn:hover {
-    background-color: #B91C1C !important;
-    border-color: #B91C1C !important;
+.exp-action-menu-item.exp-menu-item-disabled .exp-menu-icon svg path,
+.exp-action-menu-item.exp-menu-item-disabled .exp-menu-icon-edit svg path,
+.exp-action-menu-item[aria-disabled="true"] .exp-menu-icon svg path,
+.exp-action-menu-item[aria-disabled="true"] .exp-menu-icon-edit svg path {
+    stroke: #9CA3AF !important;
 }

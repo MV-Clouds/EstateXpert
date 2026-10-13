@@ -315,8 +315,10 @@
                                                                         </div>
                                                                         <span class="exp-menu-label">Preview</span>
                                                                     </div>
-                                                                    <div class="exp-action-menu-item"
+                                                                    <div class={record.editMenuItemClass}
                                                                         data-id={record.id} data-action="Edit"
+                                                                        title={record.editTitle}
+                                                                        aria-disabled={record.isEditDisabled}
                                                                         onclick={handleActionClick}>
                                                                         <div class="exp-menu-icon exp-menu-icon-edit">
                                                                             <svg width="15" height="15"
@@ -452,43 +454,8 @@
                     </div>
                 </div>
 
-                <!-- Delete Confirmation Modal with 30-Day Name Freeze Notice -->
-                <template if:true={showDeleteModal}>
-                    <section role="dialog" tabindex="-1" aria-labelledby="delete-modal-heading" aria-modal="true" class="slds-modal slds-fade-in-open slds-modal_small">
-                        <div class="slds-modal__container exp-delete-modal-container">
-                            <div class="slds-modal__header exp-delete-modal-header">
-                                <h2 id="delete-modal-heading" class="slds-modal__title slds-hyphenate exp-delete-modal-title">
-                                    Delete WhatsApp Template
-                                </h2>
-                                <button class="slds-button slds-button_icon exp-modal-close-btn" title="Close" onclick={cancelDeleteModal}>
-                                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-                                        <path d="M2.5 17.5L17.5 2.5M2.5 2.5L17.5 17.5" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
-                                    </svg>
-                                    <span class="slds-assistive-text">Close</span>
-                                </button>
-                            </div>
-                            <div class="slds-modal__content slds-p-around_medium exp-delete-modal-content">
-                                <p class="exp-delete-confirm-text">
-                                    Are you sure you want to delete template <strong>"{deletingTemplateRecord.Template_Name__c}"</strong>?
-                                </p>
-                                <div class="exp-delete-warning-box">
-                                    <p class="exp-delete-warning-title">
-                                        <span>⚠️</span> Meta 30-Day Name Freeze Policy
-                                    </p>
-                                    <p class="exp-delete-warning-desc">
-                                        Deleting this template removes it permanently from Meta across all languages. 
-                                        <strong>Meta locks this template name for 30 days</strong>, meaning you will not be able to reuse or create a new template with this exact name during this period.
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="slds-modal__footer exp-delete-modal-footer">
-                                <button class="exp-white-btn-css" onclick={cancelDeleteModal}>Cancel</button>
-                                <button class="exp-blue-btn-css exp-delete-confirm-btn" onclick={confirmDeleteTemplate}>Delete Template</button>
-                            </div>
-                        </div>
-                    </section>
-                    <div class="slds-backdrop slds-backdrop_open"></div>
-                </template>
+                <!-- Confirmation Pop-up using MessagePopup component -->
+                <c-message-popup onconfirmation={handleDeleteConfirmation}></c-message-popup>
             </div>
         </template>
     </template>

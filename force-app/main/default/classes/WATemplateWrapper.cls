@@ -5,7 +5,7 @@
  * @author            : Karan Singh
  * @last modified on  : 12/10/2026
  **/
-public with sharing class WATemplateWrapper {
+public inherited sharing class WATemplateWrapper {
     @TestVisible
     private static OAuth_Configuration__mdt mockConfig;
 
@@ -101,9 +101,32 @@ public with sharing class WATemplateWrapper {
             if (metaTempId != null) {
                 whatsAppTemplate.Template_Id__c = metaTempId;
             }
-            whatsAppTemplate.Status__c = String.isNotBlank(metaTemplateStatus) 
-                ? metaTemplateStatus 
-                : (whatsAppTemplate.Status__c != null ? whatsAppTemplate.Status__c : 'PENDING');
+            // Normalize Meta status to standard Salesforce Picklist values (e.g. In-Review instead of PENDING)
+            String normalizedStatus = 'In-Review';
+            if (String.isNotBlank(metaTemplateStatus)) {
+                String upperMeta = metaTemplateStatus.toUpperCase();
+                if (upperMeta == 'PENDING' || upperMeta == 'IN_REVIEW' || upperMeta == 'IN-REVIEW') {
+                    normalizedStatus = 'In-Review';
+                } else if (upperMeta == 'APPROVED') {
+                    normalizedStatus = 'Active-Quality Pending';
+                } else if (upperMeta == 'REJECTED') {
+                    normalizedStatus = 'Rejected';
+                } else if (upperMeta == 'DISABLED') {
+                    normalizedStatus = 'Disabled';
+                } else if (upperMeta == 'PAUSED') {
+                    normalizedStatus = 'Paused';
+                } else {
+                    normalizedStatus = metaTemplateStatus;
+                }
+            } else if (whatsAppTemplate.Status__c != null) {
+                String existingUpper = whatsAppTemplate.Status__c.toUpperCase();
+                if (existingUpper == 'PENDING' || existingUpper == 'IN_REVIEW' || existingUpper == 'IN-REVIEW') {
+                    normalizedStatus = 'In-Review';
+                } else {
+                    normalizedStatus = whatsAppTemplate.Status__c;
+                }
+            }
+            whatsAppTemplate.Status__c = normalizedStatus;
             whatsAppTemplate.Template_Name__c = templateName;
             whatsAppTemplate.Template_Category__c = String.isNotBlank(templateWrapper.templateCategory) 
                 ? templateWrapper.templateCategory 

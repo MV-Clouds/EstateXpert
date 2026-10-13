@@ -266,41 +266,8 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
         if (action === 'Edit') {
             const targetRecord = this.allRecords.find(r => r.Id === recordId);
             if (targetRecord) {
-                const status = (targetRecord.Status__c || '').toUpperCase();
-                if (status === 'PENDING' || status === 'IN-REVIEW' || status === 'IN_REVIEW') {
-                    this.showToastError('This template is currently under review by Meta and cannot be edited until approved or rejected.');
-                    return;
-                }
-                if (status === 'PENDING_DELETION') {
-                    this.showToastError('This template is scheduled for deletion and cannot be edited.');
-                    return;
-                }
-                if (targetRecord.Last_Meta_Edit_Time__c) {
-                    const lastEdit = new Date(targetRecord.Last_Meta_Edit_Time__c);
-                    const cooldownEnd = new Date(lastEdit.getTime() + (24 * 60 * 60 * 1000));
-                    const now = new Date();
-                    if (now < cooldownEnd) {
-                        const msRemaining = cooldownEnd - now;
-                        const totalMinutes = Math.floor(msRemaining / (60 * 1000));
-                        const hours = Math.floor(totalMinutes / 60);
-                        const mins = totalMinutes % 60;
-                        this.showToastError(`Meta permits only 1 edit every 24 hours for approved templates. You can edit this template in ${hours} hr ${mins} min.`);
-                        return;
-                    }
-                }
-                let editsUsed30Days = targetRecord.Edit_Count_30_Days__c || 0;
-                if (targetRecord.Edit_Timestamps_JSON__c) {
-                    try {
-                        const timestamps = JSON.parse(targetRecord.Edit_Timestamps_JSON__c);
-                        const thirtyDaysAgo = new Date(Date.now() - (30 * 24 * 60 * 60 * 1000));
-                        const active = timestamps.filter(t => new Date(t) >= thirtyDaysAgo);
-                        editsUsed30Days = active.length;
-                    } catch (e) {
-                        // ignore parse issue
-                    }
-                }
-                if (editsUsed30Days >= 10) {
-                    this.showToastError("This template has reached Meta's maximum limit of 10 edits in a rolling 30-day window.");
+                if (targetRecord.isEditDisabled) {
+                    this.showToastError(targetRecord.editDisabledReason || 'This template cannot be edited due to Meta restrictions.');
                     return;
                 }
             }
@@ -334,22 +301,31 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
         } else if (action === 'Delete') {
             const targetRecord = this.allRecords.find(r => r.Id === recordId);
             this.deletingTemplateRecord = targetRecord || { Id: recordId, Template_Name__c: 'this template' };
-            this.showDeleteModal = true;
+            const popup = this.template.querySelector('c-message-popup');
+            if (popup) {
+                const tempName = this.deletingTemplateRecord.Template_Name__c || 'this template';
+                popup.showMessagePopup({
+                    status: 'warning',
+                    title: 'Delete WhatsApp Template',
+                    message: `Are you sure you want to delete template "${tempName}"? Deleting this template permanently removes it from Meta across all languages. Meta locks this template name for 30 days.`
+                });
+            }
         }
     }
 
-    cancelDeleteModal() {
-        this.showDeleteModal = false;
-        this.deletingTemplateRecord = null;
+    handleDeleteConfirmation(event) {
+        if (event.detail === true) {
+            this.confirmDeleteTemplate();
+        } else {
+            this.deletingTemplateRecord = null;
+        }
     }
 
     confirmDeleteTemplate() {
         if (!this.deletingTemplateRecord || !this.deletingTemplateRecord.Id) {
-            this.showDeleteModal = false;
             return;
         }
         const recId = this.deletingTemplateRecord.Id;
-        this.showDeleteModal = false;
         this.isLoading = true;
         deleteTemplete({ templateId: recId })
             .then((result) => {
@@ -457,7 +433,12 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
             .then(data => {
                 if (data) {
                     this.categoryOptions = [{ label: 'All', value: '' }, ...data.categories.map(cat => ({ label: cat, value: cat }))];
-                    this.statusOptions = [{ label: 'All', value: '' }, ...data.statuses.map(st => ({ label: st, value: st }))];
+                    const uniqueStatuses = [];
+                    data.statuses.forEach(st => {
+                        if (st === 'Pending') return;
+                        if (!uniqueStatuses.includes(st)) uniqueStatuses.push(st);
+                    });
+                    this.statusOptions = [{ label: 'All', value: '' }, ...uniqueStatuses.map(st => ({ label: st, value: st }))];
                 }
             })
             .catch(error => {
@@ -474,7 +455,12 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                 try {
                     if (data) {
                         this.allRecords = data.map((record, index) => {
-                            const statusVal = record.Status__c || '';
+                            const rawStatus = record.Status__c || '';
+                            let statusVal = rawStatus;
+                            if (rawStatus.toUpperCase() === 'PENDING') {
+                                statusVal = 'In-Review';
+                            }
+
                             let cooldownHours = 0;
                             let cooldownMins = 0;
                             let hasCooldown = false;
@@ -494,6 +480,43 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                                 }
                             }
 
+                            // Calculate if editing this template is disabled and reason
+                            let isEditDisabled = false;
+                            let editDisabledReason = '';
+                            const upperStatus = (statusVal || '').toUpperCase();
+
+                            if (upperStatus === 'IN-REVIEW' || upperStatus === 'IN_REVIEW' || upperStatus === 'PENDING') {
+                                isEditDisabled = true;
+                                editDisabledReason = 'This template is currently under review by Meta and cannot be edited until approved or rejected.';
+                            } else if (upperStatus === 'PENDING_DELETION') {
+                                isEditDisabled = true;
+                                editDisabledReason = 'This template is scheduled for deletion and cannot be edited.';
+                            } else if (hasCooldown) {
+                                isEditDisabled = true;
+                                editDisabledReason = `Meta permits only 1 edit every 24 hours for approved templates. You can edit this template in ${cooldownHours} hr ${cooldownMins} min.`;
+                            } else {
+                                let editsUsed30Days = record.Edit_Count_30_Days__c || 0;
+                                if (record.Edit_Timestamps_JSON__c) {
+                                    try {
+                                        const timestamps = JSON.parse(record.Edit_Timestamps_JSON__c);
+                                        const thirtyDaysAgo = new Date(Date.now() - (30 * 24 * 60 * 60 * 1000));
+                                        const active = timestamps.filter(t => new Date(t) >= thirtyDaysAgo);
+                                        editsUsed30Days = active.length;
+                                    } catch (e) {
+                                        // ignore parse issue
+                                    }
+                                }
+                                if (editsUsed30Days >= 10) {
+                                    isEditDisabled = true;
+                                    editDisabledReason = "This template has reached Meta's maximum limit of 10 edits in a rolling 30-day window.";
+                                }
+                            }
+
+                            const editMenuItemClass = isEditDisabled
+                                ? 'exp-action-menu-item exp-menu-item-disabled'
+                                : 'exp-action-menu-item';
+                            const editTitle = isEditDisabled ? editDisabledReason : 'Edit';
+
                             return {
                                 ...record,
                                 id: record.Id,
@@ -506,6 +529,10 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                                 Rejection_Reason__c: record.Rejection_Reason__c || '',
                                 hasCooldown,
                                 cooldownBadgeText,
+                                isEditDisabled,
+                                editDisabledReason,
+                                editMenuItemClass,
+                                editTitle,
                                 rawLastModifiedDate: record.LastModifiedDate,
                                 rawCreatedDate: record.CreatedDate,
                                 LastModifiedDate: this.formatDate(record.LastModifiedDate),
@@ -644,7 +671,12 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                 filtered = filtered.filter(record => new Date(record.rawCreatedDate || record.CreatedDate) >= fromDate);
             }
             if (this.statusValues && this.statusValues.length > 0) {
-                filtered = filtered.filter(record => record.Status__c && this.statusValues.includes(record.Status__c));
+                filtered = filtered.filter(record => {
+                    if (!record.Status__c) return false;
+                    if (this.statusValues.includes(record.Status__c)) return true;
+                    if (this.statusValues.includes('In-Review') && (record.Status__c === 'Pending' || record.Status__c === 'In-Review')) return true;
+                    return false;
+                });
             }
     
             if (this.searchInput) {

@@ -91,6 +91,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     marketingOpt = 0;
     isEditBlocked = false;
     editBlockReason = '';
+    pendingConfirmAction = null;
+    _boundHandleBeforeUnload = null;
+    _boundHandleKeyDown = null;
     iseditTemplatevisible = false;
     showReviewTemplate = false;
     IsHeaderText = false;
@@ -553,6 +556,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         // Store bound reference for proper cleanup in disconnectedCallback
         this._boundHandleOutsideClick = this.handleOutsideClick.bind(this);
         document.addEventListener('click', this._boundHandleOutsideClick);
+
+        this._boundHandleBeforeUnload = this.handleBeforeUnload.bind(this);
+        this._boundHandleKeyDown = this.handleKeyDown.bind(this);
+        window.addEventListener('beforeunload', this._boundHandleBeforeUnload);
+        window.addEventListener('keydown', this._boundHandleKeyDown);
     }
 
     renderedCallback() {
@@ -1906,15 +1914,30 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
     handlePrevclick() {
         try {
-            if (this.contentVersionId != null) {
-                this.handleDelete();
+            if (this.hasUnsavedChanges()) {
+                this.pendingConfirmAction = 'cancel';
+                const popup = this.template.querySelector('c-message-popup');
+                if (popup) {
+                    popup.showMessagePopup({
+                        status: 'warning',
+                        title: 'Discard Changes?',
+                        message: 'This may remove the changes you have done. Are you sure you want to proceed?'
+                    });
+                    return;
+                }
             }
-
-            this.clearEditTemplateData();
-            this.closeAndReturnToTemplateList();
+            this.executeCancel();
         } catch (error) {
             console.error('Error in handlePrevclick: ', error);
         }
+    }
+
+    executeCancel() {
+        if (this.contentVersionId != null) {
+            this.handleDelete();
+        }
+        this.clearEditTemplateData();
+        this.closeAndReturnToTemplateList();
     }
 
 
@@ -3742,11 +3765,75 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    hasUnsavedChanges() {
+        if (!this.iseditTemplatevisible) {
+            return false;
+        }
+        return Boolean(this.templateName) ||
+            (this.tempBody && this.tempBody !== 'Hello') ||
+            Boolean(this.header) ||
+            Boolean(this.footer) ||
+            (this.buttonList && this.buttonList.length > 0) ||
+            (this.customButtonList && this.customButtonList.length > 0) ||
+            Boolean(this.contentVersionId) ||
+            this.isEditTemplate;
+    }
+
+    handleBeforeUnload(event) {
+        if (this.hasUnsavedChanges()) {
+            event.preventDefault();
+            event.returnValue = 'This may remove the changes you have done.';
+            return event.returnValue;
+        }
+    }
+
+    handleKeyDown(event) {
+        const isRefreshKey = event.key === 'F5' || 
+            ((event.ctrlKey || event.metaKey) && (event.key === 'r' || event.key === 'R'));
+        if (isRefreshKey && this.hasUnsavedChanges()) {
+            event.preventDefault();
+            this.pendingConfirmAction = 'refresh';
+            const popup = this.template.querySelector('c-message-popup');
+            if (popup) {
+                popup.showMessagePopup({
+                    status: 'warning',
+                    title: 'Discard Changes?',
+                    message: 'This may remove the changes you have done. Are you sure you want to refresh?'
+                });
+            }
+        }
+    }
+
+    handleConfirmation(event) {
+        const isConfirmed = event.detail === true;
+        const action = this.pendingConfirmAction;
+        this.pendingConfirmAction = null;
+
+        if (!isConfirmed) {
+            // User clicked No or closed popup -> do not do the next action
+            return;
+        }
+
+        if (action === 'cancel') {
+            this.executeCancel();
+        } else if (action === 'refresh') {
+            window.location.reload();
+        }
+    }
+
     disconnectedCallback() {
         // Use stored bound reference to properly remove the event listener
         if (this._boundHandleOutsideClick) {
             document.removeEventListener('click', this._boundHandleOutsideClick);
             this._boundHandleOutsideClick = null;
+        }
+        if (this._boundHandleBeforeUnload) {
+            window.removeEventListener('beforeunload', this._boundHandleBeforeUnload);
+            this._boundHandleBeforeUnload = null;
+        }
+        if (this._boundHandleKeyDown) {
+            window.removeEventListener('keydown', this._boundHandleKeyDown);
+            this._boundHandleKeyDown = null;
         }
     }
 }

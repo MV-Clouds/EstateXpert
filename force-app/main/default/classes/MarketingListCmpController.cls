@@ -88,11 +88,11 @@ public with sharing class MarketingListCmpController {
                 allFields.add(fieldName);
             }
 
-            MVEX__MarketingListFilterConfig__mdt filterConfig = [SELECT MVEX__BlockedFields__c FROM MVEX__MarketingListFilterConfig__mdt WITH USER_MODE LIMIT 1];
+            List<MVEX__MarketingListFilterConfig__mdt> filterConfigs = [SELECT MVEX__BlockedFields__c FROM MVEX__MarketingListFilterConfig__mdt WITH USER_MODE LIMIT 1];
 
             Set<String> blockedFields = new Set<String>();
-            if (filterConfig != null && filterConfig.MVEX__BlockedFields__c != null) {
-                blockedFields.addAll(filterConfig.MVEX__BlockedFields__c.split(';'));
+            if (!filterConfigs.isEmpty() && filterConfigs[0].MVEX__BlockedFields__c != null) {
+                blockedFields.addAll(filterConfigs[0].MVEX__BlockedFields__c.split(';'));
             }
             List<String> filteredFields = new List<String>();
 
@@ -175,6 +175,9 @@ public with sharing class MarketingListCmpController {
             Set<String> contactFields = new Set<String>{'Id', 'FirstName', 'LastName', 'Email'};
             Set<String> contactRelationships = new Set<String>();
             for (FilterCondition filter : contactFilters) {
+                if (filter == null || String.isBlank(filter.fieldPath)) {
+                    continue;
+                }
                 String fieldPath = filter.fieldPath;
                 if (fieldPath.contains('.')) {
                     String relationship = fieldPath.substringBefore('.');
@@ -211,7 +214,9 @@ public with sharing class MarketingListCmpController {
             // Collect fields for MVEX__Inquiry__c query
             Set<String> inquiryFields = new Set<String>{'MVEX__Contact__c'};
             for (FilterCondition filter : inquiryFilters) {
-                inquiryFields.add(filter.fieldPath);
+                if (filter != null && String.isNotBlank(filter.fieldPath)) {
+                    inquiryFields.add(filter.fieldPath);
+                }
             }
 
             // Check field accessibility for MVEX__Inquiry__c

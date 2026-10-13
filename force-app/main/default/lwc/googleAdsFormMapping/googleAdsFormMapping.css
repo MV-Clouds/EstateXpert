@@ -141,48 +141,6 @@ textarea {
     border-radius: 50%;
 }
 
-.disconnect-btn,
-.action-outline-btn {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #ffffff;
-    border-radius: 6px;
-    padding: 0 16px;
-    height: 30px;
-    min-height: 30px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.disconnect-btn {
-    color: #dc2626;
-    border: 1px solid #dc2626;
-}
-
-.disconnect-btn:hover {
-    background: #fef2f2;
-}
-
-.action-outline-btn {
-    color: #374151;
-    border: 1px solid #d1d5db;
-}
-
-.action-outline-btn:hover {
-    background: #f9fafb;
-    color: #111827;
-}
-
-.action-outline-btn:disabled {
-    background: #f9fafb;
-    color: #9ca3af;
-    border-color: #e5e7eb;
-    cursor: not-allowed;
-}
-
 .account-details {
     display: flex;
     padding: 0 16px 16px 16px;
@@ -531,17 +489,6 @@ c-message-popup {
     border-radius: 8px;
 }
 
-.connect-card .exp-blue-btn-css:disabled {
-    background-color: #8fbbe6;
-    color: #ffffff;
-}
-
-.connect-card .exp-white-btn-css:disabled {
-    background: #ffffff;
-    color: #9ca3af;
-    border: 1px solid #d1d5db;
-}
-
 .connect-actions {
     display: flex;
     gap: 16px;
@@ -661,32 +608,6 @@ c-message-popup {
     align-items: center;
 }
 
-.close-icon-css {
-    z-index: 20;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    background: #F3F6F9;
-    transition: all 0.2s ease;
-}
-
-.close-icon-css:hover {
-    background: #e5e7eb;
-}
-
-.blue-header {
-    background-color: #0176D3;
-    color: white;
-    border-bottom-style: unset;
-    border-top-left-radius: 8px !important;
-    border-top-right-radius: 8px !important;
-    padding: 1rem 1.25rem;
-}
-
 .modalbody {
     background-color: #F9FAFB !important;
     border-bottom-left-radius: 8px !important;
@@ -704,111 +625,6 @@ c-message-popup {
     scrollbar-color: #0170d27d transparent;
     padding: 1rem;
     background: white;
-}
-
-.footerbtns {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    padding: 1rem;
-    background: #FFFFFF;
-    border-top: 1px solid #E5E7EB;
-    flex-shrink: 0;
-}
-
-.cancel_btn_css,
-.save_btn_css,
-.blue-btn-css,
-.white-btn-css {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    height: 30px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.cancel_btn_css {
-    padding: 0 1.5rem;
-    background: #FFFFFF;
-    border: 1.5px solid #0176D3;
-    color: #0176D3;
-    border-radius: 5px;
-}
-
-.cancel_btn_css:hover {
-    background: #F3F6F9;
-    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.15);
-}
-
-.save_btn_css {
-    padding: 0 1.5rem;
-    border: none;
-    background: #0176D3;
-    color: white;
-    border-radius: 5px;
-}
-
-.save_btn_css:hover {
-    background: #0156A3;
-    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.25);
-    transform: translateY(-1px);
-}
-
-.save_btn_css:disabled {
-    background-color: #9ca3af;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-.blue-btn-css {
-    background-color: #0176D3;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 0 16px;
-}
-
-.blue-btn-css:hover {
-    background-color: #014486;
-}
-
-.blue-btn-css:disabled {
-    background-color: #9ca3af;
-    cursor: not-allowed;
-}
-
-.white-btn-css {
-    background-color: white;
-    color: #444;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    padding: 0 16px;
-}
-
-.white-btn-css:hover {
-    background-color: #f3f4f6;
-}
-
-.white-btn-css:disabled {
-    background-color: #f9fafb;
-    color: #9ca3af;
-    border-color: #e5e7eb;
-    cursor: not-allowed;
-}
-
-.red-text-btn {
-    color: #dc2626 !important;
-}
-
-.red-text-btn:disabled {
-    color: #9ca3af !important;
 }
 
 .retry-banner {

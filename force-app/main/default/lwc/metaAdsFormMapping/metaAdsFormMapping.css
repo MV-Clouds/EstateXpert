@@ -1204,7 +1204,11 @@
 }
 
 .col-checkbox{
-    padding-left: 12px;
+    padding-left: 12px !important;
+}
+
+.exp-white-btn-css svg{
+    fill:none !important;
 }
 
 @media only screen and (max-width: 1500px) {

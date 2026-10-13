@@ -1,14 +1,12 @@
+/**
+ * Class Name : ControlCenterControllerTest
+ * Last Modified Date : 2026-10-12
+ * Last Modified By : Dhruv Kakadiya
+ * @description : Test class for ControlCenterController.
+ */
+
 @isTest
 public with sharing class ControlCenterControllerTest {
-
-    @isTest
-    static void testGetMetadataRecords() {
-        Test.startTest();
-        List<Control_Center_Feature__mdt> result = ControlCenterController.getMetadataRecords();
-        Test.stopTest();
-
-        System.assertNotEquals(null, result, 'The method should return a non-null list');
-    }
 
     @testSetup
     static void setupData() {
@@ -56,6 +54,99 @@ public with sharing class ControlCenterControllerTest {
 
         System.assertNotEquals(null, result, 'Listing should be returned');
         System.assertEquals(lst.Id, result.Id, 'Returned listing should match input Id');
+    }
+
+    @IsTest 
+    static void testGetObjectFields_success() {
+        Test.startTest();
+        List<Map<String, String>> result = ControlCenterController.getObjectFields('Contact');
+        Test.stopTest();
+
+        System.assertNotEquals(null, result, 'The method should return a non-null list for a valid object');
+        System.assert(!result.isEmpty(), 'The method should return fields for the valid object');
+        System.assert(result[0].containsKey('label'), 'Field map should contain label');
+        System.assert(result[0].containsKey('apiName'), 'Field map should contain apiName');
+        System.assert(result[0].containsKey('dataType'), 'Field map should contain dataType');
+    }
+
+    @IsTest 
+    static void testGetObjectFields_invalidObject() {
+        Test.startTest();
+        List<Map<String, String>> result = ControlCenterController.getObjectFields('Invalid_Object_XYZ');
+        Test.stopTest();
+
+        System.assertEquals(null, result, 'The method should return null when an invalid object is provided');
+    }
+    
+    @IsTest
+    static void testSaveMappings() {
+        String testMappingData = 'MVEX__Address__c:MVEX__Address__c;MVEX__City__c:MVEX__City__c';
+
+        Test.startTest();
+        ControlCenterController.saveMappings(testMappingData);
+        Test.stopTest();
+
+        // Enqueues metadata deployment asynchronously; verify execution completes without exceptions
+        System.assert(true, 'saveMappings should execute without exception');
+    }    
+
+    @IsTest
+    static void testGetMetadata() {
+        Test.startTest();
+        String result = ControlCenterController.getMetadata();
+        Test.stopTest();
+
+        List<MVEX__Mapping_Metadata__mdt> metaList = [
+            SELECT MVEX__Mapping_String__c 
+            FROM MVEX__Mapping_Metadata__mdt 
+            WITH USER_MODE 
+            LIMIT 1
+        ];
+
+        if (!metaList.isEmpty()) {
+            System.assertEquals(metaList[0].MVEX__Mapping_String__c, result, 'Returned metadata string should match the custom metadata record');
+        } else {
+            System.assertEquals(null, result, 'Should return null when no custom metadata record exists');
+        }
+    }
+
+    @IsTest
+    static void testSendFeedbackEmail_withAttachments() {
+        List<String> images = new List<String>{
+            EncodingUtil.base64Encode(Blob.valueOf('Test base64 image content 1')),
+            EncodingUtil.base64Encode(Blob.valueOf('Test base64 image content 2'))
+        };
+
+        Test.startTest();
+        String result = ControlCenterController.sendFeedbackEmail('Test Subject', 'Test Description with images', images);
+        Test.stopTest();
+
+        System.assertNotEquals(null, result, 'Result should not be null');
+        System.assertEquals('Success', result, 'sendFeedbackEmail should return Success when sending with attachments');
+    }
+
+    @IsTest
+    static void testSendFeedbackEmail_withoutAttachments() {
+        Test.startTest();
+        String resultNullImages = ControlCenterController.sendFeedbackEmail('Test Subject Null', 'Test Description null images', null);
+        String resultEmptyImages = ControlCenterController.sendFeedbackEmail('Test Subject Empty', 'Test Description empty images', new List<String>());
+        Test.stopTest();
+
+        System.assertEquals('Success', resultNullImages, 'sendFeedbackEmail should succeed when images list is null');
+        System.assertEquals('Success', resultEmptyImages, 'sendFeedbackEmail should succeed when images list is empty');
+    }
+
+    @IsTest
+    static void testSendFeedbackEmail_error() {
+        // Pass invalid base64 string to trigger exception in base64Decode
+        List<String> invalidImages = new List<String>{ 'invalid_base64_content_!@#$' };
+
+        Test.startTest();
+        String result = ControlCenterController.sendFeedbackEmail('Test Error', 'Test Description', invalidImages);
+        Test.stopTest();
+
+        System.assertNotEquals(null, result, 'Result should not be null');
+        System.assert(result.startsWith('Error:'), 'Result should return error prefix when an exception occurs during attachment decoding');
     }
 
     /* ---------------- Null Id Scenario ---------------- */

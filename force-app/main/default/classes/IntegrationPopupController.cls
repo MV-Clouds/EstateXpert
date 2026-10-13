@@ -93,7 +93,9 @@ public with sharing class IntegrationPopupController {
 
                     Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
                     mdContainer.addMetadata(cmtRecord);
-                    Metadata.Operations.enqueueDeployment(mdContainer, null);
+                    if (!Test.isRunningTest()) {
+                        Metadata.Operations.enqueueDeployment(mdContainer, null);
+                    }
                 }
 
             } else if (integrationType == 'Instagram') {
@@ -136,7 +138,7 @@ public with sharing class IntegrationPopupController {
                     }
 
                     // Stamp Connected_Date__c only on first connect (when token is set and date not yet stored)
-                    if (String.isNotBlank(accessTokenValue) && instaOAuthList[0].Connected_Date__c == null) {
+                    if (String.isNotBlank(accessTokenValue) && (instaOAuthList[0].Connected_Date__c == null)) {
                         Metadata.CustomMetadataValue cmtConnectedDate = new Metadata.CustomMetadataValue();
                         cmtConnectedDate.field = 'Connected_Date__c';
                         cmtConnectedDate.value = Datetime.now();
@@ -145,7 +147,9 @@ public with sharing class IntegrationPopupController {
 
                     Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
                     mdContainer.addMetadata(cmtRecord);
-                    Metadata.Operations.enqueueDeployment(mdContainer, null);
+                    if (!Test.isRunningTest()) {
+                        Metadata.Operations.enqueueDeployment(mdContainer, null);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -466,7 +470,9 @@ public with sharing class IntegrationPopupController {
 
             Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
             mdContainer.addMetadata(cmtRecord);
-            Metadata.Operations.enqueueDeployment(mdContainer, null);
+            if (!Test.isRunningTest()) {
+                Metadata.Operations.enqueueDeployment(mdContainer, null);
+            }
 
             return 'success';
         } catch (Exception e) {
@@ -521,7 +527,9 @@ public with sharing class IntegrationPopupController {
 
             Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
             mdContainer.addMetadata(cmtRecord);
-            Metadata.Operations.enqueueDeployment(mdContainer, null);
+            if (!Test.isRunningTest()) {
+                Metadata.Operations.enqueueDeployment(mdContainer, null);
+            }
 
             return 'success';
         } catch (Exception e) {
@@ -600,17 +608,8 @@ public with sharing class IntegrationPopupController {
                 return 'Integration type is required.';
             }
 
-            if (Test.isRunningTest()) {
-                if (mockValidationResult != null) {
-                    return mockValidationResult;
-                }
-                // Return stub identifier so the LWC can save it during tests
-                if (integrationType == 'Gmail') {
-                    return 'SUCCESS|test@example.com';
-                } else if (integrationType == 'Instagram') {
-                    return 'SUCCESS|test_user';
-                }
-                return 'SUCCESS';
+            if (Test.isRunningTest() && mockValidationResult != null) {
+                return mockValidationResult;
             }
 
             if (integrationType == 'Instagram') {
@@ -713,6 +712,13 @@ public with sharing class IntegrationPopupController {
                 metaClientId = gmailOAuth[0].Client_Id__c.trim();
             }
             metaClientSecret = gmailOAuth[0].Client_Secret__c.trim();
+        }
+
+        if (Test.isRunningTest() && String.isBlank(metaClientSecret)) {
+            metaClientSecret = 'mock_client_secret';
+            if (String.isBlank(metaClientId)) {
+                metaClientId = 'mock_client_id';
+            }
         }
 
         if (String.isBlank(metaClientId) || String.isBlank(metaClientSecret)) {

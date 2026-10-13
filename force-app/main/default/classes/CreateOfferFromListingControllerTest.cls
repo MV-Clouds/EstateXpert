@@ -304,4 +304,60 @@ public class CreateOfferFromListingControllerTest {
         // Assertions
         System.assertEquals(false, result, 'Update should return false when exception occurs');
     }
+
+    @isTest
+    static void testGetOfferTimelineNullFirstOfferId() {
+        MVEX__Offer__c testOffer = [SELECT Id FROM MVEX__Offer__c LIMIT 1];
+
+        Test.startTest();
+        CreateOfferFromListingController.OfferTimelineResponse result =
+            CreateOfferFromListingController.getOfferTimeline(testOffer.Id);
+        Test.stopTest();
+
+        System.assertEquals(false, result.isSuccess, 'Should fail when First Offer ID is null');
+    }
+
+    @isTest
+    static void testGetOfferTimelineWithCounterOfferChain() {
+        MVEX__Listing__c testListing = [SELECT Id FROM MVEX__Listing__c LIMIT 1];
+        Contact seller = [SELECT Id FROM Contact WHERE LastName = 'Seller' LIMIT 1];
+        Contact buyer  = [SELECT Id FROM Contact WHERE LastName = 'Buyer'  LIMIT 1];
+
+        MVEX__Offer__c firstOffer = new MVEX__Offer__c(
+            MVEX__Listing__c        = testListing.Id,
+            MVEX__Listing_Type__c   = 'Sale',
+            MVEX__Listing_Price__c  = 500000,
+            MVEX__Seller_Contact__c = seller.Id,
+            MVEX__Buyer_Contact__c  = buyer.Id,
+            MVEX__Offer_Amount__c   = 450000,
+            MVEX__Status__c         = 'Draft',
+            MVEX__Offer_Date__c     = Date.today(),
+            MVEX__Offer_made_by__c  = 'Buyer'
+        );
+        insert firstOffer;
+        firstOffer.MVEX__First_Offer_Id__c = String.valueOf(firstOffer.Id);
+        update firstOffer;
+
+        MVEX__Offer__c counterOffer = new MVEX__Offer__c(
+            MVEX__Listing__c           = testListing.Id,
+            MVEX__Listing_Type__c      = 'Sale',
+            MVEX__Listing_Price__c     = 500000,
+            MVEX__Seller_Contact__c    = seller.Id,
+            MVEX__Buyer_Contact__c     = buyer.Id,
+            MVEX__Offer_Amount__c      = 460000,
+            MVEX__Status__c            = 'Draft',
+            MVEX__Offer_Date__c        = Date.today(),
+            MVEX__Offer_made_by__c     = 'Seller',
+            MVEX__Counter_Offer_for__c = firstOffer.Id,
+            MVEX__First_Offer_Id__c    = String.valueOf(firstOffer.Id)
+        );
+        insert counterOffer;
+
+        Test.startTest();
+        CreateOfferFromListingController.OfferTimelineResponse result =
+            CreateOfferFromListingController.getOfferTimeline(firstOffer.Id);
+        Test.stopTest();
+
+        System.assertEquals(2, result.offers.size(), 'Timeline should contain both offers in the chain');
+    }
 }

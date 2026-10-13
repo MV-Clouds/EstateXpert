@@ -627,7 +627,7 @@ global without sharing class WAWebhook {
                             if (value.containsKey('event')) {
                                 String event = (String) value.get('event');
                                 String templateId = String.valueOf(value.get('message_template_id'));
-                                updateWhatsAppTemplateStatus(templateId, event);
+                                updateWhatsAppTemplateStatus(templateId, event, value);
                             }
                         }
                     }
@@ -639,19 +639,46 @@ global without sharing class WAWebhook {
     }
 
     public static void updateWhatsAppTemplateStatus(String templateId, String event) {
+        updateWhatsAppTemplateStatus(templateId, event, null);
+    }
+
+    public static void updateWhatsAppTemplateStatus(String templateId, String event, Map<String, Object> valueMap) {
         try {
-            List<WA_Template__c> templates = [SELECT Id, Status__c FROM WA_Template__c WHERE Template_Id__c = :templateId LIMIT 1];
+            List<WA_Template__c> templates = [SELECT Id, Status__c, Previous_Status__c, Quality_Rating__c, Rejection_Reason__c, Last_Status_Update_Time__c 
+                                                FROM WA_Template__c WHERE Template_Id__c = :templateId LIMIT 1];
 
             if (!templates.isEmpty()) {
                 WA_Template__c waTemplate = templates[0];
+                waTemplate.Previous_Status__c = waTemplate.Status__c;
+                waTemplate.Last_Status_Update_Time__c = System.now();
 
-                if (event == 'APPROVED') {
+                String upperEvent = String.isNotBlank(event) ? event.toUpperCase() : '';
+                if (upperEvent == 'APPROVED') {
                     waTemplate.Status__c = 'Active-Quality Pending';
-                } else if (event == 'PENDING') {
+                    waTemplate.Rejection_Reason__c = null;
+                } else if (upperEvent == 'PENDING' || upperEvent == 'IN_REVIEW') {
                     waTemplate.Status__c = 'In-Review';
-                } else if (event == 'REJECTED') {
+                } else if (upperEvent == 'REJECTED') {
                     waTemplate.Status__c = 'Rejected';
+                } else if (upperEvent == 'PAUSED') {
+                    waTemplate.Status__c = 'Paused';
+                } else if (upperEvent == 'DISABLED') {
+                    waTemplate.Status__c = 'Disabled';
                 }
+
+                if (valueMap != null) {
+                    if (valueMap.containsKey('reason') && valueMap.get('reason') != null) {
+                        String r = String.valueOf(valueMap.get('reason'));
+                        if (valueMap.containsKey('other_info') && valueMap.get('other_info') != null) {
+                            r += ' - ' + String.valueOf(valueMap.get('other_info'));
+                        }
+                        waTemplate.Rejection_Reason__c = r;
+                    }
+                    if (valueMap.containsKey('new_quality_score') && valueMap.get('new_quality_score') != null) {
+                        waTemplate.Quality_Rating__c = String.valueOf(valueMap.get('new_quality_score'));
+                    }
+                }
+
                 update waTemplate;
 
                 publishTemplateUpdateEvent(waTemplate.Id, waTemplate.Status__c);

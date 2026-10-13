@@ -256,7 +256,19 @@
                                                     </td>
                                                     <td class="slds-cell_action-mode exp-table-status-col"
                                                         role="gridcell" data-label="Status">
-                                                        <span class={record.statusClass}>{record.Status__c}</span>
+                                                        <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                                                            <span class={record.statusClass}>{record.Status__c}</span>
+                                                            <template if:true={record.hasCooldown}>
+                                                                <span style="font-size: 11px; color: #B45309; background: #FEF3C7; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px;" title="Meta 24-hour edit cooldown is active">
+                                                                    ⏱️ {record.cooldownBadgeText}
+                                                                </span>
+                                                            </template>
+                                                            <template if:true={record.Rejection_Reason__c}>
+                                                                <span style="font-size: 11px; color: #DC2626; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title={record.Rejection_Reason__c}>
+                                                                    ⚠️ {record.Rejection_Reason__c}
+                                                                </span>
+                                                            </template>
+                                                        </div>
                                                     </td>
                                                     <td class="slds-cell_action-mode exp-truncate-css" role="gridcell"
                                                         data-label="Last Modified Date" title={record.LastModifiedDate}>
@@ -439,6 +451,44 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Delete Confirmation Modal with 30-Day Name Freeze Notice -->
+                <template if:true={showDeleteModal}>
+                    <section role="dialog" tabindex="-1" aria-labelledby="delete-modal-heading" aria-modal="true" class="slds-modal slds-fade-in-open slds-modal_small">
+                        <div class="slds-modal__container" style="max-width: 500px;">
+                            <div class="slds-modal__header" style="border-bottom: 1px solid #E5E7EB; padding: 18px 24px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
+                                <h2 id="delete-modal-heading" class="slds-modal__title slds-hyphenate" style="font-size: 17px; font-weight: 700; color: #111827;">
+                                    Delete WhatsApp Template
+                                </h2>
+                                <button class="slds-button slds-button_icon" title="Close" onclick={cancelDeleteModal} style="border: none; background: transparent; cursor: pointer;">
+                                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                                        <path d="M2.5 17.5L17.5 2.5M2.5 2.5L17.5 17.5" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
+                                    </svg>
+                                    <span class="slds-assistive-text">Close</span>
+                                </button>
+                            </div>
+                            <div class="slds-modal__content slds-p-around_medium" style="background: #ffffff; padding: 22px 24px; color: #374151;">
+                                <p style="margin-bottom: 14px; font-size: 14px; line-height: 1.5;">
+                                    Are you sure you want to delete template <strong>"{deletingTemplateRecord.Template_Name__c}"</strong>?
+                                </p>
+                                <div style="background: #FEF2F2; border-left: 4px solid #EF4444; padding: 12px 14px; border-radius: 4px;">
+                                    <p style="color: #991B1B; font-weight: 600; font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                                        <span>⚠️</span> Meta 30-Day Name Freeze Policy
+                                    </p>
+                                    <p style="color: #7F1D1D; font-size: 12px; line-height: 1.45;">
+                                        Deleting this template removes it permanently from Meta across all languages. 
+                                        <strong>Meta locks this template name for 30 days</strong>, meaning you will not be able to reuse or create a new template with this exact name during this period.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="slds-modal__footer" style="border-top: 1px solid #E5E7EB; padding: 14px 24px; display: flex; justify-content: flex-end; gap: 10px; background: #F9FAFB;">
+                                <button class="exp-white-btn-css" onclick={cancelDeleteModal}>Cancel</button>
+                                <button class="exp-blue-btn-css" style="background-color: #DC2626; border-color: #DC2626;" onclick={confirmDeleteTemplate}>Delete Template</button>
+                            </div>
+                        </div>
+                    </section>
+                    <div class="slds-backdrop slds-backdrop_open"></div>
+                </template>
             </div>
         </template>
     </template>

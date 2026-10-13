@@ -306,7 +306,9 @@ public with sharing class WAManageTemplatePageController {
         try {
             List<WA_Template__c> templates = [SELECT Id, Name, Template_Name__c, Button_Body__c, Status__c, Image_Header_Handle__c, Template_Id__c, Button_Label__c, 
                                                 Button_Type__c, File_Name__c, Footer_Body__c, Header_Body__c, Header_Type__c, Language__c, Template_Body__c, 
-                                                Template_Category__c, Template_Miscellaneous_Data__c FROM WA_Template__c  WHERE Id = :templateId WITH USER_MODE
+                                                Template_Category__c, Template_Miscellaneous_Data__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c,
+                                                Edit_Count_30_Days__c, Quality_Rating__c, Rejection_Reason__c, Previous_Status__c
+                                                FROM WA_Template__c  WHERE Id = :templateId WITH USER_MODE
                                                 ORDER BY LastModifiedDate DESC LIMIT 1];
 
             if (templates.isEmpty()) {
@@ -315,6 +317,15 @@ public with sharing class WAManageTemplatePageController {
 
             WA_Template__c template = templates[0];
             wrapper.template = template;
+
+            // Evaluate edit eligibility based on Meta 24h & 30-day policies
+            Map<String, Object> eligibility = evaluateEditEligibility(template);
+            wrapper.canEdit = (Boolean) eligibility.get('canEdit');
+            wrapper.editBlockReason = (String) eligibility.get('reason');
+            wrapper.hoursRemaining = (Integer) eligibility.get('hoursRemaining');
+            wrapper.minutesRemaining = (Integer) eligibility.get('minutesRemaining');
+            wrapper.editsUsed30Days = (Integer) eligibility.get('editsUsed30Days');
+            wrapper.editsRemaining30Days = (Integer) eligibility.get('editsRemaining30Days');
 
             if (template.Header_Type__c == 'Image' || template.Header_Type__c == 'Video' || template.Header_Type__c == 'Document') {
                 wrapper.isImgUrl = true;
@@ -582,6 +593,22 @@ public with sharing class WAManageTemplatePageController {
                 response.put('message', 'Client App ID is not configured in Custom Metadata (OAuth_Configuration__mdt).');
                 return response;
             }
+
+            // Pre-callout eligibility validation against Meta 24h & 30-day rules
+            List<WA_Template__c> currentTemps = [SELECT Id, Status__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c 
+                                                    FROM WA_Template__c 
+                                                    WHERE (Template_Id__c = :templateId AND Template_Id__c != null) 
+                                                       OR (Template_Name__c = :templateName AND Template_Name__c != null) 
+                                                    WITH USER_MODE LIMIT 1];
+            if (!currentTemps.isEmpty()) {
+                Map<String, Object> eligibility = evaluateEditEligibility(currentTemps[0]);
+                if (eligibility.get('canEdit') == false) {
+                    response.put('success', false);
+                    response.put('status', 'error');
+                    response.put('message', (String) eligibility.get('reason'));
+                    return response;
+                }
+            }
             
             String token = config.Access_Token__c;
             String apiVersion = config.API_Version__c;
@@ -607,10 +634,6 @@ public with sharing class WAManageTemplatePageController {
                 response.put('success', true);
                 response.put('status', 'success');
                 response.put('message', 'Template is being updated, you will be notified once it is ready.');
-                
-                if (updatedTemplateId != null) {
-                    createTemplateEditHistory(updatedTemplateId, serializedWrapper, payloadWrapper);
-                }
             } else if (res.getStatusCode() != 200 && String.isNotEmpty(res.getBody())) {
                 try {
                     Map<String, Object> resMap = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
@@ -651,35 +674,117 @@ public with sharing class WAManageTemplatePageController {
 
     /*
     *********************************************************
-    @description     : Safely tracks template edit history using dynamic sObject.
-    @param           : templateId, serializedWrapper, payloadWrapper
+    @description     : Purges timestamps older than 30 days and returns active list.
+    @param           : timestampsJson - JSON array string of ISO dates
+    @return          : List<String>
     ********************************************************
     */
-    private static void createTemplateEditHistory(Id templateId, String serializedWrapper, String payloadWrapper) {
-        try {
-            Schema.SObjectType editHistoryType = Schema.getGlobalDescribe().get('Template_Edit_History__c');
-            if (editHistoryType != null && editHistoryType.getDescribe().isCreateable()) {
-                sObject editHistory = editHistoryType.newSObject();
-                Map<String, Schema.SObjectField> fieldsMap = editHistoryType.getDescribe().fields.getMap();
-                if (fieldsMap.containsKey('WA_Template__c')) {
-                    editHistory.put('WA_Template__c', templateId);
-                } else if (fieldsMap.containsKey('WhatsappTemplate__c')) {
-                    editHistory.put('WhatsappTemplate__c', templateId);
+    public static List<String> purgeAndGetActiveTimestamps(String timestampsJson) {
+        List<String> activeTimestamps = new List<String>();
+        if (String.isNotBlank(timestampsJson)) {
+            try {
+                List<Object> rawList = (List<Object>) JSON.deserializeUntyped(timestampsJson);
+                DateTime thirtyDaysAgo = System.now().addDays(-30);
+                for (Object obj : rawList) {
+                    String strDate = String.valueOf(obj);
+                    DateTime dt = (DateTime) JSON.deserialize('"' + strDate + '"', DateTime.class);
+                    if (dt >= thirtyDaysAgo) {
+                        activeTimestamps.add(strDate);
+                    }
                 }
-                if (fieldsMap.containsKey('Edited_Time__c')) {
-                    editHistory.put('Edited_Time__c', System.now());
-                }
-                if (fieldsMap.containsKey('Serialized_Wrapper__c')) {
-                    editHistory.put('Serialized_Wrapper__c', serializedWrapper);
-                }
-                if (fieldsMap.containsKey('Payload_JSON__c')) {
-                    editHistory.put('Payload_JSON__c', payloadWrapper);
-                }
-                insert editHistory;
+            } catch (Exception ex) {
+                // ignore parse issue
             }
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'createTemplateEditHistory', e.getMessage());
         }
+        return activeTimestamps;
+    }
+
+    /*
+    *********************************************************
+    @description     : Evaluates edit eligibility against Meta policies.
+    @param           : template - WA_Template__c record
+    @return          : Map<String, Object> (canEdit, reason, hoursRemaining, etc.)
+    ********************************************************
+    */
+    public static Map<String, Object> evaluateEditEligibility(WA_Template__c template) {
+        Map<String, Object> result = new Map<String, Object>();
+        result.put('canEdit', true);
+        result.put('reason', '');
+        result.put('hoursRemaining', 0);
+        result.put('minutesRemaining', 0);
+
+        if (template == null) {
+            return result;
+        }
+
+        String status = template.Status__c != null ? template.Status__c.toUpperCase() : '';
+
+        // 1. Cannot edit if PENDING / IN-REVIEW
+        if (status == 'PENDING' || status == 'IN-REVIEW' || status == 'IN_REVIEW') {
+            result.put('canEdit', false);
+            result.put('reason', 'This template is currently under review by Meta and cannot be edited until approved or rejected.');
+            return result;
+        }
+
+        // 2. Cannot edit if PENDING_DELETION
+        if (status == 'PENDING_DELETION') {
+            result.put('canEdit', false);
+            result.put('reason', 'This template is scheduled for deletion and cannot be edited.');
+            return result;
+        }
+
+        // 3. 24-Hour Cooldown for approved templates
+        if (template.Last_Meta_Edit_Time__c != null) {
+            DateTime cooldownEnd = template.Last_Meta_Edit_Time__c.addHours(24);
+            if (System.now() < cooldownEnd) {
+                Long msRemaining = cooldownEnd.getTime() - System.now().getTime();
+                Long totalMinutes = msRemaining / (60 * 1000);
+                Integer hours = (Integer)(totalMinutes / 60);
+                Integer minutes = (Integer)(Math.mod(totalMinutes, 60));
+
+                result.put('canEdit', false);
+                result.put('hoursRemaining', hours);
+                result.put('minutesRemaining', minutes);
+                result.put('reason', 'Meta permits only 1 edit every 24 hours for approved templates. You can edit this template in ' + hours + ' hr ' + minutes + ' min.');
+                return result;
+            }
+        }
+
+        // 4. Max 10 edits in rolling 30 days
+        List<String> activeTimestamps = purgeAndGetActiveTimestamps(template.Edit_Timestamps_JSON__c);
+        Integer editsUsed = activeTimestamps.size();
+        result.put('editsUsed30Days', editsUsed);
+        result.put('editsRemaining30Days', Math.max(0, 10 - editsUsed));
+
+        if (editsUsed >= 10) {
+            result.put('canEdit', false);
+            result.put('reason', 'This template has reached Meta\'s maximum limit of 10 edits in a rolling 30-day window.');
+            return result;
+        }
+
+        return result;
+    }
+
+    /*
+    *********************************************************
+    @description     : Pre-check for LWC before opening/confirming template edits.
+    @param           : templateId - Id of WA_Template__c
+    @return          : Map<String, Object>
+    ********************************************************
+    */
+    @AuraEnabled
+    public static Map<String, Object> checkTemplateEditEligibility(String templateId) {
+        if (String.isBlank(templateId)) {
+            return new Map<String, Object>{ 'canEdit' => true, 'reason' => '' };
+        }
+        List<WA_Template__c> templates = [SELECT Id, Status__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c 
+                                            FROM WA_Template__c 
+                                            WHERE Id = :templateId OR Template_Id__c = :templateId 
+                                            WITH USER_MODE LIMIT 1];
+        if (templates.isEmpty()) {
+            return new Map<String, Object>{ 'canEdit' => true, 'reason' => '' };
+        }
+        return evaluateEditEligibility(templates[0]);
     }
    
     @AuraEnabled
@@ -825,6 +930,12 @@ public with sharing class WAManageTemplatePageController {
         @AuraEnabled public List<String> fieldNames;
         @AuraEnabled public List<Map<String, String>> templateVariables; 
         @AuraEnabled public Boolean isImgUrl;
+        @AuraEnabled public Boolean canEdit;
+        @AuraEnabled public String editBlockReason;
+        @AuraEnabled public Integer hoursRemaining;
+        @AuraEnabled public Integer minutesRemaining;
+        @AuraEnabled public Integer editsUsed30Days;
+        @AuraEnabled public Integer editsRemaining30Days;
     }
 
     /*

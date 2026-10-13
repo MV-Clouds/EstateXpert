@@ -29,6 +29,11 @@
                 <default>false</default>
                 <label>Rejected</label>
             </value>
+            <value>
+                <fullName>Pending</fullName>
+                <default>false</default>
+                <label>Pending</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

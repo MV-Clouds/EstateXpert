@@ -53,7 +53,9 @@ public with sharing class WATemplateHomePageController {
     public static List<WA_Template__c> getWhatsAppTemplates() {
         try {
             List<WA_Template__c> templates = [SELECT Id, Name, Template_Name__c, Template_Category__c, toLabel(Language__c) LanguageLabel, File_Name__c, 
-                                                Image_Header_Handle__c, Status__c, LastModifiedById, LastModifiedDate, CreatedDate FROM WA_Template__c 
+                                                Image_Header_Handle__c, Status__c, Quality_Rating__c, Rejection_Reason__c, Previous_Status__c,
+                                                Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c, Last_Status_Update_Time__c,
+                                                LastModifiedById, LastModifiedDate, CreatedDate FROM WA_Template__c 
                                                 WITH USER_MODE ORDER BY LastModifiedDate DESC LIMIT 50000];
             return templates;
         } catch (Exception e) {

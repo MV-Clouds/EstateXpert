@@ -4,6 +4,14 @@
     </template>
     <template if:true={iseditTemplatevisible}>
         <div class="main-container">
+            <template if:true={isEditBlocked}>
+                <div class="slds-notify slds-notify_alert slds-alert_error" role="alert" style="margin: 0 1rem 1rem 1rem; border-radius: 6px; padding: 12px 16px; background: #FEF2F2; color: #991B1B; border: 1px solid #FCA5A5; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 18px;">⚠️</span>
+                    <div style="flex: 1; font-size: 13px; font-weight: 500;">
+                        <strong>Meta Edit Restriction:</strong> {editBlockReason}
+                    </div>
+                </div>
+            </template>
             <div class="divcontainer2">
                 <div class="createtempdiv2">
                     <div class="slds-theme_default templateContent3 template-details-card">
@@ -69,7 +77,7 @@
                             <div class="landiv">
                                 <label for="languageSelect" class="form-field-label">Language</label>
                                 <select id="languageSelect" name="language" class="lanInput"
-                                    onchange={handleInputChange}>
+                                    disabled={isLanguageDisabled} onchange={handleInputChange}>
                                     <template for:each={languageOptions} for:item="option">
                                         <option key={option.value} value={option.value} selected={option.isSelected}>
                                             {option.label}</option>
@@ -875,6 +883,20 @@
                 </div>
                 <div class="slds-modal__content clone-modalbody" id="review-modal-content">
                     <div class="clone-content_body">
+                        <template if:true={isEditTemplate}>
+                            <div style="background: #FFFBEB; border-left: 4px solid #F59E0B; padding: 12px 14px; border-radius: 4px; margin-bottom: 12px; text-align: left;">
+                                <p style="color: #92400E; font-weight: 600; font-size: 13px; margin-bottom: 4px;">
+                                    ⚠️ Meta Re-Review &amp; Policy Notice
+                                </p>
+                                <p style="color: #78350F; font-size: 12px; line-height: 1.45; margin-bottom: 4px;">
+                                    Submitting these edits sends this template back into <strong>In Review</strong> status with Meta. Active automated campaigns using this template cannot send messages until Meta re-approves it.
+                                </p>
+                                <p style="color: #78350F; font-size: 11.5px; line-height: 1.4;">
+                                    • Cooldown: Max <strong>1 edit per 24 hours</strong>.<br/>
+                                    • Monthly limit: Max <strong>10 edits per rolling 30 days</strong>.
+                                </p>
+                            </div>
+                        </template>
                         <p class="review-modal-subtitle">If you choose not to submit a completed language now, it will
                             not be saved and you'll lose the content.</p>
                         <div class="review-lang-row">

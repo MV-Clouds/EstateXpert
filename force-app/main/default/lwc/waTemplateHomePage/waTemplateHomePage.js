@@ -33,6 +33,8 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
     @track isManageTemplateView = false;
     @track manageTemplateId = null;
     @track isCloneMode = false;
+    @track showDeleteModal = false;
+    @track deletingTemplateRecord = null;
     emptyStateUrl = emptyState || '/resource/MVEX__emptyState';
 
     // Pagination properties
@@ -262,6 +264,47 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
         this.updateShownData();
 
         if (action === 'Edit') {
+            const targetRecord = this.allRecords.find(r => r.Id === recordId);
+            if (targetRecord) {
+                const status = (targetRecord.Status__c || '').toUpperCase();
+                if (status === 'PENDING' || status === 'IN-REVIEW' || status === 'IN_REVIEW') {
+                    this.showToastError('This template is currently under review by Meta and cannot be edited until approved or rejected.');
+                    return;
+                }
+                if (status === 'PENDING_DELETION') {
+                    this.showToastError('This template is scheduled for deletion and cannot be edited.');
+                    return;
+                }
+                if (targetRecord.Last_Meta_Edit_Time__c) {
+                    const lastEdit = new Date(targetRecord.Last_Meta_Edit_Time__c);
+                    const cooldownEnd = new Date(lastEdit.getTime() + (24 * 60 * 60 * 1000));
+                    const now = new Date();
+                    if (now < cooldownEnd) {
+                        const msRemaining = cooldownEnd - now;
+                        const totalMinutes = Math.floor(msRemaining / (60 * 1000));
+                        const hours = Math.floor(totalMinutes / 60);
+                        const mins = totalMinutes % 60;
+                        this.showToastError(`Meta permits only 1 edit every 24 hours for approved templates. You can edit this template in ${hours} hr ${mins} min.`);
+                        return;
+                    }
+                }
+                let editsUsed30Days = targetRecord.Edit_Count_30_Days__c || 0;
+                if (targetRecord.Edit_Timestamps_JSON__c) {
+                    try {
+                        const timestamps = JSON.parse(targetRecord.Edit_Timestamps_JSON__c);
+                        const thirtyDaysAgo = new Date(Date.now() - (30 * 24 * 60 * 60 * 1000));
+                        const active = timestamps.filter(t => new Date(t) >= thirtyDaysAgo);
+                        editsUsed30Days = active.length;
+                    } catch (e) {
+                        // ignore parse issue
+                    }
+                }
+                if (editsUsed30Days >= 10) {
+                    this.showToastError("This template has reached Meta's maximum limit of 10 edits in a rolling 30-day window.");
+                    return;
+                }
+            }
+
             this.manageTemplateId = recordId;
             this.isCloneMode = false;
             this.isManageTemplateView = true;
@@ -289,23 +332,38 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                 detail: { title: 'Preview Template', parentTitle: 'Message Templates' }
             }));
         } else if (action === 'Delete') {
-            this.handleDeleteTemplate(recordId);
+            const targetRecord = this.allRecords.find(r => r.Id === recordId);
+            this.deletingTemplateRecord = targetRecord || { Id: recordId, Template_Name__c: 'this template' };
+            this.showDeleteModal = true;
         }
     }
 
-    handleDeleteTemplate(recordId) {
+    cancelDeleteModal() {
+        this.showDeleteModal = false;
+        this.deletingTemplateRecord = null;
+    }
+
+    confirmDeleteTemplate() {
+        if (!this.deletingTemplateRecord || !this.deletingTemplateRecord.Id) {
+            this.showDeleteModal = false;
+            return;
+        }
+        const recId = this.deletingTemplateRecord.Id;
+        this.showDeleteModal = false;
         this.isLoading = true;
-        deleteTemplete({ templateId: recordId })
+        deleteTemplete({ templateId: recId })
             .then((result) => {
                 this.dispatchEvent(new ShowToastEvent({
                     title: 'Success',
                     message: result || 'Template deleted successfully',
                     variant: 'success'
                 }));
+                this.deletingTemplateRecord = null;
                 this.fetchAllTemplate(false);
             })
             .catch((error) => {
                 this.isLoading = false;
+                this.deletingTemplateRecord = null;
                 this.dispatchEvent(new ShowToastEvent({
                     title: 'Error',
                     message: (error.body && error.body.message) || error.message || 'Error deleting template',
@@ -417,6 +475,25 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                     if (data) {
                         this.allRecords = data.map((record, index) => {
                             const statusVal = record.Status__c || '';
+                            let cooldownHours = 0;
+                            let cooldownMins = 0;
+                            let hasCooldown = false;
+                            let cooldownBadgeText = '';
+
+                            if (record.Last_Meta_Edit_Time__c) {
+                                const lastEdit = new Date(record.Last_Meta_Edit_Time__c);
+                                const cooldownEnd = new Date(lastEdit.getTime() + (24 * 60 * 60 * 1000));
+                                const now = new Date();
+                                if (now < cooldownEnd) {
+                                    hasCooldown = true;
+                                    const diffMs = cooldownEnd - now;
+                                    const totalMins = Math.floor(diffMs / 60000);
+                                    cooldownHours = Math.floor(totalMins / 60);
+                                    cooldownMins = totalMins % 60;
+                                    cooldownBadgeText = `${cooldownHours}h ${cooldownMins}m edit cooldown`;
+                                }
+                            }
+
                             return {
                                 ...record,
                                 id: record.Id,
@@ -425,6 +502,10 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                                 Template_Category__c: this.handleEmptyValue(record.Template_Category__c),
                                 LanguageLabel: this.handleEmptyValue(record.LanguageLabel),
                                 Status__c: this.handleEmptyValue(statusVal),
+                                Quality_Rating__c: record.Quality_Rating__c || '',
+                                Rejection_Reason__c: record.Rejection_Reason__c || '',
+                                hasCooldown,
+                                cooldownBadgeText,
                                 rawLastModifiedDate: record.LastModifiedDate,
                                 rawCreatedDate: record.CreatedDate,
                                 LastModifiedDate: this.formatDate(record.LastModifiedDate),

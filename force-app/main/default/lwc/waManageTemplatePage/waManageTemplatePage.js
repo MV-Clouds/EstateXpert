@@ -2,22 +2,15 @@ import { LightningElement, track, api } from 'lwc';
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
-import buttonIconsZip from '@salesforce/resourceUrl/buttonIconsZip';
-import waEmojis from '@salesforce/resourceUrl/waEmojis';
-import COUNTRY_PHONE_LENGTHS from '@salesforce/resourceUrl/CountryPhoneLengths';
 import globalStyles from '@salesforce/resourceUrl/globalStyles';
-import LanguageJson from '@salesforce/resourceUrl/LanguageJson';
+import waJSONFiles from '@salesforce/resourceUrl/waJSONFiles';
+import waIcons from '@salesforce/resourceUrl/waIcons';
 import createWhatsappTemplate from '@salesforce/apex/WAManageTemplatePageController.createWhatsappTemplate';
 import editWhatsappTemplate from '@salesforce/apex/WAManageTemplatePageController.editWhatsappTemplate';
 import getObjectFields from '@salesforce/apex/WAManageTemplatePageController.getObjectFields';
 import getObjectFieldsWithRelationships from '@salesforce/apex/WAManageTemplatePageController.getObjectFieldsWithRelationships';
 import getWhatsAppTemplates from '@salesforce/apex/WAManageTemplatePageController.getWhatsAppTemplates';
 import getDynamicObjectData from '@salesforce/apex/WAManageTemplatePageController.getDynamicObjectData';
-import tempLocationIcon from '@salesforce/resourceUrl/tempLocationIcon';
-import tempVideoIcon from '@salesforce/resourceUrl/tempVideoIcon';
-import imageUploadPreview from '@salesforce/resourceUrl/imageUploadPreview';
-import docUploadPreview from '@salesforce/resourceUrl/documentPreviewIcon';
-import NoPreviewAvailable from '@salesforce/resourceUrl/NoPreviewAvailable';
 import uploadFile from '@salesforce/apex/WAManageTemplatePageController.uploadFile';
 import deleteFile from '@salesforce/apex/WAManageTemplatePageController.deleteFile';
 import getCompanyName from '@salesforce/apex/WAManageTemplatePageController.getCompanyName';
@@ -96,6 +89,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     visitWebsiteCount = 0;
     callPhoneNumber = 0;
     marketingOpt = 0;
+    isEditBlocked = false;
+    editBlockReason = '';
     iseditTemplatevisible = false;
     showReviewTemplate = false;
     IsHeaderText = false;
@@ -145,7 +140,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     NoFileSelected = true;
     filePreview = '';
     selectedObject = 'Contact';
-    buttonIconsZip = buttonIconsZip;
     isDropdownOpen = false;
     dropdownClass = 'dropdown-hidden';
     metaTemplateId = '';
@@ -155,11 +149,26 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     defaultPreview = true;
     UtilityCustomSelected = false;
     isDefault = true;
-    tempLocationIcon = tempLocationIcon;
-    tempVideoIcon = tempVideoIcon;
-    imageUploadPreview = imageUploadPreview;
-    docUploadPreviewImg = docUploadPreview;
-    NoPreviewAvailableImg = NoPreviewAvailable;
+
+    get tempLocationIcon() {
+        return `${waIcons}/tempLocationIcon.png`;
+    }
+
+    get tempVideoIcon() {
+        return `${waIcons}/tempVideoIcon.png`;
+    }
+
+    get imageUploadPreview() {
+        return `${waIcons}/imageUploadPreview.png`;
+    }
+
+    get docUploadPreviewImg() {
+        return `${waIcons}/documentPreviewIcon.png`;
+    }
+
+    get NoPreviewAvailableImg() {
+        return `${waIcons}/NoPreviewAvailable.png`;
+    }
     isFeatureEnabled = false;
     isAWSEnabled = false;
     confData;
@@ -431,12 +440,20 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             headerFileNotSelected = headerVideoNotSelected;
         }
 
+        if (this.isEditBlocked) {
+            return true;
+        }
+
         return !(this.templateName && this.tempBody && areButtonFieldsFilled && areCustomButtonFilled &&
             !this.templateExists && !hasCustomButtonError && !hasButtonListError &&
             !headerFileNotSelected && !hasHeaderError && !headerTextNotSelected);
     }
 
     get templateNameDisabled() {
+        return this.isEditTemplate && !this.isTemplateClone;
+    }
+
+    get isLanguageDisabled() {
         return this.isEditTemplate && !this.isTemplateClone;
     }
 
@@ -1158,7 +1175,15 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         try {
             getDynamicObjectData({ templateId: this.edittemplateid })
                 .then((data) => {
-                    const { template, templateVariables } = data;
+                    const { template, templateVariables, canEdit, editBlockReason } = data;
+
+                    if (this.isEditTemplate && !this.isTemplateClone && canEdit === false) {
+                        this.isEditBlocked = true;
+                        this.editBlockReason = editBlockReason;
+                    } else {
+                        this.isEditBlocked = false;
+                        this.editBlockReason = '';
+                    }
 
                     this.selectedOption = template.Template_Type__c || template.MVEX__Template_Type__c;
                     this.activeTab = template.Template_Category__c || template.MVEX__Template_Category__c;
@@ -2997,8 +3022,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     generateEmojiCategories() {
-        fetch(waEmojis)
-            .then((response) => response.json())
+        const urlWithExt = `${waJSONFiles}/whatsapp-emojis.json`;
+        const urlWithoutExt = `${waJSONFiles}/whatsapp-emojis`;
+        fetch(urlWithExt)
+            .then(res => res.ok ? res : fetch(urlWithoutExt))
+            .then(response => response.json())
             .then((data) => {
                 let groupedEmojis = Object.values(
                     data.reduce((acc, item) => {
@@ -3018,7 +3046,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
     fetchCountries() {
         try {
-            fetch(COUNTRY_PHONE_LENGTHS)
+            const urlWithExt = `${waJSONFiles}/CountryPhoneLengths.json`;
+            const urlWithoutExt = `${waJSONFiles}/CountryPhoneLengths`;
+            fetch(urlWithExt)
+                .then(res => res.ok ? res : fetch(urlWithoutExt))
                 .then(response => response.json())
                 .then(data => {
                     // Build options for combobox
@@ -3059,8 +3090,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
 
     fetchLanguages() {
-
-        fetch(LanguageJson)
+        const urlWithExt = `${waJSONFiles}/LanguageJson.json`;
+        const urlWithoutExt = `${waJSONFiles}/LanguageJson`;
+        fetch(urlWithExt)
+            .then(res => res.ok ? res : fetch(urlWithoutExt))
             .then((response) => response.json())
             .then((data) => {
                 this.languageOptions = data.map(lang => {
@@ -3074,7 +3107,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 }
             })
             .catch((e) => console.error('Error fetching language data:', e));
-
     }
 
     handleEmoji(event) {
@@ -3190,6 +3222,20 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             if (this.checkBodyVariablePlacement()) {
                 this.showToast(this.bodyVariablePlacementError, 'error');
                 return false;
+            }
+
+            // Validate sequential variable numbering in body ({{1}}, {{2}}, etc.)
+            if (this.tempBody) {
+                const varMatches = [...this.tempBody.matchAll(/\{\{(\d+)\}\}/g)].map(m => parseInt(m[1], 10));
+                if (varMatches.length > 0) {
+                    const uniqueSorted = [...new Set(varMatches)].sort((a, b) => a - b);
+                    for (let i = 0; i < uniqueSorted.length; i++) {
+                        if (uniqueSorted[i] !== i + 1) {
+                            this.showToast(`Body variables must be numbered sequentially starting from {{1}}. Expected {{${i + 1}}} but found {{${uniqueSorted[i]}}}.`, 'error');
+                            return false;
+                        }
+                    }
+                }
             }
 
             const buttonData = [...this.buttonList, ...this.customButtonList];
@@ -3417,6 +3463,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             return;
         }
 
+        if (this.isEditBlocked) {
+            this.showToast(this.editBlockReason || 'This template cannot be edited due to Meta policy restrictions.', 'error');
+            return;
+        }
+
         this.showReviewTemplate = true;
     }
     handleCloseTemplate() {
@@ -3426,6 +3477,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
     handleSubmit() {
         try {
+            if (this.isEditBlocked) {
+                this.showToast(this.editBlockReason || 'This template cannot be edited due to Meta policy restrictions.', 'error');
+                this.isLoading = false;
+                return;
+            }
             if ((this.activeTab == 'Marketing' || this.activeTab == 'Utiltiy') && !this.isCheckboxChecked && this.visitWebsiteCount > 0) {
                 this.showToast('Please select check-box to report website clicks.', 'error');
                 return;
@@ -3551,10 +3607,19 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                             this.clearEditTemplateData();
                             this.closeAndReturnToTemplateList();
                         } else {
-                            const errorResponse = JSON.parse(result.errorMessage);
-                            const errorMsg = errorResponse.error.error_user_msg || 'Due to unknown error';
+                            let errorMsg = result ? (result.message || result.errorMessage) : 'Due to unknown error';
+                            if (result && result.errorMessage) {
+                                try {
+                                    const errorResponse = JSON.parse(result.errorMessage);
+                                    if (errorResponse && errorResponse.error) {
+                                        errorMsg = errorResponse.error.error_user_msg || errorResponse.error.message || errorMsg;
+                                    }
+                                } catch (e) {
+                                    // plain text errorMessage
+                                }
+                            }
 
-                            this.showToast('Template updation failed, reason - ' + errorMsg, 'error');
+                            this.showToast('Template update failed: ' + errorMsg, 'error');
                             this.isLoading = false;
                         }
                     })
@@ -3646,7 +3711,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     getButtonPath(iconName) {
-        return `${buttonIconsZip}/button-sectionIcons/${iconName}.png`;
+        return `${waIcons}/${iconName}.png`;
     }
 
     toggleDropdown(event) {

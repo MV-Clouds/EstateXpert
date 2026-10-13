@@ -55,15 +55,46 @@ public with sharing class WATemplateWrapper {
                 : (String) payloadMap.get('name');
 
             // Find existing WA_Template__c by name or Meta template ID
-            List<WA_Template__c> existingTemplates = [SELECT Id, Name, Template_Name__c, Template_Id__c FROM WA_Template__c WHERE (Template_Name__c = :templateName 
+            List<WA_Template__c> existingTemplates = [SELECT Id, Name, Template_Name__c, Template_Id__c, Status__c,
+                                                        Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c,
+                                                        Previous_Status__c, Quality_Rating__c, Last_Status_Update_Time__c
+                                                        FROM WA_Template__c WHERE (Template_Name__c = :templateName 
                                                         AND Template_Name__c != null) OR (Template_Id__c = :metaTempId AND Template_Id__c != null) 
                                                         WITH USER_MODE LIMIT 1];
 
             WA_Template__c whatsAppTemplate;
-            if (!existingTemplates.isEmpty()) {
+            Boolean isExisting = !existingTemplates.isEmpty();
+            if (isExisting) {
                 whatsAppTemplate = existingTemplates[0];
+                whatsAppTemplate.Previous_Status__c = whatsAppTemplate.Status__c;
+                whatsAppTemplate.Last_Meta_Edit_Time__c = System.now();
+
+                // Maintain rolling 30-day edit timestamps in JSON
+                List<String> activeTimestamps = new List<String>();
+                if (String.isNotBlank(whatsAppTemplate.Edit_Timestamps_JSON__c)) {
+                    try {
+                        List<Object> rawList = (List<Object>) JSON.deserializeUntyped(whatsAppTemplate.Edit_Timestamps_JSON__c);
+                        DateTime thirtyDaysAgo = System.now().addDays(-30);
+                        for (Object obj : rawList) {
+                            String strDate = String.valueOf(obj);
+                            DateTime dt = (DateTime) JSON.deserialize('"' + strDate + '"', DateTime.class);
+                            if (dt >= thirtyDaysAgo) {
+                                activeTimestamps.add(strDate);
+                            }
+                        }
+                    } catch (Exception ex) {
+                        // ignore parse issue
+                    }
+                }
+                activeTimestamps.add(JSON.serialize(System.now()).replaceAll('"', ''));
+                whatsAppTemplate.Edit_Timestamps_JSON__c = JSON.serialize(activeTimestamps);
+                whatsAppTemplate.Edit_Count_30_Days__c = activeTimestamps.size();
+                whatsAppTemplate.Last_Status_Update_Time__c = System.now();
             } else {
                 whatsAppTemplate = new WA_Template__c();
+                whatsAppTemplate.Quality_Rating__c = 'UNKNOWN';
+                whatsAppTemplate.Edit_Count_30_Days__c = 0;
+                whatsAppTemplate.Last_Status_Update_Time__c = System.now();
             }
 
             // Populate WA_Template__c fields

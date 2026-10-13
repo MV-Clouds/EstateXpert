@@ -4,14 +4,6 @@
     </template>
     <template if:true={iseditTemplatevisible}>
         <div class="main-container">
-            <template if:true={isEditBlocked}>
-                <div class="slds-notify slds-notify_alert slds-alert_error exp-edit-restriction-banner" role="alert">
-                    <span class="exp-edit-restriction-icon">⚠️</span>
-                    <div class="exp-edit-restriction-text">
-                        <strong>Meta Edit Restriction:</strong> {editBlockReason}
-                    </div>
-                </div>
-            </template>
             <div class="divcontainer2">
                 <div class="createtempdiv2">
                     <div class="slds-theme_default templateContent3 template-details-card">
@@ -75,14 +67,18 @@
 
                             <!-- Language Selection -->
                             <div class="landiv">
-                                <label for="languageSelect" class="form-field-label">Language</label>
-                                <select id="languageSelect" name="language" class="lanInput"
-                                    disabled={isLanguageDisabled} onchange={handleInputChange}>
-                                    <template for:each={languageOptions} for:item="option">
-                                        <option key={option.value} value={option.value} selected={option.isSelected}>
-                                            {option.label}</option>
-                                    </template>
-                                </select>
+                                <label class="form-field-label">Language</label>
+                                <lightning-combobox
+                                    name="language"
+                                    label="Language"
+                                    variant="label-hidden"
+                                    class="lanCombobox"
+                                    value={selectedLanguage}
+                                    options={languageOptions}
+                                    disabled={isLanguageDisabled}
+                                    onchange={handleInputChange}
+                                    placeholder="Select Language">
+                                </lightning-combobox>
                             </div>
                         </div>
                     </div>
@@ -102,12 +98,16 @@
                                     <span class="seg-opt">Optional</span>
                                 </div>
                                 <div class="contentType">
-                                    <select class="conInput" name="progress" onchange={handleContentType}
-                                        value={selectedContentType}>
-                                        <template for:each={typeOptions} for:item="option">
-                                            <option key={option.value} value={option.value}>{option.label}</option>
-                                        </template>
-                                    </select>
+                                    <lightning-combobox
+                                        name="progress"
+                                        label="Header Type"
+                                        variant="label-hidden"
+                                        class="conCombobox"
+                                        value={selectedContentType}
+                                        options={typeOptions}
+                                        onchange={handleContentType}
+                                        placeholder="Select Header Type">
+                                    </lightning-combobox>
                                 </div>
                                 <template if:true={addMedia}>
                                     <div class="add-variable">
@@ -266,15 +266,16 @@
                                             <!-- Single Object Selector for Header -->
                                             <div class="object-selector-container">
                                                 <label class="object-selector-label">Select Object</label>
-                                                <select class="object-dropdown dropdown" onchange={handleObjectChange}>
-                                                    <template for:each={availableObjectsWithSelection}
-                                                        for:item="object">
-                                                        <option key={object.value} value={object.value}
-                                                            selected={object.isSelected}>
-                                                            {object.label}
-                                                        </option>
-                                                    </template>
-                                                </select>
+                                                <lightning-combobox
+                                                    name="headerObjectSelector"
+                                                    label="Select Object"
+                                                    variant="label-hidden"
+                                                    class="object-combobox"
+                                                    value={selectedObject}
+                                                    options={availableObjectsWithSelection}
+                                                    onchange={handleObjectChange}
+                                                    placeholder="Select Object">
+                                                </lightning-combobox>
                                             </div>
 
                                             <template for:each={computedHeaderVariables} for:item="varItem"
@@ -430,14 +431,16 @@
                                     <!-- Single Object Selector - Always shown -->
                                     <div class="object-selector-container">
                                         <label class="object-selector-label">Select Object</label>
-                                        <select class="object-dropdown dropdown" onchange={handleObjectChange}>
-                                            <template for:each={availableObjectsWithSelection} for:item="object">
-                                                <option key={object.value} value={object.value}
-                                                    selected={object.isSelected}>
-                                                    {object.label}
-                                                </option>
-                                            </template>
-                                        </select>
+                                        <lightning-combobox
+                                            name="bodyObjectSelector"
+                                            label="Select Object"
+                                            variant="label-hidden"
+                                            class="object-combobox"
+                                            value={selectedObject}
+                                            options={availableObjectsWithSelection}
+                                            onchange={handleObjectChange}
+                                            placeholder="Select Object">
+                                        </lightning-combobox>
                                     </div>
 
                                     <!-- Variables with field picker -->
@@ -713,7 +716,7 @@
                                             <template if:true={isStopMarketing}>
                                                 <div class="consent">
                                                     <lightning-input type="checkbox" name="input2"></lightning-input>
-                                                    <p class="text-medium">I understand that it's {companyName}
+                                                    <p class="text-medium">I understand that it is our
                                                         responsibility to stop sending marketing
                                                         messages to customers who opt out.</p>
                                                 </div>
@@ -782,11 +785,7 @@
                                         <p class="addressMerge">{locationAddressMerge}</p>
                                     </div>
                                 </template>
-                                <template if:true={ifUtilty}>
-                                    <div class="TextBodyWP">
-                                        <p>{orderStatusBody}</p>
-                                    </div>
-                                </template>
+
                                 <template if:true={isDefault}>
 
                                     <div class="TextBodyWP">

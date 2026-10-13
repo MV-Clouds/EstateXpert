@@ -55,12 +55,10 @@ public inherited sharing class WATemplateWrapper {
                 : (String) payloadMap.get('name');
 
             // Find existing WA_Template__c by name or Meta template ID
-            List<WA_Template__c> existingTemplates = [SELECT Id, Name, Template_Name__c, Template_Id__c, Status__c,
-                                                        Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c,
-                                                        Previous_Status__c, Quality_Rating__c, Last_Status_Update_Time__c
-                                                        FROM WA_Template__c WHERE (Template_Name__c = :templateName 
-                                                        AND Template_Name__c != null) OR (Template_Id__c = :metaTempId AND Template_Id__c != null) 
-                                                        WITH USER_MODE LIMIT 1];
+            List<WA_Template__c> existingTemplates = [SELECT Id, Name, Template_Name__c, Template_Id__c, Status__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, 
+                                                        Edit_Count_30_Days__c, Previous_Status__c, Quality_Rating__c, Last_Status_Update_Time__c FROM WA_Template__c 
+                                                        WHERE (Template_Name__c = :templateName AND Template_Name__c != null) OR (Template_Id__c = :metaTempId AND 
+                                                        Template_Id__c != null) WITH USER_MODE LIMIT 1];
 
             WA_Template__c whatsAppTemplate;
             Boolean isExisting = !existingTemplates.isEmpty();
@@ -187,9 +185,7 @@ public inherited sharing class WATemplateWrapper {
                                 headerIndex++;
                             }
                         }
-                    }
-                    // BODY Component
-                    else if (type == 'BODY') {
+                    } else if (type == 'BODY') {
                         Map<String, Object> result = handleBodyComponent(component);
                         if (result.get('bodyText') != null) {
                             whatsAppTemplate.Template_Body__c = String.isNotBlank((String) result.get('bodyText')) ? (String) result.get('bodyText') : '';
@@ -216,13 +212,9 @@ public inherited sharing class WATemplateWrapper {
                                 }
                             }
                         }
-                    }
-                    // FOOTER Component
-                    else if (type == 'FOOTER') {
+                    } else if (type == 'FOOTER') {
                         whatsAppTemplate.Footer_Body__c = (String) component.get('text');
-                    }
-                    // BUTTONS Component
-                    else if (type == 'BUTTONS') {
+                    } else if (type == 'BUTTONS') {
                         List<Object> buttons = (List<Object>) component.get('buttons');
                         if (buttons != null) {
                             for (Object buttonObj : buttons) {
@@ -277,16 +269,12 @@ public inherited sharing class WATemplateWrapper {
             templateId = whatsAppTemplate.Id;
 
             // Delete existing WA_Template_Variable__c records for this template
-            List<WA_Template_Variable__c> existingVars = [
-                SELECT Id FROM WA_Template_Variable__c 
-                WHERE WA_Template__c = :templateId 
-                WITH USER_MODE
-            ];
+            List<WA_Template_Variable__c> existingVars = [SELECT Id FROM WA_Template_Variable__c WHERE WA_Template__c = :templateId WITH USER_MODE];
+
             if (!existingVars.isEmpty() && WA_Template_Variable__c.sObjectType.getDescribe().isDeletable()) {
                 delete existingVars;
             }
 
-            // If variables were not mapped via payload matching, map directly from templateWrapper
             if (variableRecords.isEmpty()) {
                 if (templateWrapper.variables != null) {
                     for (VariableWrapper vw : templateWrapper.variables) {

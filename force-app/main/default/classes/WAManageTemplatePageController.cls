@@ -11,12 +11,6 @@ public with sharing class WAManageTemplatePageController {
     @TestVisible
     private static OAuth_Configuration__mdt mockConfig;
 
-    // List of allowed fields for polymorphic relationships (like Owner which can be User or Queue)
-    public static List<String> polymorphismObjAllowedFields = new List<String>{
-        'Alias', 'Email', 'FirstName', 'IsActive', 'LastName', 
-        'LastReferencedDate', 'LastViewedDate', 'MiddleName', 'Name', 'Phone', 
-        'Profile', 'Suffix', 'Title', 'Type', 'Username', 'UserRole', 'UserRoleId'
-    };
 
     /**
      * @description : Retrieves the WhatsApp OAuth Custom Metadata configuration record for Whatsapp_OAuth
@@ -37,20 +31,6 @@ public with sharing class WAManageTemplatePageController {
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getConfig', e.getMessage());
             return null;
-        }
-    }
-
-    /**
-     * @description : Method to check if WhatsApp business account is configured using OAuth_Configuration__mdt
-     * @return Boolean
-     */
-    @AuraEnabled(cacheable=true)
-    public static Boolean hasBusinessAccountId() {
-        try {
-            OAuth_Configuration__mdt config = getConfig();
-            return config != null && String.isNotBlank(config.Client_Business_Account_ID__c);
-        } catch (Exception e) {
-            return false;
         }
     }
 
@@ -75,219 +55,35 @@ public with sharing class WAManageTemplatePageController {
 
     /*
     *********************************************************
-    @description     : Used to fetch all the fields related to object name
+    @description     : Used to fetch all the fields directly related to object name
     @param           : objectName
-    @return          : List<String> fieldNames
+    @return          : List<Map<String, String>> fieldOptions
     ********************************************************
     */
     @AuraEnabled
-    public static List<String> getObjectFields(String objectName) {
-        List<String> fieldNames = new List<String>();
+    public static List<Map<String, String>> getObjectFields(String objectName) {
+        List<Map<String, String>> fieldList = new List<Map<String, String>>();
         try {
-            Schema.DescribeSObjectResult objDescribe = Schema.getGlobalDescribe().get(objectName).getDescribe();
-            Map<String, Schema.SObjectField> fieldsMap = objDescribe.fields.getMap();
-            for (String fieldName : fieldsMap.keySet()) {
-                fieldNames.add(fieldsMap.get(fieldName).getDescribe().getName()); 
+            if (String.isBlank(objectName)) {
+                return fieldList;
             }
-            fieldNames.sort();
+            Schema.SObjectType sObjectType = Schema.getGlobalDescribe().get(objectName);
+            if (sObjectType != null) {
+                Map<String, Schema.SObjectField> fieldsMap = sObjectType.getDescribe().fields.getMap();
+                for (Schema.SObjectField field : fieldsMap.values()) {
+                    Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
+                    fieldList.add(new Map<String, String>{
+                        'label' => fieldDescribe.getLabel(),
+                        'value' => fieldDescribe.getName()
+                    });
+                }
+            }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getObjectFields', e.getMessage());
         }
-        return fieldNames;
+        return fieldList;
     }
 
-    /*
-    *********************************************************
-    @description     : Method to fetch fields for objects with optional relationship paths.
-    @param           : objectNames - List of object API names to fetch fields for
-                       relationshipPaths - Optional list of relationship paths
-    @return          : Map<String, List<FieldOption>>
-    ********************************************************
-    */
-    @AuraEnabled
-    public static Map<String, List<FieldOption>> getObjectFieldsWithRelationships(List<String> objectNames, List<String> relationshipPaths) {
-        Map<String, List<FieldOption>> resultMap = new Map<String, List<FieldOption>>();
-        
-        try {
-            if (objectNames == null || objectNames.isEmpty()) {
-                return resultMap;
-            }
-            
-            Set<String> uniqueObjects = new Set<String>(objectNames);
-            Boolean hasRelationshipPaths = relationshipPaths != null && !relationshipPaths.isEmpty();
-            
-            if (hasRelationshipPaths && uniqueObjects.size() == 1) {
-                String objectName = new List<String>(uniqueObjects)[0];
-                Set<String> uniquePaths = new Set<String>(relationshipPaths);
-                
-                for (String path : uniquePaths) {
-                    try {
-                        if (String.isBlank(path)) {
-                            continue;
-                        }
-                        List<FieldOption> fieldOptions = getFieldsAtPath(objectName, path);
-                        resultMap.put(path, fieldOptions);
-                    } catch (Exception e) {
-                        ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getObjectFieldsWithRelationships', 'Error fetching fields for path ' + path);  
-                        resultMap.put(path, new List<FieldOption>());
-                    }
-                }
-            } else {
-                for (String objectName : uniqueObjects) {
-                    try {
-                        if (String.isBlank(objectName)) {
-                            continue;
-                        }
-                        List<FieldOption> fields = getFieldsAtPath(objectName, '');
-                        resultMap.put(objectName, fields);
-                    } catch (Exception e) {
-                        ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getObjectFieldsWithRelationships', 'Error fetching fields for object ' + objectName);
-                        resultMap.put(objectName, new List<FieldOption>());
-                    }
-                }
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getObjectFieldsWithRelationships', e.getMessage());
-            throw new AuraHandledException('Error fetching fields: ' + e.getMessage());
-        }
-        
-        return resultMap;
-    }
-
-    private static List<FieldOption> getFieldsAtPath(String objectName, String relationshipPath) {
-        String[] pathParts = relationshipPath.split('\\.');
-        String currentObjectName = objectName;
-        Boolean isPolymorphicPath = false;
-        
-        for (String part : pathParts) {
-            Schema.DescribeSObjectResult objDescribe = Schema.getGlobalDescribe().get(currentObjectName).getDescribe();
-            Map<String, Schema.SObjectField> fieldsMap = objDescribe.fields.getMap();
-            
-            for (String fieldName : fieldsMap.keySet()) {
-                Schema.DescribeFieldResult fieldDescribe = fieldsMap.get(fieldName).getDescribe();
-                String relationshipName = fieldDescribe.getRelationshipName();
-                
-                if (relationshipName == part) {
-                    List<Schema.sObjectType> referenceTo = fieldDescribe.getReferenceTo();
-                    if (!referenceTo.isEmpty()) {
-                        if (referenceTo.size() > 1) {
-                            isPolymorphicPath = true;
-                        }
-                        currentObjectName = referenceTo[0].getDescribe().getName();
-                        break;
-                    }
-                }
-            }
-        }
-        
-        return getFieldsImmediate(currentObjectName, relationshipPath, isPolymorphicPath);
-    }
-
-    private static List<FieldOption> getFieldsImmediate(String objectName, String prefix, Boolean isPolymorphicParent) {
-        List<FieldOption> fieldOptions = new List<FieldOption>();
-        Set<String> allowedFieldsSet = new Set<String>(polymorphismObjAllowedFields);
-        
-        try {
-            Schema.DescribeSObjectResult objDescribe = Schema.getGlobalDescribe().get(objectName).getDescribe();
-            Map<String, Schema.SObjectField> fieldsMap = objDescribe.fields.getMap();
-            
-            for (String fieldName : fieldsMap.keySet()) {
-                Schema.DescribeFieldResult fieldDescribe = fieldsMap.get(fieldName).getDescribe();
-                String fieldApiName = fieldDescribe.getName();
-                String fieldLabel = fieldDescribe.getLabel();
-                Schema.DisplayType fieldType = fieldDescribe.getType();
-                
-                if (isPolymorphicParent) {
-                    if (allowedFieldsSet.contains(fieldApiName)) {
-                        String fullPath = String.isNotBlank(prefix) ? prefix + '.' + fieldApiName : fieldApiName;
-                        FieldOption option = new FieldOption();
-                        option.label = fieldLabel;
-                        option.value = fullPath;
-                        option.apiName = fieldApiName;
-                        option.type = String.valueOf(fieldType);
-                        option.isRelationship = false;
-                        option.level = 0;
-                        option.hasChildren = false;
-                        fieldOptions.add(option);
-                    }
-                    continue;
-                }
-                
-                String fullPath = String.isNotBlank(prefix) ? prefix + '.' + fieldApiName : fieldApiName;
-                FieldOption option = new FieldOption();
-                option.label = fieldLabel;
-                option.value = fullPath;
-                option.apiName = fieldApiName;
-                option.type = String.valueOf(fieldType);
-                option.isRelationship = false;
-                option.level = 0;
-                option.hasChildren = false;
-                fieldOptions.add(option);
-                
-                if (fieldType == Schema.DisplayType.REFERENCE) {
-                    List<Schema.sObjectType> referenceTo = fieldDescribe.getReferenceTo();
-                    if (!referenceTo.isEmpty()) {
-                        String relationshipName = fieldDescribe.getRelationshipName();
-                        if (String.isNotBlank(relationshipName)) {
-                            String relatedObjectName = referenceTo[0].getDescribe().getName();
-                            String relatedObjectLabel = referenceTo[0].getDescribe().getLabel();
-                            Boolean isPolymorphic = referenceTo.size() > 1;
-                            
-                            FieldOption relOption = new FieldOption();
-                            relOption.label = fieldLabel + ' (' + relatedObjectLabel + ')';
-                            relOption.value = String.isNotBlank(prefix) ? prefix + '.' + relationshipName : relationshipName;
-                            relOption.apiName = relationshipName;
-                            relOption.relationshipName = relationshipName;
-                            relOption.type = 'RELATIONSHIP';
-                            relOption.isRelationship = true;
-                            relOption.level = 0;
-                            relOption.hasChildren = true;
-                            relOption.relatedObject = relatedObjectName;
-                            relOption.isPolymorphic = isPolymorphic;
-                            relOption.children = new List<FieldOption>();
-                            
-                            fieldOptions.add(relOption);
-                        }
-                    }
-                }
-            }
-            
-            fieldOptions.sort();
-            
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getFieldsImmediate', e.getMessage());
-        }
-        
-        return fieldOptions;
-    }
-
-    public class FieldOption implements Comparable {
-        @AuraEnabled public String label { get; set; }
-        @AuraEnabled public String value { get; set; }
-        @AuraEnabled public String apiName { get; set; }
-        @AuraEnabled public String type { get; set; }
-        @AuraEnabled public Boolean isRelationship { get; set; }
-        @AuraEnabled public Integer level { get; set; }
-        @AuraEnabled public Boolean hasChildren { get; set; }
-        @AuraEnabled public String relatedObject { get; set; }
-        @AuraEnabled public String relationshipName { get; set; }
-        @AuraEnabled public Boolean isPolymorphic { get; set; }
-        @AuraEnabled public List<FieldOption> children { get; set; }
-        
-        public FieldOption() {
-            this.children = new List<FieldOption>();
-            this.hasChildren = false;
-            this.isRelationship = false;
-            this.isPolymorphic = false;
-        }
-        
-        public Integer compareTo(Object compareTo) {
-            FieldOption compareToField = (FieldOption)compareTo;
-            if (label == compareToField.label) return 0;
-            if (label > compareToField.label) return 1;
-            return -1;
-        }
-    }
 
     /*
     *********************************************************
@@ -909,11 +705,6 @@ public with sharing class WAManageTemplatePageController {
         return 'application/octet-stream';
     }
 
-    @AuraEnabled(cacheable=true)
-    public static String getCompanyName() {
-        return [SELECT Name FROM Organization WITH USER_MODE LIMIT 1].Name;
-    }
-
     public class FileChunkWrapper {
         @AuraEnabled public String uploadSessionId;
         @AuraEnabled public String fileContent;
@@ -998,6 +789,7 @@ public with sharing class WAManageTemplatePageController {
                     Alternate_Text__c = tv.Alternate_Text__c
                 ));
             }
+
             if (!variablesToInsert.isEmpty()) {
                 insert as user variablesToInsert;
             }
@@ -1039,8 +831,6 @@ public with sharing class WAManageTemplatePageController {
     @AuraEnabled
     public static String deleteFile(String contentVersionId) {
         try {
-
-            // Get related ContentDocument
             List<ContentDocument> docs = [SELECT Id FROM ContentDocument WHERE LatestPublishedVersionId = :contentVersionId WITH USER_MODE LIMIT 1];
             if (!docs.isEmpty()) {
                 Id contentDocumentId = docs[0].Id;
@@ -1055,6 +845,7 @@ public with sharing class WAManageTemplatePageController {
             return 'Error: ' + e.getMessage();
         }
     }
+
     @AuraEnabled
     public static String getPublicLink(String contentVersionId) {
         try {

@@ -8,7 +8,6 @@ import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadStyle } from 'lightning/platformResourceLoader';
 import globalStyles from '@salesforce/resourceUrl/globalStyles';
-import emptyState from '@salesforce/resourceUrl/emptyState';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 
 export default class WaTemplateHomePage extends NavigationMixin(LightningElement) {
@@ -35,7 +34,6 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
     @track isCloneMode = false;
     @track showDeleteModal = false;
     @track deletingTemplateRecord = null;
-    emptyStateUrl = emptyState || '/resource/MVEX__emptyState';
 
     // Pagination properties
     @track pageSize = 20;
@@ -175,10 +173,7 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
     async connectedCallback() {
         try {
             window?.globalThis?.addEventListener('click', this.handleDocumentClick);
-            loadStyle(this, globalStyles)
-                .catch(error => {
-                    console.error('Error loading globalStyles:', error);
-                });
+            loadStyle(this, globalStyles);
 
             await this.checkBusinessAccountConfig();
             if (!this.hasBusinessAccountConfigured) {
@@ -457,7 +452,7 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                         this.allRecords = data.map((record, index) => {
                             const rawStatus = record.Status__c || '';
                             let statusVal = rawStatus;
-                            if (rawStatus.toUpperCase() === 'PENDING') {
+                            if (rawStatus?.toUpperCase() === 'PENDING') {
                                 statusVal = 'In-Review';
                             }
 
@@ -775,7 +770,7 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
             this.sortData();
             this.updateSortIcons();
         } catch (error) {
-            console.log('Error in sortClick --> ' + error);
+            console.error('Error in sortClick --> ' + error);
         }
     }
 
@@ -818,7 +813,7 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
             this.currentPage = 1;
             this.updateShownData();
         } catch (error) {
-            console.log('Error in sortData --> ', error.stack);
+            console.error('Error in sortData --> ', error.stack);
         }
     }
 
@@ -843,7 +838,7 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                 }
             }
         } catch (error) {
-            console.log('Error in updateSortIcons --> ' + error);
+            console.error('Error in updateSortIcons --> ' + error);
         }
     }
 }

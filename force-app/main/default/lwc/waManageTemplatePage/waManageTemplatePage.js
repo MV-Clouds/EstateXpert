@@ -8,12 +8,10 @@ import waIcons from '@salesforce/resourceUrl/waIcons';
 import createWhatsappTemplate from '@salesforce/apex/WAManageTemplatePageController.createWhatsappTemplate';
 import editWhatsappTemplate from '@salesforce/apex/WAManageTemplatePageController.editWhatsappTemplate';
 import getObjectFields from '@salesforce/apex/WAManageTemplatePageController.getObjectFields';
-import getObjectFieldsWithRelationships from '@salesforce/apex/WAManageTemplatePageController.getObjectFieldsWithRelationships';
 import getWhatsAppTemplates from '@salesforce/apex/WAManageTemplatePageController.getWhatsAppTemplates';
 import getDynamicObjectData from '@salesforce/apex/WAManageTemplatePageController.getDynamicObjectData';
 import uploadFile from '@salesforce/apex/WAManageTemplatePageController.uploadFile';
 import deleteFile from '@salesforce/apex/WAManageTemplatePageController.deleteFile';
-import getCompanyName from '@salesforce/apex/WAManageTemplatePageController.getCompanyName';
 import getS3ConfigSettings from '@salesforce/apex/ImageAndMediaController.getS3ConfigSettings';
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
 import buildPayload from './waManageTemplateWrapper';
@@ -74,7 +72,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     fileData;
     fileSize = 0;
     fileType = '';
-    companyName = '';
 
     dropdownOptions = [
         { title: 'Custom', value: 'QUICK_REPLY', iconName: 'custom' },
@@ -89,8 +86,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     visitWebsiteCount = 0;
     callPhoneNumber = 0;
     marketingOpt = 0;
-    isEditBlocked = false;
-    editBlockReason = '';
     pendingConfirmAction = null;
     _boundHandleBeforeUnload = null;
     _boundHandleKeyDown = null;
@@ -147,10 +142,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     dropdownClass = 'dropdown-hidden';
     metaTemplateId = '';
     headerError = '';
-    isRendered = false;
-    utilityOrderStatusSelected = false;
-    defaultPreview = true;
-    UtilityCustomSelected = false;
     isDefault = true;
 
     get tempLocationIcon() {
@@ -176,11 +167,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     isAWSEnabled = false;
     confData;
     s3;
-    isAwsSdkInitialized = true;
     awsFileName;
     originalContentVersionId = null;
-    ifUtilty = false;
-    orderStatusBody = '';
     catalogName = '';
     locationNameMerge = '';
     locationAddressMerge = '';
@@ -210,12 +198,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     @track headerVariableFormatError = '';
     @track selectedFilesToUpload = [];
     @track objectFieldMap = {};
-    @track fieldOptionsWithRelationships = [];
-    @track allObjectFieldsMap = {};
 
-    @api activeTab;
-    @api selectedTab;
-    @api selectedOption = 'Custom';
+    activeTab = 'Marketing';
+    selectedOption = 'CustomMarketing';
     @track addVar = false;
     @api isTemplateClone = false;
 
@@ -273,10 +258,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             return;
         }
         this.activeTab = selected;
-        this.selectedTab = (selected === 'Marketing') ? 'section1' : 'section2';
         this.selectedOption = (selected === 'Marketing') ? 'CustomMarketing' : 'Custom';
-        this.handleTabClick(this.selectedTab);
-        this.handleRadioChange(this.selectedOption);
 
         this._cachedQuickReplyOptions = null;
         this._cachedCallToActionOptions = null;
@@ -443,9 +425,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             headerFileNotSelected = headerVideoNotSelected;
         }
 
-        if (this.isEditBlocked) {
-            return true;
-        }
 
         return !(this.templateName && this.tempBody && areButtonFieldsFilled && areCustomButtonFilled &&
             !this.templateExists && !hasCustomButtonError && !hasButtonListError &&
@@ -520,35 +499,27 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     connectedCallback() {
         try {
             loadStyle(this, globalStyles);
+            loadScript(this, AWS_SDK);
             this.isLoading = true;
             this.iseditTemplatevisible = true;
-            if (!this.activeTab) {
-                this.activeTab = 'Marketing';
-                this.selectedTab = 'section1';
-                this.selectedOption = 'CustomMarketing';
-            }
-            if (this.selectedTab != undefined && this.selectedOption != undefined) {
-                this.handleTabClick(this.selectedTab);
-                this.handleRadioChange(this.selectedOption);
-            }
+            this.loadStaticResourceData();
 
-            // Generate synchronous data first
-            this.generateEmojiCategories();
-
-            // Execute independent async operations in parallel for better performance
-            Promise.all([
+            const apexPromises = [
                 this.getS3ConfigDataAsync(),
-                this.fetchCountries(),
-                this.fetchLanguages(),
-                this.fetchUpdatedTemplates(false),
-                this.fetchObjectsWithPhoneField(),
-                getCompanyName()
-            ]).then(results => {
-                // getCompanyName result is the last one
-                this.companyName = results[5] || '';
-            }).catch(error => {
-                console.error('Error in parallel initialization:', error);
-            });
+                this.fetchUpdatedTemplates(false)
+            ];
+
+            if (!this.isEditTemplate && !this.isTemplateClone) {
+                apexPromises.push(this.loadObjectFields(this.selectedObject));
+            }
+
+            Promise.all(apexPromises)
+                .catch(error => {
+                    console.error('Error in parallel initialization:', error);
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                });
         } catch (e) {
             console.error('Error in connectedCallback:', e.message);
         }
@@ -562,29 +533,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         window.addEventListener('beforeunload', this._boundHandleBeforeUnload);
         window.addEventListener('keydown', this._boundHandleKeyDown);
     }
-
-    renderedCallback() {
-        try {
-            if (this.isRendered) return;
-            this.isRendered = true;
-
-            if (this.isAwsSdkInitialized) {
-                Promise.all([loadScript(this, AWS_SDK)])
-                    .then(() => {
-                        // Script loaded successfully
-                    })
-                    .catch((error) => {
-                        console.error("error -> ", error);
-                    });
-
-                this.isAwsSdkInitialized = false;
-            }
-        } catch (error) {
-            console.error('Error in function renderedCallback:::', error.message);
-        }
-    }
-
-
 
     /**
      * Shared helper to compute variable field options with selection state
@@ -627,30 +575,21 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         this.isDocFile = false;
     }
 
-    /**
-     * Shared method to reset radio/option selection flags
-     */
-    resetOptionFlags() {
-        this.utilityOrderStatusSelected = false;
-        this.UtilityCustomSelected = false;
-        this.defaultPreview = false;
-        this.showDefaultBtn = true;
-    }
+
 
     /**
      * Unified handler for object selection changes (both header and body)
      */
     async handleObjectChange(event) {
-        const selectedObject = event.target.value;
+        const selectedObject = event.detail?.value !== undefined ? event.detail.value : event.target.value;
         this.isLoading = true;
         this.selectedObject = selectedObject;
 
         try {
-            const fieldOptions = await this.loadObjectFields(selectedObject);
-            const simpleFields = this.flattenFieldsForDropdown(fieldOptions);
-            const firstField = simpleFields[0] || fieldOptions[0];
+            const fields = await this.loadObjectFields(selectedObject);
+            const firstField = fields[0];
 
-            this.fields = simpleFields;
+            this.fields = fields;
 
             // Update body variables
             if (this.variables.length > 0) {
@@ -658,8 +597,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                     ...varItem,
                     object: selectedObject,
                     field: firstField?.value || '',
-                    fieldLabel: firstField?.label || 'Search fields...',
-                    options: simpleFields
+                    fieldLabel: firstField?.label || 'Select field',
+                    options: fields
                 }));
                 this.formatedTempBody = this.formatText(this.tempBody);
                 this.updateTextarea();
@@ -672,271 +611,20 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                     ...varItem_1,
                     object: selectedObject,
                     field: firstField?.value || '',
-                    fieldLabel: firstField?.label || 'Search fields...',
-                    options: simpleFields
+                    fieldLabel: firstField?.label || 'Select field',
+                    options: fields
                 }));
                 this.updatePreviewContent(this.header, 'header');
             }
         } catch (error) {
-            console.error('Error fetching fields with relationships: ', error);
-        }
-        finally {
-            this.isLoading = false;
-        }
-    }
-
-    /**
-     * Extract all unique object names from a field path
-     * Example: "Account.Owner.Profile.Name" -> ["Account", "User", "Profile"]
-     */
-    extractObjectsFromFieldPath(objectName, fieldPath) {
-        const objects = [objectName];
-
-        if (!fieldPath || !fieldPath.includes('.')) {
-            return objects;
-        }
-
-        // Split by dots and process each relationship
-        const parts = fieldPath.split('.');
-        let currentObject = objectName;
-
-        for (let i = 0; i < parts.length - 1; i++) {
-            const fieldName = parts[i];
-
-            // Try to find the field in our cached object field map
-            const cachedFields = this.allObjectFieldsMap[currentObject];
-            if (cachedFields) {
-                const field = cachedFields.find(f => f.value === fieldName || f.value === fieldName + '.');
-                if (field && field.relatedObject) {
-                    currentObject = field.relatedObject;
-                    objects.push(currentObject);
-                }
-            }
-        }
-
-        return objects;
-    }
-
-    /**
-     * Get all unique objects needed for the current template variables
-     */
-    getAllRequiredObjects() {
-        const objectSet = new Set();
-
-        // Add the main selected object
-        if (this.selectedObject) {
-            objectSet.add(this.selectedObject);
-        }
-
-        // Extract objects from body variables
-        if (this.variables && this.variables.length > 0) {
-            this.variables.forEach(variable => {
-                if (variable.object) {
-                    objectSet.add(variable.object);
-
-                    // Extract objects from nested field paths
-                    if (variable.field && variable.field.includes('.')) {
-                        const objects = this.extractObjectsFromFieldPath(variable.object, variable.field);
-                        objects.forEach(obj => objectSet.add(obj));
-                    }
-                }
-            });
-        }
-
-        // Extract objects from header variables
-        if (this.header_variables && this.header_variables.length > 0) {
-            this.header_variables.forEach(variable => {
-                if (variable.object) {
-                    objectSet.add(variable.object);
-
-                    // Extract objects from nested field paths
-                    if (variable.field && variable.field.includes('.')) {
-                        const objects = this.extractObjectsFromFieldPath(variable.object, variable.field);
-                        objects.forEach(obj => objectSet.add(obj));
-                    }
-                }
-            });
-        }
-
-        return Array.from(objectSet);
-    }
-
-    /**
-     * Pre-fetch all object fields for edit mode
-     */
-    async prefetchAllObjectFields() {
-        const requiredObjects = this.getAllRequiredObjects();
-
-        if (requiredObjects.length === 0) {
-            return;
-        }
-
-        try {
-            // Use the unified method with multiple objects and empty relationship paths
-            const result = await getObjectFieldsWithRelationships({
-                objectNames: requiredObjects,
-                relationshipPaths: []
-            });
-
-            // Store all fields in the map
-            this.allObjectFieldsMap = result || {};
-
-            // Now load relationship children for nested field paths and regenerate labels
-            this.loadRelationshipChildrenForVariables();
-        } catch (error) {
-            console.error('Error pre-fetching object fields:', error);
-            this.showToast('Error loading field data: ' + (error.body?.message || error.message), 'error');
+            console.error('Error fetching fields: ', error);
         } finally {
             this.isLoading = false;
         }
     }
 
-    async loadRelationshipChildrenForVariables() {
-
-        try {
-            // Collect all unique relationship paths from variables
-            const relationshipPaths = new Set();
-
-            const processVariable = (variable) => {
-                if (variable.field && variable.field.includes('.')) {
-                    const parts = variable.field.split('.');
-                    for (let i = 0; i < parts.length - 1; i++) {
-                        const path = parts.slice(0, i + 1).join('.');
-                        relationshipPaths.add(path);
-                    }
-                }
-            };
-
-            // Process body variables
-            if (this.variables && this.variables.length > 0) {
-                this.variables.forEach(processVariable);
-            }
-
-            // Process header variables
-            if (this.header_variables && this.header_variables.length > 0) {
-                this.header_variables.forEach(processVariable);
-            }
-
-            if (relationshipPaths.size === 0) {
-                return;
-            }
-
-            const resultMap = await getObjectFieldsWithRelationships({
-                objectNames: [this.selectedObject],
-                relationshipPaths: Array.from(relationshipPaths)
-            });
-
-            for (const [path, childFields] of Object.entries(resultMap)) {
-                if (childFields && childFields.length > 0) {
-                    this.updateFieldOptionsTree(path, childFields);
-                }
-            }
-
-            this.regenerateVariableLabels();
-
-        } catch (error) {
-            console.error('Error loading relationship children:', error.stack);
-        }
-    }
-
-    /**
-     * Regenerate field labels for all variables after relationship children are loaded
-     */
-    regenerateVariableLabels() {
-        // Regenerate labels for body variables
-        if (this.variables && this.variables.length > 0) {
-            this.variables = this.variables.map(variable => {
-                const fieldLabel = this.generateFieldLabelFromPath(variable.field);
-                return {
-                    ...variable,
-                    fieldLabel: fieldLabel
-                };
-            });
-        }
-
-        // Regenerate labels for header variables
-        if (this.header_variables && this.header_variables.length > 0) {
-            this.header_variables = this.header_variables.map(variable => {
-                const fieldLabel = this.generateFieldLabelFromPath(variable.field);
-                return {
-                    ...variable,
-                    fieldLabel: fieldLabel
-                };
-            });
-        }
-    }
-
-    /**
-     * Update the field options tree with loaded children for a relationship path
-     */
-    updateFieldOptionsTree(relationshipPath, childFields) {
-        const updateChildren = (fields, path) => {
-            return fields.map(field => {
-                if (field.value === path) {
-                    return { ...field, children: childFields };
-                }
-                if (field.children && field.children.length > 0) {
-                    return { ...field, children: updateChildren(field.children, path) };
-                }
-                return field;
-            });
-        };
-
-        this.fieldOptionsWithRelationships = updateChildren(
-            this.fieldOptionsWithRelationships,
-            relationshipPath
-        );
-    }
-
     getButtonIcon(type) {
         return BUTTON_ICON_MAP[type] || 'utility:question';
-    }
-
-    handleTabClick() {
-        this.isDefault = true;
-        this.handleDefaultValues();
-    }
-
-    handleDefaultValues() {
-        this.resetOptionFlags();
-
-        switch (this.selectedOption) {
-            case 'ORDER_STATUS':
-                this.utilityOrderStatusSelected = true;
-                this.showDefaultBtn = false;
-                break;
-            case 'Custom':
-                this.UtilityCustomSelected = true;
-                break;
-            case 'CustomMarketing':
-                this.defaultPreview = true;
-                break;
-            default:
-                this.defaultPreview = true;
-                break;
-        }
-
-    }
-
-    handleRadioChange(optionname) {
-        this.selectedOption = optionname;
-        this.ifUtilty = false;
-        this.resetOptionFlags();
-
-        switch (this.selectedOption) {
-            case 'ORDER_STATUS':
-                this.ifUtilty = true;
-                this.utilityOrderStatusSelected = true;
-                this.showDefaultBtn = false;
-                break;
-            case 'Custom':
-                this.UtilityCustomSelected = true;
-                break;
-            default:
-                this.defaultPreview = true;
-                break;
-        }
-
     }
 
     getS3ConfigDataAsync() {
@@ -980,130 +668,44 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    // Helper method to flatten fields for dropdown display
-    flattenFieldsForDropdown(fields, parentLabel = '') {
-        let result = [];
-        if (!fields || !Array.isArray(fields)) return result;
-
-        fields.forEach(field => {
-            const displayLabel = parentLabel ? `${parentLabel} > ${field.label}` : field.label;
-
-            if (!field.isRelationship && field.value && field.label) {
-                result.push({ label: displayLabel, value: field.value });
-            }
-
-            if (field.children && field.children.length > 0) {
-                result = result.concat(this.flattenFieldsForDropdown(field.children, displayLabel));
-            }
-        });
-
-        if (!parentLabel) {
-            const uniqueMap = new Map();
-            result.forEach(item => {
-                if (!uniqueMap.has(item.value)) {
-                    uniqueMap.set(item.value, item);
-                }
-            });
-            result = Array.from(uniqueMap.values());
-            result.sort((a, b) => (a.label || '').localeCompare(b.label || ''));
-        }
-        return result;
-    }
-
-    // Generate a display label from a field path (e.g., "Account.Owner.Name" -> "Account (Account) > Owner (User) > Name")
-    generateFieldLabelFromPath(fieldPath) {
-        if (!fieldPath) return 'Search fields...';
-
-        // If it's a simple field (no dots), just return it
-        if (!fieldPath.includes('.')) {
-            // Try to find the label from fieldOptionsWithRelationships - use exact match only
-            const field = this.fieldOptionsWithRelationships?.find(f => f.value === fieldPath || f.apiName === fieldPath);
-            return field?.label || fieldPath;
-        }
-
-        // For relationship paths, build the label from the path parts
-        const pathParts = fieldPath.split('.');
-        let labelParts = [];
-        let currentFields = this.fieldOptionsWithRelationships || [];
-
-        for (let i = 0; i < pathParts.length; i++) {
-            const part = pathParts[i];
-            const isLastPart = i === pathParts.length - 1;
-
-            if (isLastPart) {
-                // Last part is the field name - find it in current fields using EXACT match only
-                const field = currentFields.find(f => {
-                    // Use strict exact matching to avoid selecting wrong fields
-                    // e.g., "Name" should not match "CompanyName"
-                    return f.apiName === part || f.value === part;
-                });
-                if (field && !field.isRelationship) {
-                    labelParts.push(field.label);
-                } else {
-                    labelParts.push(part);
-                }
-            } else {
-                // Intermediate parts are relationships - use exact match for apiName/relationshipName/value
-                const relationshipField = currentFields.find(f => {
-                    if (!f.isRelationship) return false;
-                    // Use strict matching for relationships
-                    return f.apiName === part ||
-                        f.relationshipName === part ||
-                        f.value === part;
-                });
-                if (relationshipField) {
-                    labelParts.push(relationshipField.label);
-                    currentFields = relationshipField.children || [];
-                } else {
-                    // Fallback - just use the part name
-                    labelParts.push(part);
-                    currentFields = [];
-                }
-            }
-        }
-
-        return labelParts.join(' > ') || fieldPath;
+    // Generate a display label from a field path or API name
+    generateFieldLabelFromPath(fieldPath, objectName = null) {
+        if (!fieldPath) return 'Select field';
+        const fieldList = (objectName && this.objectFieldMap[objectName]) ? this.objectFieldMap[objectName] : this.fields;
+        const field = fieldList?.find(f => f.value === fieldPath);
+        return field?.label || fieldPath;
     }
 
     // Load and process fields for a given object
-    async loadObjectFields(objectName, relationshipPath = '') {
-        // Check if we already have cached fields for this object at root level
-        if (!relationshipPath && this.allObjectFieldsMap[objectName]) {
-            const cachedFields = this.allObjectFieldsMap[objectName];
-            this.fieldOptionsWithRelationships = cachedFields;
-            const simpleFields = this.flattenFieldsForDropdown(cachedFields);
-            this.objectFieldMap[objectName] = simpleFields;
-            this.fields = simpleFields;
-
-            // Update any existing variables with empty fields
-            this.updateVariablesWithDefaultFields(simpleFields, objectName);
-
+    async loadObjectFields(objectName) {
+        if (!objectName) return [];
+        // Check if we already have cached fields for this object
+        if (this.objectFieldMap[objectName]) {
+            const cachedFields = this.objectFieldMap[objectName];
+            this.fields = cachedFields;
+            this.updateVariablesWithDefaultFields(cachedFields, objectName);
             return cachedFields;
         }
 
-        // Call the unified method with list parameter
-        const resultMap = await getObjectFieldsWithRelationships({
-            objectNames: [objectName],
-            relationshipPaths: relationshipPath ? [relationshipPath] : []
-        });
-
-        // Extract the field options for the requested object (key is path if provided, else objectName)
-        const fieldOptions = relationshipPath ? (resultMap[relationshipPath] || []) : (resultMap[objectName] || []);
-
-        if (!relationshipPath) {
-            // Root level - store in main cache
-            this.fieldOptionsWithRelationships = fieldOptions;
-            const simpleFields = this.flattenFieldsForDropdown(fieldOptions);
-            this.objectFieldMap[objectName] = simpleFields;
-            this.fields = simpleFields;
-            // Also cache in allObjectFieldsMap
-            this.allObjectFieldsMap[objectName] = fieldOptions;
+        try {
+            const result = await getObjectFields({ objectName: objectName });
+            const fields = (result || []).map(f =>
+                typeof f === 'string'
+                    ? { label: f, value: f }
+                    : { label: f.label || f.value, value: f.value }
+            );
+            fields.sort((a, b) => (a.label || '').localeCompare(b.label || ''));
+            this.objectFieldMap[objectName] = fields;
+            this.fields = fields;
 
             // Update any existing variables with empty fields
-            this.updateVariablesWithDefaultFields(simpleFields, objectName);
-        }
+            this.updateVariablesWithDefaultFields(fields, objectName);
 
-        return fieldOptions;
+            return fields;
+        } catch (error) {
+            console.error('Error fetching fields for object ' + objectName, error);
+            return [];
+        }
     }
 
     /**
@@ -1162,47 +764,14 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    fetchObjectsWithPhoneField() {
-        this.availableObjects = [
-            { label: 'Contact', value: 'Contact' },
-            { label: 'Listing', value: 'Listing__c' }
-        ];
-        // Default selectedObject to Contact
-        if (!this.selectedObject) {
-            this.selectedObject = 'Contact';
-        }
-        // Only fetch fields for new templates (edit/clone fetches in fetchTemplateData)
-        if (!this.isEditTemplate && !this.isTemplateClone) {
-            this.isLoading = false;
-            return this.loadObjectFields(this.selectedObject);
-        }
-        return Promise.resolve();
-    }
-
     fetchTemplateData() {
         try {
             getDynamicObjectData({ templateId: this.edittemplateid })
                 .then((data) => {
-                    const { template, templateVariables, canEdit, editBlockReason } = data;
+                    const { template, templateVariables } = data;
 
-                    if (this.isEditTemplate && !this.isTemplateClone && canEdit === false) {
-                        this.isEditBlocked = true;
-                        this.editBlockReason = editBlockReason;
-                    } else {
-                        this.isEditBlocked = false;
-                        this.editBlockReason = '';
-                    }
-
-                    this.selectedOption = template.Template_Type__c || template.MVEX__Template_Type__c;
-                    this.activeTab = template.Template_Category__c || template.MVEX__Template_Category__c;
-                    if (this.activeTab === 'Marketing') {
-                        this.selectedTab = 'section1';
-                    } else if (this.activeTab === 'Utility') {
-                        this.selectedTab = 'section2';
-                    }
-
-                    this.handleTabClick(this.selectedTab);
-                    this.handleRadioChange(this.selectedOption);
+                    this.selectedOption = template.Template_Type__c || template.MVEX__Template_Type__c || 'Custom';
+                    this.activeTab = template.Template_Category__c || template.MVEX__Template_Category__c || 'Marketing';
 
                     setTimeout(() => {
 
@@ -1322,7 +891,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
                         Promise.all(fieldFetchPromises)
                             .then(() => {
-                                // Load fields with relationships for the selected object (for the field picker)
+                                // Load fields for the selected object (for the field picker)
                                 if (this.selectedObject) {
                                     return this.loadObjectFields(this.selectedObject);
                                 }
@@ -1340,8 +909,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                                         const objectFields = this.objectFieldMap[variable.object] || [];
                                         const fieldValue = tempfieldsBody[index] || variable.field;
 
-                                        // Generate fieldLabel from field path (e.g., "Account.Owner.Name" -> "Account (Account) > Owner (User) > Name")
-                                        const fieldLabel = this.generateFieldLabelFromPath(fieldValue);
+                                        // Generate fieldLabel from field path
+                                        const fieldLabel = this.generateFieldLabelFromPath(fieldValue, variable.object);
 
                                         return {
                                             ...variable,
@@ -1363,7 +932,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                                         const fieldValue = tempfieldsHead[index] || variable.field;
 
                                         // Generate fieldLabel from field path for header variables too
-                                        const fieldLabel = this.generateFieldLabelFromPath(fieldValue);
+                                        const fieldLabel = this.generateFieldLabelFromPath(fieldValue, variable.object);
 
                                         return {
                                             ...variable,
@@ -1382,9 +951,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                                 // Update preview
                                 this.updatePreviewContent(this.previewHeader, 'header');
                                 this.updatePreviewContent(this.previewBody, 'body');
-
-                                // Pre-fetch all required object fields for edit mode (after variables are set)
-                                return this.prefetchAllObjectFields();
+                                this.isLoading = false;
                             })
                             .catch(error => {
                                 console.error('Error while loading field data for editing:', error);
@@ -1521,19 +1088,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     fetchFields(objectName) {
-        try {
-            getObjectFields({ objectName: objectName })
-                .then((result) => {
-                    const fields = result.map((field) => ({ label: field, value: field }));
-                    this.fields = fields;
-                    this.objectFieldMap[objectName] = fields;
-                })
-                .catch((error) => {
-                    console.error('Error fetching fields: ', error);
-                });
-        } catch (error) {
-            console.error('Error fetching objects fields: ', error);
-        }
+        return this.loadObjectFields(objectName);
     }
 
     async handleFileChange(event) {
@@ -1889,7 +1444,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         try {
             this.NoFileSelected = true;
             this.isfilename = false;
-            this.selectedContentType = event.target.value;
+            this.selectedContentType = event.detail?.value !== undefined ? event.detail.value : event.target.value;
             this.IsHeaderText = this.selectedContentType === 'Text';
 
             // Reset all media flags first
@@ -2045,7 +1600,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
     handleInputChange(event) {
         try {
-            const { name, value, checked, dataset } = event.target;
+            const name = event.target.name;
+            const checked = event.target.checked;
+            const dataset = event.target.dataset || {};
+            const value = event.detail?.value !== undefined ? event.detail.value : event.target.value;
             const index = dataset.index;
 
             // Handle button-related fields that need special processing
@@ -3044,56 +2602,65 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    generateEmojiCategories() {
-        const urlWithExt = `${waJSONFiles}/whatsapp-emojis.json`;
-        const urlWithoutExt = `${waJSONFiles}/whatsapp-emojis`;
-        fetch(urlWithExt)
-            .then(res => res.ok ? res : fetch(urlWithoutExt))
-            .then(response => response.json())
-            .then((data) => {
-                let groupedEmojis = Object.values(
-                    data.reduce((acc, item) => {
-                        let category = item.category;
-                        if (!acc[category]) {
-                            acc[category] = { category, emojis: [] };
-                        }
-                        acc[category].emojis.push(item);
-                        return acc;
-                    }, {})
-                );
+    async loadStaticResourceData() {
+        const fetchJson = async (fileName) => {
+            try {
+                const res = await fetch(`${waJSONFiles}/${fileName}`);
+                const okRes = res.ok ? res : await fetch(`${waJSONFiles}/${fileName.replace(/\.json$/, '')}`);
+                return await okRes.json();
+            } catch (error) {
+                console.error(`Error loading ${fileName}:`, error);
+                return null;
+            }
+        };
 
-                this.emojiCategories = groupedEmojis;
-            })
-            .catch((e) => console.error('There was an error fetching the emoji.', e));
-    }
+        const [emojiData, countryData, languageData] = await Promise.all([
+            fetchJson('whatsapp-emojis.json'),
+            fetchJson('CountryPhoneLengths.json'),
+            fetchJson('LanguageJson.json')
+        ]);
 
-    fetchCountries() {
-        try {
-            const urlWithExt = `${waJSONFiles}/CountryPhoneLengths.json`;
-            const urlWithoutExt = `${waJSONFiles}/CountryPhoneLengths`;
-            fetch(urlWithExt)
-                .then(res => res.ok ? res : fetch(urlWithoutExt))
-                .then(response => response.json())
-                .then(data => {
-                    // Build options for combobox
-                    this.countryType = data.map(item => ({
-                        label: item?.label,
-                        value: item?.label
-                    }));
-
-                    // Map code → length for validation
-                    data.forEach(item => {
-                        this.countryLabelToCodeMap[item?.label] = item?.code;
-                        this.countryCodeToLabelMap[item?.code] = item?.label;
-                        this.countryPhoneMap[item?.code] = item.lengths;
-                    });
-
-                    this.updatePhonePattern(this.selectedCountryType);
-                })
-                .catch(error => console.error('Error loading country codes', error));
+        // Process Emojis
+        if (emojiData) {
+            this.emojiCategories = Object.values(
+                emojiData.reduce((acc, item) => {
+                    const category = item.category;
+                    if (!acc[category]) {
+                        acc[category] = { category, emojis: [] };
+                    }
+                    acc[category].emojis.push(item);
+                    return acc;
+                }, {})
+            );
         }
-        catch (e) {
-            console.error('Something wrong while fetching country data:', e);
+
+        // Process Countries & Phone Patterns
+        if (countryData) {
+            this.countryType = countryData.map(item => ({
+                label: item?.label,
+                value: item?.label
+            }));
+            countryData.forEach(item => {
+                this.countryLabelToCodeMap[item?.label] = item?.code;
+                this.countryCodeToLabelMap[item?.code] = item?.label;
+                this.countryPhoneMap[item?.code] = item.lengths;
+            });
+            this.updatePhonePattern(this.selectedCountryType);
+        }
+
+        // Process Languages
+        if (languageData) {
+            this.languageOptions = languageData.map(lang => ({
+                label: `${lang.language}`,
+                value: lang.code,
+                isSelected: lang.code === this.selectedLanguage
+            }));
+            if (!this.languageOptions.some(option => option.isSelected)) {
+                this.selectedLanguage = this.languageOptions[0]?.value || '';
+                if (this.languageOptions[0]) {
+                    this.languageOptions[0].isSelected = true;
+                }
+            }
         }
     }
 
@@ -3109,27 +2676,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             this.phonePattern = '^\\d+$';
             this.phoneErrorMessage = 'Enter a valid phone number';
         }
-    }
-
-
-    fetchLanguages() {
-        const urlWithExt = `${waJSONFiles}/LanguageJson.json`;
-        const urlWithoutExt = `${waJSONFiles}/LanguageJson`;
-        fetch(urlWithExt)
-            .then(res => res.ok ? res : fetch(urlWithoutExt))
-            .then((response) => response.json())
-            .then((data) => {
-                this.languageOptions = data.map(lang => {
-                    return { label: `${lang.language}`, value: lang.code, isSelected: lang.code === this.selectedLanguage };
-                });
-                if (!this.languageOptions.some(option => option.isSelected)) {
-                    this.selectedLanguage = this.languageOptions[0]?.value || '';
-                    if (this.languageOptions[0]) {
-                        this.languageOptions[0].isSelected = true;
-                    }
-                }
-            })
-            .catch((e) => console.error('Error fetching language data:', e));
     }
 
     handleEmoji(event) {
@@ -3486,10 +3032,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             return;
         }
 
-        if (this.isEditBlocked) {
-            this.showToast(this.editBlockReason || 'This template cannot be edited due to Meta policy restrictions.', 'error');
-            return;
-        }
 
         this.showReviewTemplate = true;
     }
@@ -3500,11 +3042,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
     handleSubmit() {
         try {
-            if (this.isEditBlocked) {
-                this.showToast(this.editBlockReason || 'This template cannot be edited due to Meta policy restrictions.', 'error');
-                this.isLoading = false;
-                return;
-            }
             if ((this.activeTab == 'Marketing' || this.activeTab == 'Utiltiy') && !this.isCheckboxChecked && this.visitWebsiteCount > 0) {
                 this.showToast('Please select check-box to report website clicks.', 'error');
                 return;

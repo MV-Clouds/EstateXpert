@@ -9,10 +9,13 @@
 public with sharing class IntegrationPopupController {
 
     @TestVisible public static String mockValidationResult = null;
-    public static String GMAILENDPOINT = System.label.Google_Endpoint;
     public static String AWSS3ENDPOINT = System.label.AWS_S3_ENDPONT;
-    public static String gmailSendEndpoint = System.label.Gmail_Sending_Endpoint;
-    public static final String instagramEndpoint = System.label.InstagramEndPoint;
+
+    private static AuraHandledException auraError(String message) {
+        AuraHandledException error = new AuraHandledException(message);
+        error.setMessage(message);
+        return error;
+    }
 
     /**
     * Method Name : createPortalListingRecord
@@ -45,13 +48,13 @@ public with sharing class IntegrationPopupController {
                 upsert as user awsSettings;
     
             } else if (integrationType == 'Gmail') {
-                // Only SubscriberControlled fields (Refresh_Token__c, Access_Token__c, Email__c, Connected_Date__c)
+                // Only SubscriberControlled fields (Refresh_Token__c, Access_Token__c, Username__c, Connected_At__c)
                 String refreshTokenValue = stringFieldMap.get('Refresh_Token__c');
                 String accessTokenValue  = stringFieldMap.get('Access_Token__c');
-                String emailValue        = stringFieldMap.get('Email__c');
+                String emailValue        = stringFieldMap.get('Username__c');
 
                 List<OAuth_Configuration__mdt> gmailOAuthList = [
-                    SELECT Id, DeveloperName, Refresh_Token__c, Access_Token__c, Email__c, Connected_Date__c
+                    SELECT Id, DeveloperName, Refresh_Token__c, Access_Token__c, Username__c, Connected_At__c
                     FROM OAuth_Configuration__mdt
                     WHERE DeveloperName = 'Gmail_OAuth'
                     WITH USER_MODE
@@ -77,34 +80,37 @@ public with sharing class IntegrationPopupController {
                     }
                     if (emailValue != null) {
                         Metadata.CustomMetadataValue cmtEmail = new Metadata.CustomMetadataValue();
-                        cmtEmail.field = 'Email__c';
+                        cmtEmail.field = 'Username__c';
                         cmtEmail.value = emailValue;
                         cmtRecord.values.add(cmtEmail);
                     }
 
-                    // Stamp Connected_Date__c only when a refresh token is being saved (i.e. first connect)
+                    // Stamp Connected_At__c only when a refresh token is being saved (i.e. first connect)
                     // and only if it hasn't been set yet — preserve the original connection date on re-saves.
-                    if (String.isNotBlank(refreshTokenValue) && gmailOAuthList[0].Connected_Date__c == null) {
+                    if (String.isNotBlank(refreshTokenValue) && gmailOAuthList[0].Connected_At__c == null) {
                         Metadata.CustomMetadataValue cmtConnectedDate = new Metadata.CustomMetadataValue();
-                        cmtConnectedDate.field = 'Connected_Date__c';
+                        cmtConnectedDate.field = 'Connected_At__c';
                         cmtConnectedDate.value = Datetime.now();
                         cmtRecord.values.add(cmtConnectedDate);
                     }
 
                     Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
                     mdContainer.addMetadata(cmtRecord);
+                    if (Test.isRunningTest()) {
+                        return;
+                    }
                     Metadata.Operations.enqueueDeployment(mdContainer, null);
                 }
 
             } else if (integrationType == 'Instagram') {
-                // Only SubscriberControlled fields (Access_Token__c, User_Id__c, Username__c, Connected_Date__c)
+                // Only SubscriberControlled fields (Access_Token__c, User_Id__c, Username__c, Connected_At__c)
                 // can be written at runtime via Metadata.deployContainer.
                 String accessTokenValue = stringFieldMap.containsKey('Access_Token__c') ? stringFieldMap.get('Access_Token__c') : stringFieldMap.get('MVEX__Long_Access_Token__c');
                 String userIdValue      = stringFieldMap.containsKey('User_Id__c') ? stringFieldMap.get('User_Id__c') : stringFieldMap.get('MVEX__User_Id__c');
                 String usernameValue    = stringFieldMap.get('Username__c');
 
                 List<OAuth_Configuration__mdt> instaOAuthList = [
-                    SELECT Id, DeveloperName, Access_Token__c, User_Id__c, Username__c, Connected_Date__c
+                    SELECT Id, DeveloperName, Access_Token__c, User_Id__c, Username__c, Connected_At__c
                     FROM OAuth_Configuration__mdt
                     WHERE DeveloperName = 'Instagram_OAuth'
                     WITH USER_MODE
@@ -135,16 +141,19 @@ public with sharing class IntegrationPopupController {
                         cmtRecord.values.add(cmtUsername);
                     }
 
-                    // Stamp Connected_Date__c only on first connect (when token is set and date not yet stored)
-                    if (String.isNotBlank(accessTokenValue) && instaOAuthList[0].Connected_Date__c == null) {
+                    // Stamp Connected_At__c only on first connect (when token is set and date not yet stored)
+                    if (String.isNotBlank(accessTokenValue) && instaOAuthList[0].Connected_At__c == null) {
                         Metadata.CustomMetadataValue cmtConnectedDate = new Metadata.CustomMetadataValue();
-                        cmtConnectedDate.field = 'Connected_Date__c';
+                        cmtConnectedDate.field = 'Connected_At__c';
                         cmtConnectedDate.value = Datetime.now();
                         cmtRecord.values.add(cmtConnectedDate);
                     }
 
                     Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
                     mdContainer.addMetadata(cmtRecord);
+                    if (Test.isRunningTest()) {
+                        return;
+                    }
                     Metadata.Operations.enqueueDeployment(mdContainer, null);
                 }
             }
@@ -328,25 +337,19 @@ public with sharing class IntegrationPopupController {
 
             // Gmail — read from OAuth_Configuration__mdt (Custom Metadata Type)
             // NOTE: CreatedDate/LastModifiedDate are NOT queryable on CMT. SystemModstamp IS.
-            List<OAuth_Configuration__mdt> gmailOAuthList = [
-                SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Refresh_Token__c, Email__c,
-                       Connected_Date__c, SystemModstamp
-                FROM OAuth_Configuration__mdt
-                WHERE DeveloperName = 'Gmail_OAuth'
-                WITH USER_MODE
-                LIMIT 1
-            ];
+            List<OAuth_Configuration__mdt> gmailOAuthList = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Refresh_Token__c, Username__c, Connected_At__c, SystemModstamp FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Gmail_OAuth' WITH USER_MODE LIMIT 1];
 
             // Gmail Integration
             FieldWrapperData gmailWrapper = new FieldWrapperData();
             gmailWrapper.integrationName = 'Gmail';
             if (!gmailOAuthList.isEmpty()) {
                 OAuth_Configuration__mdt gmailCredential = gmailOAuthList[0];
-                gmailWrapper.integrationData = gmailCredential;
-                gmailWrapper.isValid = String.isNotBlank(gmailCredential.Client_Id__c)
-                                    && String.isNotBlank(gmailCredential.Client_Secret__c)
-                                    && String.isNotBlank(gmailCredential.Redirect_URI__c)
-                                    && String.isNotBlank(gmailCredential.Refresh_Token__c);
+                gmailWrapper.integrationData = new Map<String, Object>{
+                    'Username__c' => gmailCredential.Username__c,
+                    'Connected_At__c' => gmailCredential.Connected_At__c,
+                    'SystemModstamp' => gmailCredential.SystemModstamp
+                };
+                gmailWrapper.isValid = String.isNotBlank(gmailCredential.Client_Id__c) && String.isNotBlank(gmailCredential.Client_Secret__c) && String.isNotBlank(gmailCredential.Redirect_URI__c) && String.isNotBlank(gmailCredential.Refresh_Token__c);
             } else {
                 gmailWrapper.integrationData = null;
                 gmailWrapper.isValid = false;
@@ -360,23 +363,19 @@ public with sharing class IntegrationPopupController {
             wrapperList.add(awsWrapper);
 
             // Instagram — read from OAuth_Configuration__mdt
-            List<OAuth_Configuration__mdt> instaOAuthList = [
-                SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Access_Token__c,
-                       User_Id__c, Username__c, Connected_Date__c, SystemModstamp
-                FROM OAuth_Configuration__mdt
-                WHERE DeveloperName = 'Instagram_OAuth'
-                WITH USER_MODE
-                LIMIT 1
-            ];
+            List<OAuth_Configuration__mdt> instaOAuthList = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Access_Token__c, User_Id__c, Username__c, Connected_At__c, SystemModstamp FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Instagram_OAuth' WITH USER_MODE LIMIT 1];
 
             FieldWrapperData instagramWrapper = new FieldWrapperData();
             instagramWrapper.integrationName = 'Instagram';
             if (!instaOAuthList.isEmpty()) {
                 OAuth_Configuration__mdt instaCredential = instaOAuthList[0];
-                instagramWrapper.integrationData = instaCredential;
-                instagramWrapper.isValid = String.isNotBlank(instaCredential.Client_Id__c)
-                                        && String.isNotBlank(instaCredential.Access_Token__c)
-                                        && String.isNotBlank(instaCredential.User_Id__c);
+                instagramWrapper.integrationData = new Map<String, Object>{
+                    'User_Id__c' => instaCredential.User_Id__c,
+                    'Username__c' => instaCredential.Username__c,
+                    'Connected_At__c' => instaCredential.Connected_At__c,
+                    'SystemModstamp' => instaCredential.SystemModstamp
+                };
+                instagramWrapper.isValid = String.isNotBlank(instaCredential.Client_Id__c) && String.isNotBlank(instaCredential.Access_Token__c) && String.isNotBlank(instaCredential.User_Id__c);
             } else {
                 instagramWrapper.integrationData = null;
                 instagramWrapper.isValid = false;
@@ -393,23 +392,26 @@ public with sharing class IntegrationPopupController {
 
     /**
     * Method Name : revokeGmailAccess
-    * @param refreshToken : String to stored the refresh token.
-    * @param recordId : String to stored the record id.
     * @return String : Status of revoke access.
-    * @description : Method to revoke gmail access.
+    * @description : Revokes Gmail access using the server-side refresh token.
     */
     @AuraEnabled
-    public static String revokeGmailAccess(String refreshToken, String recordId) {
+    public static String revokeGmailAccess() {
         String status;
         try {
-            String gmailRevokeEndpoint =  GMAILENDPOINT + 'revoke';
+            List<OAuth_Configuration__mdt> gmailOAuth = [SELECT Refresh_Token__c, Token_Endpoint__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Gmail_OAuth' WITH USER_MODE LIMIT 1];
+            if (gmailOAuth.isEmpty() || String.isBlank(gmailOAuth[0].Refresh_Token__c)) {
+                return 'Gmail refresh token is not configured.';
+            }
+
+            String gmailRevokeEndpoint =  gmailOAuth[0].Token_Endpoint__c.replace('token', 'revoke');
             // Initialize the HTTP request
             HttpRequest req = new HttpRequest();
             req.setEndpoint(gmailRevokeEndpoint);
             req.setMethod('POST');
             
             // Set the parameters for the request
-            String requestBody = 'token=' + refreshToken;
+            String requestBody = 'token=' + EncodingUtil.urlEncode(gmailOAuth[0].Refresh_Token__c, 'UTF-8');
             req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
             req.setBody(requestBody);
             
@@ -422,7 +424,7 @@ public with sharing class IntegrationPopupController {
                 ErrorHandler.insertErrordata(null, 'IntegrationPopupController', 'revokeGmailAccess', res.getBody() + 'and error at line 430');
             }
 
-            status = deleteGmailConfig(recordId);
+            status = deleteGmailConfig();
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'revokeGmailAccess', 'Error while revoking gmail access.');
             status = e.getMessage();
@@ -433,12 +435,11 @@ public with sharing class IntegrationPopupController {
 
     /**
     * Method Name : deleteGmailConfig
-    * @param recordId : String to stored the record id.
     * @return String : Status of revoke access.
-    * @description : Clears the SubscriberControlled token fields (Refresh_Token__c, Access_Token__c, Email__c)
+    * @description : Clears the SubscriberControlled token fields (Refresh_Token__c, Access_Token__c, Username__c)
     *               on the Gmail_OAuth Custom Metadata record.
     */
-    public static String deleteGmailConfig(String recordId){
+    public static String deleteGmailConfig(){
         try {
             Metadata.CustomMetadata cmtRecord = new Metadata.CustomMetadata();
             cmtRecord.fullName = 'OAuth_Configuration__mdt.Gmail_OAuth';
@@ -455,17 +456,20 @@ public with sharing class IntegrationPopupController {
             cmtRecord.values.add(cmtAccessToken);
 
             Metadata.CustomMetadataValue cmtEmail = new Metadata.CustomMetadataValue();
-            cmtEmail.field = 'Email__c';
+            cmtEmail.field = 'Username__c';
             cmtEmail.value = null;
             cmtRecord.values.add(cmtEmail);
 
             Metadata.CustomMetadataValue cmtConnectedDate = new Metadata.CustomMetadataValue();
-            cmtConnectedDate.field = 'Connected_Date__c';
+            cmtConnectedDate.field = 'Connected_At__c';
             cmtConnectedDate.value = null;
             cmtRecord.values.add(cmtConnectedDate);
 
             Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
             mdContainer.addMetadata(cmtRecord);
+            if (Test.isRunningTest()) {
+                return 'success';
+            }
             Metadata.Operations.enqueueDeployment(mdContainer, null);
 
             return 'success';
@@ -493,7 +497,7 @@ public with sharing class IntegrationPopupController {
     }
 
     @AuraEnabled
-    public static String revokeInstagramAccess(String recordId) {
+    public static String revokeInstagramAccess() {
         try {
             Metadata.CustomMetadata cmtRecord = new Metadata.CustomMetadata();
             cmtRecord.fullName = 'OAuth_Configuration__mdt.Instagram_OAuth';
@@ -515,12 +519,15 @@ public with sharing class IntegrationPopupController {
             cmtRecord.values.add(cmtUsername);
 
             Metadata.CustomMetadataValue cmtConnectedDate = new Metadata.CustomMetadataValue();
-            cmtConnectedDate.field = 'Connected_Date__c';
+            cmtConnectedDate.field = 'Connected_At__c';
             cmtConnectedDate.value = null;
             cmtRecord.values.add(cmtConnectedDate);
 
             Metadata.DeployContainer mdContainer = new Metadata.DeployContainer();
             mdContainer.addMetadata(cmtRecord);
+            if (Test.isRunningTest()) {
+                return 'success';
+            }
             Metadata.Operations.enqueueDeployment(mdContainer, null);
 
             return 'success';
@@ -550,27 +557,14 @@ public with sharing class IntegrationPopupController {
         FieldWrapper result = new FieldWrapper();
         try {
             if (integrationType == 'Gmail') {
-                List<OAuth_Configuration__mdt> gmailOAuth = [
-                    SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c, Refresh_Token__c, Email__c
-                    FROM OAuth_Configuration__mdt
-                    WHERE DeveloperName = 'Gmail_OAuth'
-                    WITH USER_MODE
-                    LIMIT 1
-                ];
+                List<OAuth_Configuration__mdt> gmailOAuth = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c, Refresh_Token__c, Username__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Gmail_OAuth' WITH USER_MODE LIMIT 1];
 
                 if (!gmailOAuth.isEmpty()) {
                     result.objectData = gmailOAuth[0];
                     result.siteUrl    = gmailOAuth[0].Redirect_URI__c;
                 }
             } else if (integrationType == 'Instagram') {
-                List<OAuth_Configuration__mdt> instaOAuth = [
-                    SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c,
-                           Access_Token__c, User_Id__c, Username__c
-                    FROM OAuth_Configuration__mdt
-                    WHERE DeveloperName = 'Instagram_OAuth'
-                    WITH USER_MODE
-                    LIMIT 1
-                ];
+                List<OAuth_Configuration__mdt> instaOAuth = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c, Access_Token__c, User_Id__c, Username__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Instagram_OAuth' WITH USER_MODE LIMIT 1];
 
                 if (!instaOAuth.isEmpty()) {
                     result.objectData = instaOAuth[0];
@@ -581,6 +575,44 @@ public with sharing class IntegrationPopupController {
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'getSettings', 'Error while getting settings.');
             return null;
+        }
+    }
+
+    /**
+    * @description : Builds the provider authorization URL from server-side OAuth configuration.
+    */
+    @AuraEnabled
+    public static String getAuthorizationUrl(String integrationType) {
+        try {
+            if (integrationType != 'Gmail' && integrationType != 'Instagram') {
+                throw auraError('Unsupported integration type.');
+            }
+
+            String developerName = integrationType == 'Gmail' ? 'Gmail_OAuth' : 'Instagram_OAuth';
+            List<OAuth_Configuration__mdt> configurations = [SELECT Client_Id__c, Redirect_URI__c, Authorization_Endpoint__c, Scope__c FROM OAuth_Configuration__mdt WHERE DeveloperName = :developerName WITH USER_MODE LIMIT 1];
+            if (configurations.isEmpty() || String.isBlank(configurations[0].Client_Id__c) || String.isBlank(configurations[0].Redirect_URI__c)) {
+                throw auraError(integrationType + ' OAuth configuration is incomplete.');
+            }
+
+            OAuth_Configuration__mdt config = configurations[0];
+            String endpoint;
+            String scope;
+            String parameters = 'client_id=' + EncodingUtil.urlEncode(config.Client_Id__c, 'UTF-8') + '&redirect_uri=' + EncodingUtil.urlEncode(config.Redirect_URI__c, 'UTF-8') + '&response_type=code';
+
+            endpoint = configurations[0].Authorization_Endpoint__c;
+            scope = configurations[0].Scope__c;
+            if (integrationType == 'Gmail') {
+                parameters += '&access_type=offline&prompt=consent&state=Gmail_OAuth' + '&scope=' + EncodingUtil.urlEncode(scope, 'UTF-8');
+            } else {
+                parameters += '&scope=' + EncodingUtil.urlEncode(scope, 'UTF-8');
+            }
+
+            return endpoint + '?' + parameters;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'IntegrationPopupController', 'getAuthorizationUrl', 'Error while building the authorization URL.');
+            throw auraError('Failed to generate the ' + integrationType + ' authorization URL.');
         }
     }
 
@@ -600,6 +632,16 @@ public with sharing class IntegrationPopupController {
                 return 'Integration type is required.';
             }
 
+            if (integrationType == 'Instagram' && (String.isBlank(credential1) || String.isBlank(credential2))) {
+                return 'Please fill in both User ID and Long-Lived Access Token.';
+            }
+            if (integrationType == 'Gmail' && String.isBlank(credential1)) {
+                return 'Please enter a valid Gmail Refresh Token.';
+            }
+            if (integrationType != 'Instagram' && integrationType != 'Gmail') {
+                return 'Unsupported integration type: ' + integrationType;
+            }
+
             if (Test.isRunningTest()) {
                 if (mockValidationResult != null) {
                     return mockValidationResult;
@@ -617,7 +659,7 @@ public with sharing class IntegrationPopupController {
                 return validateInstagram(credential1, credential2);
             } else if (integrationType == 'Gmail') {
                 return validateGmail(credential1, credential2);
-            } 
+            }
 
             return 'Unsupported integration type: ' + integrationType;
         } catch (Exception e) {
@@ -636,16 +678,14 @@ public with sharing class IntegrationPopupController {
         }
 
         String graphApiVersion = 'v24.0';
+        String instagramEndpoint = '';
         try {
-            List<OAuth_Configuration__mdt> instaConfigs = [
-                SELECT API_Version__c
-                FROM OAuth_Configuration__mdt
-                WHERE DeveloperName = 'Instagram_OAuth'
-                WITH USER_MODE
-                LIMIT 1
-            ];
+            List<OAuth_Configuration__mdt> instaConfigs = [SELECT API_Version__c, Base_URL__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Instagram_OAuth' WITH USER_MODE LIMIT 1];
             if (!instaConfigs.isEmpty() && String.isNotBlank(instaConfigs[0].API_Version__c)) {
                 graphApiVersion = instaConfigs[0].API_Version__c.trim();
+            }
+            if (!instaConfigs.isEmpty() && String.isNotBlank(instaConfigs[0].Base_URL__c)) {
+                instagramEndpoint = instaConfigs[0].Base_URL__c.trim();
             }
         } catch (Exception e1) {
             graphApiVersion = 'v24.0';
@@ -659,7 +699,7 @@ public with sharing class IntegrationPopupController {
         Http http = new Http();
         HttpRequest req = new HttpRequest();
         req.setMethod('GET');
-        String endpoint = instagramEndpoint + graphApiVersion + '/me?fields=id,user_id,username&access_token=' + EncodingUtil.urlEncode(accessToken.trim(), 'UTF-8');
+        String endpoint = instagramEndpoint + '/' + graphApiVersion + '/me?fields=id,user_id,username&access_token=' + EncodingUtil.urlEncode(accessToken.trim(), 'UTF-8');
         req.setEndpoint(endpoint);
         req.setTimeout(20000);
 
@@ -707,7 +747,7 @@ public with sharing class IntegrationPopupController {
         String metaClientId = clientId != null ? clientId.trim() : '';
         String metaClientSecret = '';
 
-        List<OAuth_Configuration__mdt> gmailOAuth = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Gmail_OAuth' WITH USER_MODE LIMIT 1];
+        List<OAuth_Configuration__mdt> gmailOAuth = [SELECT Client_Id__c, Client_Secret__c, Redirect_URI__c, Token_Endpoint__c, Base_URL__c FROM OAuth_Configuration__mdt WHERE DeveloperName = 'Gmail_OAuth' WITH USER_MODE LIMIT 1];
         if (!gmailOAuth.isEmpty()) {
             if (String.isBlank(metaClientId) && String.isNotBlank(gmailOAuth[0].Client_Id__c)) {
                 metaClientId = gmailOAuth[0].Client_Id__c.trim();
@@ -728,7 +768,7 @@ public with sharing class IntegrationPopupController {
         Http http = new Http();
         HttpRequest req = new HttpRequest();
         req.setMethod('POST');
-        req.setEndpoint(GMAILENDPOINT + 'token');
+        req.setEndpoint(gmailOAuth[0].Token_Endpoint__c);
         req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
         req.setBody(requestBody);
         req.setTimeout(20000);
@@ -745,7 +785,7 @@ public with sharing class IntegrationPopupController {
                 try {
                     HttpRequest userReq = new HttpRequest();
                     userReq.setMethod('GET');
-                    String endpoint = gmailSendEndpoint + 'oauth2/v2/userinfo';
+                    String endpoint = gmailOAuth[0].Base_URL__c + '/' + 'oauth2/v2/userinfo';
                     userReq.setEndpoint(endpoint);
                     userReq.setHeader('Authorization', 'Bearer ' + freshAccessToken);
                     userReq.setTimeout(10000);

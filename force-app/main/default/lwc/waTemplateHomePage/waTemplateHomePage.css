@@ -463,3 +463,119 @@
         flex-direction: column;
     }
 }
+
+/* Status cell enhancements */
+.exp-status-cell-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+}
+
+.exp-cooldown-badge {
+    font-size: 11px;
+    color: #B45309;
+    background: #FEF3C7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-weight: 500;
+}
+
+.exp-rejection-reason {
+    font-size: 11px;
+    color: #DC2626;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+/* Delete Confirmation Modal Styles */
+.exp-delete-modal-container {
+    max-width: 500px;
+}
+
+.exp-delete-modal-header {
+    border-bottom: 1px solid #E5E7EB;
+    padding: 18px 24px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.exp-delete-modal-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.exp-modal-close-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.exp-delete-modal-content {
+    background: #ffffff;
+    padding: 22px 24px;
+    color: #374151;
+}
+
+.exp-delete-confirm-text {
+    margin-bottom: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #374151;
+}
+
+.exp-delete-warning-box {
+    background: #FEF2F2;
+    border-left: 4px solid #EF4444;
+    padding: 12px 14px;
+    border-radius: 4px;
+}
+
+.exp-delete-warning-title {
+    color: #991B1B;
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.exp-delete-warning-desc {
+    color: #7F1D1D;
+    font-size: 12px;
+    line-height: 1.45;
+    margin: 0;
+}
+
+.exp-delete-modal-footer {
+    border-top: 1px solid #E5E7EB;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    background: #F9FAFB;
+}
+
+.exp-delete-confirm-btn {
+    background-color: #DC2626 !important;
+    border-color: #DC2626 !important;
+}
+
+.exp-delete-confirm-btn:hover {
+    background-color: #B91C1C !important;
+    border-color: #B91C1C !important;
+}

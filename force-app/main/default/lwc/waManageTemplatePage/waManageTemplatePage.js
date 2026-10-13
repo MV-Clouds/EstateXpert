@@ -195,7 +195,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     @track countryType = [];
     @track availableObjects = [
         { label: 'Contact', value: 'Contact' },
-        { label: 'Listing', value: 'Listing__c' }
+        { label: 'Listing', value: 'MVEX__Listing__c' }
     ];
     @track fields = [];
     @track emojiCategories = [];

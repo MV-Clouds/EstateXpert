@@ -5,9 +5,9 @@
     <template if:true={iseditTemplatevisible}>
         <div class="main-container">
             <template if:true={isEditBlocked}>
-                <div class="slds-notify slds-notify_alert slds-alert_error" role="alert" style="margin: 0 1rem 1rem 1rem; border-radius: 6px; padding: 12px 16px; background: #FEF2F2; color: #991B1B; border: 1px solid #FCA5A5; display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 18px;">⚠️</span>
-                    <div style="flex: 1; font-size: 13px; font-weight: 500;">
+                <div class="slds-notify slds-notify_alert slds-alert_error exp-edit-restriction-banner" role="alert">
+                    <span class="exp-edit-restriction-icon">⚠️</span>
+                    <div class="exp-edit-restriction-text">
                         <strong>Meta Edit Restriction:</strong> {editBlockReason}
                     </div>
                 </div>
@@ -237,8 +237,7 @@
                                         </button>
                                         <lightning-helptext
                                             content="Add variables by selecting columns from your customer list. When your message is sent, the variable will be replaced with data from the column."
-                                            icon-variant="bare"
-                                            class="var-helptext"></lightning-helptext>
+                                            icon-variant="bare" class="var-helptext"></lightning-helptext>
                                     </div>
                                     <template if:true={headerError}>
                                         <div class="slds-text-color_error slds-m-top_small margin-top-zero">
@@ -283,15 +282,10 @@
                                                 <div key={varItem.id} class="true-div">
                                                     <p class="var">{varItem.index}</p>
 
-                                                    <lightning-combobox
-                                                        name="headerFieldSelector"
-                                                        value={varItem.field}
-                                                        placeholder="Select field"
-                                                        options={varItem.options}
-                                                        data-id={varItem.id}
-                                                        data-index={varItem.index}
-                                                        onchange={handleFieldChange}
-                                                        variant="label-hidden"
+                                                    <lightning-combobox name="headerFieldSelector" value={varItem.field}
+                                                        placeholder="Select field" options={varItem.options}
+                                                        data-id={varItem.id} data-index={varItem.index}
+                                                        onchange={handleFieldChange} variant="label-hidden"
                                                         class="field-combobox">
                                                     </lightning-combobox>
 
@@ -412,8 +406,7 @@
                                             </button>
                                             <lightning-helptext
                                                 content="Add variables by selecting columns from your customer list. When your message is sent, the variable will be replaced with data from the column."
-                                                icon-variant="bare"
-                                                class="var-helptext"></lightning-helptext>
+                                                icon-variant="bare" class="var-helptext"></lightning-helptext>
                                         </div>
                                     </div>
                                 </div>
@@ -452,15 +445,10 @@
                                         <div key={varItem.id} class="true-div">
                                             <input class="var disabled" type="text" value={varItem.index} readonly />
 
-                                            <lightning-combobox
-                                                name="bodyFieldSelector"
-                                                value={varItem.field}
-                                                placeholder="Select field"
-                                                options={varItem.options}
-                                                data-id={varItem.id}
-                                                data-index={varItem.index}
-                                                onchange={handleVarFieldChange}
-                                                variant="label-hidden"
+                                            <lightning-combobox name="bodyFieldSelector" value={varItem.field}
+                                                placeholder="Select field" options={varItem.options}
+                                                data-id={varItem.id} data-index={varItem.index}
+                                                onchange={handleVarFieldChange} variant="label-hidden"
                                                 class="field-combobox">
                                             </lightning-combobox>
 
@@ -580,7 +568,6 @@
                                                         data-index={index} name="selectedActionType" disabled="true"
                                                         value={button.selectedActionType} options={typeactionOption}
                                                         onchange={handleInputChange}></lightning-combobox>
-
                                                 </div>
 
                                                 <!-- Button Text Input -->
@@ -853,7 +840,7 @@
                         <button type="button" class="exp-blue-btn-css preview-action-btn" onclick={handleConfirm}
                             disabled={isSubmitDisabled}>
                             <svg fill="#ffffff" height="14" width="14" viewBox="0 0 512.01 512.01"
-                                style="margin-right: 6px;">
+                                class="exp-submit-btn-icon">
                                 <path
                                     d="M505.754,240.923L271.088,6.256c-3.989-4.011-9.408-6.251-15.083-6.251H21.338c-8.619,0-16.427,5.184-19.712,13.163 c-3.307,7.979-1.472,17.152,4.629,23.253l219.584,219.584L6.256,475.59c-6.101,6.101-7.936,15.275-4.629,23.253 c3.285,7.979,11.093,13.163,19.712,13.163h234.667c5.675,0,11.093-2.24,15.083-6.251l234.667-234.667 C514.096,262.747,514.096,249.264,505.754,240.923z">
                                 </path>
@@ -884,15 +871,17 @@
                 <div class="slds-modal__content clone-modalbody" id="review-modal-content">
                     <div class="clone-content_body">
                         <template if:true={isEditTemplate}>
-                            <div style="background: #FFFBEB; border-left: 4px solid #F59E0B; padding: 12px 14px; border-radius: 4px; margin-bottom: 12px; text-align: left;">
-                                <p style="color: #92400E; font-weight: 600; font-size: 13px; margin-bottom: 4px;">
+                            <div class="exp-rereview-warning-box">
+                                <p class="exp-rereview-warning-title">
                                     ⚠️ Meta Re-Review &amp; Policy Notice
                                 </p>
-                                <p style="color: #78350F; font-size: 12px; line-height: 1.45; margin-bottom: 4px;">
-                                    Submitting these edits sends this template back into <strong>In Review</strong> status with Meta. Active automated campaigns using this template cannot send messages until Meta re-approves it.
+                                <p class="exp-rereview-warning-desc">
+                                    Submitting these edits sends this template back into <strong>In Review</strong>
+                                    status with Meta. Active automated campaigns using this template cannot send
+                                    messages until Meta re-approves it.
                                 </p>
-                                <p style="color: #78350F; font-size: 11.5px; line-height: 1.4;">
-                                    • Cooldown: Max <strong>1 edit per 24 hours</strong>.<br/>
+                                <p class="exp-rereview-warning-points">
+                                    • Cooldown: Max <strong>1 edit per 24 hours</strong>.<br />
                                     • Monthly limit: Max <strong>10 edits per rolling 30 days</strong>.
                                 </p>
                             </div>

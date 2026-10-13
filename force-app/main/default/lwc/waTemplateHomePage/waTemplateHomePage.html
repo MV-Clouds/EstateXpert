@@ -256,15 +256,15 @@
                                                     </td>
                                                     <td class="slds-cell_action-mode exp-table-status-col"
                                                         role="gridcell" data-label="Status">
-                                                        <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                                                        <div class="exp-status-cell-wrapper">
                                                             <span class={record.statusClass}>{record.Status__c}</span>
                                                             <template if:true={record.hasCooldown}>
-                                                                <span style="font-size: 11px; color: #B45309; background: #FEF3C7; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px;" title="Meta 24-hour edit cooldown is active">
+                                                                <span class="exp-cooldown-badge" title="Meta 24-hour edit cooldown is active">
                                                                     ⏱️ {record.cooldownBadgeText}
                                                                 </span>
                                                             </template>
                                                             <template if:true={record.Rejection_Reason__c}>
-                                                                <span style="font-size: 11px; color: #DC2626; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title={record.Rejection_Reason__c}>
+                                                                <span class="exp-rejection-reason" title={record.Rejection_Reason__c}>
                                                                     ⚠️ {record.Rejection_Reason__c}
                                                                 </span>
                                                             </template>
@@ -455,35 +455,35 @@
                 <!-- Delete Confirmation Modal with 30-Day Name Freeze Notice -->
                 <template if:true={showDeleteModal}>
                     <section role="dialog" tabindex="-1" aria-labelledby="delete-modal-heading" aria-modal="true" class="slds-modal slds-fade-in-open slds-modal_small">
-                        <div class="slds-modal__container" style="max-width: 500px;">
-                            <div class="slds-modal__header" style="border-bottom: 1px solid #E5E7EB; padding: 18px 24px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
-                                <h2 id="delete-modal-heading" class="slds-modal__title slds-hyphenate" style="font-size: 17px; font-weight: 700; color: #111827;">
+                        <div class="slds-modal__container exp-delete-modal-container">
+                            <div class="slds-modal__header exp-delete-modal-header">
+                                <h2 id="delete-modal-heading" class="slds-modal__title slds-hyphenate exp-delete-modal-title">
                                     Delete WhatsApp Template
                                 </h2>
-                                <button class="slds-button slds-button_icon" title="Close" onclick={cancelDeleteModal} style="border: none; background: transparent; cursor: pointer;">
+                                <button class="slds-button slds-button_icon exp-modal-close-btn" title="Close" onclick={cancelDeleteModal}>
                                     <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
                                         <path d="M2.5 17.5L17.5 2.5M2.5 2.5L17.5 17.5" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
                                     </svg>
                                     <span class="slds-assistive-text">Close</span>
                                 </button>
                             </div>
-                            <div class="slds-modal__content slds-p-around_medium" style="background: #ffffff; padding: 22px 24px; color: #374151;">
-                                <p style="margin-bottom: 14px; font-size: 14px; line-height: 1.5;">
+                            <div class="slds-modal__content slds-p-around_medium exp-delete-modal-content">
+                                <p class="exp-delete-confirm-text">
                                     Are you sure you want to delete template <strong>"{deletingTemplateRecord.Template_Name__c}"</strong>?
                                 </p>
-                                <div style="background: #FEF2F2; border-left: 4px solid #EF4444; padding: 12px 14px; border-radius: 4px;">
-                                    <p style="color: #991B1B; font-weight: 600; font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                                <div class="exp-delete-warning-box">
+                                    <p class="exp-delete-warning-title">
                                         <span>⚠️</span> Meta 30-Day Name Freeze Policy
                                     </p>
-                                    <p style="color: #7F1D1D; font-size: 12px; line-height: 1.45;">
+                                    <p class="exp-delete-warning-desc">
                                         Deleting this template removes it permanently from Meta across all languages. 
                                         <strong>Meta locks this template name for 30 days</strong>, meaning you will not be able to reuse or create a new template with this exact name during this period.
                                     </p>
                                 </div>
                             </div>
-                            <div class="slds-modal__footer" style="border-top: 1px solid #E5E7EB; padding: 14px 24px; display: flex; justify-content: flex-end; gap: 10px; background: #F9FAFB;">
+                            <div class="slds-modal__footer exp-delete-modal-footer">
                                 <button class="exp-white-btn-css" onclick={cancelDeleteModal}>Cancel</button>
-                                <button class="exp-blue-btn-css" style="background-color: #DC2626; border-color: #DC2626;" onclick={confirmDeleteTemplate}>Delete Template</button>
+                                <button class="exp-blue-btn-css exp-delete-confirm-btn" onclick={confirmDeleteTemplate}>Delete Template</button>
                             </div>
                         </div>
                     </section>
@@ -500,26 +500,26 @@
                 <div class="content-wrapper">
                     <div class="icon-container">
                         <svg class="custom-icon" width="40" height="40" viewBox="0 0 512 512" fill="#000000">
-                            <path style="fill:#464655;"
+                            <path fill="#464655"
                                 d="M509.435,448.962L271.75,44.367c-7.076-12.045-24.424-12.045-31.5,0L2.565,448.962 c-7.194,12.245,1.595,27.705,15.75,27.705h475.368C507.839,476.666,516.629,461.207,509.435,448.962z">
                             </path>
-                            <path style="fill:#5B5D6E;"
+                            <path fill="#5B5D6E"
                                 d="M310.09,109.633c-75.525,54.5-124.731,143.208-124.731,243.46c0,44.069,9.578,85.877,26.64,123.573 h281.685c14.155,0,22.944-15.459,15.75-27.705L310.09,109.633z">
                             </path>
-                            <path style="fill:#FFDC64;"
+                            <path fill="#FFDC64"
                                 d="M252.195,93.738L53.788,431.474c-2.57,4.374,0.585,9.885,5.658,9.885h393.11 c5.073,0,8.228-5.511,5.658-9.885L259.805,93.738C258.099,90.834,253.901,90.834,252.195,93.738z">
                             </path>
-                            <path style="fill:#FFF082;"
+                            <path fill="#FFF082"
                                 d="M185.36,353.093c0,30.722,4.638,60.357,13.216,88.267h253.98c5.073,0,8.228-5.511,5.658-9.885 L282.389,132.181C222.755,187.029,185.36,265.683,185.36,353.093z">
                             </path>
-                            <circle style="fill:#464655;" cx="256.028" cy="379.568" r="17.653"></circle>
-                            <path style="fill:#464655;"
+                            <circle fill="#464655" cx="256.028" cy="379.568" r="17.653"></circle>
+                            <path fill="#464655"
                                 d="M239.049,213.171l7.566,113.485c0.33,4.948,4.174,8.784,8.805,8.784h1.216 c4.631,0,8.475-3.834,8.805-8.784l7.566-113.485c0.365-5.475-3.682-10.131-8.805-10.131h-16.347 C242.731,203.04,238.684,207.697,239.049,213.171z">
                             </path>
-                            <path style="fill:#FFC850;"
+                            <path fill="#FFC850"
                                 d="M452.556,450.186H59.442c-5.499,0-10.62-2.966-13.353-7.741c-2.733-4.78-2.698-10.697,0.086-15.442 L244.587,89.258c2.405-4.086,6.672-6.525,11.422-6.525c4.741,0,9.008,2.439,11.413,6.525l198.401,337.744 c2.784,4.75,2.819,10.667,0.086,15.442C463.176,447.22,458.055,450.186,452.556,450.186z M63.399,432.533h385.201L255.998,104.684 L63.399,432.533z">
                             </path>
-                            <path style="fill:#FFDC64;"
+                            <path fill="#FFDC64"
                                 d="M448.599,432.533H196.069c1.633,5.964,3.455,11.844,5.441,17.653h251.048 c5.499,0,10.62-2.966,13.353-7.741c2.733-4.775,2.698-10.692-0.086-15.442L289.135,126.224c-4.553,3.944-9,8.005-13.307,12.212 L448.599,432.533z">
                             </path>
                         </svg>

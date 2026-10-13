@@ -2,7 +2,6 @@ import { LightningElement, track, api } from 'lwc';
 import { loadStyle, loadScript } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
-import richTextZip from '@salesforce/resourceUrl/richTextZip';
 import buttonIconsZip from '@salesforce/resourceUrl/buttonIconsZip';
 import waEmojis from '@salesforce/resourceUrl/waEmojis';
 import COUNTRY_PHONE_LENGTHS from '@salesforce/resourceUrl/CountryPhoneLengths';
@@ -10,11 +9,9 @@ import globalStyles from '@salesforce/resourceUrl/globalStyles';
 import LanguageJson from '@salesforce/resourceUrl/LanguageJson';
 import createWhatsappTemplate from '@salesforce/apex/WAManageTemplatePageController.createWhatsappTemplate';
 import editWhatsappTemplate from '@salesforce/apex/WAManageTemplatePageController.editWhatsappTemplate';
-import uploadFileChunk from '@salesforce/apex/WAManageTemplatePageController.uploadFileChunk';
 import getObjectFields from '@salesforce/apex/WAManageTemplatePageController.getObjectFields';
 import getObjectFieldsWithRelationships from '@salesforce/apex/WAManageTemplatePageController.getObjectFieldsWithRelationships';
 import getWhatsAppTemplates from '@salesforce/apex/WAManageTemplatePageController.getWhatsAppTemplates';
-import checkTemplateExistance from '@salesforce/apex/WAManageTemplatePageController.checkTemplateExistance';
 import getDynamicObjectData from '@salesforce/apex/WAManageTemplatePageController.getDynamicObjectData';
 import tempLocationIcon from '@salesforce/resourceUrl/tempLocationIcon';
 import tempVideoIcon from '@salesforce/resourceUrl/tempVideoIcon';
@@ -23,17 +20,12 @@ import docUploadPreview from '@salesforce/resourceUrl/documentPreviewIcon';
 import NoPreviewAvailable from '@salesforce/resourceUrl/NoPreviewAvailable';
 import uploadFile from '@salesforce/apex/WAManageTemplatePageController.uploadFile';
 import deleteFile from '@salesforce/apex/WAManageTemplatePageController.deleteFile';
-import getObjectsWithPhoneField from '@salesforce/apex/WAManageTemplatePageController.getObjectsWithPhoneField';
 import getCompanyName from '@salesforce/apex/WAManageTemplatePageController.getCompanyName';
 import getS3ConfigSettings from '@salesforce/apex/ImageAndMediaController.getS3ConfigSettings';
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
 import buildPayload from './waManageTemplateWrapper';
 import getMetaHeaderHandler from '@salesforce/apex/WAManageTemplatePageController.getMetaHeaderHandler';
 
-
-// ============================
-// MODULE-LEVEL CONSTANTS
-// ============================
 const TYPE_OPTIONS = [
     { label: 'None', value: 'None' },
     { label: 'Text', value: 'Text' },
@@ -77,26 +69,18 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         maxTempBodyLength: 1024,
         maxWebsiteUrl: 2000,
         maxBtnTxt: 25,
-        maxPhonetxt: 20,
-        chunkSize: 1048576,
-        maxHierarchyLevel: 5
+        maxPhonetxt: 20
     };
-
-    // ============================
-    // INSTANCE PROPERTIES
-    // ============================
     _edittemplateid;
-    _boundHandleOutsideClick; // Stored bound reference for event listener cleanup
-    _cachedToolbarButtons; // Cached toolbar buttons with classes
-    _cachedQuickReplyOptions; // Cached quick reply options
-    _cachedCallToActionOptions; // Cached call to action options
-    _lastActiveTab; // Track activeTab for cache invalidation
-
+    _boundHandleOutsideClick;
+    _cachedQuickReplyOptions;
+    _cachedCallToActionOptions;
+    _lastActiveTabForQuickReply;
     file;
     fileName = '';
+    fileData;
     fileSize = 0;
     fileType = '';
-    uploadSessionId = '';
     companyName = '';
 
     dropdownOptions = [
@@ -106,20 +90,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         { title: 'Visit Website', value: 'URL', iconName: 'site', description: 'Maximum 2 buttons can be added' }
     ];
 
-    toolbarButtons = [
-        { title: 'bold', iconName: 'bold' },
-        { title: 'italic', iconName: 'italic' },
-        { title: 'strikethrough', iconName: 'stike' },
-        { title: 'codeIcon', iconName: 'code' }
-    ];
-
-    // Primitives - auto-tracked by LWC (no @track needed)
     contentVersionId;
     isEditTemplate = false;
     totalButtonsCount = 0;
     visitWebsiteCount = 0;
     callPhoneNumber = 0;
-    copyOfferCode = 0;
     marketingOpt = 0;
     iseditTemplatevisible = false;
     showReviewTemplate = false;
@@ -136,7 +111,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     isVideoFileUploader = false;
     isDocFileUploader = false;
     isLocation = false;
-    isCallPhone = false;
     isVisitSite = false;
     isCustom = false;
     createButton = false;
@@ -155,17 +129,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     formatedTempBody = this.tempBody;
     previewBody = 'Hello';
     previewHeader = '';
-    btntext = '';
-    webURL = '';
-    Cbtntext = '';
-    selectedUrlType = 'Static';
     nextIndex = 1;
     headIndex = 1;
-    selectedOption = 'Custom';
-    activeSection = 'section1';
     selectedContentType = 'None';
     selectedLanguage = 'en_US';
-    selectedActionType = '';
     selectedCountryType = '+971';
     selectedCountryTypeLabel = 'United Arab Emirates (+971)';
     phonePattern = '^[0-9]+$';
@@ -178,7 +145,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     NoFileSelected = true;
     filePreview = '';
     selectedObject = 'Contact';
-    richTextZip = richTextZip;
     buttonIconsZip = buttonIconsZip;
     isDropdownOpen = false;
     dropdownClass = 'dropdown-hidden';
@@ -195,7 +161,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     docUploadPreviewImg = docUploadPreview;
     NoPreviewAvailableImg = NoPreviewAvailable;
     isFeatureEnabled = false;
-    selectedTime = '5 minutes';
     isAWSEnabled = false;
     confData;
     s3;
@@ -238,7 +203,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
     @api activeTab;
     @api selectedTab;
-    @api selectedOption;
+    @api selectedOption = 'Custom';
     @track addVar = false;
     @api isTemplateClone = false;
 
@@ -309,8 +274,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     // GETTERS FOR CONDITIONS / DISABLES
     // ============================
 
-
-
     get acceptedFormats() {
         // Allowed file formats for upload
         return ['png', 'jpeg', 'jpg'];
@@ -325,30 +288,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     get hasButtons() {
         // Check if there are any buttons present
         return this.buttonList.length > 0 || this.customButtonList.length > 0;
-    }
-
-    get buttonListWithDisabledState() {
-        // Disable 'Marketing opt-out' buttons from editing
-        return this.customButtonList.map(button => ({
-            ...button,
-            isDisabled: button.selectedCustomType === 'Marketing opt-out'
-        }));
-    }
-
-    // Limits for buttons
-    get visitWebsiteDisabled() {
-        return this.visitWebsiteCount >= 2;
-    }
-
-    get callPhoneNumberDisabled() {
-        return this.callPhoneNumber >= 1;
-    }
-
-
-
-
-    get marketingOptDisabled() {
-        return this.marketingOpt >= 1;
     }
 
     get maxtelephonelength() {
@@ -383,7 +322,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     // ============================
     // BUTTONS, TOOLBARS, OPTIONS
     // ============================
-
 
     get computedVariables() {
         return this.variables.map(varItem => {
@@ -461,19 +399,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             ...obj,
             isSelected: obj.value === this.selectedObject
         }));
-    }
-
-    get toolbarButtonsWithClasses() {
-        // Cache toolbar buttons since they never change after initial computation
-        if (!this._cachedToolbarButtons) {
-            this._cachedToolbarButtons = this.toolbarButtons.map(button => ({
-                ...button,
-                iconUrl: this.getIconPath(button.iconName),
-                classes: `toolbar-button ${button.title.toLowerCase()}`,
-                imgClasses: `custom-icon ${button.iconName.toLowerCase()}`
-            }));
-        }
-        return this._cachedToolbarButtons;
     }
 
     // ============================
@@ -567,15 +492,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         // Setter to control template states when edittemplateid is set
         this._edittemplateid = value;
         if (this._edittemplateid) {
-            this.isNewTemplate = false;
             this.isEditTemplate = true;
-
             this.fetchTemplateData(); // Load template data when ID is set
         }
-    }
-
-    getIconPath(iconName) {
-        return `${richTextZip}/rich-texticon/${iconName}.png`;
     }
 
     connectedCallback() {
@@ -623,22 +542,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         try {
             if (this.isRendered) return;
             this.isRendered = true;
-            let headerEls = this.template.querySelectorAll('.field-header-dd');
-            if (headerEls != null && this.addHeaderVar) {
-                for (let i = 0; i < this.header_variables.length; i++) {
-                    this.header_variables.forEach((hv, i) => {
-                        headerEls[i].value = hv.field;
-                    })
-                }
-                this.addHeaderVar = false;
-            }
-            let bodyEls = this.template.querySelectorAll('.field-body-dd');
-            if (bodyEls != null && this.addVar) {
-                this.variables.forEach((bv, i) => {
-                    bodyEls[i].value = bv.field;
-                })
-                this.addVar = false;
-            }
 
             if (this.isAwsSdkInitialized) {
                 Promise.all([loadScript(this, AWS_SDK)])
@@ -704,7 +607,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
      */
     resetOptionFlags() {
         this.utilityOrderStatusSelected = false;
-        this.authenticationPasscodeSelected = false;
         this.UtilityCustomSelected = false;
         this.defaultPreview = false;
         this.showDefaultBtn = true;
@@ -965,8 +867,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         return BUTTON_ICON_MAP[type] || 'utility:question';
     }
 
-    handleTabClick(sectionname) {
-        this.activeSection = sectionname;
+    handleTabClick() {
         this.isDefault = true;
         this.handleDefaultValues();
     }
@@ -1016,8 +917,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     getS3ConfigDataAsync() {
         return getS3ConfigSettings()
             .then(result => {
-                console.log('result - ', result);
-                
                 if (result != null) {
                     this.confData = result.awsConfigData;
                     this.isAWSEnabled = result.isIntegrated;
@@ -1350,11 +1249,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                                         console.error('Error fetching header handler: ', error);
                                     });
                             }
-                            else {
-                                if (this.filePreview) {
-                                    this.handleFileFromUrl(this.filePreview, this.fileName || 'headerfile');
-                                }
-                            }
                         } else {
                             this.previewHeader = this.formatText(headerBody) || '';
                         }
@@ -1367,8 +1261,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                             this.IsHeaderText = true;
                             this.header = headerBody || '';
                         }
-
-                        this.btntext = template.Button_Label__c || template.MVEX__Button_Label__c || '';
 
                         const tvs = templateVariables.map(tv => ({
                             object: tv.objName,
@@ -1478,7 +1370,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                             this.customButtonList = [];
                             this.callPhoneNumber = 0;
                             this.visitWebsiteCount = 0;
-                            this.copyOfferCode = 0;
                             this.marketingOpt = 0;
 
                             buttonDataList.forEach((button, index) => {
@@ -1547,13 +1438,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                                         btntext: button?.text || '',
                                         webURL: button?.url || '',
                                         phonenum: parsedPhoneNum,
-                                        offercode: button?.example || '',
                                         selectedUrlType: button?.type === 'URL' ? 'Static' : '',
                                         selectedCountryType: parsedCountryCode || '+91',
                                         selectedCountryTypeLabel: parsedCountryLabel,
                                         isCallPhone: button?.type === 'PHONE_NUMBER',
                                         isVisitSite: button?.type === 'URL',
-                                        isOfferCode: button?.type === 'COPY_CODE',
                                         hasError: false,
                                         errorMessage: ''
                                     };
@@ -1577,7 +1466,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
                         if (headerType.toLowerCase() == 'image' || headerType.toLowerCase() == 'video') {
                             this.headerHandle = template.Image_Header_Handle__c || template.MVEX__WBImage_Header_Handle__c;
-                            this.imageurl = template.Header_Body__c || template.MVEX__WBHeader_Body__c;
                             this.NoFileSelected = false;
                             this.isfilename = true;
                             this.fileName = template.File_Name__c || template.MVEX__File_Name__c;
@@ -1964,74 +1852,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    /**
-     * Uploads file chunks to Meta to get header handle for WhatsApp template.
-     * Called by uploadFileToMeta() after getting upload session ID.
-     */
-    uploadChunksToMeta() {
-        try {
-            let chunkStart = 0;
-            const uploadNextChunk = () => {
-
-                const chunkEnd = Math.min(chunkStart + this.LIMITS.chunkSize, this.fileSize);
-                const chunk = this.file.slice(chunkStart, chunkEnd);
-                const reader = new FileReader();
-                const isLastChunk = (chunkEnd >= this.fileSize);
-
-                reader.onloadend = async () => {
-                    const base64Data = reader.result.split(',')[1];
-                    const fileChunkWrapper = {
-                        uploadSessionId: this.uploadSessionId,
-                        fileContent: base64Data,
-                        chunkStart: chunkStart,
-                        chunkSize: chunk.size,
-                        totalFileSize: this.fileSize,
-                        fileName: this.fileName,
-                        isLastChunk: isLastChunk
-                    };
-                    const serializedWrapper = JSON.stringify(fileChunkWrapper);
-                    // Pass isAWSEnabled to backend - it will skip ContentVersion creation when AWS is enabled
-                    uploadFileChunk({ serializedWrapper: serializedWrapper, isAWSEnabled: this.isAWSEnabled })
-                        .then(result => {
-                            if (result) {
-                                let serializeResult = JSON.parse(result);
-                                if (serializeResult.headerHandle) {
-                                    this.headerHandle = serializeResult.headerHandle;
-                                }
-                                // Only set contentDocumentId when NOT using AWS (local Salesforce storage)
-                                if (!this.isAWSEnabled && serializeResult.contentDocumentId) {
-                                    this.contentDocumentId = serializeResult.contentDocumentId;
-                                }
-
-                                chunkStart += chunk.size;
-                                if (chunkStart < this.fileSize) {
-                                    uploadNextChunk();
-                                } else {
-                                    this.isLoading = false;
-                                    this.showToast('File upload successfully.', 'success');
-                                }
-                            } else {
-                                this.isLoading = false;
-                                this.showToast('Failed to upload file chunk.', 'error');
-                            }
-                        })
-                        .catch(error => {
-                            this.isLoading = false;
-                            console.error('Error uploading file chunk: ', error.body);
-                            this.showToast(error.body?.message || 'An error occurred while uploading image.', 'error');
-                        });
-                };
-
-                reader.readAsDataURL(chunk);
-            };
-
-            uploadNextChunk();
-        } catch (error) {
-            this.isLoading = false;
-            console.error('Error uploading file chunk: ', error);
-        }
-    }
-
     handleContentType(event) {
         try {
             this.NoFileSelected = true;
@@ -2079,17 +1899,15 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             this.selectedContentType = 'None';
             this.header = '';
             this.addHeaderVar = false;
-            this.content = '';
             this.tempBody = 'Hello';
             this.addVar = false;
             this.footer = '';
-            var tempList = [];
-            this.buttonList = tempList;
+            this.buttonList = [];
             this.customButtonList = [];
             this.variables = [];
             this.header_variables = [];
             this.buttonDisabled = false;
-            this.originalHeader = [];
+            this.originalHeader = '';
             this.nextIndex = 1;
             this.headIndex = 1;
             this.createButton = false;
@@ -2098,17 +1916,13 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             this.formatedTempBody = this.tempBody;
             this.visitWebsiteCount = 0;
             this.callPhoneNumber = 0;
-            this.copyOfferCode = 0;
             this.marketingOpt = 0;
-            this.selectContent = 'Add security recommendation';
             this.addMedia = false;
             this.isDocSelected = false;
             this.isVidSelected = false;
             this.isImgSelected = false;
             this.isDocFile = false;
 
-            this.isautofillChecked = false;
-            this.isExpiration = false;
             // Reset original content version ID
             this.originalContentVersionId = null;
             const headerInput = this.template.querySelector('input[name="header"]');
@@ -2121,7 +1935,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     handleCustom(event) {
-        this.selectedCustomType = event.target.value;
+        const index = event.target?.dataset?.index;
+        if (index !== undefined && this.customButtonList[index]) {
+            this.customButtonList[index].selectedCustomType = event.target.value;
+        }
     }
 
     // Input change handler map for cleaner code organization
@@ -2243,8 +2060,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 this.visitWebsiteCount--;
             } else if (removedButton && removedButton.isCallPhone) {
                 this.callPhoneNumber--;
-            } else if (removedButton && removedButton.isOfferCode) {
-                this.copyOfferCode--;
             }
             this.buttonList = this.buttonList.filter((_, i) => i !== parseInt(index));
             if (this.buttonList.length == 0) {
@@ -2263,7 +2078,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             let buttonData = event.currentTarget.dataset.buttonData;
 
             // Check if this is edit mode (buttonData exists and already has button configured)
-            const isEditMode = buttonData && (buttonData.isCallPhone || buttonData.isVisitSite || buttonData.isOfferCode);
+            const isEditMode = buttonData && (buttonData.isCallPhone || buttonData.isVisitSite);
 
             let newButton = buttonData ? buttonData : {
                 id: this.buttonList.length + 1,
@@ -2272,13 +2087,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 btntext: '',
                 webURL: '',
                 phonenum: '',
-                offercode: '',
                 selectedUrlType: 'Static',
                 selectedCountryType: '',
                 selectedCountryTypeLabel: '',
                 isCallPhone: false,
                 isVisitSite: false,
-                isOfferCode: false,
                 hasError: false,
                 errorMessage: ''
             };
@@ -2308,7 +2121,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                         this.createButton = true;
                         newButton.isCallPhone = true;
                         newButton.btntext = buttonData?.btntext || 'Call Phone Number';
-                        this.btntext = buttonData?.btntext || 'Call Phone Number';
 
                         if (!isEditMode) {
                             this.callPhoneNumber++;
@@ -2324,7 +2136,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                         newButton.isVisitSite = true;
                         this.isVisitSite = true;
                         newButton.btntext = buttonData?.btntext || 'Visit Website';
-                        this.btntext = buttonData?.btntext || 'Visit Website';
 
                         if (!isEditMode) {
                             this.visitWebsiteCount++;
@@ -2332,21 +2143,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                             // In edit mode, count how many URL buttons exist
                             const existingUrlCount = this.buttonList.filter(b => b.isVisitSite).length;
                             this.visitWebsiteCount = existingUrlCount + 1;
-                        }
-                        buttonAdded = true;
-                    }
-                    break;
-                case 'COPY_CODE':
-                    if (isEditMode || this.copyOfferCode < 1) {
-                        this.createButton = true;
-                        newButton.isOfferCode = true;
-                        newButton.btntext = buttonData?.btntext || 'Copy Offer Code';
-                        this.btntext = newButton.btntext;
-
-                        if (!isEditMode) {
-                            this.copyOfferCode++;
-                        } else {
-                            this.copyOfferCode = 1;
                         }
                         buttonAdded = true;
                     }
@@ -2464,7 +2260,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 }
             }
 
-            this.Cbtntext = newValue;
             this.updateButtonErrors(true);
         } catch (error) {
             console.error('Error while handling the custom text.', error);
@@ -2486,25 +2281,17 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
             this.totalButtonsCount--;
 
-
-
             this.customButtonList = [...this.customButtonList];
             this.updateButtonDisabledState();
         } catch (error) {
             console.error('Error while removing custom buttons.', error);
-
         }
     }
 
     updateButtonDisabledState() {
         this.isDropdownOpen = false;
         this.isButtonDisabled = this.totalButtonsCount >= 10;
-        this.buttonList.forEach(button => {
-            button.isDisabled = button.selectedActionType === 'COPY_CODE';
-        });
     }
-
-
 
     addvariable() {
         try {
@@ -2520,8 +2307,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             // Use the currently selected variable type from the dropdown
             const currentVariableType = this.selectedVariableType || 'Name';
 
-            // For Name type, use empty placeholder; for Number type, use numbered placeholder
-            const placeholderIndex = currentVariableType === 'Name' ? '' : this.nextIndex;
             const displayIndex = currentVariableType === 'Name' ? `{{}}` : `{{${this.nextIndex}}}`;
 
             const newVariable = {
@@ -2739,18 +2524,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
         const headerValidation = this.validateVariableFormat(this.header, this.selectedVariableType);
         this.headerVariableFormatError = headerValidation.isValid ? '' : headerValidation.errorMessage;
-    }
-
-    handleVariableTypeChange(event) {
-        const variableIndex = String(event.target.dataset.index);
-        const variableType = event.target.value;
-
-        // Update the variables array with the new variable type
-        this.variables = this.variables.map(varItem =>
-            String(varItem.index) === variableIndex
-                ? { ...varItem, variableType }
-                : varItem
-        );
     }
 
     updatePreviewContentWithNameValue() {
@@ -3373,10 +3146,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    applyFormattingAfter(text, cursorPos, marker) {
-        return text.slice(0, cursorPos) + marker + text.slice(cursorPos);
-    }
-
     formatText(inputText) {
         try {
             inputText = inputText.replace(/(\n\s*){3,}/g, '\n\n');
@@ -3390,13 +3159,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         } catch (error) {
             console.error('Error while returning formatted text.', error);
         }
-    }
-
-    updateCursor(cursorPos) {
-        const textarea = this.template.querySelector('textarea');
-        textarea.value = this.tempBody;
-        textarea.focus();
-        textarea.selectionStart = textarea.selectionEnd = cursorPos;
     }
 
     updateCursorRange(selStart, selEnd) {
@@ -3440,13 +3202,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 } else if (button.isCallPhone) {
                     if (!button.selectedCountryType || !button.phonenum || !this.validatePhoneNumber(button.phonenum)) {
                         this.showToast('Please provide a valid country and phone number for the "Call Phone Number" button', 'error');
-                        return false;
-                    }
-                } else if (button.isOfferCode) {
-                    const alphanumericPattern = /^[a-zA-Z0-9]+$/;
-                    const offerButton = Array.isArray(button?.offercode) ? button?.offercode[0] : button?.offercode;
-                    if (!alphanumericPattern.test(offerButton?.trim())) {
-                        this.showToast('Offer code must only contain alphanumeric characters (letters and numbers)', 'error');
                         return false;
                     }
                 }
@@ -3497,7 +3252,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
         // Pattern to match variables - handle both {{1}} and {{name}} formats based on type
         const variablePattern = this.selectedVariableType === 'Name' ? /\{\{[^}]*\}\}/ : /\{\{\d+\}\}/;
-        const variablePatternGlobal = this.selectedVariableType === 'Name' ? /\{\{[^}]*\}\}/g : /\{\{\d+\}\}/g;
 
         const startsWithVariable = new RegExp(`^${variablePattern.source}`).test(normalizedBody);
         const endsWithVariable = new RegExp(`${variablePattern.source}$`).test(normalizedBody);
@@ -3621,7 +3375,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             this.buttonList[index].errorMessage = isDuplicate ? 'You have entered the same text for multiple buttons.' : '';
         }
 
-        this.btntext = newValue;
         this.updateButtonErrors();
     }
 
@@ -3693,10 +3446,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             if (this.customButtonList && this.customButtonList.length > 0) {
                 buttonData.push(...this.customButtonList);
             }
-            let fileUrl = null;
-            if (this.filePreview) {
-                fileUrl = this.filePreview; // Use ContentVersion if available
-            }
 
             // Extract marketingOptText from customButtonList if Marketing opt-out button exists
             let marketingOptText = null;
@@ -3759,10 +3508,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 typeOfButton: buttonData.length > 0 ? JSON.stringify(buttonData) : null,
                 marketingOptText: marketingOptText,
 
-                // Authentication template fields
-                packagename: null,
-                signaturename: null,
-
                 // Miscellaneous data (for UI state restoration)
                 templateMiscellaneousData: templateMiscellaneousData ? JSON.stringify(templateMiscellaneousData) : null,
 
@@ -3783,10 +3528,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 })) : [],
 
                 // Fields needed by buildPayload for Meta API (not stored in Apex)
-                selectedVariableType: this.selectedVariableType || 'Name',
-                isSecurityRecommedation: null,
-                isCodeExpiration: false,
-                expireTime: 300
+                selectedVariableType: this.selectedVariableType || 'Name'
             };
 
 
@@ -3805,10 +3547,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                             this.closeAndReturnToTemplateList();
                         } else if (result && result.success == false && result.status == 'warning') {
                             this.showToast('Template updation taking too much time, please wait for few minutes and refresh the page to see the updated template.', 'warning');
-                            this.isLoading = false;
-                            setTimeout(() => {
-                                checkTemplateExistance({ templateName: this.templateName, serializedWrapper: serializedWrapper, payloadWrapper: payload, metaTempId: this.metaTemplateId, isCreate: false });
-                            }, 60000);
                             this.isLoading = false;
                             this.clearEditTemplateData();
                             this.closeAndReturnToTemplateList();
@@ -3907,10 +3645,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }));
     }
 
-    closePreview() {
-        this.closeAndReturnToTemplateList();
-    }
-
     getButtonPath(iconName) {
         return `${buttonIconsZip}/button-sectionIcons/${iconName}.png`;
     }
@@ -3923,10 +3657,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         } catch (error) {
             console.error('Error in toggleDropdown:', error);
         }
-    }
-
-    navigateToAllTemplatePage() {
-        this.closeAndReturnToTemplateList();
     }
 
     closeAndReturnToTemplateList() {

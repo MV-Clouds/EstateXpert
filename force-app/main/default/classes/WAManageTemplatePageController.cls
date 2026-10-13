@@ -7,13 +7,9 @@
  * @last modified on  : 09/10/2026
  **/
 public with sharing class WAManageTemplatePageController {
-    
-    private static final String CONFIG_DEV_NAME = 'Whatsapp_OAuth';
 
     @TestVisible
     private static OAuth_Configuration__mdt mockConfig;
-
-    public static String uploadEndpoint;
 
     // List of allowed fields for polymorphic relationships (like Owner which can be User or Queue)
     public static List<String> polymorphismObjAllowedFields = new List<String>{
@@ -31,47 +27,17 @@ public with sharing class WAManageTemplatePageController {
             if (mockConfig != null) {
                 return mockConfig;
             }
+            String CONFIGDEVNAME = WhatsappConnectController.CONFIG_DEV_NAME;
+
             List<OAuth_Configuration__mdt> configs = [SELECT Id, DeveloperName, MasterLabel, Client_Id__c, Client_Secret__c, Config_Id__c, API_Version__c, 
                                                         Authorization_Endpoint__c, Token_Endpoint__c, Access_Token__c, Client_App_ID__c, Client_Business_Account_ID__c,
                                                         Client_Phone_Number_ID__c, Connected_Date__c, SystemModstamp FROM OAuth_Configuration__mdt
-                                                        WHERE DeveloperName = :CONFIG_DEV_NAME WITH USER_MODE LIMIT 1];
+                                                        WHERE DeveloperName = :CONFIGDEVNAME WITH USER_MODE LIMIT 1];
             return configs.isEmpty() ? null : configs[0];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getConfig', e.getMessage());
             return null;
         }
-    }
-
-    public static String getAccessToken() {
-        OAuth_Configuration__mdt config = getConfig();
-        return (config != null && config.Access_Token__c != null) ? config.Access_Token__c : '';
-    }
-
-    public static String getApiEndpoint() {
-        OAuth_Configuration__mdt config = getConfig();
-        return (config != null && String.isNotBlank(config.Authorization_Endpoint__c)) 
-                ? config.Authorization_Endpoint__c.removeEnd('/') : 'https://graph.facebook.com';
-    }
-
-    public static String getApiVersion() {
-        OAuth_Configuration__mdt config = getConfig();
-        return (config != null && String.isNotBlank(config.API_Version__c)) 
-                ? (config.API_Version__c.trim().startsWithIgnoreCase('v') ? config.API_Version__c.trim() : 'v' + config.API_Version__c.trim()) : 'v24.0';
-    }
-
-    public static String getBusinessAccountId() {
-        OAuth_Configuration__mdt config = getConfig();
-        return (config != null && config.Client_Business_Account_ID__c != null) ? config.Client_Business_Account_ID__c : '';
-    }
-
-    public static String getPhoneNumberId() {
-        OAuth_Configuration__mdt config = getConfig();
-        return (config != null && config.Client_Phone_Number_ID__c != null) ? config.Client_Phone_Number_ID__c : '';
-    }
-
-    public static String getAppId() {
-        OAuth_Configuration__mdt config = getConfig();
-        return (config != null && config.Client_App_ID__c != null) ? config.Client_App_ID__c : '';
     }
 
     /**
@@ -97,59 +63,14 @@ public with sharing class WAManageTemplatePageController {
     @AuraEnabled
     public static List<WA_Template__c> getWhatsAppTemplates() {
         try {
-            List<WA_Template__c> templates = [SELECT Id, Name, Template_Id__c, Template_Name__c, Template_Category__c,
-                                                toLabel(Language__c) LanguageLabel,
-                                                File_Name__c, Image_Header_Handle__c, Status__c,
-                                                LastModifiedById, LastModifiedDate, CreatedDate
-                                                FROM WA_Template__c
-                                                WITH USER_MODE
-                                                ORDER BY LastModifiedDate DESC LIMIT 50000];
+            List<WA_Template__c> templates = [SELECT Id, Name, Template_Id__c, Template_Name__c, Template_Category__c, toLabel(Language__c) LanguageLabel,
+                                                File_Name__c, Image_Header_Handle__c, Status__c, LastModifiedById, LastModifiedDate, CreatedDate
+                                                FROM WA_Template__c WITH USER_MODE ORDER BY LastModifiedDate DESC LIMIT 50000];
             return templates;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getWhatsAppTemplates', e.getMessage());
             return new List<WA_Template__c>();
         }
-    }
-
-    /*
-    *********************************************************
-    @description     : Send preview message using OAuth_Configuration__mdt configuration.
-    @param           : jsonData - Serialized preview message payload
-    @return          : errorMessage
-    ********************************************************
-    */
-    @AuraEnabled
-    public static String sendPreviewTemplate(String jsonData) {
-        String errorMessage = null;
-        try {
-            OAuth_Configuration__mdt config = getConfig(); 
-            if (config == null || String.isBlank(config.Access_Token__c) || String.isBlank(config.Client_Phone_Number_ID__c)) {
-                errorMessage = 'WhatsApp configuration is missing or incomplete in Custom Metadata.';
-                return errorMessage;
-            }
-
-            String token = getAccessToken();
-            String endpoint = getApiEndpoint() + '/' + getApiVersion() + '/' + getPhoneNumberId() + '/messages';
-
-            HttpRequest httpReq = new HttpRequest();
-            httpReq.setEndpoint(endpoint);
-            httpReq.setMethod('POST');
-            httpReq.setHeader('Content-Type', 'application/json');
-            httpReq.setHeader('Authorization', 'Bearer ' + token);
-            httpReq.setBody(jsonData);
-
-            Http http = new Http();
-            HttpResponse response = http.send(httpReq);
-            Integer statusCode = response.getStatusCode();
-            if (statusCode != 200) {
-                errorMessage = 'Failed to send Template';
-                ErrorHandler.insertErrordata(null, 'WAManageTemplatePageController', 'sendPreviewTemplate', 'API Exception while sending preview message: ' + response.getBody());
-            }
-
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'sendPreviewTemplate', e.getMessage());
-        }
-        return errorMessage;
     }
 
     /*
@@ -370,25 +291,6 @@ public with sharing class WAManageTemplatePageController {
 
     /*
     *********************************************************
-    @description     : Fetch records based on the object name
-    @param           : objectName
-    @return          : List<sObject>
-    ********************************************************
-    */
-    @AuraEnabled
-    public static List<sObject> getRecordsBySObject(String objectName) {
-        List<sObject> records = new List<sObject>();
-        try {
-            String query = 'SELECT Id, Name, Phone FROM ' + String.escapeSingleQuotes(objectName) + ' WHERE Phone != null LIMIT 200';           
-            records = Database.query(query, AccessLevel.USER_MODE);
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getRecordsBySObject', e.getMessage());
-        }
-        return records;
-    }
-
-    /*
-    *********************************************************
     @description     : Fetches template data and variable mapping using WA_Template__c and WA_Template_Variable__c.
     @param           : templateId
     @return          : TemplateDataWrapper
@@ -402,16 +304,10 @@ public with sharing class WAManageTemplatePageController {
         wrapper.templateVariables = new List<Map<String, String>>();
 
         try {
-            List<WA_Template__c> templates = [
-                SELECT Id, Name, Template_Name__c, Button_Body__c, Status__c, Image_Header_Handle__c, Template_Id__c, Button_Label__c, Button_Type__c, File_Name__c,
-                    Footer_Body__c, Header_Body__c, Header_Type__c, Language__c, Template_Body__c, 
-                    Template_Category__c, Template_Miscellaneous_Data__c
-                FROM WA_Template__c 
-                WHERE Id = :templateId
-                WITH USER_MODE
-                ORDER BY LastModifiedDate DESC
-                LIMIT 1
-            ];
+            List<WA_Template__c> templates = [SELECT Id, Name, Template_Name__c, Button_Body__c, Status__c, Image_Header_Handle__c, Template_Id__c, Button_Label__c, 
+                                                Button_Type__c, File_Name__c, Footer_Body__c, Header_Body__c, Header_Type__c, Language__c, Template_Body__c, 
+                                                Template_Category__c, Template_Miscellaneous_Data__c FROM WA_Template__c  WHERE Id = :templateId WITH USER_MODE
+                                                ORDER BY LastModifiedDate DESC LIMIT 1];
 
             if (templates.isEmpty()) {
                 return wrapper; 
@@ -424,11 +320,8 @@ public with sharing class WAManageTemplatePageController {
                 wrapper.isImgUrl = true;
             }
 
-            List<WA_Template_Variable__c> templateVariables = [
-                SELECT Name, Object_Name__c, Field_Name__c, Type__c, Alternate_Text__c
-                FROM WA_Template_Variable__c 
-                WHERE WA_Template__c = :template.Id WITH USER_MODE
-            ];
+            List<WA_Template_Variable__c> templateVariables = [SELECT Name, Object_Name__c, Field_Name__c, Type__c, Alternate_Text__c FROM WA_Template_Variable__c 
+                                                                WHERE WA_Template__c = :template.Id WITH USER_MODE];
 
             if (!templateVariables.isEmpty()) {
                 for (WA_Template_Variable__c variable : templateVariables) {
@@ -457,174 +350,6 @@ public with sharing class WAManageTemplatePageController {
 
     /*
     *********************************************************
-    @description     : Fetch records based on the dynamic object name, fieldname and recordid
-    @param           : objectName, fieldNames, recordId
-    @return          : Map<String, Object>
-    ********************************************************
-    */
-    @AuraEnabled(cacheable=true)
-    public static Map<String, Object> fetchDynamicRecordData(String objectName, List<String> fieldNames, String recordId) {
-        Map<String, Object> resultMap = new Map<String, Object>();
-
-        try {
-            if (String.isEmpty(objectName) || fieldNames.isEmpty() || String.isEmpty(recordId)) {
-                ErrorHandler.insertErrordata(null, 'WAManageTemplatePageController', 'fetchDynamicRecordData', 'Object name, field names or record ID cannot be empty.');
-                throw new AuraHandledException('Invalid input parameters');
-            }
-
-            if (!fieldNames.contains('Phone')) {
-                fieldNames.add('Phone');
-            }
-            String fields = String.join(fieldNames, ',');
-            
-            String queryString = 'SELECT ' + fields + ' FROM ' + String.escapeSingleQuotes(objectName) + ' WHERE Id = :recordId LIMIT 1';            
-            List<SObject> queriedData = Database.query(queryString);
-
-            if (!queriedData.isEmpty()) {
-                resultMap.put('queriedData', queriedData[0]);  
-            } else {
-                resultMap.put('queriedData', null);
-            }
-
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'fetchDynamicRecordData', e.getMessage());
-            resultMap.put('error', e.getMessage());
-        }
-
-        return resultMap;
-    }
-   
-    /*
-    *********************************************************
-    @description     : Replaces template variables from backend to handle sending of template variable using WA_Template__c.
-    @param           : templateId, contactId
-    @return          : Map<String, Object>
-    ********************************************************
-    */
-    @AuraEnabled
-    public static Map<String, Object> getTemplateDataWithReplacement(String templateId, String contactId) {
-        try {
-            Map<String, Object> templateData = new Map<String, Object>();
-            List<WA_Template__c> templates = [SELECT Id, Name, Template_Name__c, Button_Body__c, Button_Label__c, Button_Type__c, Image_Header_Handle__c, 
-                                                Footer_Body__c, Header_Body__c, Header_Type__c, Language__c, File_Name__c, 
-                                                Template_Body__c, Template_Category__c, 
-                                                Template_Variable_Count__c, Template_Miscellaneous_Data__c,
-                                                (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c 
-                                                    FROM WA_Template_Variables__r ORDER BY Name ASC) 
-                                            FROM WA_Template__c 
-                                            WHERE Id = :templateId 
-                                            WITH USER_MODE];
-            if (templates.size() > 0) {
-                WA_Template__c template = templates[0];
-
-                if (template.WA_Template_Variables__r.size() > 0) {
-                    List<Object> headerVariables = new List<Object>();
-                    List<Object> bodyVariables = new List<Object>();
-
-                    if (String.isNotBlank(contactId)) {
-                        Set<String> fieldSelectionCause = new Set<String>();
-                        for (WA_Template_Variable__c tv : template.WA_Template_Variables__r) {
-                            if (tv.Object_Name__c == 'Contact') {
-                                fieldSelectionCause.add(tv.Field_Name__c);
-                            } else {
-                                fieldSelectionCause.add(tv.Object_Name__c + '.' + tv.Field_Name__c);
-                            }
-                        }
-
-                        if (fieldSelectionCause.size() > 0) {
-                            String query = 'SELECT Id, ' + String.join(fieldSelectionCause, ', ') + ' FROM Contact WHERE Id =:contactId';
-                            List<Contact> contacts = Database.query(query);
-                            if (contacts.size() > 0) {
-                                Contact contactRecord = contacts[0];
-                                for (WA_Template_Variable__c tv : template.WA_Template_Variables__r) {
-                                    Object valueToReplace = '';
-                                    if (tv.Object_Name__c == 'Contact') {
-                                        valueToReplace = contactRecord.get(tv.Field_Name__c);
-                                    } else {
-                                        valueToReplace = contactRecord.getSObject(tv.Object_Name__c) != null ? 
-                                                        contactRecord.getSObject(tv.Object_Name__c).get(tv.Field_Name__c) : null;
-                                    }
-                                    
-                                    if (tv.Type__c == 'Header') {
-                                        String replacement = (valueToReplace != null ? valueToReplace.toString() : 
-                                                                (tv.Alternate_Text__c != null ? tv.Alternate_Text__c : ''));
-                                    
-                                        headerVariables.add(replacement);
-                                        template.Header_Body__c = template.Header_Body__c != null ? template.Header_Body__c.replace(tv.Name, replacement) : '';
-                                    } else if (tv.Type__c == 'Body') {
-                                        String replacement = (valueToReplace != null ? valueToReplace.toString() : 
-                                                                (tv.Alternate_Text__c != null ? tv.Alternate_Text__c : ''));
-                                    
-                                        bodyVariables.add(replacement);
-                                        template.Template_Body__c = template.Template_Body__c != null ? template.Template_Body__c.replace(tv.Name, replacement) : '';
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        for (WA_Template_Variable__c tv : template.WA_Template_Variables__r) {
-                            if (tv.Type__c == 'Header') {
-                                headerVariables.add(tv.Alternate_Text__c != null ? tv.Alternate_Text__c : '{{' + tv.Name + '}}');
-                                template.Header_Body__c = template.Header_Body__c != null ? template.Header_Body__c.replace(tv.Name, 
-                                                            tv.Alternate_Text__c != null ? tv.Alternate_Text__c : '{{' + tv.Name + '}}') : '';
-                            } else if (tv.Type__c == 'Body') {
-                                bodyVariables.add(tv.Alternate_Text__c != null ? tv.Alternate_Text__c : tv.Name);
-                                template.Template_Body__c = template.Template_Body__c != null ? template.Template_Body__c.replace(tv.Name, 
-                                                            tv.Alternate_Text__c != null ? tv.Alternate_Text__c : tv.Name) : '';
-                            }
-                        }
-                    }
-
-                    templateData.put('template', template);
-                    templateData.put('headerParams', headerVariables);
-                    templateData.put('bodyParams', bodyVariables);
-                } else {
-                    templateData.put('template', template);
-                }
-
-                return templateData;
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getTemplateDataWithReplacement', e.getMessage());
-        }
-        return null;
-    }
-   
-    /*
-    *********************************************************
-    @description     : Get picklist values for Template_Category__c and Status__c from WA_Template__c.
-    @return          : Map<String, List<String>>
-    ********************************************************
-    */
-    @AuraEnabled(cacheable=true)
-    public static Map<String, List<String>> getCategoryAndStatusPicklistValues() {
-        Map<String, List<String>> picklistValues = new Map<String, List<String>>();
-        List<String> categoryValues = new List<String>();
-        List<String> statusValues = new List<String>();
-
-        try {
-            Schema.DescribeFieldResult categoryFieldResult = WA_Template__c.Template_Category__c.getDescribe();
-            for (Schema.PicklistEntry entry : categoryFieldResult.getPicklistValues()) {
-                categoryValues.add(entry.getLabel());
-            }
-
-            Schema.DescribeFieldResult statusFieldResult = WA_Template__c.Status__c.getDescribe();
-            for (Schema.PicklistEntry entry : statusFieldResult.getPicklistValues()) {
-                statusValues.add(entry.getLabel());
-            }
-
-            picklistValues.put('categories', categoryValues);
-            picklistValues.put('statuses', statusValues);
-
-            return picklistValues;
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getCategoryAndStatusPicklistValues', e.getMessage());
-            return null;
-        }
-    }
-
-    /*
-    *********************************************************
     @description     : Callout to create template in Meta Graph API and save WA_Template__c.
     @param           : serializedWrapper, payloadWrapper, templateName
     @return          : Map<String, Object>
@@ -635,18 +360,32 @@ public with sharing class WAManageTemplatePageController {
         Map<String, Object> response = new Map<String, Object>();
 
         try {
-            String wabaId = getBusinessAccountId();
-            if (String.isBlank(wabaId)) {
+            OAuth_Configuration__mdt config = getConfig();
+            if(config == null){
+                response.put('success', false);
+                response.put('errorMessage', 'OAuth_Configuration__mdt is not configured in Custom Metadata (OAuth_Configuration__mdt).');
+                return response;
+            }
+
+            if(String.isBlank(config.Access_Token__c)){
+                response.put('success', false);
+                response.put('errorMessage', 'Access Token is not configured in Custom Metadata (OAuth_Configuration__mdt).');
+                return response;
+            }
+
+            if(String.isBlank(config.Client_Business_Account_ID__c)){
                 response.put('success', false);
                 response.put('errorMessage', 'Business Account ID is not configured in Custom Metadata (OAuth_Configuration__mdt).');
                 return response;
             }
 
+            String wabaId = config.Client_Business_Account_ID__c;
+            String token = config.Access_Token__c;
+            String apiVersion = config.API_Version__c;
+            String endpoint = config.Authorization_Endpoint__c.removeEnd('/') + '/' + apiVersion + '/' + wabaId + '/message_templates';
+
             WATemplateWrapper.TemplateWrapper templateWrapper = (WATemplateWrapper.TemplateWrapper) JSON.deserialize(serializedWrapper, WATemplateWrapper.TemplateWrapper.class);
             Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(payloadWrapper);
-
-            String endpoint = getApiEndpoint() + '/' + getApiVersion() + '/' + wabaId + '/message_templates';
-            String token = getAccessToken();
             
             HttpRequest req = new HttpRequest();
             req.setEndpoint(endpoint);
@@ -668,13 +407,7 @@ public with sharing class WAManageTemplatePageController {
                 response.put('errorMessage', res.getBody());
 
                 if (String.isNotBlank(templateWrapper.tempImgId)) {
-                    List<ContentVersion> versions = [
-                        SELECT ContentDocumentId 
-                        FROM ContentVersion 
-                        WHERE Id = :templateWrapper.tempImgId 
-                        WITH USER_MODE 
-                        LIMIT 1
-                    ];
+                    List<ContentVersion> versions = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :templateWrapper.tempImgId WITH USER_MODE LIMIT 1];
 
                     if (!versions.isEmpty() && Schema.sObjectType.ContentDocument.isDeletable()) {
                         delete new ContentDocument(Id = versions[0].ContentDocumentId);
@@ -689,7 +422,6 @@ public with sharing class WAManageTemplatePageController {
                 response.put('success', false);
                 response.put('status', 'warning');
                 response.put('message', 'Template is being created, you will be notified once it is ready.');
-                checkTemplateExistance(templateName, serializedWrapper, payloadWrapper);
             } else {
                 response.put('success', false);
                 response.put('status', 'error');
@@ -698,70 +430,6 @@ public with sharing class WAManageTemplatePageController {
         }
 
         return response;
-    }
-
-    @future(callout=true)
-    @AuraEnabled
-    public static void checkTemplateExistance(String templateName, String serializedWrapper, String payloadWrapper) {
-        try {
-            String wabaId = getBusinessAccountId();
-            if (String.isBlank(wabaId)) return;
-
-            String endpoint = getApiEndpoint() + '/' + getApiVersion() + '/' + wabaId + '/message_templates?name=' + EncodingUtil.urlEncode(templateName, 'UTF-8');
-            String token = getAccessToken();
-            
-            HttpRequest req = new HttpRequest();
-            req.setEndpoint(endpoint);
-            req.setMethod('GET');
-            req.setHeader('Content-Type', 'application/json');
-            req.setHeader('Authorization', 'Bearer ' + token);
-
-            Http http = new Http();
-            HttpResponse res = http.send(req);
-
-            if (res.getStatusCode() == 200) {
-                Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
-                List<Object> dataList = (List<Object>) responseMap.get('data');
-
-                if (!dataList.isEmpty()) {
-                    Map<String, Object> templateData = (Map<String, Object>) dataList[0];
-                    String metaTemplateId = (String) templateData.get('id');
-                    String metaTempStatus = (String) templateData.get('status');
-
-                    WATemplateWrapper.TemplateWrapper templateWrapper = (WATemplateWrapper.TemplateWrapper) JSON.deserialize(serializedWrapper, WATemplateWrapper.TemplateWrapper.class);
-                    Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(payloadWrapper);
-
-                    Id templateId = WATemplateWrapper.handleSuccessResponse(metaTemplateId, metaTempStatus, payload, templateWrapper);
-
-                    if (templateId != null) {
-                        try {
-                            Schema.SObjectType eventType = Schema.getGlobalDescribe().get('MVEX__Template_Update__e');
-                            if (eventType == null) {
-                                eventType = Schema.getGlobalDescribe().get('Template_Update__e');
-                            }
-                            if (eventType != null) {
-                                sObject fetchAllTemplatesEvent = eventType.newSObject();
-                                Map<String, Schema.SObjectField> fieldMap = eventType.getDescribe().fields.getMap();
-                                if (fieldMap.containsKey('Fetch_All_Templates__c')) {
-                                    fetchAllTemplatesEvent.put('Fetch_All_Templates__c', true);
-                                } else if (fieldMap.containsKey('MVEX__Fetch_All_Templates__c')) {
-                                    fetchAllTemplatesEvent.put('MVEX__Fetch_All_Templates__c', true);
-                                }
-                                EventBus.publish(fetchAllTemplatesEvent);
-                            }
-                        } catch (Exception peEx) {
-                            System.debug('Could not publish template update event: ' + peEx.getMessage());
-                        }
-                    } else {
-                        ErrorHandler.insertErrordata(null, 'WAManageTemplatePageController', 'checkTemplateExistance', 'Template Id not found in checkTemplateExistance for template ' + templateName);
-                    }
-                }
-            } else {
-                ErrorHandler.insertErrordata(null, 'WAManageTemplatePageController', 'checkTemplateExistance', 'API Call failed: ' + res.getStatusCode() + ' - ' + res.getBody());
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'checkTemplateExistance', e.getMessage());
-        }
     }
 
     /*
@@ -774,22 +442,29 @@ public with sharing class WAManageTemplatePageController {
     @AuraEnabled
     public static String startUploadSession(String fileName, Integer fileLength, String fileType) {
         try {
-            String appId = getAppId();
+            OAuth_Configuration__mdt config = getConfig();
+            if(config == null){
+                return 'OAuth_Configuration__mdt is not configured in Custom Metadata (OAuth_Configuration__mdt).';
+            }
+
+            String appId = config.Client_App_ID__c;
             if (String.isBlank(appId)) {
                 return 'Application ID is not configured in Custom Metadata (OAuth_Configuration__mdt).';
             }
+
+            String apiVersion = config.API_Version__c;
+
+            String endpoint = config.Authorization_Endpoint__c + '/' + apiVersion + '/' + appId + '/uploads';
+            String token = config.Access_Token__c;
 
             Map<String, Object> payload = new Map<String, Object>();
             payload.put('file_name', fileName);
             payload.put('file_length', fileLength);
             payload.put('file_type', fileType);
 
-            uploadEndpoint = getApiEndpoint() + '/' + getApiVersion() + '/' + appId + '/uploads';
-            String token = getAccessToken();
-
             HttpRequest req = new HttpRequest();
             Http http = new Http();
-            req.setEndpoint(uploadEndpoint);
+            req.setEndpoint(endpoint);
             req.setMethod('POST');
             req.setHeader('Content-Type', 'application/json');
             req.setHeader('Authorization', 'OAuth ' + token);
@@ -822,14 +497,23 @@ public with sharing class WAManageTemplatePageController {
     @AuraEnabled
     public static String uploadFileChunk(String serializedWrapper, Boolean isAWSEnabled) {
         try {
+            OAuth_Configuration__mdt config = getConfig();
+            if(config == null){
+                return 'OAuth_Configuration__mdt is not configured in Custom Metadata (OAuth_Configuration__mdt).';
+            }
+
+            if(config.Client_App_ID__c == null){
+                return 'Client App ID is not configured in Custom Metadata (OAuth_Configuration__mdt).';
+            }
+
+            String token = config.Access_Token__c;
+
             FileChunkWrapper fileWrapper = (FileChunkWrapper) JSON.deserialize(serializedWrapper, FileChunkWrapper.class);
             Blob fileBlob = EncodingUtil.base64Decode(fileWrapper.fileContent);
+            String endpoint = config.Authorization_Endpoint__c + '/' + config.API_Version__c + '/upload:' + fileWrapper.uploadSessionId;
 
             HttpRequest req = new HttpRequest();
             Http http = new Http();
-
-            String endpoint = getApiEndpoint() + '/' + getApiVersion() + '/upload:' + fileWrapper.uploadSessionId;
-            String token = getAccessToken();
 
             req.setEndpoint(endpoint);
             req.setMethod('POST');            
@@ -869,78 +553,6 @@ public with sharing class WAManageTemplatePageController {
         }
         return '';
     }
-     
-    /*
-    *********************************************************
-    @description     : Method used to delete WA_Template__c from Meta as well as from Salesforce.
-    @param           : templateId
-    @return          : Return the success or error message. 
-    ********************************************************
-    */
-    @AuraEnabled
-    public static String deleteTemplete(String templateId) {
-        try {
-            WA_Template__c wbTempRec = [SELECT Id, Name, Template_Name__c, Status__c, Template_Id__c FROM WA_Template__c WHERE Id = :templateId WITH USER_MODE LIMIT 1];
-
-            // If template is Draft or hasn't been created in Meta, delete directly from Salesforce without Meta callout
-            if (wbTempRec.Status__c == 'Draft' || wbTempRec.Status__c == 'DRAFT' || String.isBlank(wbTempRec.Template_Id__c) || wbTempRec.Template_Id__c == 'DRAFT') {
-                if (WA_Template__c.sObjectType.getDescribe().isDeletable()) {
-                    delete wbTempRec;
-                }
-                return 'Template deleted successfully';
-            }
-
-            String wabaId = getBusinessAccountId();
-            if (String.isBlank(wabaId)) {
-                return 'Business Account ID is not configured in Custom Metadata (OAuth_Configuration__mdt).';
-            }
-            
-            String endpoint = getApiEndpoint() + '/' + getApiVersion() + '/' + wabaId + '/message_templates?name=' + wbTempRec.Template_Name__c;
-            String token = getAccessToken();
-
-            HttpRequest req = new HttpRequest();         
-            req.setEndpoint(endpoint);
-            req.setMethod('DELETE');
-            req.setHeader('Content-Type', 'application/json');
-            req.setHeader('Authorization', 'Bearer ' + token);
-            Http http = new Http();
-            HttpResponse res = http.send(req);
-
-            Integer statusCode = res.getStatusCode();
-            Boolean shouldDeleteFromSF = false;
-            String returnMessage = '';
-
-            if (statusCode == 400 && res.getBody().contains('Message template not found')) {
-                shouldDeleteFromSF = true;
-                returnMessage = 'Template not found in Meta and deleted from Salesforce successfully';                
-            } else if (statusCode == 404) {
-                shouldDeleteFromSF = true;
-                returnMessage = 'Template not found in Meta and deleted from Salesforce successfully';
-            } else if (statusCode == 200) {
-                Map<String, Object> jsonResponse = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
-                Boolean success = (Boolean) jsonResponse.get('success');
-                if (success) {
-                    shouldDeleteFromSF = true;
-                    returnMessage = 'Template deleted successfully';
-                } else {
-                    ErrorHandler.insertErrordata(null, 'WAManageTemplatePageController', 'deleteTemplete', res.getBody());
-                    returnMessage = 'Template deletion failed in Meta';
-                }
-            } else {
-                ErrorHandler.insertErrordata(null, 'WAManageTemplatePageController', 'deleteTemplete', res.getBody());
-                returnMessage = 'Template deletion failed with status: ' + statusCode;
-            }
-
-            if (shouldDeleteFromSF && WA_Template__c.sObjectType.getDescribe().isDeletable()) {
-                delete wbTempRec;
-            }
-
-            return returnMessage;
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'deleteTemplete', e.getMessage());
-            return e.getMessage();
-        }
-    }
 
     /*
     *********************************************************
@@ -955,15 +567,32 @@ public with sharing class WAManageTemplatePageController {
         HttpResponse res = new HttpResponse();
 
         try {
+            OAuth_Configuration__mdt config = getConfig();
+
+            if(config == null){
+                response.put('success', false);
+                response.put('status', 'error');
+                response.put('message', 'OAuth_Configuration__mdt is not configured in Custom Metadata (OAuth_Configuration__mdt).');
+                return response;
+            }
+
+            if(config.Client_App_ID__c == null){
+                response.put('success', false);
+                response.put('status', 'error');
+                response.put('message', 'Client App ID is not configured in Custom Metadata (OAuth_Configuration__mdt).');
+                return response;
+            }
+            
+            String token = config.Access_Token__c;
+            String apiVersion = config.API_Version__c;
+            String endpoint = config.Authorization_Endpoint__c + '/' + apiVersion + '/' + templateId;
+
             WATemplateWrapper.TemplateWrapper templateWrapper = (WATemplateWrapper.TemplateWrapper) JSON.deserialize(serializedWrapper, WATemplateWrapper.TemplateWrapper.class);
 
-            String editEndpoint = getApiEndpoint() + '/' + getApiVersion() + '/' + templateId;
-            String token = getAccessToken();
-
             Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(payloadWrapper);
-            
+
             HttpRequest req = new HttpRequest();
-            req.setEndpoint(editEndpoint);
+            req.setEndpoint(endpoint);
             req.setMethod('POST');
             req.setHeader('Content-Type', 'application/json');
             req.setHeader('Authorization', 'Bearer ' + token);
@@ -976,6 +605,8 @@ public with sharing class WAManageTemplatePageController {
                 Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
                 Id updatedTemplateId = WATemplateWrapper.handleSuccessResponse((String) responseMap.get('id'), (String) responseMap.get('status'), payload, templateWrapper);
                 response.put('success', true);
+                response.put('status', 'success');
+                response.put('message', 'Template is being updated, you will be notified once it is ready.');
                 
                 if (updatedTemplateId != null) {
                     createTemplateEditHistory(updatedTemplateId, serializedWrapper, payloadWrapper);
@@ -1077,10 +708,7 @@ public with sharing class WAManageTemplatePageController {
                 fileName = fileUrlOrContentVersionId.substring(fileUrlOrContentVersionId.lastIndexOf('/') + 1);
                 fileLength = fileBlob.size();
             } else {
-                ContentVersion cv = [SELECT Title, VersionData, FileExtension, ContentSize
-                                     FROM ContentVersion
-                                     WHERE Id = :contentVersionId
-                                     LIMIT 1];
+                ContentVersion cv = [SELECT Title, VersionData, FileExtension, ContentSize FROM ContentVersion WHERE Id = :contentVersionId WITH USER_MODE LIMIT 1];
                 fileBlob = cv.VersionData;
                 fileName = cv.Title + '.' + cv.FileExtension;
                 mimeType = getMimeTypeFromExtension(cv.FileExtension);
@@ -1177,105 +805,8 @@ public with sharing class WAManageTemplatePageController {
     }
 
     @AuraEnabled(cacheable=true)
-    public static List<sObject> getAllFlows() {
-        try {
-            if (Schema.getGlobalDescribe().containsKey('Flow__c')) {
-                return Database.query('SELECT Id, Flow_Id__c, Flow_Name__c, Flow_JSON__c, LastModifiedDate, Status__c FROM Flow__c WHERE Status__c = \'Published\' WITH USER_MODE ORDER BY CreatedDate DESC');
-            }
-            return new List<sObject>();
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getAllFlows', e.getMessage());
-            return new List<sObject>();
-        }
-    }
-
-    @AuraEnabled
-    public static Map<String, String> getPreviewURLofWhatsAppFlow(String flowId) {
-        try {
-            OAuth_Configuration__mdt config = getConfig();
-            if (config == null || String.isBlank(config.Access_Token__c)) {
-                return new Map<String, String>{'status' => 'failed', 'error' => 'failed'};
-            }
-
-            String token = getAccessToken();
-            String endpoint = getApiEndpoint() + '/' + getApiVersion() + '/' + flowId + '?fields=preview.invalidate(false)';
-            HttpRequest request = new HttpRequest();
-            request.setEndpoint(endpoint);
-            request.setMethod('GET');
-            request.setHeader('Authorization', 'Bearer ' + token);
-            Http http = new Http();
-            HttpResponse response = http.send(request);
-            
-            if (response.getStatusCode() == 200) {
-                Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
-                Map<String, Object> previewMap = (Map<String, Object>) responseMap.get('preview');
-                String previewUrl = (String) previewMap.get('preview_url');
-                return new Map<String, String>{'status' => '200', 'previewUrl' => previewUrl};
-            } else {
-                return new Map<String, String>{'status' => 'failed', 'error' => 'failed'};
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getPreviewURLofWhatsAppFlow', e.getMessage());
-            return new Map<String, String>{'status' => 'failed', 'error' => 'failed'};
-        }
-    }
-
-    @AuraEnabled(cacheable=true)
-    public static List<Map<String, String>> getObjectsWithPhoneField() {
-        List<Map<String, String>> objectList = new List<Map<String, String>>();
-        
-        try {
-            List<FieldDefinition> phoneFields = [SELECT EntityDefinition.QualifiedApiName, EntityDefinition.Label FROM FieldDefinition WHERE DataType = 'Phone' AND EntityDefinition.IsCustomizable = true AND EntityDefinition.IsApexTriggerable = true AND EntityDefinition.IsQueryable = true WITH USER_MODE];
-            Set<String> processedObjects = new Set<String>();
-    
-            for (FieldDefinition field : phoneFields) {
-                String objectName = field.EntityDefinition.QualifiedApiName;
-                if (!processedObjects.contains(objectName)) {
-                    objectList.add(new Map<String, String>{
-                        'label' => field.EntityDefinition.Label,
-                        'value' => objectName
-                    });
-                    processedObjects.add(objectName);
-                }
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getObjectsWithPhoneField', e.getMessage());
-        }
-    
-        return objectList;
-    }
-
-    @AuraEnabled(cacheable=true)
     public static String getCompanyName() {
-        return [SELECT Name FROM Organization LIMIT 1].Name;
-    }
-
-    @AuraEnabled
-    public static String getAllFlowScreenIds(String flowId) {
-        List<String> screenIds = new List<String>();
-
-        try {
-            if (Schema.getGlobalDescribe().containsKey('Flow__c')) {
-                List<sObject> flowRecs = Database.query('SELECT Id, Flow_Id__c, Flow_Json__c FROM Flow__c WHERE Flow_Id__c = :flowId LIMIT 1');
-                if (!flowRecs.isEmpty() && flowRecs[0].get('Flow_Json__c') != null) {
-                    String jsonStr = (String) flowRecs[0].get('Flow_Json__c');
-                    Map<String, Object> flowJson = (Map<String, Object>) JSON.deserializeUntyped(jsonStr);
-                    if (flowJson.containsKey('screens')) {
-                        List<Object> screens = (List<Object>) flowJson.get('screens');
-                        for (Object scr : screens) {
-                            Map<String, Object> scrMap = (Map<String, Object>) scr;
-                            if (scrMap.containsKey('id')) {
-                                screenIds.add((String) scrMap.get('id'));
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getAllFlowScreenIds', e.getMessage());
-        }
-
-        return screenIds.isEmpty() ? '' : screenIds[0];
+        return [SELECT Name FROM Organization WITH USER_MODE LIMIT 1].Name;
     }
 
     public class FileChunkWrapper {

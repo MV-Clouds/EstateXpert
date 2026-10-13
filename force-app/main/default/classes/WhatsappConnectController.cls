@@ -17,7 +17,7 @@ public with sharing class WhatsappConnectController {
     public static String lastModifiedDate {get; set;}
     public static String namespace {get; set;}
 
-    private static final String CONFIG_DEV_NAME = 'Whatsapp_OAuth';
+    public static final String CONFIG_DEV_NAME = 'Whatsapp_OAuth';
 
     @TestVisible
     private static OAuth_Configuration__mdt mockConfig;

@@ -218,11 +218,10 @@
                                     </div>
                                     <div class="header-variable-btn-container">
                                         <button class="toolbar-button custom-button richtext"
-                                            onclick={addheadervariable} disabled={buttonDisabled}
-                                            style="display: flex; align-items: center; font-weight: 500; font-size: 15px; color: #1a1a1a; padding: 6px 8px;">
-                                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor"
+                                            onclick={addheadervariable} disabled={buttonDisabled}>
+                                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
                                                 stroke-width="2" fill="none" stroke-linecap="round"
-                                                stroke-linejoin="round" style="margin-right: 6px;">
+                                                stroke-linejoin="round" class="add-var-icon">
                                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                                             </svg>
@@ -231,7 +230,7 @@
                                         <lightning-helptext
                                             content="Add variables by selecting columns from your customer list. When your message is sent, the variable will be replaced with data from the column."
                                             icon-variant="bare"
-                                            style="margin-left: 4px; --slds-c-icon-color-foreground-default: #4b4b4b;"></lightning-helptext>
+                                            class="var-helptext"></lightning-helptext>
                                     </div>
                                     <template if:true={headerError}>
                                         <div class="slds-text-color_error slds-m-top_small margin-top-zero">
@@ -312,7 +311,7 @@
                                     </template>
                                 </template>
                             </template>
-                            <div class="body">
+                            <div class="wa-body">
                                 <label for="body" class="body-label">Body</label>
                                 <textarea name="tempBody" class="body-area" oninput={handleInputChange} maxlength="1024"
                                     rows="4" cols="50">{tempBody}</textarea>
@@ -341,12 +340,10 @@
                                     </div>
                                 </template>
 
-                                <div class="inner-rich"
-                                    style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; background: transparent;">
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <button class="toolbar-button" onclick={handleEmoji} title="Emoji"
-                                            style="display: flex; align-items: center; justify-content: center; padding: 6px;">
-                                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4b4b4b"
+                                <div class="inner-rich">
+                                    <div class="toolbar-btn-group">
+                                        <button class="toolbar-button" onclick={handleEmoji} title="Emoji">
+                                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4b4b4b"
                                                 stroke-width="2" fill="none" stroke-linecap="round"
                                                 stroke-linejoin="round">
                                                 <circle cx="12" cy="12" r="10"></circle>
@@ -356,9 +353,8 @@
                                             </svg>
                                         </button>
                                         <button class="toolbar-button" data-format="Bold" onclick={handleFormat}
-                                            title="Bold"
-                                            style="display: flex; align-items: center; justify-content: center; padding: 6px;">
-                                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4b4b4b"
+                                            title="Bold">
+                                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4b4b4b"
                                                 stroke-width="2" fill="none" stroke-linecap="round"
                                                 stroke-linejoin="round">
                                                 <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path>
@@ -366,9 +362,8 @@
                                             </svg>
                                         </button>
                                         <button class="toolbar-button" data-format="Italic" onclick={handleFormat}
-                                            title="Italic"
-                                            style="display: flex; align-items: center; justify-content: center; padding: 6px;">
-                                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4b4b4b"
+                                            title="Italic">
+                                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4b4b4b"
                                                 stroke-width="2" fill="none" stroke-linecap="round"
                                                 stroke-linejoin="round">
                                                 <line x1="19" y1="4" x2="10" y2="4"></line>
@@ -377,9 +372,8 @@
                                             </svg>
                                         </button>
                                         <button class="toolbar-button" data-format="Strikethrough"
-                                            onclick={handleFormat} title="Strikethrough"
-                                            style="display: flex; align-items: center; justify-content: center; padding: 6px;">
-                                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4b4b4b"
+                                            onclick={handleFormat} title="Strikethrough">
+                                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4b4b4b"
                                                 stroke-width="2" fill="none" stroke-linecap="round"
                                                 stroke-linejoin="round">
                                                 <path
@@ -389,9 +383,8 @@
                                             </svg>
                                         </button>
                                         <button class="toolbar-button" data-format="Code" onclick={handleFormat}
-                                            title="Code"
-                                            style="display: flex; align-items: center; justify-content: center; padding: 6px;">
-                                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4b4b4b"
+                                            title="Code">
+                                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4b4b4b"
                                                 stroke-width="2" fill="none" stroke-linecap="round"
                                                 stroke-linejoin="round">
                                                 <polyline points="16 18 22 12 16 6"></polyline>
@@ -399,13 +392,11 @@
                                             </svg>
                                         </button>
 
-                                        <div class="variable-btn-container"
-                                            style="display: flex; align-items: center; margin-left: 8px; width: 100%;">
-                                            <button class="toolbar-button custom-button richtext" onclick={addvariable}
-                                                style="display: flex; align-items: center; font-weight: 500; font-size: 15px; color: #1a1a1a; padding: 6px 8px; width: 100%;">
-                                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor"
+                                        <div class="variable-btn-container">
+                                            <button class="toolbar-button custom-button richtext" onclick={addvariable}>
+                                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor"
                                                     stroke-width="2" fill="none" stroke-linecap="round"
-                                                    stroke-linejoin="round" style="margin-right: 6px;">
+                                                    stroke-linejoin="round" class="add-var-icon">
                                                     <line x1="12" y1="5" x2="12" y2="19"></line>
                                                     <line x1="5" y1="12" x2="19" y2="12"></line>
                                                 </svg>
@@ -414,7 +405,7 @@
                                             <lightning-helptext
                                                 content="Add variables by selecting columns from your customer list. When your message is sent, the variable will be replaced with data from the column."
                                                 icon-variant="bare"
-                                                style="margin-left: 4px; --slds-c-icon-color-foreground-default: #4b4b4b;"></lightning-helptext>
+                                                class="var-helptext"></lightning-helptext>
                                         </div>
                                     </div>
                                 </div>

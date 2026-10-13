@@ -6,9 +6,6 @@
  * @last modified on  : 09/10/2026
  **/
 public with sharing class WATemplateHomePageController {
-    
-    private static final String CONFIG_DEV_NAME = 'Whatsapp_OAuth';
-
     @TestVisible
     private static OAuth_Configuration__mdt mockConfig;
 
@@ -21,10 +18,12 @@ public with sharing class WATemplateHomePageController {
             if (mockConfig != null) {
                 return mockConfig;
             }
+            String CONFIGDEVNAME = WhatsappConnectController.CONFIG_DEV_NAME;
+
             List<OAuth_Configuration__mdt> configs = [SELECT Id, DeveloperName, MasterLabel, Client_Id__c, Client_Secret__c, Config_Id__c, API_Version__c, 
                                                         Authorization_Endpoint__c, Token_Endpoint__c, Access_Token__c, Client_App_ID__c, Client_Business_Account_ID__c,
                                                         Client_Phone_Number_ID__c, Connected_Date__c, SystemModstamp FROM OAuth_Configuration__mdt
-                                                        WHERE DeveloperName = :CONFIG_DEV_NAME WITH USER_MODE LIMIT 1];
+                                                        WHERE DeveloperName = :CONFIGDEVNAME WITH USER_MODE LIMIT 1];
             return configs.isEmpty() ? null : configs[0];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WATemplateHomePageController', 'getConfig', e.getMessage());

@@ -50,7 +50,6 @@ function buildMarketingOrUtilityComponents(templateWrapper) {
 
         // Build the FOOTER component with conditional logic.
         if (templateWrapper.tempFooterText) {
-            // Standard text footer.
             components.push({
                 type: 'FOOTER',
                 text: templateWrapper.tempFooterText
@@ -65,9 +64,6 @@ function buildMarketingOrUtilityComponents(templateWrapper) {
                 buttons: buttonComponents
             });
         }
-
-        console.log('Components ==> ', components);
-        
 
         return components;
     } catch (e) {
@@ -105,7 +101,6 @@ function buildHeaderComponent(templateWrapper) {
                         // Build header_text_named_params array using alternateText from variable objects
                         const namedParams = matches.map((match) => {
                             const paramName = match[1];
-                            // Find the variable object with matching nameValue (not name)
                             const variable = templateWrapper.header_variables?.find(v => v.nameValue === paramName);
                             const exampleValue = variable?.alternateText?.trim() || '';
                             if (!exampleValue) {
@@ -148,49 +143,41 @@ function buildBodyComponent(templateWrapper) {
     try {
         let bodyComponent = { type: 'BODY' };
 
-        // Authentication templates have a special body structure.
-        if (templateWrapper.templateCategory === 'Authentication') {
-            bodyComponent.add_security_recommendation = templateWrapper.isSecurityRecommedation;
-        } else {
-            // For other types, set the main text content.
-            bodyComponent.text = templateWrapper.templateBody.replace(/\\n/g, '\n');
-            
-            // Add example text for variables if provided.
-            if (templateWrapper.templateBodyText && templateWrapper.templateBodyText.length > 0) {
-                // For Name type (named parameters), use body_text_named_params format
-                if (templateWrapper.selectedVariableType === 'Name') {
-                    // Extract variable names from the body text
-                    const variablePattern = /\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g;
-                    const matches = [...templateWrapper.templateBody.matchAll(variablePattern)];
-                    
-                    if (matches.length > 0) {
-                        // Build body_text_named_params array using alternateText from variable objects
-                        const namedParams = matches.map((match) => {
-                            const paramName = match[1];
-                            // Find the variable object with matching nameValue (not name)
-                            const variable = templateWrapper.variables?.find(v => v.nameValue === paramName);
-                            const exampleValue = variable?.alternateText?.trim() || '';
-                            if (!exampleValue) {
-                                console.error(`Body variable "${paramName}" has no example value`);
-                            }
-                            return {
-                                param_name: paramName,
-                                example: exampleValue
-                            };
-                        });
-                        
-                        bodyComponent.example = {
-                            body_text_named_params: namedParams
+        bodyComponent.text = templateWrapper.templateBody.replace(/\\n/g, '\n');
+        
+        // Add example text for variables if provided.
+        if (templateWrapper.templateBodyText && templateWrapper.templateBodyText.length > 0) {
+            // For Name type (named parameters), use body_text_named_params format
+            if (templateWrapper.selectedVariableType === 'Name') {
+                // Extract variable names from the body text
+                const variablePattern = /\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g;
+                const matches = [...templateWrapper.templateBody.matchAll(variablePattern)];
+                
+                if (matches.length > 0) {
+                    // Build body_text_named_params array using alternateText from variable objects
+                    const namedParams = matches.map((match) => {
+                        const paramName = match[1];
+                        const variable = templateWrapper.variables?.find(v => v.nameValue === paramName);
+                        const exampleValue = variable?.alternateText?.trim() || '';
+                        if (!exampleValue) {
+                            console.error(`Body variable "${paramName}" has no example value`);
+                        }
+                        return {
+                            param_name: paramName,
+                            example: exampleValue
                         };
-                    }
-                } else {
-                    // For Number type (positional parameters), use body_text format
+                    });
+                    
                     bodyComponent.example = {
-                        body_text: [templateWrapper.templateBodyText]
+                        body_text_named_params: namedParams
                     };
                 }
+            } else {
+                // For Number type (positional parameters), use body_text format
+                bodyComponent.example = {
+                    body_text: [templateWrapper.templateBodyText]
+                };
             }
-
         }
 
         return bodyComponent;
@@ -200,6 +187,10 @@ function buildBodyComponent(templateWrapper) {
     }
 }
 
+/**
+ * Method Name: buildButtonComponent 
+ * @description Constructs the BUTTONS component array.
+ */
 function buildButtonComponent(templateWrapper) {
     const buttonComponents = [];
 
@@ -211,10 +202,10 @@ function buildButtonComponent(templateWrapper) {
         for (const item of untypedList) {
             const actionType = item.selectedActionType;
             const customActionType = item.selectedCustomType;
-            const phoneNumber = `${item.selectedCountryType} ${item.phonenum}`;
             const buttonComponent = {};
 
             if (actionType === 'PHONE_NUMBER') {
+                const phoneNumber = `${item.selectedCountryType} ${item.phonenum}`;
                 Object.assign(buttonComponent, {
                     type: 'PHONE_NUMBER',
                     text: item.btntext,
@@ -234,17 +225,6 @@ function buildButtonComponent(templateWrapper) {
                     text: item.btntext,
                     url: item.webURL
                 });
-
-            } else if (actionType === 'CATALOG') {
-                Object.assign(buttonComponent, {
-                    type: 'CATALOG',
-                    text: item.btntext
-                });
-            } else if (actionType === 'MPM') {
-                Object.assign(buttonComponent, {
-                    type: 'MPM',
-                    text: item.btntext
-                });
             }
 
             if (Object.keys(buttonComponent).length > 0) {
@@ -257,7 +237,6 @@ function buildButtonComponent(templateWrapper) {
 
     return buttonComponents;
 }
-
 
 // Export the main builder function as the default export of this module.
 export default buildPayload;

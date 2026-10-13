@@ -6,9 +6,6 @@
  * @last modified on  : 12/10/2026
  **/
 public with sharing class WATemplateWrapper {
-    
-    private static final String CONFIG_DEV_NAME = 'Whatsapp_OAuth';
-
     @TestVisible
     private static OAuth_Configuration__mdt mockConfig;
 
@@ -21,10 +18,12 @@ public with sharing class WATemplateWrapper {
             if (mockConfig != null) {
                 return mockConfig;
             }
+            String CONFIGDEVNAME = WhatsappConnectController.CONFIG_DEV_NAME;
+
             List<OAuth_Configuration__mdt> configs = [SELECT Id, DeveloperName, MasterLabel, Client_Id__c, Client_Secret__c, Config_Id__c, API_Version__c, 
                                                         Authorization_Endpoint__c, Token_Endpoint__c, Access_Token__c, Client_App_ID__c, Client_Business_Account_ID__c,
                                                         Client_Phone_Number_ID__c, Connected_Date__c, SystemModstamp FROM OAuth_Configuration__mdt
-                                                        WHERE DeveloperName = :CONFIG_DEV_NAME WITH USER_MODE LIMIT 1];
+                                                        WHERE DeveloperName = :CONFIGDEVNAME WITH USER_MODE LIMIT 1];
             return configs.isEmpty() ? null : configs[0];
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'WATemplateWrapper', 'getConfig', e.getMessage());
@@ -115,8 +114,8 @@ public with sharing class WATemplateWrapper {
                             whatsAppTemplate.Header_Body__c = (String) component.get('text');
                         }
 
-                        if (example != null && example.containsKey('header_text') && example.get('header_text') instanceof List<Object>) {
-                            Pattern pattern = Pattern.compile('\\{\\{(\\d+)\\}\\}');
+                        if (example != null && (example.containsKey('header_text') || example.containsKey('header_text_named_params'))) {
+                            Pattern pattern = Pattern.compile('\\{\\{([^}]+)\\}\\}');
                             Matcher matcher = pattern.matcher((String) component.get('text'));
 
                             while (matcher.find() && headerIndex < headerVariables.size()) {
@@ -127,7 +126,7 @@ public with sharing class WATemplateWrapper {
                                         Name = placeholder,
                                         Object_Name__c = varData.objectName,
                                         Field_Name__c = varData.fieldName,
-                                        Type__c = String.isNotBlank(varData.variableType) ? varData.variableType : 'Header',
+                                        Type__c = 'Header',
                                         Alternate_Text__c = varData.alternateText
                                     ));
                                 }
@@ -137,11 +136,11 @@ public with sharing class WATemplateWrapper {
                     }
                     // BODY Component
                     else if (type == 'BODY') {
-                        Map<String, Object> result = handleBodyComponent(whatsAppTemplate.Template_Category__c, component, example);
+                        Map<String, Object> result = handleBodyComponent(component);
                         if (result.get('bodyText') != null) {
                             whatsAppTemplate.Template_Body__c = String.isNotBlank((String) result.get('bodyText')) ? (String) result.get('bodyText') : '';
 
-                            Pattern pattern = Pattern.compile('\\{\\{(\\d+)\\}\\}');
+                            Pattern pattern = Pattern.compile('\\{\\{([^}]+)\\}\\}');
                             Matcher matcher = pattern.matcher((String) result.get('bodyText'));
                             Set<String> processedBodyPlaceholders = new Set<String>();
 
@@ -155,7 +154,7 @@ public with sharing class WATemplateWrapper {
                                             Name = placeholder,
                                             Object_Name__c = varData.objectName,
                                             Field_Name__c = varData.fieldName, 
-                                            Type__c = String.isNotBlank(varData.variableType) ? varData.variableType : 'Body',
+                                            Type__c = 'Body',
                                             Alternate_Text__c = varData.alternateText
                                         ));
                                     }
@@ -243,7 +242,7 @@ public with sharing class WATemplateWrapper {
                                 Name = vw.placeholder,
                                 Object_Name__c = vw.objectName,
                                 Field_Name__c = vw.fieldName,
-                                Type__c = String.isNotBlank(vw.variableType) ? vw.variableType : 'Body',
+                                Type__c = 'Body',
                                 Alternate_Text__c = vw.alternateText
                             ));
                         }
@@ -257,7 +256,7 @@ public with sharing class WATemplateWrapper {
                                 Name = vw.placeholder,
                                 Object_Name__c = vw.objectName,
                                 Field_Name__c = vw.fieldName,
-                                Type__c = String.isNotBlank(vw.variableType) ? vw.variableType : 'Header',
+                                Type__c = 'Header',
                                 Alternate_Text__c = vw.alternateText
                             ));
                         }
@@ -282,11 +281,11 @@ public with sharing class WATemplateWrapper {
     /*
     *********************************************************
     @description     : Handle body component to extract body text.
-    @param           : category, component, example
+    @param           : component - Map<String, Object>
     @return          : result - contains the body text.
     ********************************************************
     */
-    private static Map<String, Object> handleBodyComponent(String category, Map<String, Object> component, Map<String, Object> example) {
+    private static Map<String, Object> handleBodyComponent(Map<String, Object> component) {
         Map<String, Object> result = new Map<String, Object>(); 
         try {
             String bodyText = (String) component.get('text');
@@ -333,8 +332,6 @@ public with sharing class WATemplateWrapper {
         @AuraEnabled public String tempImgUrl;  // Required for media headers
         @AuraEnabled public String tempImgName; // Required for media headers
         @AuraEnabled public String tempImgId;   // Required for media headers
-        @AuraEnabled public List<String> packagename;  
-        @AuraEnabled public List<String> signaturename;  
         @AuraEnabled public String marketingOptText;  // Required for button opt-out identification
         @AuraEnabled public String templateMiscellaneousData;
         @AuraEnabled public List<VariableWrapper> variables;

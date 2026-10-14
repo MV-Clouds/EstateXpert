@@ -76,8 +76,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     selectedOption = 'Custom';
     selectedContentType = 'None';
     header = '';
-    tempBody = 'Hello';
-    formatedTempBody = 'Hello';
+    tempBody = 'Hello! Thank you for choosing us for your property needs. Our team will be happy to assist you.';
+    formatedTempBody = 'Hello! Thank you for choosing us for your property needs. Our team will be happy to assist you.';
     footer = '';
     selectedObject = 'Contact';
     selectedVariableType = 'Number';

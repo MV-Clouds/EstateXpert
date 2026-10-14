@@ -7,26 +7,6 @@
  * @last modified on  : 09/10/2026
  **/
 public with sharing class WAManageTemplatePageController {
-
-    /**
-     * @description : Retrieves the WhatsApp OAuth Custom Metadata configuration record for Whatsapp_OAuth
-     * @return OAuth_Configuration__mdt
-     */
-    public static OAuth_Configuration__mdt getConfig() {
-        try {
-            String CONFIGDEVNAME = WhatsappConnectController.CONFIG_DEV_NAME;
-
-            List<OAuth_Configuration__mdt> configs = [SELECT Id, DeveloperName, MasterLabel, Client_Id__c, Client_Secret__c, Config_Id__c, API_Version__c, 
-                                                        Authorization_Endpoint__c, Token_Endpoint__c, Access_Token__c, Client_App_ID__c, Client_Business_Account_ID__c,
-                                                        Client_Phone_Number_ID__c, Connected_Date__c, SystemModstamp FROM OAuth_Configuration__mdt
-                                                        WHERE DeveloperName = :CONFIGDEVNAME WITH USER_MODE LIMIT 1];
-            return configs.isEmpty() ? null : configs[0];
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getConfig', e.getMessage());
-            return null;
-        }
-    }
-
     /*
     *********************************************************
     @description     : Used in waTemplateHomePage / template list to get all WA_Template__c records.
@@ -160,7 +140,7 @@ public with sharing class WAManageTemplatePageController {
         Map<String, Object> response = new Map<String, Object>();
 
         try {
-            OAuth_Configuration__mdt config = getConfig();
+            OAuth_Configuration__mdt config = WhatsappConnectController.getConfig();
             if(config == null){
                 response.put('success', false);
                 response.put('errorMessage', 'OAuth_Configuration__mdt is not configured in Custom Metadata (OAuth_Configuration__mdt).');
@@ -340,7 +320,7 @@ public with sharing class WAManageTemplatePageController {
         HttpResponse res = new HttpResponse();
 
         try {
-            OAuth_Configuration__mdt config = getConfig();
+            OAuth_Configuration__mdt config = WhatsappConnectController.getConfig();
 
             if(config == null){
                 response.put('success', false);
@@ -533,7 +513,7 @@ public with sharing class WAManageTemplatePageController {
             String fileName;
             Integer fileLength;
 
-            OAuth_Configuration__mdt config = getConfig();
+            OAuth_Configuration__mdt config = WhatsappConnectController.getConfig();
 
             if(config == null){
                 return 'OAuth_Configuration__mdt is not configured in Custom Metadata (OAuth_Configuration__mdt).';

@@ -19,9 +19,6 @@ public with sharing class WhatsappConnectController {
 
     public static final String CONFIG_DEV_NAME = 'Whatsapp_OAuth';
 
-    @TestVisible
-    private static OAuth_Configuration__mdt mockConfig;
-
     public WhatsappConnectController() {
         String className = WhatsappConnectController.class.getName();
         namespace = className.contains('.') ? className.substringBefore('.') : 'c';
@@ -68,9 +65,6 @@ public with sharing class WhatsappConnectController {
      */
     public static OAuth_Configuration__mdt getConfig() {
         try {
-            if (mockConfig != null) {
-                return mockConfig;
-            }
             List<OAuth_Configuration__mdt> configs = [SELECT Id, DeveloperName, MasterLabel, Client_Id__c, Client_Secret__c, Config_Id__c, API_Version__c, 
                                                         Authorization_Endpoint__c, Token_Endpoint__c, Access_Token__c, Client_App_ID__c, Client_Business_Account_ID__c,
                                                         Client_Phone_Number_ID__c, Connected_Date__c, SystemModstamp FROM OAuth_Configuration__mdt

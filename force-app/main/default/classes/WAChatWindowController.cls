@@ -6,45 +6,7 @@
  * @author            : EstateXpert Team
  * @last modified on  : 14/10/2026
  **/
-public with sharing class WAChatWindowController {
-
-    private static final String CONFIG_DEV_NAME = 'Whatsapp_OAuth';
-
-    /**
-     * @description : Retrieves the WhatsApp OAuth Custom Metadata configuration record for Whatsapp_OAuth
-     * @return OAuth_Configuration__mdt
-     */
-    public static OAuth_Configuration__mdt getConfig() {
-        try {
-            List<OAuth_Configuration__mdt> configs = [
-                SELECT Id, DeveloperName, MasterLabel, API_Version__c, Authorization_Endpoint__c, 
-                       Access_Token__c, Client_Phone_Number_ID__c, Client_Business_Account_ID__c 
-                FROM OAuth_Configuration__mdt 
-                WHERE DeveloperName = :CONFIG_DEV_NAME 
-                WITH USER_MODE 
-                LIMIT 1
-            ];
-            return configs.isEmpty() ? null : configs[0];
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAChatWindowController', 'getConfig', e.getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * @description : Checks if WhatsApp Business Account is configured
-     * @return Boolean
-     */
-    @AuraEnabled(cacheable=true)
-    public static Boolean hasBusinessAccountId() {
-        try {
-            OAuth_Configuration__mdt config = getConfig();
-            return config != null && String.isNotBlank(config.Client_Business_Account_ID__c);
-        } catch (Exception e) {
-            return false;
-        }
-    }
-    
+public with sharing class WAChatWindowController {    
     /**
      * @description : Retrieves list of objects configured for WhatsApp Chat Window from MVEX__Object_Config__mdt
      * @return List<String>
@@ -412,7 +374,7 @@ public with sharing class WAChatWindowController {
         WA_Chat__c chat = new WA_Chat__c(Id = chatId);
         try {
             resultMap.put('errorMessage', null);
-            OAuth_Configuration__mdt config = getConfig();
+            OAuth_Configuration__mdt config = WhatsappConnectController.getConfig();
 
             if (config == null || String.isBlank(config.Access_Token__c) || String.isBlank(config.Client_Phone_Number_ID__c)) {
                 if (!isReaction) {
@@ -718,7 +680,7 @@ public with sharing class WAChatWindowController {
 
         try {
             List<WA_Chat__c> chats = [SELECT Id, Message_ID__c, Message_Status__c FROM WA_Chat__c WHERE Id IN :messageIds WITH USER_MODE];
-            OAuth_Configuration__mdt config = getConfig();
+            OAuth_Configuration__mdt config = WhatsappConnectController.getConfig();
             if (config == null || String.isBlank(config.Access_Token__c) || String.isBlank(config.Client_Phone_Number_ID__c)) {
                 return successCount;
             }

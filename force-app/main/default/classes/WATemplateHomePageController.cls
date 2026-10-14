@@ -7,32 +7,13 @@
  **/
 public with sharing class WATemplateHomePageController {
     /**
-     * @description : Retrieves the WhatsApp OAuth Custom Metadata configuration record for Whatsapp_OAuth
-     * @return OAuth_Configuration__mdt
-     */
-    public static OAuth_Configuration__mdt getConfig() {
-        try {
-            String CONFIGDEVNAME = WhatsappConnectController.CONFIG_DEV_NAME;
-
-            List<OAuth_Configuration__mdt> configs = [SELECT Id, DeveloperName, MasterLabel, Client_Id__c, Client_Secret__c, Config_Id__c, API_Version__c, 
-                                                        Authorization_Endpoint__c, Token_Endpoint__c, Access_Token__c, Client_App_ID__c, Client_Business_Account_ID__c,
-                                                        Client_Phone_Number_ID__c, Connected_Date__c, SystemModstamp FROM OAuth_Configuration__mdt
-                                                        WHERE DeveloperName = :CONFIGDEVNAME WITH USER_MODE LIMIT 1];
-            return configs.isEmpty() ? null : configs[0];
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WATemplateHomePageController', 'getConfig', e.getMessage());
-            return null;
-        }
-    }
-
-    /**
      * @description : Method to check if WhatsApp business account is configured using OAuth_Configuration__mdt
      * @return Boolean
      */
     @AuraEnabled(cacheable=true)
     public static Boolean hasBusinessAccountId() {
         try {
-            OAuth_Configuration__mdt config = getConfig();
+            OAuth_Configuration__mdt config = WhatsappConnectController.getConfig();
             return config != null && String.isNotBlank(config.Client_Business_Account_ID__c);
         } catch (Exception e) {
             return false;
@@ -78,7 +59,7 @@ public with sharing class WATemplateHomePageController {
                 return 'Template deleted successfully';
             }
 
-            OAuth_Configuration__mdt config = getConfig();
+            OAuth_Configuration__mdt config = WhatsappConnectController.getConfig();
             String wabaId = (config != null && config.Client_Business_Account_ID__c != null) ? config.Client_Business_Account_ID__c : '';
             if (String.isBlank(wabaId)) {
                 return 'Business Account ID is not configured in the system.';

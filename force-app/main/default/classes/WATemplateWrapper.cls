@@ -6,31 +6,6 @@
  * @last modified on  : 12/10/2026
  **/
 public inherited sharing class WATemplateWrapper {
-    @TestVisible
-    private static OAuth_Configuration__mdt mockConfig;
-
-    /**
-     * @description : Retrieves the WhatsApp OAuth Custom Metadata configuration record for Whatsapp_OAuth
-     * @return OAuth_Configuration__mdt
-     */
-    public static OAuth_Configuration__mdt getConfig() {
-        try {
-            if (mockConfig != null) {
-                return mockConfig;
-            }
-            String CONFIGDEVNAME = WhatsappConnectController.CONFIG_DEV_NAME;
-
-            List<OAuth_Configuration__mdt> configs = [SELECT Id, DeveloperName, MasterLabel, Client_Id__c, Client_Secret__c, Config_Id__c, API_Version__c, 
-                                                        Authorization_Endpoint__c, Token_Endpoint__c, Access_Token__c, Client_App_ID__c, Client_Business_Account_ID__c,
-                                                        Client_Phone_Number_ID__c, Connected_Date__c, SystemModstamp FROM OAuth_Configuration__mdt
-                                                        WHERE DeveloperName = :CONFIGDEVNAME WITH USER_MODE LIMIT 1];
-            return configs.isEmpty() ? null : configs[0];
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'WATemplateWrapper', 'getConfig', e.getMessage());
-            return null;
-        }
-    }
-
     /*
     *********************************************************
     @description     : Handle response and store all in the template (WA_Template__c) and template variable (WA_Template_Variable__c) records.

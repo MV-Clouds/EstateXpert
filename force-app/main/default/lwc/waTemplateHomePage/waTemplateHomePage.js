@@ -47,11 +47,21 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
     @track isCloneMode = false;
     @track showDeleteModal = false;
     @track deletingTemplateRecord = null;
+    @track isPreviewModalOpen = false;
+    @track previewTemplateId = null;
+    @track previewTemplateName = '';
+    @track previewTemplateCategory = '';
+    @track previewTemplateLanguage = '';
+    @track previewTemplateStatus = '';
 
     // Pagination properties
     @track pageSize = 20;
     @track currentPage = 1;
     @track visiblePages = 5;
+
+    get mainContainerClass() {
+        return `full-page-container ${this.isPreviewModalOpen ? 'has-preview-open' : ''}`;
+    }
 
     get totalItems() {
         return this.filteredRecords.length;
@@ -268,15 +278,22 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
         const recordId = event.currentTarget.dataset.id;
         this.openActionMenuId = null;
         this.openActionMenuUpwards = false;
+
+        // Blur active element so row does not stay highlighted with focus/hover color
+        if (event.currentTarget && typeof event.currentTarget.blur === 'function') {
+            event.currentTarget.blur();
+        }
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+            document.activeElement.blur();
+        }
+
         this.updateShownData();
 
         if (action === 'Edit') {
             const targetRecord = this.allRecords.find(r => r.Id === recordId);
-            if (targetRecord) {
-                if (targetRecord.isEditDisabled) {
-                    this.showToastError(targetRecord.editDisabledReason || 'This template cannot be edited due to Meta restrictions.');
-                    return;
-                }
+            if (targetRecord && targetRecord.isEditDisabled) {
+                // Disabled button is not clickable; reason is displayed in hover title
+                return;
             }
 
             this.manageTemplateId = recordId;
@@ -297,16 +314,20 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                 detail: { title: 'Clone Template', parentTitle: 'Message Templates' }
             }));
         } else if (action === 'Preview') {
-            this.manageTemplateId = recordId;
-            this.isCloneMode = false;
-            this.isManageTemplateView = true;
-            this.dispatchEvent(new CustomEvent('templatenavigate', {
-                bubbles: true,
-                composed: true,
-                detail: { title: 'Preview Template', parentTitle: 'Message Templates' }
-            }));
+            this.previewTemplateId = recordId;
+            const targetRecord = this.allRecords.find(r => r.Id === recordId);
+            this.previewTemplateName = targetRecord ? targetRecord.Template_Name__c : 'Template Preview';
+            this.previewTemplateCategory = targetRecord ? targetRecord.Template_Category__c : '';
+            this.previewTemplateLanguage = targetRecord ? (targetRecord.LanguageLabel || targetRecord.Language__c) : '';
+            this.previewTemplateStatus = targetRecord ? targetRecord.Status__c : '';
+            this.isPreviewModalOpen = true;
         } else if (action === 'Delete') {
             const targetRecord = this.allRecords.find(r => r.Id === recordId);
+            if (targetRecord && targetRecord.isDeleteDisabled) {
+                // Disabled button is not clickable; reason is displayed in hover title
+                return;
+            }
+
             this.deletingTemplateRecord = targetRecord || { Id: recordId, Template_Name__c: 'this template' };
             const popup = this.template.querySelector('c-message-popup');
             if (popup) {
@@ -364,6 +385,35 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
             bubbles: true,
             composed: true,
             detail: { title: 'Message Templates', parentTitle: '' }
+        }));
+    }
+
+    /**
+     * Handles breadcrumb back navigation by asking the manage template page to prompt confirmation if unsaved changes exist.
+     * @param {string} destination - Navigation target ('parent' or 'controlCenter')
+     * @returns {boolean} True if handled (either modal shown or cancel executed), false otherwise
+     */
+    @api
+    handleBreadcrumbBack(destination = 'parent') {
+        if (this.isManageTemplateView) {
+            const manageCmp = this.template.querySelector('c-wa-manage-template-page');
+            if (manageCmp && typeof manageCmp.handlePrevclick === 'function') {
+                return manageCmp.handlePrevclick(destination);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Forwards back to control center event from manage template page
+     */
+    handleBackToControlCenter() {
+        this.isManageTemplateView = false;
+        this.manageTemplateId = null;
+        this.isCloneMode = false;
+        this.dispatchEvent(new CustomEvent('backtocontrolcenter', {
+            bubbles: true,
+            composed: true
         }));
     }
 
@@ -542,6 +592,23 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                                 : 'exp-action-menu-item';
                             const editTitle = isEditDisabled ? editDisabledReason : 'Edit';
 
+                            // Calculate if deleting this template is disabled and reason
+                            let isDeleteDisabled = false;
+                            let deleteDisabledReason = '';
+
+                            if (upperStatus === 'PENDING_DELETION') {
+                                isDeleteDisabled = true;
+                                deleteDisabledReason = 'This template is already scheduled for deletion and cannot be deleted again.';
+                            } else if (upperStatus === 'IN-REVIEW' || upperStatus === 'IN_REVIEW' || upperStatus === 'PENDING') {
+                                isDeleteDisabled = true;
+                                deleteDisabledReason = 'This template is currently under review by Meta and cannot be deleted until reviewed.';
+                            }
+
+                            const deleteMenuItemClass = isDeleteDisabled
+                                ? 'exp-action-menu-item exp-action-menu-item-delete exp-menu-item-disabled'
+                                : 'exp-action-menu-item exp-action-menu-item-delete';
+                            const deleteTitle = isDeleteDisabled ? deleteDisabledReason : 'Delete';
+
                             return {
                                 ...record,
                                 id: record.Id,
@@ -558,6 +625,10 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                                 editDisabledReason,
                                 editMenuItemClass,
                                 editTitle,
+                                isDeleteDisabled,
+                                deleteDisabledReason,
+                                deleteMenuItemClass,
+                                deleteTitle,
                                 rawLastModifiedDate: record.LastModifiedDate,
                                 rawCreatedDate: record.CreatedDate,
                                 LastModifiedDate: this.formatDate(record.LastModifiedDate),
@@ -870,5 +941,15 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
         } catch (error) {
             console.error('Error in updateSortIcons --> ' + error);
         }
+    }
+
+    closePreviewModal() {
+        this.isPreviewModalOpen = false;
+        this.previewTemplateId = null;
+        this.previewTemplateName = '';
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+            document.activeElement.blur();
+        }
+        this.updateShownData();
     }
 }

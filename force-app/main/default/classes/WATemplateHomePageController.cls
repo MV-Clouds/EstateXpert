@@ -215,4 +215,323 @@ public with sharing class WATemplateHomePageController {
             return result;
         }
     }
+
+    /*
+    *********************************************************
+    @description     : Method to get template preview data for waTemplatePreview component.
+    @param           : templateId - {String} - Id of the WA_Template__c record
+    @return          : Map<String, Object> containing template, isMediaHeader, and variables.
+    ********************************************************
+    */
+    @AuraEnabled
+    public static Map<String, Object> getTemplatePreviewData(String templateId) {
+        try {
+            Map<String, Object> templateData = new Map<String, Object>();
+            if (String.isBlank(templateId)) {
+                return templateData;
+            }
+
+            List<WA_Template__c> templates = [
+                SELECT Id, Name, Template_Name__c, Button_Body__c, Button_Label__c, Button_Type__c, 
+                       Footer_Body__c, Header_Body__c, Header_Type__c, toLabel(Language__c) LanguageLabel, Language__c, 
+                       Template_Body__c, Template_Category__c, Template_Miscellaneous_Data__c, 
+                       File_Name__c, Image_Header_Handle__c, Status__c, Quality_Rating__c,
+                       (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c 
+                        FROM WA_Template_Variables__r ORDER BY Name ASC) 
+                FROM WA_Template__c 
+                WHERE Id = :templateId 
+                WITH USER_MODE 
+                LIMIT 1
+            ];
+
+            if (templates.isEmpty()) {
+                return templateData;
+            }
+
+            WA_Template__c template = templates[0];
+            templateData.put('template', template);
+            templateData.put('isMediaHeader', template.Header_Type__c == 'Image' || template.Header_Type__c == 'Video' || template.Header_Type__c == 'Document');
+
+            List<Map<String, String>> variableList = new List<Map<String, String>>();
+            Set<String> detectedObjects = new Set<String>();
+            if (template.WA_Template_Variables__r != null) {
+                for (WA_Template_Variable__c tv : template.WA_Template_Variables__r) {
+                    Map<String, String> vMap = new Map<String, String>();
+                    vMap.put('name', tv.Name);
+                    vMap.put('type', tv.Type__c);
+                    vMap.put('fieldName', tv.Field_Name__c);
+                    vMap.put('objectName', tv.Object_Name__c);
+                    vMap.put('alternateText', tv.Alternate_Text__c);
+                    variableList.add(vMap);
+
+                    if (String.isNotBlank(tv.Object_Name__c)) {
+                        detectedObjects.add(tv.Object_Name__c);
+                    }
+                }
+            }
+            templateData.put('variables', variableList);
+            templateData.put('detectedObjects', new List<String>(detectedObjects));
+
+            return templateData;
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'WATemplateHomePageController', 'getTemplatePreviewData', e.getMessage());
+            return new Map<String, Object>();
+        }
+    }
+
+    /*
+    *********************************************************
+    @description     : Searches records of a specified sObject for variable replacement preview.
+    @param           : objectName - API name of the sObject (e.g. Contact, Lead, Account)
+    @param           : searchTerm - Search term to filter records by Name/Email
+    @return          : List<Map<String, String>> containing id, title, subtitle, objectName
+    ********************************************************
+    */
+    @AuraEnabled
+    public static List<Map<String, String>> searchPreviewRecords(String objectName, String searchTerm) {
+        List<Map<String, String>> results = new List<Map<String, String>>();
+        try {
+            if (String.isBlank(objectName)) {
+                return results;
+            }
+
+            Map<String, Schema.SObjectType> globalDescribe = Schema.getGlobalDescribe();
+            if (!globalDescribe.containsKey(objectName.toLowerCase())) {
+                return results;
+            }
+
+            Schema.SObjectType sObjType = globalDescribe.get(objectName.toLowerCase());
+            Schema.DescribeSObjectResult sObjDescribe = sObjType.getDescribe();
+            if (!sObjDescribe.isAccessible()) {
+                return results;
+            }
+
+            Map<String, Schema.SObjectField> fieldMap = sObjDescribe.fields.getMap();
+            Boolean hasName = fieldMap.containsKey('name');
+            Boolean hasFirstName = fieldMap.containsKey('firstname');
+            Boolean hasLastName = fieldMap.containsKey('lastname');
+            Boolean hasEmail = fieldMap.containsKey('email');
+            Boolean hasPhone = fieldMap.containsKey('phone');
+
+            List<String> selectFields = new List<String>{ 'Id' };
+            if (hasName) selectFields.add('Name');
+            if (hasFirstName) selectFields.add('FirstName');
+            if (hasLastName) selectFields.add('LastName');
+            if (hasEmail) selectFields.add('Email');
+            if (hasPhone) selectFields.add('Phone');
+
+            String query = 'SELECT ' + String.join(selectFields, ', ') + ' FROM ' + String.escapeSingleQuotes(objectName);
+
+            String sanitizedTerm = (searchTerm != null) ? searchTerm.trim() : '';
+            if (String.isNotBlank(sanitizedTerm)) {
+                String filter = '%' + String.escapeSingleQuotes(sanitizedTerm) + '%';
+                List<String> whereClauses = new List<String>();
+                if (hasName) {
+                    whereClauses.add('Name LIKE \'' + filter + '\'');
+                } else if (hasLastName) {
+                    whereClauses.add('LastName LIKE \'' + filter + '\'');
+                }
+                if (hasEmail) {
+                    whereClauses.add('Email LIKE \'' + filter + '\'');
+                }
+                if (!whereClauses.isEmpty()) {
+                    query += ' WHERE (' + String.join(whereClauses, ' OR ') + ')';
+                }
+            }
+
+            query += ' WITH USER_MODE ORDER BY LastModifiedDate DESC LIMIT 10';
+
+            List<SObject> records = Database.query(query);
+            for (SObject rec : records) {
+                Map<String, String> item = new Map<String, String>();
+                item.put('id', (String) rec.get('Id'));
+
+                String title = '';
+                if (hasFirstName && hasLastName) {
+                    String fn = (String) rec.get('FirstName');
+                    String ln = (String) rec.get('LastName');
+                    title = ((String.isNotBlank(fn) ? fn + ' ' : '') + (String.isNotBlank(ln) ? ln : '')).trim();
+                }
+                if (String.isBlank(title) && hasName) {
+                    title = (String) rec.get('Name');
+                }
+                if (String.isBlank(title)) {
+                    title = (String) rec.get('Id');
+                }
+                item.put('title', title);
+
+                String subtitle = '';
+                if (hasEmail && rec.get('Email') != null) {
+                    subtitle = (String) rec.get('Email');
+                } else if (hasPhone && rec.get('Phone') != null) {
+                    subtitle = (String) rec.get('Phone');
+                }
+                item.put('subtitle', subtitle);
+                item.put('objectName', objectName);
+
+                results.add(item);
+            }
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'WATemplateHomePageController', 'searchPreviewRecords', e.getMessage());
+        }
+        return results;
+    }
+
+    /*
+    *********************************************************
+    @description     : Returns template preview data with variable values replaced from a selected record.
+    @param           : templateId - Id of the WA_Template__c record
+    @param           : objectName - Object name of the record (e.g. Contact, Lead)
+    @param           : recordId - Id of the record to fetch merge data from
+    @return          : result {Map<String, Object>}
+    ********************************************************
+    */
+    @AuraEnabled
+    public static Map<String, Object> getTemplatePreviewDataWithRecord(String templateId, String objectName, String recordId) {
+        try {
+            Map<String, Object> templateData = new Map<String, Object>();
+            if (String.isBlank(templateId)) {
+                return templateData;
+            }
+
+            List<WA_Template__c> templates = [
+                SELECT Id, Name, Template_Name__c, Button_Body__c, Button_Label__c, Button_Type__c, Image_Header_Handle__c, 
+                       Footer_Body__c, Header_Body__c, Header_Type__c, toLabel(Language__c) LanguageLabel, Language__c, File_Name__c, 
+                       Template_Body__c, Template_Category__c, Template_Miscellaneous_Data__c, Status__c, Quality_Rating__c,
+                       (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c 
+                        FROM WA_Template_Variables__r ORDER BY Name ASC) 
+                FROM WA_Template__c 
+                WHERE Id = :templateId 
+                WITH USER_MODE 
+                LIMIT 1
+            ];
+
+            if (templates.isEmpty()) {
+                return templateData;
+            }
+
+            WA_Template__c template = templates[0];
+            templateData.put('template', template);
+            templateData.put('isMediaHeader', template.Header_Type__c == 'Image' || template.Header_Type__c == 'Video' || template.Header_Type__c == 'Document');
+
+            List<Map<String, String>> variableList = new List<Map<String, String>>();
+            Set<String> detectedObjects = new Set<String>();
+
+            if (template.WA_Template_Variables__r != null) {
+                for (WA_Template_Variable__c tv : template.WA_Template_Variables__r) {
+                    Map<String, String> vMap = new Map<String, String>();
+                    vMap.put('name', tv.Name);
+                    vMap.put('type', tv.Type__c);
+                    vMap.put('fieldName', tv.Field_Name__c);
+                    vMap.put('objectName', tv.Object_Name__c);
+                    vMap.put('alternateText', tv.Alternate_Text__c);
+                    variableList.add(vMap);
+
+                    if (String.isNotBlank(tv.Object_Name__c)) {
+                        detectedObjects.add(tv.Object_Name__c);
+                    }
+                }
+            }
+            templateData.put('variables', variableList);
+            templateData.put('detectedObjects', new List<String>(detectedObjects));
+
+            String replacedHeader = template.Header_Body__c;
+            String replacedBody = template.Template_Body__c;
+            Map<String, String> replacements = new Map<String, String>();
+
+            if (String.isNotBlank(recordId) && String.isNotBlank(objectName) && template.WA_Template_Variables__r != null && !template.WA_Template_Variables__r.isEmpty()) {
+                Map<String, Schema.SObjectType> globalDescribe = Schema.getGlobalDescribe();
+                if (globalDescribe.containsKey(objectName.toLowerCase())) {
+                    Schema.DescribeSObjectResult objDescribe = globalDescribe.get(objectName.toLowerCase()).getDescribe();
+                    Map<String, Schema.SObjectField> fieldMap = objDescribe.fields.getMap();
+
+                    Set<String> queryFields = new Set<String>{ 'Id' };
+                    for (WA_Template_Variable__c tv : template.WA_Template_Variables__r) {
+                        if (String.isNotBlank(tv.Field_Name__c) && (String.isBlank(tv.Object_Name__c) || tv.Object_Name__c.equalsIgnoreCase(objectName))) {
+                            String fName = tv.Field_Name__c.toLowerCase();
+                            if (fieldMap.containsKey(fName)) {
+                                queryFields.add(fieldMap.get(fName).getDescribe().getName());
+                            } else if (tv.Field_Name__c.contains('.')) {
+                                queryFields.add(tv.Field_Name__c);
+                            }
+                        }
+                    }
+
+                    String query = 'SELECT ' + String.join(new List<String>(queryFields), ', ') + ' FROM ' + String.escapeSingleQuotes(objectName) + ' WHERE Id = :recordId WITH USER_MODE LIMIT 1';
+                    List<SObject> queriedRecords = Database.query(query);
+
+                    if (!queriedRecords.isEmpty()) {
+                        SObject record = queriedRecords[0];
+
+                        for (WA_Template_Variable__c tv : template.WA_Template_Variables__r) {
+                            Object val = null;
+                            if (String.isNotBlank(tv.Field_Name__c) && (String.isBlank(tv.Object_Name__c) || tv.Object_Name__c.equalsIgnoreCase(objectName))) {
+                                try {
+                                    if (tv.Field_Name__c.contains('.')) {
+                                        List<String> parts = tv.Field_Name__c.split('\\.');
+                                        SObject currentObj = record;
+                                        for (Integer i = 0; i < parts.size() - 1; i++) {
+                                            if (currentObj != null) {
+                                                currentObj = currentObj.getSObject(parts[i]);
+                                            }
+                                        }
+                                        if (currentObj != null) {
+                                            val = currentObj.get(parts[parts.size() - 1]);
+                                        }
+                                    } else {
+                                        val = record.get(tv.Field_Name__c);
+                                    }
+                                } catch (Exception fieldEx) {
+                                    System.debug('Error getting field value: ' + fieldEx.getMessage());
+                                }
+                            }
+
+                            String replacement = (val != null) ? String.valueOf(val) : 
+                                                 (String.isNotBlank(tv.Alternate_Text__c) ? tv.Alternate_Text__c : '');
+
+                            String cleanVarName = tv.Name;
+                            if (cleanVarName != null) {
+                                cleanVarName = cleanVarName.replace('{', '').replace('}', '').trim();
+                            }
+
+                            if (String.isNotBlank(replacement)) {
+                                replacements.put(cleanVarName, replacement);
+
+                                if (String.isNotBlank(replacedHeader)) {
+                                    replacedHeader = replacedHeader.replace('{{' + cleanVarName + '}}', replacement);
+                                    replacedHeader = replacedHeader.replace('{' + cleanVarName + '}', replacement);
+                                }
+                                if (String.isNotBlank(replacedBody)) {
+                                    replacedBody = replacedBody.replace('{{' + cleanVarName + '}}', replacement);
+                                    replacedBody = replacedBody.replace('{' + cleanVarName + '}', replacement);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            templateData.put('replacedHeader', replacedHeader);
+            templateData.put('replacedBody', replacedBody);
+            templateData.put('replacements', replacements);
+
+            return templateData;
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'WATemplateHomePageController', 'getTemplatePreviewDataWithRecord', e.getMessage());
+            return new Map<String, Object>();
+        }
+    }
+
+    /*
+    *********************************************************
+    @description     : Returns template data with merged variable replacements for preview.
+    @param           : templateId - Id of the WA_Template__c record
+    @param           : contactId - Optional contact Id to preview merge values
+    @return          : result {Map<String, Object>}
+    ********************************************************
+    */
+    @AuraEnabled
+    public static Map<String, Object> getTemplateDataWithReplacement(String templateId, String contactId) {
+        return getTemplatePreviewDataWithRecord(templateId, 'Contact', contactId);
+    }
 }

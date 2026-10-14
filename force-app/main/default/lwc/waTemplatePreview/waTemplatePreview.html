@@ -1,0 +1,209 @@
+<template>
+    <template if:true={isLoading}>
+        <c-spinner-component></c-spinner-component>
+    </template>
+
+    <div class="preview-container">
+        <template if:true={hasError}>
+            <div class="empty-preview-state">
+                <lightning-icon icon-name="utility:warning" size="medium" variant="warning"></lightning-icon>
+                <p class="empty-preview-title">Template Not Found</p>
+                <p class="empty-preview-desc">The requested WhatsApp template could not be loaded or no longer exists.
+                </p>
+            </div>
+        </template>
+
+        <template if:false={hasError}>
+            <div class="preview-content-layout">
+                <!-- Record Selection Option when Variables are Present -->
+                <template if:true={hasVariables}>
+                    <div class="variable-record-picker-card">
+                        <div class="picker-header-row">
+                            <label class="combobox-field-label">Preview with {activeObjectName} Record</label>
+                            <span class="picker-var-badge">{variableBadgeLabel}</span>
+                        </div>
+
+                        <!-- Object Switcher if template contains multiple objects -->
+                        <template if:true={hasMultipleObjects}>
+                            <div class="object-tabs-row">
+                                <span class="object-tab-label">Object:</span>
+                                <template for:each={objectTabList} for:item="tab">
+                                    <button key={tab.name} class={tab.className} data-object={tab.name}
+                                        onclick={handleSelectObjectTab}>
+                                        {tab.name}
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- Custom Searchable Combobox matching editCheckListModal -->
+                        <div class="searchable-combobox" tabindex="0" onfocusout={handleComboboxFocusOut}>
+                            <div class={comboboxTriggerClass} onclick={handleComboboxToggle}>
+                                <span class={comboboxTriggerTextClass}>{selectedDisplayLabel}</span>
+                                <template if:true={selectedRecord}>
+                                    <span class="combobox-clear-btn" onclick={handleClearRecord}
+                                        title="Clear selection">
+                                        <svg width="10" height="10" viewBox="0 0 14 14" fill="none">
+                                            <path
+                                                d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z"
+                                                fill="#9CA3AF" />
+                                        </svg>
+                                    </span>
+                                </template>
+                                <svg class={comboboxArrowClass} width="10" height="6" viewBox="0 0 10 6" fill="none">
+                                    <path d="M1 1L5 5L9 1" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+
+                            <template if:true={isComboboxOpen}>
+                                <div class="combobox-dropdown">
+                                    <div class="combobox-search-wrapper">
+                                        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                            <path
+                                                d="M21 21L15 15M17 11C17 14.3137 14.3137 17 11 17C7.68629 17 5 14.3137 5 11C5 7.68629 7.68629 5 11 5C14.3137 5 17 7.68629 17 11Z"
+                                                stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" />
+                                        </svg>
+                                        <input type="text" class="combobox-search-input" placeholder={searchPlaceholder}
+                                            value={searchTerm} oninput={handleSearchInput}
+                                            onclick={handleSearchInputClick} />
+                                        <template if:true={isSearchingRecords}>
+                                            <span class="search-loader-dot"></span>
+                                        </template>
+                                    </div>
+                                    <div class="combobox-options-list">
+                                        <!-- Default Option: Reset/None -->
+                                        <div class="combobox-option combobox-default-option"
+                                            onclick={handleSelectDefaultTemplate}>
+                                            <div class="opt-label-group">
+                                                <span class="opt-title">Default Template Placeholders</span>
+                                                <span class="opt-subtitle">Show variable tokens</span>
+                                            </div>
+                                            <template if:false={selectedRecord}>
+                                                <svg width="14" height="14" viewBox="0 0 20 20" fill="#0176D3">
+                                                    <path fill-rule="evenodd"
+                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                            </template>
+                                        </div>
+
+                                        <template for:each={filteredRecordOptions} for:item="opt">
+                                            <div key={opt.id} class={opt.optionClass} data-id={opt.id}
+                                                onclick={handleOptionSelect}>
+                                                <div class="opt-label-group">
+                                                    <span class="opt-title">{opt.title}</span>
+                                                    <template if:true={opt.subtitle}>
+                                                        <span class="opt-subtitle">{opt.subtitle}</span>
+                                                    </template>
+                                                </div>
+                                                <template if:true={opt.isSelected}>
+                                                    <svg width="14" height="14" viewBox="0 0 20 20" fill="#0176D3">
+                                                        <path fill-rule="evenodd"
+                                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                            clip-rule="evenodd" />
+                                                    </svg>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <template if:true={noResults}>
+                                            <div class="combobox-no-results">No {activeObjectName} records found</div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- WhatsApp Chat Background Canvas -->
+                <div class="whatsapp-chat-wrapper">
+                    <div class="whatsapp-canvas">
+                        <div class={chatBubbleClass}>
+                            <!-- Header Section -->
+                            <template if:true={isTextHeader}>
+                                <div class="header-text-block">
+                                    <p class="header-text-content">{displayedHeaderText}</p>
+                                </div>
+                            </template>
+
+                            <template if:true={isImageHeader}>
+                                <div class="header-media-block">
+                                    <template if:true={hasValidImageUrl}>
+                                        <img src={headerMediaUrl} alt="Header Preview" class="header-media-img" />
+                                    </template>
+                                    <template if:false={hasValidImageUrl}>
+                                        <img src={imageUploadPreview} alt="Image Header"
+                                            class="header-media-placeholder" />
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template if:true={isVideoHeader}>
+                                <div class="header-media-block">
+                                    <template if:true={hasValidVideoUrl}>
+                                        <video src={headerMediaUrl} controls playsinline
+                                            class="header-media-video"></video>
+                                    </template>
+                                    <template if:false={hasValidVideoUrl}>
+                                        <img src={tempVideoIcon} alt="Video Header" class="header-media-placeholder" />
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template if:true={isDocHeader}>
+                                <div class="header-doc-block">
+                                    <img src={docUploadPreviewImg} alt="Document" class="header-doc-icon" />
+                                    <div class="header-doc-info">
+                                        <p class="header-doc-name">{documentName}</p>
+                                        <span class="header-doc-badge">DOCUMENT</span>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Body Section -->
+                            <div class="body-text-block">
+                                <lightning-formatted-rich-text value={formattedBody}></lightning-formatted-rich-text>
+                            </div>
+
+                            <!-- Footer Section -->
+                            <template if:true={footerText}>
+                                <div class="footer-text-block">
+                                    <p class="footer-text-content">{footerText}</p>
+                                </div>
+                            </template>
+
+                            <!-- Timestamp Section -->
+                            <div class="timestamp-block">
+                                <span class="timestamp-text">11:59</span>
+                                <span class="timestamp-ticks">
+                                    <svg width="15" height="11" viewBox="0 0 16 11" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11.05 0.5L5.45 6.1L3.95 4.6L2.9 5.65L5.45 8.2L12.1 1.55L11.05 0.5Z"
+                                            fill="#53BDEB" />
+                                        <path d="M14.05 0.5L8.45 6.1L7.9 5.55L6.85 6.6L8.45 8.2L15.1 1.55L14.05 0.5Z"
+                                            fill="#53BDEB" />
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Button Area (attached directly underneath chat bubble) -->
+                        <template if:true={hasButtons}>
+                            <div class="action-buttons-container">
+                                <template for:each={buttons} for:item="btn">
+                                    <div key={btn.id} class="preview-action-row" title={btn.btntext}>
+                                        <lightning-icon icon-name={btn.iconName} size="x-small"
+                                            class="preview-btn-icon"></lightning-icon>
+                                        <span class="preview-btn-label">{btn.btntext}</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

@@ -511,7 +511,35 @@
 
 .exp-action-menu-item.exp-menu-item-disabled .exp-menu-icon svg path,
 .exp-action-menu-item.exp-menu-item-disabled .exp-menu-icon-edit svg path,
+.exp-action-menu-item.exp-menu-item-disabled .exp-menu-icon-delete svg path,
 .exp-action-menu-item[aria-disabled="true"] .exp-menu-icon svg path,
-.exp-action-menu-item[aria-disabled="true"] .exp-menu-icon-edit svg path {
+.exp-action-menu-item[aria-disabled="true"] .exp-menu-icon-edit svg path,
+.exp-action-menu-item[aria-disabled="true"] .exp-menu-icon-delete svg path {
     stroke: #9CA3AF !important;
+}
+
+/* When preview modal is open, prevent table rows from staying highlighted with hover color */
+.has-preview-open .exp-table-content table tbody tr,
+.has-preview-open .exp-table-content table tbody tr td,
+.has-preview-open .exp-table-content table tbody tr:hover,
+.has-preview-open .exp-table-content table tbody tr:hover td,
+.has-preview-open .exp-table-content tbody tr:hover,
+.has-preview-open .exp-table-content tbody tr:hover td {
+    background-color: #ffffff !important;
+}
+
+/* Prevent table row from retaining focus/active highlight on click */
+.exp-table-content table tbody tr:focus-within td,
+.exp-table-content table tbody tr td:focus,
+.exp-table-content table tbody tr:focus td,
+.exp-table-content table tbody tr.table-tr:focus-within td {
+    background-color: #ffffff;
+    outline: none;
+}
+
+.exp-preview-modal-body {
+    background-color: #F8FAFC !important;
+    padding: 1rem 1.25rem !important;
+    max-height: 72vh !important;
+    overflow-y: auto !important;
 }

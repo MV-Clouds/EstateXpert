@@ -397,6 +397,18 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
                 eventOrSkip.preventDefault();
             }
             const skipUrl = (eventOrSkip === true);
+
+            // If currently editing a template, prompt to discard unsaved changes before leaving
+            if (this.selectedComponent === 'whatsappTemplates' && this.parentComponentTitle === 'Message Templates') {
+                const waHome = this.template.querySelector('c-wa-template-home-page');
+                if (waHome && typeof waHome.handleBreadcrumbBack === 'function') {
+                    const isHandled = waHome.handleBreadcrumbBack('controlCenter');
+                    if (isHandled) {
+                        return;
+                    }
+                }
+            }
+
             this.currentView = 'controlCenter';
             this.selectedComponent = null;
             this.selectedComponentTitle = '';
@@ -442,12 +454,19 @@ export default class EstateXpertControlCenter extends NavigationMixin(LightningE
             }
             this.updateUrl('portalMapping');
         } else if (this.parentComponentTitle === 'Message Templates') {
+            const waHome = this.template.querySelector('c-wa-template-home-page');
+            if (waHome && typeof waHome.handleBreadcrumbBack === 'function') {
+                const isHandled = waHome.handleBreadcrumbBack('parent');
+                if (isHandled) {
+                    return;
+                }
+            }
+
             this.selectedComponent = 'whatsappTemplates';
             this.selectedComponentTitle = 'Message Templates';
             this.selectedComponentDescription = 'The "Message Templates" enables you to create different message templates for sending to users during marketing campaigns or regular chatting. Design reusable templates with dynamic content to maintain consistent and professional communication.';
             this.parentComponentTitle = '';
 
-            const waHome = this.template.querySelector('c-wa-template-home-page');
             if (waHome) {
                 waHome.resetView();
             }

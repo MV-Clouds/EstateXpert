@@ -74,8 +74,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     fileType = '';
 
     dropdownOptions = [
-        { title: 'Custom', value: 'QUICK_REPLY', iconName: 'custom' },
-        { title: 'Marketing Opt-Out', value: 'Marketing opt-out', iconName: 'marketing', description: 'Maximum 1 button can be added' },
+        { title: 'Custom', value: 'QUICK_REPLY', iconName: 'custom', description: 'Quick reply button for customer response' },
+        { title: 'Marketing Opt-Out', value: 'Marketing opt-out', iconName: 'marketing', description: 'Opt-out quick reply (Marketing only)' },
         { title: 'Call Phone Number', value: 'PHONE_NUMBER', iconName: 'phone', description: 'Maximum 1 button can be added' },
         { title: 'Visit Website', value: 'URL', iconName: 'site', description: 'Maximum 2 buttons can be added' }
     ];
@@ -138,18 +138,30 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     metaTemplateId = '';
     headerError = '';
 
+    /**
+     * Returns the video preview icon asset URL.
+     */
     get tempVideoIcon() {
         return `${waIcons}/tempVideoIcon.png`;
     }
 
+    /**
+     * Returns the image upload placeholder icon asset URL.
+     */
     get imageUploadPreview() {
         return `${waIcons}/imageUploadPreview.png`;
     }
 
+    /**
+     * Returns the document upload preview icon asset URL.
+     */
     get docUploadPreviewImg() {
         return `${waIcons}/documentPreviewIcon.png`;
     }
 
+    /**
+     * Returns the fallback icon asset URL when no preview is available.
+     */
     get NoPreviewAvailableImg() {
         return `${waIcons}/NoPreviewAvailable.png`;
     }
@@ -158,9 +170,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     s3;
     awsFileName;
     originalContentVersionId = null;
-    selectedVariableType = 'Number'; // Default variable type (Name or Number)
+    selectedVariableType = 'Number';
 
-    // Arrays and Objects - need @track for deep reactivity
     @track variables = [];
     @track header_variables = [];
     @track countryPhoneMap = {};
@@ -183,102 +194,133 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     @track selectedFilesToUpload = [];
     @track objectFieldMap = {};
 
-    activeTab = 'Marketing';
-    selectedOption = 'CustomMarketing';
+    activeTab = 'Utility';
+    selectedOption = 'Custom';
     @track addVar = false;
     @api isTemplateClone = false;
 
-    // ============================
-    // OPTIONS PROVIDERS (Dropdown values)
-    // ============================
-
+    /**
+    * Provides dropdown options for header media and text types.
+    */
     get typeOptions() {
         return TYPE_OPTIONS;
     }
 
+    /**
+    * Provides button action type options for call-to-action buttons.
+    */
     get typeactionOption() {
         return TYPE_ACTION_OPTIONS;
     }
 
+    /**
+    * Returns an example placeholder for the template name based on selected category.
+    */
+    get templateNamePlaceholder() {
+        return this.isUtilityCategory ? 'e.g. order_update_v1' : 'e.g. promotional_offer_v1';
+    }
+
+    /**
+    * Provides button options for quick reply and marketing opt-out actions based on category.
+    */
     get customOption() {
+        if (this.isUtilityCategory) {
+            return CUSTOM_OPTIONS.filter(opt => opt.value === 'QUICK_REPLY');
+        }
         return CUSTOM_OPTIONS;
     }
 
+    /**
+    * Determines if Meta link tracking consent should be shown (Marketing templates with website buttons).
+    */
+    get showVisitSiteConsent() {
+        return this.isMarketingCategory && this.isVisitSite;
+    }
+
+    /**
+    * Determines if marketing opt-out responsibility consent is shown.
+    */
+    get showStopMarketingConsent() {
+        return this.isMarketingCategory && this.isStopMarketing;
+    }
+
+    /**
+    * Provides URL type options for website buttons.
+    */
     get urlType() {
         return URL_TYPE_OPTIONS;
     }
 
-    // ============================
-    // CATEGORY SELECTION GETTERS & METHODS
-    // ============================
+    /**
+    * Checks if the active template category is Marketing.
+    */
     get isMarketingCategory() {
         return (this.activeTab || 'Marketing').toLowerCase() === 'marketing';
     }
 
+    /**
+    * Checks if the active template category is Utility.
+    */
     get isUtilityCategory() {
         return (this.activeTab || '').toLowerCase() === 'utility';
     }
 
+    /**
+    * Determines if category switching is disabled during template edit mode.
+    */
     get isCategoryDisabled() {
         return this.isEditTemplate && !this.isTemplateClone;
     }
 
+    /**
+    * Computes CSS classes for the Marketing category button.
+    */
     get marketingBtnClass() {
         const selected = this.isMarketingCategory ? 'category-segmented-btn active' : 'category-segmented-btn';
         return this.isCategoryDisabled ? `${selected} disabled` : selected;
     }
 
+    /**
+    * Computes CSS classes for the Utility category button.
+    */
     get utilityBtnClass() {
         const selected = this.isUtilityCategory ? 'category-segmented-btn active' : 'category-segmented-btn';
         return this.isCategoryDisabled ? `${selected} disabled` : selected;
     }
 
-    handleCategorySelect(event) {
-        if (this.isCategoryDisabled) {
-            return;
-        }
-        const selected = event.currentTarget.dataset.category;
-        if (!selected || selected.toLowerCase() === (this.activeTab || '').toLowerCase()) {
-            return;
-        }
-        this.activeTab = selected;
-        this.selectedOption = (selected === 'Marketing') ? 'CustomMarketing' : 'Custom';
-
-        this._cachedQuickReplyOptions = null;
-        this._cachedCallToActionOptions = null;
-    }
-
-    // ============================
-    // GETTERS FOR CONDITIONS / DISABLES
-    // ============================
-
+    /**
+    * Returns the display label for the currently selected language.
+    */
     get selectedLanguageLabel() {
-        // Get the selected language's label
         const selectedOption = this.languageOptions.find(option => option.value === this.selectedLanguage);
         return selectedOption ? selectedOption.label : '';
     }
 
+    /**
+    * Returns the maximum allowable phone number length for the selected country.
+    */
     get maxtelephonelength() {
         return this.countryPhoneMap[this.selectedCountryType] || 15;
     }
 
+    /**
+    * Computes CSS classes for action buttons based on disabled state.
+    */
     get buttonClass() {
-        // Class for buttons depending on disabled state
         return this.isButtonDisabled ? 'select-button disabled' : 'select-button';
     }
 
-    // ============================
-    // TEMPLATE VARIABLES MAPPINGS
-    // ============================
-
+    /**
+    * Formats header merge variables into placeholder strings for API submission.
+    */
     get tempHeaderExample() {
-        // Map header variables into string format
         return this.header_variables.map(varItem => `{{${varItem.field}}}`);
     }
 
+    /**
+    * Formats body merge variables into placeholder strings for API submission.
+    */
     get templateBodyText() {
-        // Map body variables into string format
-        // For Name type variables, use the nameValue
         return this.variables.map(varItem => {
             if (varItem.variableType === 'Name' && varItem.nameValue) {
                 return varItem.nameValue;
@@ -287,16 +329,14 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         });
     }
 
-    // ============================
-    // BUTTONS, TOOLBARS, OPTIONS
-    // ============================
-
+    /**
+    * Computes display indices and placeholders for body merge variables.
+    */
     get computedVariables() {
         return this.variables.map(varItem => {
             const computed = this.computeVariableFields(varItem);
             const isNameType = varItem.variableType === 'Name';
 
-            // For Name type, display the content from nameValue; for Number type, show {{1}}, {{2}} etc.
             const displayIndex = isNameType
                 ? (varItem.nameValue ? `{{${varItem.nameValue}}}` : `{{}}`)
                 : varItem.index;
@@ -312,12 +352,14 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         });
     }
 
+    /**
+    * Computes display indices and placeholders for header merge variables.
+    */
     get computedHeaderVariables() {
         return this.header_variables.map(varItem => {
             const computed = this.computeVariableFields(varItem);
             const isNameType = varItem.variableType === 'Name';
 
-            // For Name type, display the content from nameValue
             const displayIndex = isNameType
                 ? (varItem.nameValue ? `{{${varItem.nameValue}}}` : `{{}}`)
                 : varItem.index;
@@ -333,9 +375,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         });
     }
 
-
+    /**
+    * Returns available Salesforce objects tagged with current selection state.
+    */
     get availableObjectsWithSelection() {
-        // Highlight the selected object and restrict to Contact and Listing
         let objects = [...this.availableObjects];
         if (this.selectedObject && !objects.some(obj => obj.value === this.selectedObject)) {
             objects.push({ label: this.selectedObject, value: this.selectedObject });
@@ -346,12 +389,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }));
     }
 
-    // ============================
-    // FORM SUBMIT ENABLE / DISABLE
-    // ============================
-
+    /**
+    * Evaluates form validity to determine if template submission is disabled.
+    */
     get isSubmitDisabled() {
-        // Logic to determine if form submission should be disabled based on fields' validity
         const areButtonFieldsFilled = this.buttonList.every(button =>
             button.btntext && (button.webURL || button.phonenum)
         );
@@ -359,7 +400,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         const hasCustomButtonError = this.customButtonList.some(button => button.hasError);
         const hasButtonListError = this.buttonList.some(button => button.hasError);
 
-        // Header validation        
         const headerImageNotSelected = this.selectedContentType === 'Image' && !this.headerHandle;
         const headerVideoNotSelected = this.selectedContentType === 'Video' && !this.headerHandle;
         const headerDocumentNotSelected = this.selectedContentType === 'Document' && !this.headerHandle;
@@ -376,34 +416,35 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             headerFileNotSelected = headerVideoNotSelected;
         }
 
-
         return !(this.templateName && this.tempBody && areButtonFieldsFilled && areCustomButtonFilled &&
             !this.templateExists && !hasCustomButtonError && !hasButtonListError &&
             !headerFileNotSelected && !hasHeaderError && !headerTextNotSelected);
     }
 
+    /**
+    * Determines whether the template name input is disabled.
+    */
     get templateNameDisabled() {
         return this.isEditTemplate && !this.isTemplateClone;
     }
 
+    /**
+    * Determines whether the language selection is disabled.
+    */
     get isLanguageDisabled() {
         return this.isEditTemplate && !this.isTemplateClone;
     }
 
-
-    // ============================
-    // UI CONDITIONALS
-    // ============================
-
-
+    /**
+    * Computes and caches dropdown options for quick reply buttons.
+    */
     get quickReplyOptions() {
-        // Cache with invalidation when activeTab changes
         if (!this._cachedQuickReplyOptions || this._lastActiveTabForQuickReply !== this.activeTab) {
             this._lastActiveTabForQuickReply = this.activeTab;
             this._cachedQuickReplyOptions = this.dropdownOptions
-                .filter(option => this.activeTab == 'Utility' ?
+                .filter(option => this.isUtilityCategory ?
                     option.value === 'QUICK_REPLY' :
-                    option.value === 'QUICK_REPLY' || option.value === 'Marketing opt-out')
+                    (option.value === 'QUICK_REPLY' || option.value === 'Marketing opt-out'))
                 .map(option => ({
                     ...option,
                     iconUrl: this.getButtonPath(option.iconName),
@@ -413,8 +454,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         return this._cachedQuickReplyOptions;
     }
 
+    /**
+    * Computes and caches dropdown options for call-to-action buttons.
+    */
     get callToActionOptions() {
-        // Cache call-to-action options (static, never changes)
         if (!this._cachedCallToActionOptions) {
             this._cachedCallToActionOptions = this.dropdownOptions
                 .filter(option => ['PHONE_NUMBER', 'URL'].includes(option.value))
@@ -427,26 +470,28 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         return this._cachedCallToActionOptions;
     }
 
-
-    // ============================
-    // API PROPERTIES (GET/SET)
-    // ============================
-
+    /**
+    * Gets the record ID of the template being edited.
+    */
     @api
     get edittemplateid() {
-        // API exposed getter for edittemplateid
         return this._edittemplateid;
     }
 
+    /**
+    * Sets the template ID to edit and loads existing template data.
+    */
     set edittemplateid(value) {
-        // Setter to control template states when edittemplateid is set
         this._edittemplateid = value;
         if (this._edittemplateid) {
             this.isEditTemplate = true;
-            this.fetchTemplateData(); // Load template data when ID is set
+            this.fetchTemplateData();
         }
     }
 
+    /**
+    * Initializes component resources, styles, SDKs, event listeners, and initial data.
+    */
     connectedCallback() {
         try {
             loadStyle(this, globalStyles);
@@ -475,7 +520,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             console.error('Error in connectedCallback:', e.message);
         }
 
-        // Store bound reference for proper cleanup in disconnectedCallback
         this._boundHandleOutsideClick = this.handleOutsideClick.bind(this);
         document.addEventListener('click', this._boundHandleOutsideClick);
 
@@ -486,9 +530,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     /**
-     * Shared helper to compute variable field options with selection state
-     * Simplified version since wbMergeFieldSelector component now handles the picker logic
-     */
+    * Computes field options and selected field label for a merge variable item.
+    */
     computeVariableFields(varItem) {
         const fieldOptions = (this.fields && this.fields.length > 0) ? this.fields : (varItem.options || []);
         const selectedField = fieldOptions.find(field => field.value === varItem.field);
@@ -509,9 +552,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         };
     }
 
-    /**x
-     * Shared method to reset media/content type flags
-     */
+    /**
+    * Resets all media selection and preview state flags to false.
+    */
     resetMediaFlags() {
         this.isImgSelected = false;
         this.isDocSelected = false;
@@ -525,11 +568,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         this.isDocFile = false;
     }
 
-
-
     /**
-     * Unified handler for object selection changes (both header and body)
-     */
+    * Handles object selection changes and refreshes field options for merge variables.
+    */
     async handleObjectChange(event) {
         const selectedObject = event.detail?.value !== undefined ? event.detail.value : event.target.value;
         this.isLoading = true;
@@ -541,7 +582,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
             this.fields = fields;
 
-            // Update body variables
             if (this.variables.length > 0) {
                 this.variables = this.variables.map(varItem => ({
                     ...varItem,
@@ -554,7 +594,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 this.updateTextarea();
             }
 
-            // Update header variables
             if (this.header_variables.length > 0) {
                 this.header_variables = this.header_variables.map(varItem_1 => ({
                     ...varItem_1,
@@ -571,10 +610,16 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Maps a button action type to its corresponding utility icon name.
+    */
     getButtonIcon(type) {
         return BUTTON_ICON_MAP[type] || 'utility:question';
     }
 
+    /**
+    * Retrieves AWS S3 configuration settings from the server.
+    */
     getS3ConfigDataAsync() {
         return getS3ConfigSettings()
             .then(result => {
@@ -589,10 +634,12 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             });
     }
 
+    /**
+    * Closes dropdown menus and emoji pickers when clicking outside their containers.
+    */
     handleOutsideClick(event) {
         const target = event.target;
 
-        // Handle emoji picker close
         if (this.showEmojis) {
             const emojiContainer = this.template.querySelector('.toolbar-button');
             const button = this.template.querySelector('button');
@@ -604,9 +651,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             }
         }
 
-        // Note: Field picker dropdown closing is now handled by wbMergeFieldSelector component
-
-        // Close button dropdown when clicking outside
         if (this.isDropdownOpen) {
             const dropdownContainer = this.template.querySelector('.dropdown-container');
             if (dropdownContainer && !dropdownContainer.contains(target)) {
@@ -616,7 +660,42 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    // Generate a display label from a field path or API name
+    /**
+    * Handles template category selection changes.
+    */
+    handleCategorySelect(event) {
+        if (this.isCategoryDisabled) {
+            return;
+        }
+        const selected = event.currentTarget.dataset.category;
+        if (!selected || selected.toLowerCase() === (this.activeTab || '').toLowerCase()) {
+            return;
+        }
+        this.activeTab = selected;
+        this.selectedOption = (selected === 'Marketing') ? 'CustomMarketing' : 'Custom';
+
+        if (this.isUtilityCategory) {
+            const hadOptOut = this.customButtonList.some(btn => btn.selectedCustomType === 'Marketing opt-out');
+            if (hadOptOut) {
+                this.customButtonList = this.customButtonList.filter(btn => btn.selectedCustomType !== 'Marketing opt-out');
+                this.marketingOpt = 0;
+                this.isStopMarketing = false;
+                this.totalButtonsCount = this.buttonList.length + this.customButtonList.length;
+                if (this.customButtonList.length === 0) {
+                    this.isCustom = false;
+                }
+                this.showToast('Removed Marketing Opt-Out button as it is prohibited in Utility templates.', 'warning');
+            }
+        }
+
+        this._cachedQuickReplyOptions = null;
+        this._cachedCallToActionOptions = null;
+        this.updateButtonDisabledState();
+    }
+
+    /**
+    * Resolves a user-friendly label for a field API name or path.
+    */
     generateFieldLabelFromPath(fieldPath, objectName = null) {
         if (!fieldPath) return 'Select field';
         const fieldList = (objectName && this.objectFieldMap[objectName]) ? this.objectFieldMap[objectName] : this.fields;
@@ -624,10 +703,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         return field?.label || fieldPath;
     }
 
-    // Load and process fields for a given object
+    /**
+    * Fetches and caches field definitions for a specified Salesforce object.
+    */
     async loadObjectFields(objectName) {
         if (!objectName) return [];
-        // Check if we already have cached fields for this object
         if (this.objectFieldMap[objectName]) {
             const cachedFields = this.objectFieldMap[objectName];
             this.fields = cachedFields;
@@ -646,7 +726,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             this.objectFieldMap[objectName] = fields;
             this.fields = fields;
 
-            // Update any existing variables with empty fields
             this.updateVariablesWithDefaultFields(fields, objectName);
 
             return fields;
@@ -657,20 +736,16 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     /**
-     * Update variables that have empty field values with the first field from the loaded fields
-     * This ensures that when fields are loaded after variables are created (e.g., paste body then fields load),
-     * the variables get proper default field values
-     */
+    * Assigns default field values to merge variables that have empty selections.
+    */
     updateVariablesWithDefaultFields(fields, objectName) {
         if (!fields || fields.length === 0) return;
 
         const firstField = fields[0];
         let variablesUpdated = false;
 
-        // Update body variables with empty field values
         if (this.variables.length > 0) {
             this.variables = this.variables.map(varItem => {
-                // Only update if field is empty and object matches
                 if ((!varItem.field || varItem.field === '') && varItem.object === objectName) {
                     variablesUpdated = true;
                     return {
@@ -689,7 +764,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             }
         }
 
-        // Update header variables with empty field values
         if (this.header_variables.length > 0) {
             this.header_variables = this.header_variables.map(varItem => {
                 if ((!varItem.field || varItem.field === '') && varItem.object === objectName) {
@@ -705,19 +779,22 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Retrieves existing template details from Apex and populates form fields for editing.
+    */
     fetchTemplateData() {
         try {
             getDynamicObjectData({ templateId: this.edittemplateid })
                 .then((data) => {
                     const { template, templateVariables } = data;
 
-                    this.selectedOption = template.Template_Type__c || template.MVEX__Template_Type__c || 'Custom';
-                    this.activeTab = template.Template_Category__c || template.MVEX__Template_Category__c || 'Marketing';
+                    this.activeTab = template.Template_Category__c || template.MVEX__Template_Category__c || 'Utility';
+                    this.selectedOption = template.Template_Type__c || template.MVEX__Template_Type__c || (this.activeTab === 'Marketing' ? 'CustomMarketing' : 'Custom');
 
                     setTimeout(() => {
 
                         this.templateName = template.Template_Name__c || template.MVEX__Template_Name__c || '';
-                        this.originalTemplateName = this.templateName; // Store before appending _clone
+                        this.originalTemplateName = this.templateName;
                         this.templateName += this.isTemplateClone ? '_clone' : '';
                         this.metaTemplateId = template.Template_Id__c || template.MVEX__Template_Id__c || '';
                         const headerBody = template.Header_Body__c || template.MVEX__WBHeader_Body__c || '';
@@ -765,8 +842,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                             console.error('templateMiscellaneousData Error ::: ', error)
                         }
 
-
-
                         const currentHeaderType = template?.Header_Type__c || template?.MVEX__Header_Type__c;
                         const currentHeaderBody = template?.Header_Body__c || template?.MVEX__WBHeader_Body__c;
                         if (currentHeaderType == 'Image' || currentHeaderType == 'Video' || currentHeaderType == 'Document') {
@@ -791,10 +866,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                             }
                         }
 
-
                         this.selectedContentType = template.Header_Type__c || template.MVEX__Header_Type__c || 'None';
 
-                        // Set IsHeaderText flag and header value when header type is Text
                         if (this.selectedContentType === 'Text') {
                             this.IsHeaderText = true;
                             this.header = headerBody || '';
@@ -809,78 +882,66 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                             type: tv.type
                         }));
 
-                        // Identify all unique objects
                         const uniqueObjects = [...new Set(tvs.map(tv => tv.object))];
 
-                        // Set the selectedObject from template variables for Body type
                         const bodyVariables = tvs.filter(tv => tv.type === 'Body');
                         if (bodyVariables.length > 0 && bodyVariables[0].object) {
                             this.selectedObject = bodyVariables[0].object;
                         }
 
-                        // Fetch field maps for all unique objects (if not already cached)
                         const fieldFetchPromises = uniqueObjects.map(obj => {
                             return this.objectFieldMap[obj]
                                 ? Promise.resolve()
-                                : this.loadObjectFields(obj); // this must return a Promise
+                                : this.loadObjectFields(obj);
                         });
 
                         Promise.all(fieldFetchPromises)
                             .then(() => {
-                                // Load fields for the selected object (for the field picker)
                                 if (this.selectedObject) {
                                     return this.loadObjectFields(this.selectedObject);
                                 }
                                 return Promise.resolve();
                             })
                             .then(() => {
-                                // Split variables into body and header groups
                                 const tempfieldsBody = tvs.filter(tv => tv.type === 'Body').map(tv => tv.field);
                                 const tempfieldsHead = tvs.filter(tv => tv.type === 'Header').map(tv => tv.field);
 
-                                // Body variables with individual field options and proper fieldLabel
                                 this.variables = tvs
                                     .filter(tv => tv.type === 'Body')
                                     .map((variable, index) => {
                                         const objectFields = this.objectFieldMap[variable.object] || [];
                                         const fieldValue = tempfieldsBody[index] || variable.field;
 
-                                        // Generate fieldLabel from field path
                                         const fieldLabel = this.generateFieldLabelFromPath(fieldValue, variable.object);
 
                                         return {
                                             ...variable,
                                             field: fieldValue,
                                             fieldLabel: fieldLabel,
-                                            variableType: variable.variableType || 'Number', // Default to 'Number' type
-                                            nameValue: variable.nameValue || variable.alternateText || '', // Use alternateText as nameValue for backward compatibility
+                                            variableType: variable.variableType || 'Number',
+                                            nameValue: variable.nameValue || variable.alternateText || '',
                                             options: objectFields
                                         };
                                     });
 
-
-
-                                // Header variables with individual field options and proper fieldLabel
                                 this.header_variables = tvs
                                     .filter(tv => tv.type === 'Header')
                                     .map((variable, index) => {
                                         const objectFields = this.objectFieldMap[variable.object] || [];
                                         const fieldValue = tempfieldsHead[index] || variable.field;
 
-                                        // Generate fieldLabel from field path for header variables too
                                         const fieldLabel = this.generateFieldLabelFromPath(fieldValue, variable.object);
 
                                         return {
                                             ...variable,
                                             field: fieldValue,
                                             fieldLabel: fieldLabel,
-                                            variableType: variable.variableType || 'Number', // Default to 'Number' type
+                                            variableType: variable.variableType || 'Number',
                                             nameValue: variable.nameValue || variable.alternateText || '',
                                             options: objectFields
                                         };
                                     });
 
-                                // Toggle flags
                                 this.addHeaderVar = this.header_variables.length > 0;
                                 this.addVar = this.variables.length > 0;
 
@@ -895,10 +956,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                         }
                         const buttonDataRaw = template.Button_Body__c || template.MVEX__WBButton_Body__c;
                         if (buttonDataRaw) {
-                            // Parse JSON from Button_Body__c / WBButton_Body__c
                             let buttonDataList = JSON.parse(buttonDataRaw);
 
-                            // Clear existing button and custom button lists before populating
                             this.buttonList = [];
                             this.customButtonList = [];
                             this.callPhoneNumber = 0;
@@ -907,7 +966,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
                             buttonDataList.forEach((button, index) => {
                                 if (button.type === 'QUICK_REPLY' || button.type === 'Marketing opt-out') {
-                                    // Handle custom buttons
                                     try {
                                         if (button.isMarketingOpt) {
                                             button.type = 'Marketing opt-out';
@@ -930,7 +988,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                                     });
                                 } else {
 
-                                    // Handle phone number parsing
                                     let parsedPhoneNum = '';
                                     let parsedCountryCode = '';
                                     let parsedCountryLabel = 'India (+91)';
@@ -938,9 +995,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                                     if (button?.type === 'PHONE_NUMBER' && button?.phone_number) {
                                         const phone = button.phone_number;
 
-                                        // If phone starts with +, find matching country code
                                         if (phone.startsWith('+')) {
-                                            const countryCodes = Object.keys(this.countryCodeToLabelMap).sort((a, b) => b.length - a.length); // Sort by length descending
+                                            const countryCodes = Object.keys(this.countryCodeToLabelMap).sort((a, b) => b.length - a.length);
                                             const matchedCode = countryCodes.find(code => phone.startsWith(code));
 
                                             if (matchedCode) {
@@ -951,7 +1007,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                                                 parsedPhoneNum = phone;
                                             }
                                         } else {
-                                            // Phone doesn't start with +, check if it's already formatted as "code number"
                                             const parts = phone.split(' ');
                                             if (parts.length >= 2 && parts[0].startsWith('+')) {
                                                 parsedCountryCode = parts[0];
@@ -963,9 +1018,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                                         }
                                     }
 
-                                    // Handle regular buttons
                                     let newButton = {
-                                        id: index + 1, // Unique ID for button
+                                        id: index + 1,
                                         selectedActionType: button?.type || '',
                                         iconName: this.getButtonIcon(button?.type),
                                         btntext: button?.text || '',
@@ -983,7 +1037,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                                     this.selectedCountryType = newButton.selectedCountryType;
                                     this.selectedCountryTypeLabel = newButton.selectedCountryTypeLabel;
 
-                                    // Call handleMenuSelect() to process button creation correctly
                                     this.handleMenuSelect({
                                         currentTarget: {
                                             dataset: {
@@ -1020,8 +1073,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-
-
+    /**
+    * Validates and processes a selected header media file for upload.
+    */
     async handleFileChange(event) {
         try {
             const file = event.target.files[0];
@@ -1075,6 +1129,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Configures AWS SDK credentials and region for S3 operations.
+    */
     initializeAwsSdk(confData) {
         try {
             let AWS = window?.globalThis?.AWS || window.AWS;
@@ -1098,13 +1155,15 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Generates a unique timestamped filename for AWS S3 upload.
+    */
     renameFileName(filename) {
         try {
             let extensionIndex = filename.lastIndexOf('.');
             let baseFileName = filename.substring(0, extensionIndex);
             let extension = filename.substring(extensionIndex + 1);
 
-            // Get current timestamp in YYYYMMDD_HHmmss format
             let now = new Date();
             let timestamp = `${now.getFullYear()}${(now.getMonth() + 1)
                 .toString().padStart(2, '0')}${now.getDate()
@@ -1120,6 +1179,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Uploads selected media files to Amazon S3.
+    */
     async uploadToAWS() {
         try {
             this.isLoading = true;
@@ -1139,7 +1201,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
                 return await upload.promise();
             });
-            // Wait for all uploads to complete
             const results = await Promise.all(uploadPromises);
             results.forEach((result) => {
                 if (result) {
@@ -1160,7 +1221,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    // Generate file preview
+    /**
+    * Sets preview URLs and flags according to the uploaded media file type.
+    */
     generatePreview(publicUrl) {
         try {
             let typeCategory = '';
@@ -1216,7 +1279,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    // Upload file to Apex
+    /**
+    * Uploads media file to Salesforce ContentVersion via Apex.
+    */
     handleUpload() {
         if (this.fileData) {
             this.isLoading = true;
@@ -1225,10 +1290,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                     this.contentVersionId = result.contentVersionId;
                     const publicUrl = result.publicUrl;
 
-                    // Replace '/sfc/p/#' with '/sfc/p/' if needed
                     this.generatePreview(publicUrl.replace('/sfc/p/#', '/sfc/p/'));
 
-                    this.uploadFileToMeta(); // Upload to Meta to get header handle
+                    this.uploadFileToMeta();
                 })
                 .catch((error) => {
                     this.isLoading = false;
@@ -1242,9 +1306,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     /**
-     * Method Name: deleteFileInAWS
-     * @description: Used to delete file in AWS S3 using AWS SDK.
-     */
+    * Deletes an uploaded file from Amazon S3 using AWS SDK.
+    */
     deleteFileInAWS() {
         try {
             if (this.awsFileName) {
@@ -1269,7 +1332,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    // Delete file from ContentVersion or AWS S3
+    /**
+    * Deletes the uploaded media file from AWS S3 or Salesforce ContentVersion.
+    */
     handleDelete() {
         const isOriginalFileInEditMode = (this.isEditTemplate || this.isTemplateClone) &&
             this.originalContentVersionId !== null &&
@@ -1280,12 +1345,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             return;
         }
 
-        // Delete the file based on storage location
-        // When AWS is enabled, file is stored in S3, otherwise in Salesforce ContentVersion
         if (this.isAWSEnabled && this.awsFileName) {
             this.deleteFileInAWS();
         } else if (this.contentVersionId) {
-            // Local Salesforce ContentVersion deletion
             deleteFile({ contentVersionId: this.contentVersionId })
                 .then((result) => {
                     this.showToast('File deleted successfully', 'success');
@@ -1295,12 +1357,13 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                     this.showToast('Error deleting file!', 'error');
                 });
         } else {
-            // No file to delete, just reset
             this.resetFileData();
         }
     }
 
-    // Reset file data after deletion
+    /**
+    * Resets file upload properties, previews, and file input elements.
+    */
     resetFileData() {
         this.file = null;
         this.fileName = null;
@@ -1334,9 +1397,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     /**
-     * Uploads file to Meta to get header handle for WhatsApp template creation.
-     * This is called after file is uploaded to AWS (if AWS enabled) or after local upload.
-     */
+    * Requests a WhatsApp media header handle from Meta for the uploaded file.
+    */
     uploadFileToMeta() {
         try {
             this.isLoading = true;
@@ -1371,6 +1433,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Handles header content type selection changes and updates media flags.
+    */
     handleContentType(event) {
         try {
             this.NoFileSelected = true;
@@ -1378,10 +1443,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             this.selectedContentType = event.detail?.value !== undefined ? event.detail.value : event.target.value;
             this.IsHeaderText = this.selectedContentType === 'Text';
 
-            // Reset all media flags first
             this.resetMediaFlags();
 
-            // Set flags based on content type
             const contentTypeConfig = {
                 'Image': { isImageFile: true, isImageFileUploader: true, addMedia: true },
                 'Video': { isVideoFile: true, isVideoFileUploader: true, addMedia: true },
@@ -1397,10 +1460,17 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    handlePrevclick() {
+    /**
+    * Handles back/cancel button clicks, prompting confirmation if unsaved changes exist.
+    * @param {string|Event} destinationOrEvent - Destination identifier ('parent' or 'controlCenter') or DOM click event
+    * @returns {boolean} True if handled (either modal shown or cancel executed), false on error
+    */
+    @api
+    handlePrevclick(destinationOrEvent = 'parent') {
         try {
+            const destination = (typeof destinationOrEvent === 'string') ? destinationOrEvent : 'parent';
             if (this.hasUnsavedChanges()) {
-                this.pendingConfirmAction = 'cancel';
+                this.pendingConfirmAction = destination === 'controlCenter' ? 'cancel_to_control_center' : 'cancel';
                 const popup = this.template.querySelector('c-message-popup');
                 if (popup) {
                     popup.showMessagePopup({
@@ -1408,15 +1478,26 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                         title: 'Discard Changes?',
                         message: 'This may remove the changes you have done. Are you sure you want to proceed?'
                     });
-                    return;
+                    return true;
                 }
             }
             this.executeCancel();
+            if (destination === 'controlCenter') {
+                this.dispatchEvent(new CustomEvent('backtocontrolcenter', {
+                    bubbles: true,
+                    composed: true
+                }));
+            }
+            return true;
         } catch (error) {
             console.error('Error in handlePrevclick: ', error);
+            return false;
         }
     }
 
+    /**
+    * Executes cancellation cleanup, deletes temporary files, and returns to template list.
+    */
     executeCancel() {
         if (this.contentVersionId != null) {
             this.handleDelete();
@@ -1425,7 +1506,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         this.closeAndReturnToTemplateList();
     }
 
-
+    /**
+    * Resets all template form inputs, variables, buttons, and state properties.
+    */
     clearEditTemplateData() {
         try {
             this.templateName = '';
@@ -1455,8 +1538,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             this.isVidSelected = false;
             this.isImgSelected = false;
             this.isDocFile = false;
+            this.activeTab = 'Utility';
+            this.selectedOption = 'Custom';
+            this._cachedQuickReplyOptions = null;
+            this._cachedCallToActionOptions = null;
 
-            // Reset original content version ID
             this.originalContentVersionId = null;
             const headerInput = this.template.querySelector('input[name="header"]');
             if (headerInput) {
@@ -1467,6 +1553,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Updates custom button type for an entry in the custom button list.
+    */
     handleCustom(event) {
         const index = event.target?.dataset?.index;
         if (index !== undefined && this.customButtonList[index]) {
@@ -1474,7 +1563,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    // Input change handler map for cleaner code organization
+    /**
+    * Maps form field names to their specific input change handler functions.
+    */
     inputChangeHandlers = {
         templateName: (value) => {
             this.templateName = value.replace(/\s+/g, '_').toLowerCase();
@@ -1493,11 +1584,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         tempBody: (value) => {
             this.tempBody = value.replace(/(\n\s*){3,}/g, '\n\n');
             this.formatedTempBody = this.formatText(this.tempBody);
-            // Validate variable format in real-time
             this.updateFormatErrors();
-            // Validate variable placement immediately on change
             this.checkBodyVariablePlacement();
-            // Sync variables from body text for both types
             this.syncVariablesFromBody();
         },
         btntext: (value, index) => {
@@ -1509,20 +1597,20 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         },
         header: (value) => {
             this.header = value;
-            // Check variable count based on type
             const allVariableMatches = (value.match(/\{\{[^}]*\}\}/g) || []).length;
             if (allVariableMatches > 1) {
                 this.headerError = 'Only one variable is allowed in the header.';
             } else {
                 this.headerError = '';
             }
-            // Validate variable format in real-time
             this.updateFormatErrors();
-            // Sync header variables from header text
             this.syncHeaderVariablesFromText();
         }
     };
 
+    /**
+    * Dispatches input change events to their respective field handlers.
+    */
     handleInputChange(event) {
         try {
             const name = event.target.name;
@@ -1531,7 +1619,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             const value = event.detail?.value !== undefined ? event.detail.value : event.target.value;
             const index = dataset.index;
 
-            // Handle button-related fields that need special processing
             const buttonFields = ['selectedUrlType', 'webURL', 'selectedCountryTypeLabel', 'phonenum'];
             if (buttonFields.includes(name)) {
                 if (name === 'selectedCountryTypeLabel') {
@@ -1544,7 +1631,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 return;
             }
 
-            // Use handler map for other fields
             const handler = this.inputChangeHandlers[name];
             if (handler) {
                 handler(value, index, checked);
@@ -1554,10 +1640,16 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Updates a specific property on a button at the specified index.
+    */
     updateButtonProperty(index, property, value) {
         this.buttonList[index][property] = value;
     }
 
+    /**
+    * Checks if a template with the currently entered name already exists.
+    */
     checkTemplateExistence() {
         try {
             if (Array.isArray(this.allTemplates)) {
@@ -1583,6 +1675,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Removes an action button from the button list and updates button counters.
+    */
     handleRemove(event) {
         try {
             const index = event.currentTarget.dataset.index;
@@ -1603,12 +1698,14 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Handles the addition of action or custom buttons from menu selection.
+    */
     handleMenuSelect(event) {
         try {
             const selectedValue = event.currentTarget.dataset.value;
             let buttonData = event.currentTarget.dataset.buttonData;
 
-            // Check if this is edit mode (buttonData exists and already has button configured)
             const isEditMode = buttonData && (buttonData.isCallPhone || buttonData.isVisitSite);
 
             let newButton = buttonData ? buttonData : {
@@ -1638,6 +1735,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                     this.isStopMarketing = false;
                     break;
                 case 'Marketing opt-out':
+                    if (!this.isMarketingCategory) {
+                        this.showToast('Marketing opt-out buttons are only permitted in Marketing templates under Meta guidelines.', 'warning');
+                        break;
+                    }
                     if (this.marketingOpt < 1) {
                         this.isCustom = true;
 
@@ -1671,7 +1772,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                         if (!isEditMode) {
                             this.visitWebsiteCount++;
                         } else {
-                            // In edit mode, count how many URL buttons exist
                             const existingUrlCount = this.buttonList.filter(b => b.isVisitSite).length;
                             this.visitWebsiteCount = existingUrlCount + 1;
                         }
@@ -1705,6 +1805,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Validates button labels for duplicates and sets error flags across buttons.
+    */
     updateButtonErrors(isCustom = false) {
         const buttonListToCheck = isCustom ? this.customButtonList : this.buttonList;
         const buttonTexts = buttonListToCheck.map(button => isCustom ? button.Cbtntext : button.btntext);
@@ -1732,10 +1835,12 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         });
     }
 
+    /**
+    * Creates and adds a new custom or marketing opt-out button.
+    */
     createCustomButton(btnType, btnText) {
         try {
             const btnTextExists = this.customButtonList.some(button => button.Cbtntext === btnText);
-
 
             let newCustomButton = {
                 id: this.customButtonList.length + 1,
@@ -1767,8 +1872,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-
-
+    /**
+    * Updates custom button type for an entry in the custom button list.
+    */
     handleCustomText(event) {
         try {
             const index = event.currentTarget.dataset.index;
@@ -1796,6 +1902,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Removes an action button from the button list and updates button counters.
+    */
     handleRemoveCustom(event) {
         try {
             const index = event.currentTarget.dataset.index;
@@ -1803,6 +1912,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
             if (removedButton && removedButton.showFooterText) {
                 this.marketingOpt--;
+                if (this.marketingOpt <= 0) {
+                    this.marketingOpt = 0;
+                    this.isStopMarketing = false;
+                }
             }
             this.customButtonList = this.customButtonList.filter((_, i) => i !== parseInt(index));
             if (this.customButtonList.length === 0) {
@@ -1818,11 +1931,17 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Updates button creation disabled state based on the total button count limit.
+    */
     updateButtonDisabledState() {
         this.isDropdownOpen = false;
         this.isButtonDisabled = this.totalButtonsCount >= 10;
     }
 
+    /**
+    * Appends a new merge variable to the body variables list and inserts placeholder in text.
+    */
     addvariable() {
         try {
             this.addVar = true;
@@ -1834,7 +1953,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             const defaultField = this.fields[0]?.value || '';
             const defaultFieldLabel = this.fields[0]?.label || 'Select Field';
 
-            // Use the currently selected variable type from the dropdown
             const currentVariableType = this.selectedVariableType || 'Name';
 
             const displayIndex = currentVariableType === 'Name' ? `{{}}` : `{{${this.nextIndex}}}`;
@@ -1845,20 +1963,18 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 field: defaultField,
                 fieldLabel: defaultFieldLabel,
                 alternateText: '',
-                variableType: currentVariableType, // Use selected type (Name or Number)
-                nameValue: '', // Store the content inside {{}} for Name type
+                variableType: currentVariableType,
+                nameValue: '',
                 index: displayIndex,
                 options: this.fields
             };
 
             this.variables = [...this.variables, newVariable];
 
-            // Add placeholder to body text
             const placeholderToAdd = currentVariableType === 'Name' ? '{{}}' : `{{${this.nextIndex}}}`;
             this.tempBody = `${this.tempBody} ${placeholderToAdd} `;
             this.formatedTempBody = this.formatText(this.tempBody);
             this.updateTextarea();
-            // Validate variable placement after adding
             this.checkBodyVariablePlacement();
             this.nextIndex++;
         } catch (error) {
@@ -1866,6 +1982,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Updates the selected merge field for a body variable.
+    */
     handleVarFieldChange(event) {
         try {
             const variableIndex = String(event.currentTarget?.dataset?.index || event.target?.dataset?.index || '');
@@ -1892,29 +2011,20 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-
-
-
     /**
-     * Validate variable format in text based on variable type
-     * @param {string} text - The text to validate
-     * @param {string} variableType - 'Name' or 'Number'
-     * @param {boolean} strictMode - If true, empty {{}} is not allowed (used for submission)
-     * @returns {object} - { isValid: boolean, errorMessage: string }
-     */
+    * Validates syntax and format of merge variable placeholders in text.
+    */
     validateVariableFormat(text, variableType, strictMode = false) {
         if (!text) {
             return { isValid: true, errorMessage: '' };
         }
 
-        // Find all variables in the text
         const allVariables = text.match(/\{\{([^}]*)\}\}/g) || [];
 
         if (allVariables.length === 0) {
             return { isValid: true, errorMessage: '' };
         }
 
-        // Check for empty {{}} - not allowed in strict mode (submission)
         if (strictMode) {
             const hasEmptyVars = allVariables.some(v => v === '{{}}');
             if (hasEmptyVars) {
@@ -1926,7 +2036,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
 
         if (variableType === 'Number') {
-            // For Number type: variables must be whole numbers like {{1}}, {{2}}
             const numberPattern = /^\{\{\d+\}\}$/;
             const invalidVars = allVariables.filter(v => !numberPattern.test(v));
 
@@ -1958,9 +2067,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     /**
-     * Update body and header format errors based on current variable type
-     * Call this after any change to body/header text or variable type
-     */
+    * Updates format error messages for header and body variables.
+    */
     updateFormatErrors() {
         const bodyValidation = this.validateVariableFormat(this.tempBody, this.selectedVariableType);
         this.bodyVariableFormatError = bodyValidation.isValid ? '' : bodyValidation.errorMessage;
@@ -1969,28 +2077,23 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         this.headerVariableFormatError = headerValidation.isValid ? '' : headerValidation.errorMessage;
     }
 
-
     /**
-     * Sync variables from body text for both Name and Number types
-     * Parses {{content}} from body and updates variables array sequentially
-     */
+    * Synchronizes body variable definitions by parsing placeholders from body text.
+    */
     syncVariablesFromBody() {
         try {
-            // Match all {{...}} patterns including empty {{}}
             const variablePattern = /\{\{([^}]*)\}\}/g;
             const matches = [...this.tempBody.matchAll(variablePattern)];
 
             if (matches.length === 0) {
-                // No variables in body, clear all variables
                 this.variables = [];
                 this.addVar = false;
                 return;
             }
 
-            // Extract the content inside each {{}}
             const bodyVariables = matches.map((match, idx) => ({
                 position: idx,
-                content: match[1].trim(), // Content inside {{}}
+                content: match[1].trim(),
                 fullMatch: match[0]
             }));
 
@@ -1998,12 +2101,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             const defaultField = this.fields[0]?.value || '';
             const defaultFieldLabel = this.fields[0]?.label || 'Select Field';
 
-            // Update existing variables or create new ones based on body content
             const updatedVariables = bodyVariables.map((bodyVar, idx) => {
                 const existingVar = this.variables[idx];
 
                 if (existingVar) {
-                    // Update existing variable with the content from body
                     if (isNameType) {
                         return {
                             ...existingVar,
@@ -2011,14 +2112,12 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                             index: bodyVar.content ? `{{${bodyVar.content}}}` : `{{}}`
                         };
                     } else {
-                        // For Number type, the index is the number
                         return {
                             ...existingVar,
                             index: `{{${bodyVar.content}}}`
                         };
                     }
                 } else {
-                    // Create new variable
                     return {
                         id: idx + 1,
                         object: this.selectedObject,
@@ -2035,7 +2134,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
             this.variables = updatedVariables;
 
-            // Show the variable section if there are variables
             if (this.variables.length > 0) {
                 this.addVar = true;
             }
@@ -2045,20 +2143,18 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     /**
-     * Sync header variables from header text for both Name and Number types
-     */
+    * Synchronizes header variable definitions by parsing placeholders from header text.
+    */
     syncHeaderVariablesFromText() {
         try {
             if (!this.header) {
                 return;
             }
 
-            // Match all {{...}} patterns including empty {{}}
             const variablePattern = /\{\{([^}]*)\}\}/g;
             const matches = [...this.header.matchAll(variablePattern)];
 
             if (matches.length === 0) {
-                // No variables in header, clear header variables
                 this.header_variables = [];
                 this.addHeaderVar = false;
                 return;
@@ -2068,7 +2164,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             const defaultField = this.fields[0]?.value || '';
             const defaultFieldLabel = this.fields[0]?.label || 'Select Field';
 
-            // Update existing header variables or create new ones
             const updatedHeaderVariables = matches.map((match, idx) => {
                 const content = match[1].trim();
                 const existingVar = this.header_variables[idx];
@@ -2102,7 +2197,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
             this.header_variables = updatedHeaderVariables;
 
-            // Show the header variable section if there are variables
             if (this.header_variables.length > 0) {
                 this.addHeaderVar = true;
             }
@@ -2111,11 +2205,13 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Updates fallback text for a body merge variable.
+    */
     handleAlternateVarChange(event) {
         const variableIndex = String(event.target.dataset.index);
         const alternateText = event.target.value.trim();
 
-        // Update the variables array - store in alternateText field for both Name and Number types
         this.variables = this.variables.map(varItem =>
             String(varItem.index) === variableIndex
                 ? { ...varItem, alternateText }
@@ -2123,6 +2219,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         );
     }
 
+    /**
+    * Synchronizes the body textarea DOM value with component state and focuses it.
+    */
     updateTextarea() {
         const textarea = this.template.querySelector('textarea');
         if (textarea) {
@@ -2131,20 +2230,21 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         textarea.focus();
     }
 
+    /**
+    * Removes a merge variable from body text and re-indexes remaining variables.
+    */
     handleVarRemove(event) {
         try {
             const index = event.currentTarget.dataset.index;
             const varToRemove = this.variables[parseInt(index)];
 
             if (this.selectedVariableType === 'Name') {
-                // For Name type, remove the variable by its content or empty placeholder
                 const variableToRemove = varToRemove.nameValue
                     ? `{{${varToRemove.nameValue}}}`
                     : `{{}}`;
                 let updatedTempBody = this.tempBody.replace(variableToRemove, '');
                 this.variables = this.variables.filter((_, i) => i !== parseInt(index));
 
-                // Re-index remaining variables
                 this.variables = this.variables.map((varItem, idx) => ({
                     ...varItem,
                     id: idx + 1
@@ -2153,10 +2253,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 this.tempBody = updatedTempBody.trim();
                 this.formatedTempBody = this.formatText(this.tempBody);
 
-                // Sync variables from body after removal
                 this.syncVariablesFromBody();
             } else {
-                // For Number type, use existing logic
                 const varIndexToRemove = parseInt(index, 10) + 1;
                 const variableToRemove = `{{${varIndexToRemove}}}`;
                 let updatedTempBody = this.tempBody.replace(variableToRemove, '');
@@ -2185,25 +2283,24 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 this.nextIndex = 1;
             }
             this.updateTextarea();
-            // Validate variable placement after removing
             this.checkBodyVariablePlacement();
         } catch (error) {
             console.error('Something wrong while removing the variable.', error);
         }
     }
 
-    // Header variable add-remove functionality start here
+    /**
+    * Adds a merge variable placeholder to header text and appends to header variables.
+    */
     addheadervariable() {
         try {
             this.addHeaderVar = true;
             const defaultField = this.fields[0]?.value || '';
             const defaultFieldLabel = this.fields[0]?.label || 'Search fields...';
 
-            // Use the currently selected variable type
             const currentVariableType = this.selectedVariableType || 'Name';
             const isNameType = currentVariableType === 'Name';
 
-            // For Name type, use empty placeholder; for Number type, use numbered placeholder
             const displayIndex = isNameType ? `{{}}` : `{{${this.headIndex}}}`;
             const placeholderToAdd = isNameType ? '{{}}' : `{{${this.headIndex}}}`;
 
@@ -2229,6 +2326,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Updates the selected merge field for a header variable.
+    */
     handleFieldChange(event) {
         try {
             const variableId = String(event.currentTarget?.dataset?.id || event.target?.dataset?.id || '');
@@ -2250,11 +2350,13 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Updates fallback text for a header merge variable.
+    */
     handleAlternateTextChange(event) {
         const variableId = String(event.target.dataset.id);
         const alternateText = event.target.value.trim();
 
-        // Update the header_variables array
         this.header_variables = this.header_variables.map(varItem =>
             String(varItem.id) === variableId
                 ? { ...varItem, alternateText }
@@ -2262,6 +2364,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         );
     }
 
+    /**
+    * Removes a merge variable from header text and re-indexes remaining header variables.
+    */
     handleHeaderVarRemove(event) {
         try {
             const index = event.currentTarget.dataset.index;
@@ -2271,13 +2376,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             let updatedHeader = this.header;
 
             if (isNameType) {
-                // For Name type, remove by nameValue or empty placeholder
                 const variableToRemove = varToRemove.nameValue
                     ? `{{${varToRemove.nameValue}}}`
                     : `{{}}`;
                 updatedHeader = this.header.replace(variableToRemove, '');
             } else {
-                // For Number type, use existing logic
                 const varIndexToRemove = parseInt(index, 10) + 1;
                 const variableToRemove = `{{${varIndexToRemove}}}`;
                 updatedHeader = this.header.replace(variableToRemove, '');
@@ -2286,13 +2389,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             this.header_variables = this.header_variables.filter((_, i) => i !== parseInt(index));
 
             if (isNameType) {
-                // Re-index remaining variables for Name type
                 this.header_variables = this.header_variables.map((varItem, idx) => ({
                     ...varItem,
                     id: idx + 1
                 }));
             } else {
-                // Re-index for Number type
                 this.header_variables = this.header_variables.map((varItem, idx) => {
                     const newIndex = idx + 1;
                     return {
@@ -2302,7 +2403,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                     };
                 });
 
-                // Renumber placeholders in header text
                 let placeholders = updatedHeader.match(/\{\{\d+\}\}/g) || [];
                 placeholders.forEach((placeholder, idx) => {
                     const newIndex = `{{${idx + 1}}}`;
@@ -2323,6 +2423,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Loads emoji categories, country phone data, and supported languages.
+    */
     async loadStaticResourceData() {
         const fetchJson = async (fileName) => {
             try {
@@ -2341,7 +2444,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             fetchJson('LanguageJson.json')
         ]);
 
-        // Process Emojis
         if (emojiData) {
             this.emojiCategories = Object.values(
                 emojiData.reduce((acc, item) => {
@@ -2355,7 +2457,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             );
         }
 
-        // Process Countries & Phone Patterns
         if (countryData) {
             this.countryType = countryData.map(item => ({
                 label: item?.label,
@@ -2369,7 +2470,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             this.updatePhonePattern(this.selectedCountryType);
         }
 
-        // Process Languages
         if (languageData) {
             this.languageOptions = languageData.map(lang => ({
                 label: `${lang.language}`,
@@ -2385,25 +2485,32 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Updates phone validation regex pattern and error message for the selected country.
+    */
     updatePhonePattern(code) {
         const validLengths = this.countryPhoneMap[code];
         if (validLengths && validLengths.length > 0) {
-            // Build regex: only digits, allowed lengths only
             const lengths = validLengths.join('|');
             this.phonePattern = `^\\d{${lengths.replace(/,/g, '}$|^\\d{')}}$`;
             this.phoneErrorMessage = `Phone number must be ${validLengths.join(' or ')} digits long.`;
         } else {
-            // fallback: at least 1 digit
             this.phonePattern = '^\\d+$';
             this.phoneErrorMessage = 'Enter a valid phone number';
         }
     }
 
+    /**
+    * Toggles visibility of the emoji picker popup.
+    */
     handleEmoji(event) {
         event.stopPropagation();
         this.showEmojis = !this.showEmojis;
     }
 
+    /**
+    * Toggles visibility of the emoji picker popup.
+    */
     handleEmojiSelection(event) {
         try {
             event.stopPropagation();
@@ -2428,6 +2535,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Applies WhatsApp text formatting markers around selected text in body.
+    */
     handleFormat(event) {
         try {
             const button = event.target.closest('button');
@@ -2438,7 +2548,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             const selEnd = textarea.selectionEnd;
             const currentText = textarea.value;
 
-            // Map data-format (Pascal-case from HTML) → WhatsApp single-char marker
             const markerMap = {
                 'Bold': '*',
                 'Italic': '_',
@@ -2450,15 +2559,12 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             if (!marker) return;
 
             const selectedText = currentText.slice(selStart, selEnd);
-            // Wrap selected text (or place paired markers at cursor if nothing selected)
             const wrapped = marker + selectedText + marker;
             const newText = currentText.slice(0, selStart) + wrapped + currentText.slice(selEnd);
 
             this.tempBody = newText;
             this.formatedTempBody = this.formatText(newText);
 
-            // Place cursor: if text was selected keep it selected inside the markers;
-            // otherwise position cursor between the two markers
             const newSelStart = selStart + marker.length;
             const newSelEnd = newSelStart + selectedText.length;
             this.updateCursorRange(newSelStart, newSelEnd);
@@ -2467,6 +2573,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Converts WhatsApp text markdown formatting into HTML tags for preview display.
+    */
     formatText(inputText) {
         try {
             inputText = inputText.replace(/(\n\s*){3,}/g, '\n\n');
@@ -2482,6 +2591,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Restores cursor position and text selection range in body textarea.
+    */
     updateCursorRange(selStart, selEnd) {
         const textarea = this.template.querySelector('textarea');
         textarea.value = this.tempBody;
@@ -2490,6 +2602,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         textarea.selectionEnd = selEnd;
     }
 
+    /**
+    * Performs comprehensive validation of template fields, variables, and buttons.
+    */
     validateTemplate() {
         try {
             if (!this.templateName || this.templateName.trim() === '') {
@@ -2507,13 +2622,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 return false;
             }
 
-            // Check if body starts or ends with a variable
             if (this.checkBodyVariablePlacement()) {
                 this.showToast(this.bodyVariablePlacementError, 'error');
                 return false;
             }
 
-            // Validate sequential variable numbering in body ({{1}}, {{2}}, etc.)
             if (this.tempBody) {
                 const varMatches = [...this.tempBody.matchAll(/\{\{(\d+)\}\}/g)].map(m => parseInt(m[1], 10));
                 if (varMatches.length > 0) {
@@ -2548,6 +2661,14 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                     }
                 }
             }
+
+            if (this.isUtilityCategory) {
+                const hasMarketingOptOut = this.customButtonList.some(btn => btn.selectedCustomType === 'Marketing opt-out');
+                if (hasMarketingOptOut) {
+                    this.showToast('Marketing opt-out buttons are not allowed in Utility templates according to Meta guidelines.', 'error');
+                    return false;
+                }
+            }
             return true;
         } catch (error) {
             console.error('Something went wrong while validating template.', error);
@@ -2556,6 +2677,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
     }
 
+    /**
+    * Validates website URL format using a regular expression.
+    */
     validateUrl(value) {
         const urlPattern = new RegExp(
             '^(https?:\\/\\/)?(www\\.)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}($|\\/.*)$'
@@ -2564,16 +2688,17 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         return isValid;
     }
 
+    /**
+    * Validates phone number format to ensure valid numeric input.
+    */
     validatePhoneNumber(value) {
         const phonePattern = /^[0-9]{10,}$/;
         return phonePattern.test(value);
     }
 
     /**
-     * Check if the template body starts or ends with a variable
-     * Variables cannot be at the start or end - there must be static text surrounding them
-     * @returns {boolean} true if there's a placement error, false otherwise
-     */
+    * Checks body variable placement rules including boundaries, spacing, and word ratio.
+    */
     checkBodyVariablePlacement() {
         if (!this.tempBody || this.tempBody.trim() === '') {
             this.bodyVariablePlacementError = '';
@@ -2582,22 +2707,18 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
         const errors = [];
 
-        // Normalize the body by replacing all whitespace (including newlines) with single spaces and trim
         const normalizedBody = this.tempBody.replace(/\s+/g, ' ').trim();
 
-        // Pattern to match variables - handle both {{1}} and {{name}} formats based on type
         const variablePattern = this.selectedVariableType === 'Name' ? /\{\{[^}]*\}\}/ : /\{\{\d+\}\}/;
 
         const startsWithVariable = new RegExp(`^${variablePattern.source}`).test(normalizedBody);
         const endsWithVariable = new RegExp(`${variablePattern.source}$`).test(normalizedBody);
 
-        // Check for back-to-back variables (e.g., {{1}}{{2}} or {{name}}{{other}} without any separator)
         const backToBackPattern = this.selectedVariableType === 'Name'
             ? /\{\{[^}]*\}\}\{\{[^}]*\}\}/
             : /\{\{\d+\}\}\{\{\d+\}\}/;
         const hasBackToBackVariables = backToBackPattern.test(normalizedBody);
 
-        // Collect all placement errors
         if (hasBackToBackVariables) {
             errors.push('Variables cannot be placed directly next to each other. Please add text or a space between variables');
         }
@@ -2610,7 +2731,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             errors.push('Template body cannot end with a variable. Please add static text after the variable');
         }
 
-        // Check for variable sequence gaps only for Number type
         if (this.selectedVariableType !== 'Name') {
             const sequenceError = this.checkBodyVariableSequence(normalizedBody);
             if (sequenceError) {
@@ -2618,13 +2738,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             }
         }
 
-        // Check variable to word ratio: for x variables, need at least 2x + 1 non-variable words
         const variableWordRatioError = this.checkVariableToWordRatio(normalizedBody);
         if (variableWordRatioError) {
             errors.push(variableWordRatioError);
         }
 
-        // Combine all errors or clear if none
         if (errors.length > 0) {
             this.bodyVariablePlacementError = errors.join('. ');
             return true;
@@ -2634,29 +2752,26 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         return false;
     }
 
+    /**
+    * Validates that template body contains sufficient text relative to variable count.
+    */
     checkVariableToWordRatio(body) {
-        // Count the number of variables - handle both {{1}} and {{name}} formats
         const numberedVarMatches = body.match(/\{\{\d+\}\}/g) || [];
         const namedVarMatches = body.match(/\{\{[^}]*\}\}/g) || [];
 
-        // Use named vars for Name type, numbered for Number type
         const variableCount = this.selectedVariableType === 'Name'
             ? namedVarMatches.length
             : numberedVarMatches.length;
 
-        // If no variables, no need to check
         if (variableCount === 0) {
             return null;
         }
 
-        // Remove all variables from the body to get only the text content
         const textWithoutVariables = body.replace(/\{\{[^}]*\}\}/g, ' ').trim();
 
-        // Split by whitespace and filter out empty strings to get non-variable words
         const nonVariableWords = textWithoutVariables.split(/\s+/).filter(word => word.length > 0);
         const nonVariableWordCount = nonVariableWords.length;
 
-        // Required minimum words: 2x + 1 where x is the number of variables
         const requiredMinWords = (2 * variableCount) + 1;
 
         if (nonVariableWordCount < requiredMinWords) {
@@ -2666,13 +2781,14 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         return null;
     }
 
+    /**
+    * Verifies that numbered body variables follow a contiguous sequence from 1.
+    */
     checkBodyVariableSequence(body) {
-        // For Name type, skip sequence check as they use {{name}} format
         if (this.selectedVariableType === 'Name') {
             return null;
         }
 
-        // Extract all unique variable numbers from the body
         const variableNumbers = new Set();
         const variablePattern = /\{\{(\d+)\}\}/g;
         let match;
@@ -2683,7 +2799,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
         if (variableNumbers.size === 0) return null;
 
-        // Find max and check if all numbers from 1 to max are present
         const maxVar = Math.max(...variableNumbers);
         const missingNumbers = [];
 
@@ -2699,6 +2814,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         return null;
     }
 
+    /**
+    * Validates button label for duplicates across action buttons.
+    */
     validateButtonText(index, newValue) {
         const isDuplicate = this.buttonList.some((button, idx) => button.btntext === newValue && idx !== parseInt(index));
 
@@ -2713,15 +2831,16 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         this.updateButtonErrors();
     }
 
+    /**
+    * Validates template variables and opens the review template preview modal.
+    */
     handleConfirm() {
-        // Validate variable format with strict mode (empty {{}} not allowed)
         const bodyFormatValidation = this.validateVariableFormat(this.tempBody, this.selectedVariableType, true);
         if (!bodyFormatValidation.isValid) {
             this.showToast(bodyFormatValidation.errorMessage, 'error');
             return;
         }
 
-        // Also validate header if it has content
         if (this.header) {
             const headerFormatValidation = this.validateVariableFormat(this.header, this.selectedVariableType, true);
             if (!headerFormatValidation.isValid) {
@@ -2730,15 +2849,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             }
         }
 
-        // Check for missing alternate text in header variables (both Name and Number types)
         const headerMissingAlt = this.header_variables.some(varItem => {
-            // AlternateText is required for both Name and Number types
             return !varItem.alternateText || varItem.alternateText.trim() === '';
         });
 
-        // Check for missing alternate text in body variables (both Name and Number types)
         const bodyMissingValue = this.variables.some(varItem => {
-            // AlternateText is required for both Name and Number types
             return !varItem.alternateText || varItem.alternateText.trim() === '';
         });
 
@@ -2754,15 +2869,21 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         this.showReviewTemplate = true;
     }
 
+    /**
+    * Closes the review template modal and returns to the editor.
+    */
     handleCloseTemplate() {
         this.showReviewTemplate = false;
         this.iseditTemplatevisible = true;
         this.isLoading = false;
     }
 
+    /**
+    * Builds payload and submits create or edit request to Apex.
+    */
     handleSubmit() {
         try {
-            if ((this.activeTab == 'Marketing' || this.activeTab == 'Utiltiy') && !this.isCheckboxChecked && this.visitWebsiteCount > 0) {
+            if (this.isMarketingCategory && !this.isCheckboxChecked && this.visitWebsiteCount > 0) {
                 this.showToast('Please select check-box to report website clicks.', 'error');
                 return;
             }
@@ -2784,7 +2905,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 buttonData.push(...this.customButtonList);
             }
 
-            // Extract marketingOptText from customButtonList if Marketing opt-out button exists
             let marketingOptText = null;
             if (this.customButtonList && this.customButtonList.length > 0) {
                 const marketingOptButton = this.customButtonList.find(btn => btn.selectedCustomType === 'Marketing opt-out');
@@ -2793,7 +2913,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 }
             }
 
-            // Miscellaneous data for UI state restoration during edit
             const templateMiscellaneousData = {
                 contentVersionId: this.contentVersionId,
                 isImageFile: this.isImageFile,
@@ -2813,40 +2932,31 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 awsFileName: this.awsFileName
             };
 
-            // Template object with only fields required by Apex TemplateWrapper
             const template = {
-                // Required for template record creation
                 templateName: this.templateName || null,
                 templateCategory: this.activeTab || null,
                 templateType: this.selectedOption || null,
                 tempLanguage: this.selectedLanguage || null,
 
-                // Header fields
                 tempHeaderFormat: this.selectedContentType || null,
                 tempHeaderHandle: this.headerHandle || null,
                 tempHeaderText: this.header || '',
                 tempHeaderExample: (this.tempHeaderExample && this.tempHeaderExample.length > 0) ? this.tempHeaderExample : null,
 
-                // Media header fields
                 tempImgUrl: this.filePreview || null,
                 tempImgId: this.contentVersionId || null,
                 tempImgName: this.fileName || null,
 
-                // Body fields
                 templateBody: this.tempBody || '',
                 templateBodyText: (this.templateBodyText && this.templateBodyText.length > 0) ? this.templateBodyText : null,
 
-                // Footer field
                 tempFooterText: this.footer || null,
 
-                // Button fields
                 typeOfButton: buttonData.length > 0 ? JSON.stringify(buttonData) : null,
                 marketingOptText: marketingOptText,
 
-                // Miscellaneous data (for UI state restoration)
                 templateMiscellaneousData: templateMiscellaneousData ? JSON.stringify(templateMiscellaneousData) : null,
 
-                // Variable mappings for Template_Variable__c records
                 variables: this.variables ? this.variables.map(v => ({
                     placeholder: v.index,
                     alternateText: v.alternateText,
@@ -2888,7 +2998,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                                         errorMsg = errorResponse.error.error_user_msg || errorResponse.error.message || errorMsg;
                                     }
                                 } catch (e) {
-                                    // plain text errorMessage
                                 }
                             }
 
@@ -2954,6 +3063,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Fetches all WhatsApp templates and optionally dispatches an update event.
+    */
     fetchAllTemplates(dispatchEvent = true) {
         getWhatsAppTemplates()
             .then(data => {
@@ -2968,6 +3080,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             });
     }
 
+    /**
+    * Dispatches a toast notification event to the platform.
+    */
     showToast(message, variant = 'info', title = null) {
         this.dispatchEvent(new ShowToastEvent({
             title: title || TOAST_TITLES[variant] || 'Notification',
@@ -2976,10 +3091,16 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }));
     }
 
+    /**
+    * Returns the full static resource URL for a specified button icon asset.
+    */
     getButtonPath(iconName) {
         return `${waIcons}/${iconName}.png`;
     }
 
+    /**
+    * Toggles visibility of the button type selection dropdown menu.
+    */
     toggleDropdown(event) {
         try {
             event.stopPropagation();
@@ -2990,6 +3111,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Dispatches events to close the template manager and navigate back to list.
+    */
     closeAndReturnToTemplateList() {
         try {
             this.dispatchEvent(new CustomEvent('closetemplatemanager', {
@@ -3008,6 +3132,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Determines whether any unsaved changes exist in the template form.
+    */
+    @api
     hasUnsavedChanges() {
         if (!this.iseditTemplatevisible) {
             return false;
@@ -3022,6 +3150,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             this.isEditTemplate;
     }
 
+    /**
+    * Prompts browser confirmation dialog when attempting to leave with unsaved changes.
+    */
     handleBeforeUnload(event) {
         if (this.hasUnsavedChanges()) {
             event.preventDefault();
@@ -3030,6 +3161,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Intercepts browser refresh shortcuts to prevent losing unsaved changes.
+    */
     handleKeyDown(event) {
         const isRefreshKey = event.key === 'F5' ||
             ((event.ctrlKey || event.metaKey) && (event.key === 'r' || event.key === 'R'));
@@ -3047,6 +3181,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
+    /**
+    * Handles modal confirmation result for discarding changes, navigating, or refreshing.
+    */
     handleConfirmation(event) {
         const isConfirmed = event.detail === true;
         const action = this.pendingConfirmAction;
@@ -3058,13 +3195,21 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
         if (action === 'cancel') {
             this.executeCancel();
+        } else if (action === 'cancel_to_control_center') {
+            this.executeCancel();
+            this.dispatchEvent(new CustomEvent('backtocontrolcenter', {
+                bubbles: true,
+                composed: true
+            }));
         } else if (action === 'refresh') {
             window.location.reload();
         }
     }
 
+    /**
+    * Removes global document and window event listeners when component is destroyed.
+    */
     disconnectedCallback() {
-        // Use stored bound reference to properly remove the event listener
         if (this._boundHandleOutsideClick) {
             document.removeEventListener('click', this._boundHandleOutsideClick);
             this._boundHandleOutsideClick = null;

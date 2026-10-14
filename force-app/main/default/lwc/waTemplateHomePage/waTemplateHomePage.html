@@ -7,10 +7,11 @@
         <template if:true={isManageTemplateView}>
             <c-wa-manage-template-page edittemplateid={manageTemplateId} is-template-clone={isCloneMode}
                 onclosetemplatemanager={handleCloseManageTemplate}
-                onprevious={handleCloseManageTemplate}></c-wa-manage-template-page>
+                onprevious={handleCloseManageTemplate}
+                onbacktocontrolcenter={handleBackToControlCenter}></c-wa-manage-template-page>
         </template>
         <template if:false={isManageTemplateView}>
-            <div class="full-page-container">
+            <div class={mainContainerClass}>
                 <div class="exp-main-tab-container">
                     <template if:false={isMobileOrTablet}>
                         <div class="sub-main-header-css">
@@ -259,12 +260,14 @@
                                                         <div class="exp-status-cell-wrapper">
                                                             <span class={record.statusClass}>{record.Status__c}</span>
                                                             <template if:true={record.hasCooldown}>
-                                                                <span class="exp-cooldown-badge" title="Meta 24-hour edit cooldown is active">
+                                                                <span class="exp-cooldown-badge"
+                                                                    title="Meta 24-hour edit cooldown is active">
                                                                     ⏱️ {record.cooldownBadgeText}
                                                                 </span>
                                                             </template>
                                                             <template if:true={record.Rejection_Reason__c}>
-                                                                <span class="exp-rejection-reason" title={record.Rejection_Reason__c}>
+                                                                <span class="exp-rejection-reason"
+                                                                    title={record.Rejection_Reason__c}>
                                                                     ⚠️ {record.Rejection_Reason__c}
                                                                 </span>
                                                             </template>
@@ -359,8 +362,10 @@
                                                                         </div>
                                                                         <span class="exp-menu-label">Clone</span>
                                                                     </div>
-                                                                    <div class="exp-action-menu-item exp-action-menu-item-delete"
+                                                                    <div class={record.deleteMenuItemClass}
                                                                         data-id={record.id} data-action="Delete"
+                                                                        title={record.deleteTitle}
+                                                                        aria-disabled={record.isDeleteDisabled}
                                                                         onclick={handleActionClick}>
                                                                         <div class="exp-menu-icon exp-menu-icon-delete">
                                                                             <svg width="15" height="15"
@@ -456,6 +461,58 @@
 
                 <!-- Confirmation Pop-up using MessagePopup component -->
                 <c-message-popup onconfirmation={handleDeleteConfirmation}></c-message-popup>
+
+                <!-- WhatsApp Template Preview Modal -->
+                <template if:true={isPreviewModalOpen}>
+                    <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="preview-modal-heading"
+                        class="slds-modal slds-fade-in-open slds-modal_x-small">
+                        <div class="slds-modal__container">
+                            <div class="slds-modal__close exp-close-icon-css" onclick={closePreviewModal}>
+                                <svg width="16" height="16" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                        fill="#1F2937" />
+                                </svg>
+                            </div>
+                            <div class="slds-modal__header exp-popup-header">
+                                <div class="exp-popup-header-left">
+                                    <div class="exp-popup-icon-box">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                d="M12 2C6.48 2 2 6.48 2 12C2 13.85 2.5 15.58 3.38 17.07L2.05 21.95L7.07 20.64C8.52 21.5 10.2 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM17.02 14.88C16.81 15.47 15.98 15.98 15.34 16.12C14.9 16.22 14.33 16.3 12.4 15.5C9.94 14.48 8.35 11.99 8.23 11.83C8.11 11.67 7.25 10.53 7.25 9.35C7.25 8.17 7.86 7.59 8.1 7.34C8.3 7.14 8.63 7.05 8.93 7.05C9.03 7.05 9.12 7.05 9.2 7.06C9.44 7.07 9.56 7.08 9.72 7.47C9.92 7.96 10.41 9.15 10.47 9.27C10.53 9.39 10.59 9.55 10.51 9.71C10.43 9.87 10.38 9.94 10.26 10.08C10.14 10.22 10.01 10.38 9.9 10.51C9.77 10.65 9.64 10.8 9.79 11.06C9.94 11.31 10.46 12.16 11.23 12.85C12.22 13.73 13.03 14.01 13.32 14.13C13.57 14.23 13.72 14.21 13.9 14C14.12 13.75 14.39 13.36 14.67 12.97C14.87 12.69 15.11 12.73 15.37 12.83C15.63 12.92 17.02 13.61 17.31 13.75C17.6 13.89 17.79 13.96 17.86 14.08C17.93 14.2 17.93 14.77 17.02 14.88Z"
+                                                fill="#25D366" />
+                                        </svg>
+                                    </div>
+                                    <div class="exp-popup-title-group">
+                                        <h1 id="preview-modal-heading" class="exp-popup-title">{previewTemplateName}
+                                        </h1>
+                                        <p class="exp-popup-subtitle">
+                                            Category: <strong>{previewTemplateCategory}</strong>
+                                            <template if:true={previewTemplateLanguage}> &bull; Language:
+                                                <strong>{previewTemplateLanguage}</strong></template>
+                                            <template if:true={previewTemplateStatus}> &bull; Status:
+                                                <strong>{previewTemplateStatus}</strong></template>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="slds-modal__content exp-preview-modal-body">
+                                <c-wa-template-preview template-id={previewTemplateId}></c-wa-template-preview>
+                            </div>
+
+                            <div class="slds-modal__footer exp-popup-footer">
+                                <div></div>
+                                <div class="exp-popup-footer-right">
+                                    <button class="exp-white-btn-css" onclick={closePreviewModal}>Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+                </template>
             </div>
         </template>
     </template>

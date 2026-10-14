@@ -83,20 +83,18 @@
                         </div>
                     </div>
 
-                    <template if:true={isDefault}>
-                        <div class="slds-theme_default templateContent4">
-                            <div class="tempHead">
-                                <p class="content">Content</p>
-                            </div>
-                            <div class="descp">
-                                <p>Fill in the header, body and footer sections of your template.</p>
-                            </div>
+                    <div class="slds-theme_default templateContent4">
+                        <div class="tempHead">
+                            <p class="content">Content</p>
+                        </div>
+                        <div class="descp">
+                            <p>Fill in the header, body and footer sections of your template.</p>
+                        </div>
 
-                            <template if:true={showDefaultBtn}>
-                                <div class="formatted-text3">
-                                    <span class="seg-header">Header</span>
-                                    <span class="seg-opt">Optional</span>
-                                </div>
+                        <div class="formatted-text3">
+                            <span class="seg-header">Header</span>
+                            <span class="seg-opt">Optional</span>
+                        </div>
                                 <div class="contentType">
                                     <lightning-combobox
                                         name="progress"
@@ -313,7 +311,6 @@
                                         </div>
                                     </template>
                                 </template>
-                            </template>
                             <div class="wa-body">
                                 <label for="body" class="body-label">Body</label>
                                 <textarea name="tempBody" class="body-area" oninput={handleInputChange} maxlength="1024"
@@ -494,9 +491,8 @@
                         </div>
 
 
-                        <template if:true={showDefaultBtn}>
-                            <div class="slds-theme_default templateContent5">
-                                <div class="formatted-text3">
+                        <div class="slds-theme_default templateContent5">
+                            <div class="formatted-text3">
                                     <span class="seg-btn">Buttons</span>
                                     <span class="btn-opt">Optional</span>
                                 </div>
@@ -726,8 +722,6 @@
                                 </template>
 
                             </div>
-                        </template>
-                    </template>
                 </div>
                 <div class="creattempdiv3">
                     <div class="slds-theme_default templatePreviewmain1">
@@ -776,18 +770,6 @@
                                         <img src={NoPreviewAvailableImg} alt="no preview available">
                                     </div>
                                 </template>
-                                <template if:true={isLocation}>
-                                    <div class="imagedivWP">
-                                        <img src={tempLocationIcon} alt="">
-                                    </div>
-                                    <div class="locationMerge">
-                                        <p class="nameMerge">{locationNameMerge}</p>
-                                        <p class="addressMerge">{locationAddressMerge}</p>
-                                    </div>
-                                </template>
-
-                                <template if:true={isDefault}>
-
                                     <div class="TextBodyWP">
                                         <lightning-formatted-rich-text
                                             value={formatedTempBody}></lightning-formatted-rich-text>
@@ -796,7 +778,6 @@
                                     <div class="textfooterWP">
                                         <p class="pfooterWP">{footer}</p>
                                     </div>
-                                </template>
 
                                 <div class="TextTimeWP">
                                     <p class="timefooterWP">11:59</p>

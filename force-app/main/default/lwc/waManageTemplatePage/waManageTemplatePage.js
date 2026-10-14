@@ -103,7 +103,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     isDocFile = false;
     isVideoFileUploader = false;
     isDocFileUploader = false;
-    isLocation = false;
     isVisitSite = false;
     isCustom = false;
     createButton = false;
@@ -114,14 +113,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     templateExists = false;
     showEmojis = false;
     isCheckboxChecked = false;
-    showDefaultBtn = true;
     templateName = '';
     header = '';
     footer = '';
     tempBody = 'Hello';
     formatedTempBody = this.tempBody;
-    previewBody = 'Hello';
-    previewHeader = '';
     nextIndex = 1;
     headIndex = 1;
     selectedContentType = 'None';
@@ -130,7 +126,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     selectedCountryTypeLabel = 'United Arab Emirates (+971)';
     phonePattern = '^[0-9]+$';
     phoneErrorMessage = 'Enter a valid phone number';
-    originalTempBody = '';
     originalTemplateName = '';
     originalHeader = '';
     headerHandle = '';
@@ -142,11 +137,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     dropdownClass = 'dropdown-hidden';
     metaTemplateId = '';
     headerError = '';
-    isDefault = true;
-
-    get tempLocationIcon() {
-        return `${waIcons}/tempLocationIcon.png`;
-    }
 
     get tempVideoIcon() {
         return `${waIcons}/tempVideoIcon.png`;
@@ -163,15 +153,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     get NoPreviewAvailableImg() {
         return `${waIcons}/NoPreviewAvailable.png`;
     }
-    isFeatureEnabled = false;
     isAWSEnabled = false;
     confData;
     s3;
     awsFileName;
     originalContentVersionId = null;
-    catalogName = '';
-    locationNameMerge = '';
-    locationAddressMerge = '';
     selectedVariableType = 'Number'; // Default variable type (Name or Number)
 
     // Arrays and Objects - need @track for deep reactivity
@@ -191,8 +177,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     @track fields = [];
     @track emojiCategories = [];
     @track allTemplates = [];
-    @track headerVarAlternateTextErrors = {};
-    @track bodyVarAlternateTextErrors = {};
     @track bodyVariablePlacementError = '';
     @track bodyVariableFormatError = '';
     @track headerVariableFormatError = '';
@@ -268,20 +252,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     // GETTERS FOR CONDITIONS / DISABLES
     // ============================
 
-    get acceptedFormats() {
-        // Allowed file formats for upload
-        return ['png', 'jpeg', 'jpg'];
-    }
-
     get selectedLanguageLabel() {
         // Get the selected language's label
         const selectedOption = this.languageOptions.find(option => option.value === this.selectedLanguage);
         return selectedOption ? selectedOption.label : '';
-    }
-
-    get hasButtons() {
-        // Check if there are any buttons present
-        return this.buttonList.length > 0 || this.customButtonList.length > 0;
     }
 
     get maxtelephonelength() {
@@ -319,65 +293,42 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
     get computedVariables() {
         return this.variables.map(varItem => {
-            const computed = this.computeVariableFields(varItem, false);
-            const hasAlternateTextError = !!this.bodyVarAlternateTextErrors[varItem.id];
+            const computed = this.computeVariableFields(varItem);
             const isNameType = varItem.variableType === 'Name';
-            const isNumberType = varItem.variableType === 'Number';
 
             // For Name type, display the content from nameValue; for Number type, show {{1}}, {{2}} etc.
             const displayIndex = isNameType
                 ? (varItem.nameValue ? `{{${varItem.nameValue}}}` : `{{}}`)
                 : varItem.index;
 
-            // Dynamic placeholder based on variable type
-            const placeholderText = isNameType ? 'Enter example' : 'Enter alternative text';
-
-            return {
-                ...varItem,
-                ...computed,
-                index: displayIndex, // Override index for display
-                placeholderText, // Dynamic placeholder text
-                hasAlternateTextError,
-                isNameType, // Flag to show name value input
-                isNumberType, // Flag to show field picker and alternate text
-                showNameValueInput: isNameType, // Show name value input for Name type
-                showAlternateTextInput: isNumberType // Show alternate text for Number type
-            };
-        });
-    }
-
-
-    get computedHeaderVariables() {
-        return this.header_variables.map(varItem => {
-            const objectOptions = this.availableObjectsWithSelection
-                ? this.availableObjectsWithSelection.map(object => ({
-                    ...object,
-                    isSelected: object.value === varItem.object
-                }))
-                : [];
-
-            const computed = this.computeVariableFields(varItem, true);
-            const hasAlternateTextError = !!this.headerVarAlternateTextErrors[varItem.id];
-            const isNameType = varItem.variableType === 'Name';
-            const isNumberType = varItem.variableType === 'Number' || !varItem.variableType;
-
-            // For Name type, display the content from nameValue
-            const displayIndex = isNameType
-                ? (varItem.nameValue ? `{{${varItem.nameValue}}}` : `{{}}`)
-                : varItem.index;
-
-            // Dynamic placeholder based on variable type
             const placeholderText = isNameType ? 'Enter example' : 'Enter alternative text';
 
             return {
                 ...varItem,
                 ...computed,
                 index: displayIndex,
-                placeholderText, // Dynamic placeholder text
-                hasAlternateTextError,
-                isNameType,
-                isNumberType,
-                objectOptions
+                placeholderText
+            };
+        });
+    }
+
+    get computedHeaderVariables() {
+        return this.header_variables.map(varItem => {
+            const computed = this.computeVariableFields(varItem);
+            const isNameType = varItem.variableType === 'Name';
+
+            // For Name type, display the content from nameValue
+            const displayIndex = isNameType
+                ? (varItem.nameValue ? `{{${varItem.nameValue}}}` : `{{}}`)
+                : varItem.index;
+
+            const placeholderText = isNameType ? 'Enter example' : 'Enter alternative text';
+
+            return {
+                ...varItem,
+                ...computed,
+                index: displayIndex,
+                placeholderText
             };
         });
     }
@@ -506,7 +457,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
             const apexPromises = [
                 this.getS3ConfigDataAsync(),
-                this.fetchUpdatedTemplates(false)
+                this.fetchAllTemplates(false)
             ];
 
             if (!this.isEditTemplate && !this.isTemplateClone) {
@@ -538,7 +489,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
      * Shared helper to compute variable field options with selection state
      * Simplified version since wbMergeFieldSelector component now handles the picker logic
      */
-    computeVariableFields(varItem, isHeaderVariable = false) {
+    computeVariableFields(varItem) {
         const fieldOptions = (this.fields && this.fields.length > 0) ? this.fields : (varItem.options || []);
         const selectedField = fieldOptions.find(field => field.value === varItem.field);
         const fieldLabel = varItem.fieldLabel || selectedField?.label || varItem.field || 'Select field';
@@ -568,7 +519,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         this.isImageFileUploader = false;
         this.isVideoFileUploader = false;
         this.isDocFileUploader = false;
-        this.isLocation = false;
         this.addMedia = false;
         this.isImageFile = false;
         this.isVideoFile = false;
@@ -602,7 +552,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 }));
                 this.formatedTempBody = this.formatText(this.tempBody);
                 this.updateTextarea();
-                this.updatePreviewContent(this.formatedTempBody, 'body');
             }
 
             // Update header variables
@@ -614,7 +563,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                     fieldLabel: firstField?.label || 'Select field',
                     options: fields
                 }));
-                this.updatePreviewContent(this.header, 'header');
             }
         } catch (error) {
             console.error('Error fetching fields: ', error);
@@ -718,7 +666,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
         const firstField = fields[0];
         let variablesUpdated = false;
-        let headerVariablesUpdated = false;
 
         // Update body variables with empty field values
         if (this.variables.length > 0) {
@@ -739,7 +686,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             if (variablesUpdated) {
                 this.formatedTempBody = this.formatText(this.tempBody);
                 this.updateTextarea();
-                this.updatePreviewContent(this.formatedTempBody, 'body');
             }
         }
 
@@ -747,7 +693,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         if (this.header_variables.length > 0) {
             this.header_variables = this.header_variables.map(varItem => {
                 if ((!varItem.field || varItem.field === '') && varItem.object === objectName) {
-                    headerVariablesUpdated = true;
                     return {
                         ...varItem,
                         field: firstField.value || '',
@@ -757,10 +702,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 }
                 return varItem;
             });
-
-            if (headerVariablesUpdated) {
-                this.updatePreviewContent(this.header, 'header');
-            }
         }
     }
 
@@ -792,7 +733,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
                         this.tempBody = template.Template_Body__c || template.MVEX__WBTemplate_Body__c || 'Hello';
                         this.formatedTempBody = this.formatText(this.tempBody);
-                        this.previewBody = this.tempBody ? this.formatText(this.tempBody) : 'Hello';
 
                         try {
                             const rawMiscData = template.Template_Miscellaneous_Data__c || template.MVEX__Template_Miscellaneous_Data__c;
@@ -814,9 +754,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
                             this.isVisitSite = templateMiscellaneousData?.isVisitSite
                             this.isCheckboxChecked = templateMiscellaneousData?.isCheckboxChecked
-                            this.isFeatureEnabled = templateMiscellaneousData?.isFeatureEnabled
                             this.awsFileName = templateMiscellaneousData?.awsFileName
-                            this.catalogName = templateMiscellaneousData?.selectedCatalog
 
                             if (this.awsFileName && !this.isAWSEnabled) {
                                 this.showToast('AWS Configration missing.', 'warning');
@@ -834,14 +772,14 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                         if (currentHeaderType == 'Image' || currentHeaderType == 'Video' || currentHeaderType == 'Document') {
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(currentHeaderBody, "text/html");
-                            this.previewHeader = doc.documentElement.textContent || "";
+                            const mediaUrl = doc.documentElement.textContent || "";
                             this.fileName = template?.File_Name__c || template?.MVEX__File_Name__c;
                             this.fileType = currentHeaderType;
                             this.filePreview = currentHeaderBody;
                             this.headerHandle = template?.Image_Header_Handle__c || template?.Header_Handle__c || template?.MVEX__Header_Handle__c || template?.MVEX__WBImage_Header_Handle__c || '';
 
                             if ((this.headerHandle == '' || this.headerHandle == null) && this.isEditTemplate == true) {
-                                getMetaHeaderHandler({ fileUrlOrContentVersionId: this.previewHeader, contentVersionId: this.contentVersionId })
+                                getMetaHeaderHandler({ fileUrlOrContentVersionId: mediaUrl, contentVersionId: this.contentVersionId })
                                     .then((result) => {
                                         if (!result || !result.trim()) {
                                             this.showToast('Header handle missing, please reupload file.', 'warning');
@@ -851,8 +789,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                                         console.error('Error fetching header handler: ', error);
                                     });
                             }
-                        } else {
-                            this.previewHeader = this.formatText(headerBody) || '';
                         }
 
 
@@ -886,7 +822,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                         const fieldFetchPromises = uniqueObjects.map(obj => {
                             return this.objectFieldMap[obj]
                                 ? Promise.resolve()
-                                : this.fetchFields(obj); // this must return a Promise
+                                : this.loadObjectFields(obj); // this must return a Promise
                         });
 
                         Promise.all(fieldFetchPromises)
@@ -948,9 +884,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                                 this.addHeaderVar = this.header_variables.length > 0;
                                 this.addVar = this.variables.length > 0;
 
-                                // Update preview
-                                this.updatePreviewContent(this.previewHeader, 'header');
-                                this.updatePreviewContent(this.previewBody, 'body');
                                 this.isLoading = false;
                             })
                             .catch(error => {
@@ -1087,9 +1020,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    fetchFields(objectName) {
-        return this.loadObjectFields(objectName);
-    }
+
 
     async handleFileChange(event) {
         try {
@@ -1454,8 +1385,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             const contentTypeConfig = {
                 'Image': { isImageFile: true, isImageFileUploader: true, addMedia: true },
                 'Video': { isVideoFile: true, isVideoFileUploader: true, addMedia: true },
-                'Document': { isDocFile: true, isDocFileUploader: true, addMedia: true },
-                'Location': { isLocation: true }
+                'Document': { isDocFile: true, isDocFileUploader: true, addMedia: true }
             };
 
             const config = contentTypeConfig[this.selectedContentType];
@@ -1563,7 +1493,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         tempBody: (value) => {
             this.tempBody = value.replace(/(\n\s*){3,}/g, '\n\n');
             this.formatedTempBody = this.formatText(this.tempBody);
-            this.updatePreviewContent(this.formatedTempBody, 'body');
             // Validate variable format in real-time
             this.updateFormatErrors();
             // Validate variable placement immediately on change
@@ -1578,9 +1507,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         isCheckboxChecked: (value, index, checked) => {
             this.isCheckboxChecked = checked;
         },
-        toggle: (value, index, checked) => {
-            this.isFeatureEnabled = this.isFeatureEnabled ? false : checked;
-        },
         header: (value) => {
             this.header = value;
             // Check variable count based on type
@@ -1589,7 +1515,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 this.headerError = 'Only one variable is allowed in the header.';
             } else {
                 this.headerError = '';
-                this.updatePreviewContent(this.header, 'header');
             }
             // Validate variable format in real-time
             this.updateFormatErrors();
@@ -1607,7 +1532,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             const index = dataset.index;
 
             // Handle button-related fields that need special processing
-            const buttonFields = ['selectedUrlType', 'webURL', 'selectedCountryTypeLabel', 'phonenum', 'offercode'];
+            const buttonFields = ['selectedUrlType', 'webURL', 'selectedCountryTypeLabel', 'phonenum'];
             if (buttonFields.includes(name)) {
                 if (name === 'selectedCountryTypeLabel') {
                     this.updateButtonProperty(index, 'selectedCountryType', this.countryLabelToCodeMap[value] || value);
@@ -1816,7 +1741,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 id: this.customButtonList.length + 1,
                 selectedCustomType: btnType,
                 Cbtntext: btnText,
-                buttonClass: 'button-label-preview',
                 showFooterText: btnType === 'Marketing opt-out',
                 iconName: this.getButtonIcon(btnType),
                 hasError: false,
@@ -1929,18 +1853,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
             this.variables = [...this.variables, newVariable];
 
-            // Initialize error for both Name and Number types - alternate text is required for both
-            this.bodyVarAlternateTextErrors = {
-                ...this.bodyVarAlternateTextErrors,
-                [this.nextIndex]: 'This field is required'
-            };
-
             // Add placeholder to body text
             const placeholderToAdd = currentVariableType === 'Name' ? '{{}}' : `{{${this.nextIndex}}}`;
             this.tempBody = `${this.tempBody} ${placeholderToAdd} `;
             this.formatedTempBody = this.formatText(this.tempBody);
             this.updateTextarea();
-            this.updatePreviewContent(this.formatedTempBody, 'body');
             // Validate variable placement after adding
             this.checkBodyVariablePlacement();
             this.nextIndex++;
@@ -1970,7 +1887,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 return varItem;
             });
             this.formatedTempBody = this.formatText(this.tempBody);
-            this.updatePreviewContent(this.formatedTempBody, 'body');
         } catch (error) {
             console.error('Something went wrong while updating variable field.', error);
         }
@@ -1978,85 +1894,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
 
 
-    handleNameValueChange(event) {
-        const variableIndex = String(event.target.dataset.index);
-        const variableId = String(event.target.dataset.id);
-        const nameValue = event.target.value.trim();
-
-        // Update the variables array with nameValue
-        this.variables = this.variables.map(varItem =>
-            String(varItem.index) === variableIndex
-                ? { ...varItem, nameValue }
-                : varItem
-        );
-
-        // Validate name value
-        if (!nameValue) {
-            this.bodyVarAlternateTextErrors = {
-                ...this.bodyVarAlternateTextErrors,
-                [variableId]: 'Name value is required'
-            };
-        } else {
-            // Remove error if name value is provided
-            const updatedErrors = { ...this.bodyVarAlternateTextErrors };
-            delete updatedErrors[variableId];
-            this.bodyVarAlternateTextErrors = updatedErrors;
-        }
-
-        // Update the preview with the new name value
-        this.updatePreviewContentWithNameValue();
-    }
-
-    handleGlobalVariableTypeChange(event) {
-        const newVariableType = event.detail.value;
-
-        // Simply switch the type - errors will update automatically
-        this.selectedVariableType = newVariableType;
-
-        // Re-validate format errors with the new type
-        this.updateFormatErrors();
-
-        // Update all existing body variables to use the new type
-        this.variables = this.variables.map(varItem => ({
-            ...varItem,
-            variableType: newVariableType
-        }));
-
-        // Update all existing header variables to use the new type
-        this.header_variables = this.header_variables.map(varItem => ({
-            ...varItem,
-            variableType: newVariableType
-        }));
-
-        // Sync variables from body after type change
-        this.syncVariablesFromBody();
-
-        // Sync header variables after type change
-        this.syncHeaderVariablesFromText();
-
-        // Update error messages based on new type
-        const updatedErrors = {};
-        this.variables.forEach(varItem => {
-            if (newVariableType === 'Name') {
-                // For Name type, only validate field selection
-                if (!varItem.field || varItem.field.trim() === '') {
-                    updatedErrors[varItem.id] = 'Field selection is required';
-                }
-            } else {
-                // For Number type, validate alternate text
-                if (!varItem.alternateText || varItem.alternateText.trim() === '') {
-                    updatedErrors[varItem.id] = 'Alternate text is required';
-                }
-            }
-        });
-        this.bodyVarAlternateTextErrors = updatedErrors;
-
-        // Update preview
-        this.updatePreviewContent(this.formatedTempBody, 'body');
-
-        // Revalidate body placement
-        this.checkBodyVariablePlacement();
-    }
 
     /**
      * Validate variable format in text based on variable type
@@ -2132,29 +1969,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         this.headerVariableFormatError = headerValidation.isValid ? '' : headerValidation.errorMessage;
     }
 
-    updatePreviewContentWithNameValue() {
-        try {
-            let updatedContent = this.tempBody;
-
-            this.variables.forEach(varItem => {
-                const variablePlaceholder = varItem.index;
-                // Use nameValue for display in preview when variableType is 'Name'
-                const replacementValue = varItem.variableType === 'Name' && varItem.nameValue
-                    ? `{{${varItem.nameValue}}}`
-                    : `{{${varItem.object}.${varItem.field}}}`;
-
-                let index = updatedContent.indexOf(variablePlaceholder);
-                while (index !== -1) {
-                    updatedContent = updatedContent.slice(0, index) + replacementValue + updatedContent.slice(index + variablePlaceholder.length);
-                    index = updatedContent.indexOf(variablePlaceholder, index + replacementValue.length);
-                }
-            });
-
-            this.previewBody = updatedContent;
-        } catch (error) {
-            console.error('Something wrong while updating preview with name value.', error);
-        }
-    }
 
     /**
      * Sync variables from body text for both Name and Number types
@@ -2299,7 +2113,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
     handleAlternateVarChange(event) {
         const variableIndex = String(event.target.dataset.index);
-        const variableId = String(event.target.dataset.id);
         const alternateText = event.target.value.trim();
 
         // Update the variables array - store in alternateText field for both Name and Number types
@@ -2308,19 +2121,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 ? { ...varItem, alternateText }
                 : varItem
         );
-
-        // Validate alternate text - required for both Name and Number types
-        if (!alternateText) {
-            this.bodyVarAlternateTextErrors = {
-                ...this.bodyVarAlternateTextErrors,
-                [variableId]: 'This field is required'
-            };
-        } else {
-            // Remove error if alternate text is provided
-            const updatedErrors = { ...this.bodyVarAlternateTextErrors };
-            delete updatedErrors[variableId];
-            this.bodyVarAlternateTextErrors = updatedErrors;
-        }
     }
 
     updateTextarea() {
@@ -2351,7 +2151,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 }));
 
                 this.tempBody = updatedTempBody.trim();
-                this.originalTempBody = this.tempBody;
                 this.formatedTempBody = this.formatText(this.tempBody);
 
                 // Sync variables from body after removal
@@ -2377,20 +2176,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                     updatedTempBody = updatedTempBody.replace(placeholder, newIndex);
                 });
                 this.tempBody = updatedTempBody.trim();
-                this.originalTempBody = this.tempBody;
-                this.formatedTempBody = this.originalTempBody;
+                this.formatedTempBody = this.formatText(this.tempBody);
             }
 
-            // Clear errors and rebuild for remaining variables
-            const updatedErrors = {};
-            this.variables.forEach(varItem => {
-                if (this.bodyVarAlternateTextErrors[varItem.id]) {
-                    updatedErrors[varItem.id] = this.bodyVarAlternateTextErrors[varItem.id];
-                }
-            });
-            this.bodyVarAlternateTextErrors = updatedErrors;
-
-            this.updatePreviewContent(this.tempBody, 'body');
             this.nextIndex = this.variables.length + 1;
             if (this.variables.length === 0) {
                 this.addVar = false;
@@ -2432,15 +2220,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
             this.header_variables = [...this.header_variables, newVariable];
 
-            // Initialize error for new variable - alternate text is required for both Name and Number types
-            this.headerVarAlternateTextErrors = {
-                ...this.headerVarAlternateTextErrors,
-                [this.headIndex]: 'This field is required'
-            };
-
             this.originalHeader = (this.originalHeader || this.header || '') + ` ${placeholderToAdd}`;
             this.header = this.originalHeader;
-            this.updatePreviewContent(this.header, 'header');
             this.headIndex++;
             this.buttonDisabled = true;
         } catch (error) {
@@ -2464,7 +2245,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                     }
                     : varItem
             );
-            this.updatePreviewContent(this.header, 'header');
         } catch (error) {
             console.error('Something wrong while header variable input.', error);
         }
@@ -2480,51 +2260,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 ? { ...varItem, alternateText }
                 : varItem
         );
-
-        // Validate alternate text - required for both Name and Number types
-        if (!alternateText) {
-            this.headerVarAlternateTextErrors = {
-                ...this.headerVarAlternateTextErrors,
-                [variableId]: 'This field is required'
-            };
-        } else {
-            // Remove error if alternate text is provided
-            const updatedErrors = { ...this.headerVarAlternateTextErrors };
-            delete updatedErrors[variableId];
-            this.headerVarAlternateTextErrors = updatedErrors;
-        }
-    }
-
-    updatePreviewContent(inputContent, type) {
-        try {
-            let updatedContent = inputContent;
-
-            const variables = type === 'header' ? this.header_variables : this.variables;
-            variables.forEach(varItem => {
-                const variablePlaceholder = varItem.index;
-                // For Name type variables, use nameValue if available
-                let replacementValue;
-                if (varItem.variableType === 'Name' && varItem.nameValue) {
-                    replacementValue = `{{${varItem.nameValue}}}`;
-                } else {
-                    replacementValue = `{{${varItem.object}.${varItem.field}}}`;
-                }
-
-                let index = updatedContent.indexOf(variablePlaceholder);
-                while (index !== -1) {
-                    updatedContent = updatedContent.slice(0, index) + replacementValue + updatedContent.slice(index + variablePlaceholder.length);
-                    index = updatedContent.indexOf(variablePlaceholder, index + replacementValue.length);
-                }
-            });
-
-            if (type === 'header') {
-                this.previewHeader = updatedContent;
-            } else if (type === 'body') {
-                this.previewBody = updatedContent;
-            }
-        } catch (error) {
-            console.error('Something wrong while updating preview.', error);
-        }
     }
 
     handleHeaderVarRemove(event) {
@@ -2548,9 +2283,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 updatedHeader = this.header.replace(variableToRemove, '');
             }
 
-            // Get the variable ID before removing it
-            const removedVarId = this.header_variables[parseInt(index)]?.id;
-
             this.header_variables = this.header_variables.filter((_, i) => i !== parseInt(index));
 
             if (isNameType) {
@@ -2566,8 +2298,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                     return {
                         ...varItem,
                         id: newIndex,
-                        index: `{{${newIndex}}}`,
-                        placeholder: `Enter content for {{${newIndex}}}`
+                        index: `{{${newIndex}}}`
                     };
                 });
 
@@ -2579,18 +2310,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 });
             }
 
-            // Clear error for removed variable and rebuild errors object for remaining variables
-            const updatedErrors = {};
-            this.header_variables.forEach(varItem => {
-                if (this.headerVarAlternateTextErrors[varItem.id]) {
-                    updatedErrors[varItem.id] = this.headerVarAlternateTextErrors[varItem.id];
-                }
-            });
-            this.headerVarAlternateTextErrors = updatedErrors;
-
             this.header = updatedHeader.trim();
             this.originalHeader = this.header;
-            this.updatePreviewContent(this.originalHeader, 'header');
             this.headIndex = this.header_variables.length + 1;
             if (this.header_variables.length === 0) {
                 this.addHeaderVar = false;
@@ -2694,7 +2415,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             const newText = currentText.slice(0, cursorPos) + emojiChar + currentText.slice(cursorPos);
             this.tempBody = newText;
             this.formatedTempBody = this.tempBody;
-            this.previewBody = this.formatedTempBody;
             textarea.value = newText;
 
             setTimeout(() => {
@@ -3031,21 +2751,22 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             this.showToast('Example/Alternative Text value is required for all body variables', 'error');
             return;
         }
-
-
         this.showReviewTemplate = true;
     }
+
     handleCloseTemplate() {
         this.showReviewTemplate = false;
         this.iseditTemplatevisible = true;
         this.isLoading = false;
     }
+
     handleSubmit() {
         try {
             if ((this.activeTab == 'Marketing' || this.activeTab == 'Utiltiy') && !this.isCheckboxChecked && this.visitWebsiteCount > 0) {
                 this.showToast('Please select check-box to report website clicks.', 'error');
                 return;
             }
+
             this.isLoading = true;
             this.showReviewTemplate = false;
             if (!this.validateTemplate()) {
@@ -3089,9 +2810,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 isDocFile: this.isDocFile,
                 isVisitSite: this.isVisitSite,
                 isCheckboxChecked: this.isCheckboxChecked,
-                isFeatureEnabled: this.isFeatureEnabled,
-                awsFileName: this.awsFileName,
-                catalogName: this.catalogName
+                awsFileName: this.awsFileName
             };
 
             // Template object with only fields required by Apex TemplateWrapper
@@ -3142,17 +2861,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                     fieldName: v.field,
                     variableType: v.variableType
                 })) : [],
-
-                // Fields needed by buildPayload for Meta API (not stored in Apex)
                 selectedVariableType: this.selectedVariableType || 'Name'
             };
-
-
             const serializedWrapper = JSON.stringify(template);
             const payload = JSON.stringify(buildPayload(template));
 
-            // Route to edit if we have a real Meta template ID (not the 'DRAFT' sentinel
-            // set on freshly-cloned WhatsApp templates that have not yet been submitted to Meta).
             if (this.metaTemplateId && this.metaTemplateId !== 'DRAFT' && !this.isTemplateClone) {
                 editWhatsappTemplate({ serializedWrapper: serializedWrapper, payloadWrapper: payload, templateId: this.metaTemplateId })
                     .then(result => {
@@ -3182,8 +2895,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                             this.showToast('Template update failed: ' + errorMsg, 'error');
                             this.isLoading = false;
                         }
-                    })
-                    .catch(error => {
+                    }).catch(error => {
                         let errorMsg;
                         if (error.body && error.body.message) {
                             if (error.body.message.includes('Read timed out')) {
@@ -3200,10 +2912,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                     });
 
             } else {
-
                 createWhatsappTemplate({ serializedWrapper: serializedWrapper, payloadWrapper: payload, templateName: this.templateName })
                     .then(result => {
-
                         if (result && result.success) {
                             this.showToast('Template successfully created', 'success');
                             this.isLoading = false;
@@ -3221,8 +2931,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                             this.showToast('Template creation failed, reason - ' + errorMsg, 'error');
                             this.isLoading = false;
                         }
-                    })
-                    .catch(error => {
+                    }).catch(error => {
                         console.error('Error creating template', error);
                         let errorMsg;
                         if (error.body && error.body.message) {
@@ -3238,17 +2947,14 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                         this.showToast('Template creation failed: ' + errorMsg, 'error');
                         this.isLoading = false;
                     });
-
             }
-
-
         } catch (error) {
             this.showToast('An unexpected error occurred while submitting the template.', 'error');
             this.isLoading = false;
         }
     }
 
-    fetchUpdatedTemplates(dispatchEvent = true) {
+    fetchAllTemplates(dispatchEvent = true) {
         getWhatsAppTemplates()
             .then(data => {
                 this.allTemplates = data;
@@ -3325,7 +3031,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     handleKeyDown(event) {
-        const isRefreshKey = event.key === 'F5' || 
+        const isRefreshKey = event.key === 'F5' ||
             ((event.ctrlKey || event.metaKey) && (event.key === 'r' || event.key === 'R'));
         if (isRefreshKey && this.hasUnsavedChanges()) {
             event.preventDefault();
@@ -3347,7 +3053,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         this.pendingConfirmAction = null;
 
         if (!isConfirmed) {
-            // User clicked No or closed popup -> do not do the next action
             return;
         }
 

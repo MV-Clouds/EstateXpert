@@ -8,19 +8,12 @@
  **/
 public with sharing class WAManageTemplatePageController {
 
-    @TestVisible
-    private static OAuth_Configuration__mdt mockConfig;
-
-
     /**
      * @description : Retrieves the WhatsApp OAuth Custom Metadata configuration record for Whatsapp_OAuth
      * @return OAuth_Configuration__mdt
      */
     public static OAuth_Configuration__mdt getConfig() {
         try {
-            if (mockConfig != null) {
-                return mockConfig;
-            }
             String CONFIGDEVNAME = WhatsappConnectController.CONFIG_DEV_NAME;
 
             List<OAuth_Configuration__mdt> configs = [SELECT Id, DeveloperName, MasterLabel, Client_Id__c, Client_Secret__c, Config_Id__c, API_Version__c, 
@@ -92,7 +85,7 @@ public with sharing class WAManageTemplatePageController {
     @return          : TemplateDataWrapper
     ********************************************************
     */
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static TemplateDataWrapper getDynamicObjectData(Id templateId) {
         TemplateDataWrapper wrapper = new TemplateDataWrapper();
         Set<String> objectNames = new Set<String>();
@@ -174,15 +167,9 @@ public with sharing class WAManageTemplatePageController {
                 return response;
             }
 
-            if(String.isBlank(config.Access_Token__c)){
+            if(String.isBlank(config.Access_Token__c) || String.isBlank(config.Client_Business_Account_ID__c) || String.isBlank(config.API_Version__c) || String.isBlank(config.Authorization_Endpoint__c)){
                 response.put('success', false);
-                response.put('errorMessage', 'Access Token is not configured in Custom Metadata (OAuth_Configuration__mdt).');
-                return response;
-            }
-
-            if(String.isBlank(config.Client_Business_Account_ID__c)){
-                response.put('success', false);
-                response.put('errorMessage', 'Business Account ID is not configured in Custom Metadata (OAuth_Configuration__mdt).');
+                response.put('errorMessage', 'One of the following is not configured in Custom Metadata (OAuth_Configuration__mdt): Access Token, Business Account ID, API Version, Authorization Endpoint.');
                 return response;
             }
 
@@ -246,21 +233,10 @@ public with sharing class WAManageTemplatePageController {
     @return          : sessionId
     ********************************************************
     */
-    @AuraEnabled
-    public static String startUploadSession(String fileName, Integer fileLength, String fileType) {
+    public static String startUploadSession(String fileName, Integer fileLength, String fileType, OAuth_Configuration__mdt config) {
         try {
-            OAuth_Configuration__mdt config = getConfig();
-            if(config == null){
-                return 'OAuth_Configuration__mdt is not configured in Custom Metadata (OAuth_Configuration__mdt).';
-            }
-
             String appId = config.Client_App_ID__c;
-            if (String.isBlank(appId)) {
-                return 'Application ID is not configured in Custom Metadata (OAuth_Configuration__mdt).';
-            }
-
             String apiVersion = config.API_Version__c;
-
             String endpoint = config.Authorization_Endpoint__c + '/' + apiVersion + '/' + appId + '/uploads';
             String token = config.Access_Token__c;
 
@@ -301,18 +277,8 @@ public with sharing class WAManageTemplatePageController {
     @return          : headerHandle JSON
     ********************************************************
     */
-    @AuraEnabled
-    public static String uploadFileChunk(String serializedWrapper, Boolean isAWSEnabled) {
+    public static String uploadFileChunk(String serializedWrapper, Boolean isAWSEnabled, OAuth_Configuration__mdt config) {
         try {
-            OAuth_Configuration__mdt config = getConfig();
-            if(config == null){
-                return 'OAuth_Configuration__mdt is not configured in Custom Metadata (OAuth_Configuration__mdt).';
-            }
-
-            if(config.Client_App_ID__c == null){
-                return 'Client App ID is not configured in Custom Metadata (OAuth_Configuration__mdt).';
-            }
-
             String token = config.Access_Token__c;
 
             FileChunkWrapper fileWrapper = (FileChunkWrapper) JSON.deserialize(serializedWrapper, FileChunkWrapper.class);
@@ -383,19 +349,16 @@ public with sharing class WAManageTemplatePageController {
                 return response;
             }
 
-            if(config.Client_App_ID__c == null){
+            if(String.isBlank(config.Access_Token__c) || String.isBlank(config.API_Version__c) || String.isBlank(config.Authorization_Endpoint__c)){
                 response.put('success', false);
-                response.put('status', 'error');
-                response.put('message', 'Client App ID is not configured in Custom Metadata (OAuth_Configuration__mdt).');
+                response.put('errorMessage', 'One of the following is not configured in Custom Metadata (OAuth_Configuration__mdt): Access Token, Business Account ID, API Version, Authorization Endpoint.');
                 return response;
             }
 
             // Pre-callout eligibility validation against Meta 24h & 30-day rules
-            List<WA_Template__c> currentTemps = [SELECT Id, Status__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c 
-                                                    FROM WA_Template__c 
-                                                    WHERE (Template_Id__c = :templateId AND Template_Id__c != null) 
-                                                       OR (Template_Name__c = :templateName AND Template_Name__c != null) 
-                                                    WITH USER_MODE LIMIT 1];
+            List<WA_Template__c> currentTemps = [SELECT Id, Status__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c FROM WA_Template__c 
+                                                    WHERE (Template_Id__c = :templateId AND Template_Id__c != null) OR (Template_Name__c = :templateName AND 
+                                                    Template_Name__c != null) WITH USER_MODE LIMIT 1];
             if (!currentTemps.isEmpty()) {
                 Map<String, Object> eligibility = evaluateEditEligibility(currentTemps[0]);
                 if (eligibility.get('canEdit') == false) {
@@ -560,28 +523,6 @@ public with sharing class WAManageTemplatePageController {
 
         return result;
     }
-
-    /*
-    *********************************************************
-    @description     : Pre-check for LWC before opening/confirming template edits.
-    @param           : templateId - Id of WA_Template__c
-    @return          : Map<String, Object>
-    ********************************************************
-    */
-    @AuraEnabled
-    public static Map<String, Object> checkTemplateEditEligibility(String templateId) {
-        if (String.isBlank(templateId)) {
-            return new Map<String, Object>{ 'canEdit' => true, 'reason' => '' };
-        }
-        List<WA_Template__c> templates = [SELECT Id, Status__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c 
-                                            FROM WA_Template__c 
-                                            WHERE Id = :templateId OR Template_Id__c = :templateId 
-                                            WITH USER_MODE LIMIT 1];
-        if (templates.isEmpty()) {
-            return new Map<String, Object>{ 'canEdit' => true, 'reason' => '' };
-        }
-        return evaluateEditEligibility(templates[0]);
-    }
    
     @AuraEnabled
     public static String getMetaHeaderHandler(String fileUrlOrContentVersionId, String contentVersionId) {
@@ -591,6 +532,16 @@ public with sharing class WAManageTemplatePageController {
             String mimeType;
             String fileName;
             Integer fileLength;
+
+            OAuth_Configuration__mdt config = getConfig();
+
+            if(config == null){
+                return 'OAuth_Configuration__mdt is not configured in Custom Metadata (OAuth_Configuration__mdt).';
+            }
+
+            if(String.isBlank(config.Client_App_ID__c) || String.isBlank(config.API_Version__c) || String.isBlank(config.Authorization_Endpoint__c)){
+                return 'One of the following is not configured in Custom Metadata (OAuth_Configuration__mdt): Client App ID, API Version, Authorization Endpoint, Upload Endpoint.';
+            }
 
             if (String.isNotBlank(fileUrlOrContentVersionId) && fileUrlOrContentVersionId.contains('amazonaws.com')) {
                 Http http = new Http();
@@ -616,7 +567,7 @@ public with sharing class WAManageTemplatePageController {
                 fileLength = cv.ContentSize;
             }
 
-            String uploadSessionId = startUploadSession(fileName, fileLength, mimeType);
+            String uploadSessionId = startUploadSession(fileName, fileLength, mimeType, config);
             if (String.isBlank(uploadSessionId)) {
                 return '';
             }
@@ -630,7 +581,7 @@ public with sharing class WAManageTemplatePageController {
 
             String serializedFileWrapper = JSON.serialize(wrapper);
 
-            String resultJson = uploadFileChunk(serializedFileWrapper, false);
+            String resultJson = uploadFileChunk(serializedFileWrapper, false, config);
             if (String.isNotBlank(resultJson)) {
                 Map<String, Object> resultMap = (Map<String, Object>) JSON.deserializeUntyped(resultJson);
                 if (resultMap != null && resultMap.containsKey('headerHandle')) {
@@ -729,84 +680,6 @@ public with sharing class WAManageTemplatePageController {
         @AuraEnabled public Integer editsRemaining30Days;
     }
 
-    /*
-    *********************************************************
-    @description     : Clones a WA_Template__c record and its WA_Template_Variable__c children
-                       using user mode. Follows WATemplateHomePageController.cls pattern.
-    @param           : templateId - Id of the source WA_Template__c to clone.
-                       newName    - Value for Template_Name__c on the cloned record.
-    @return          : Map<String,String> status, message, and clonedId
-    ********************************************************
-    */
-    @AuraEnabled
-    public static Map<String, String> cloneWBTemplate(String templateId, String newName) {
-        Map<String, String> result = new Map<String, String>();
-        try {
-            String escapedTemplateId = String.escapeSingleQuotes(templateId);
-            String escapedNewName    = String.escapeSingleQuotes(newName);
-
-            List<WA_Template__c> sourceTemplates = [SELECT Id, Template_Name__c, Template_Category__c, Language__c, Header_Type__c, Header_Body__c, File_Name__c, 
-                                                        Image_Header_Handle__c, Template_Body__c, Footer_Body__c, Button_Body__c, Button_Label__c, Button_Type__c,
-                                                        Template_Miscellaneous_Data__c, (SELECT Name, Object_Name__c, Field_Name__c, Type__c, Alternate_Text__c 
-                                                        FROM WA_Template_Variables__r ORDER BY Name ASC) FROM WA_Template__c WHERE Id = :escapedTemplateId 
-                                                        WITH USER_MODE LIMIT 1];
-
-            if (sourceTemplates.isEmpty()) {
-                result.put('status',  'error');
-                result.put('message', 'Template not found.');
-                return result;
-            }
-
-            WA_Template__c source = sourceTemplates[0];
-
-            WA_Template__c cloned = new WA_Template__c(
-                Template_Name__c = escapedNewName,
-                Template_Id__c = 'DRAFT',
-                Status__c = 'Draft',
-                Template_Category__c = source.Template_Category__c,
-                Language__c = source.Language__c,
-                Header_Type__c = source.Header_Type__c,
-                Header_Body__c = source.Header_Body__c,
-                File_Name__c = source.File_Name__c,
-                Image_Header_Handle__c = source.Image_Header_Handle__c,
-                Template_Body__c = source.Template_Body__c,
-                Footer_Body__c = source.Footer_Body__c,
-                Button_Body__c = source.Button_Body__c,
-                Button_Label__c = source.Button_Label__c,
-                Button_Type__c = source.Button_Type__c,
-                Template_Miscellaneous_Data__c = source.Template_Miscellaneous_Data__c
-            );
-
-            insert as user cloned;
-
-            List<WA_Template_Variable__c> variablesToInsert = new List<WA_Template_Variable__c>();
-            for (WA_Template_Variable__c tv : source.WA_Template_Variables__r) {
-                variablesToInsert.add(new WA_Template_Variable__c(
-                    WA_Template__c = cloned.Id,
-                    Object_Name__c = tv.Object_Name__c,
-                    Field_Name__c = tv.Field_Name__c,
-                    Type__c = tv.Type__c,
-                    Alternate_Text__c = tv.Alternate_Text__c
-                ));
-            }
-
-            if (!variablesToInsert.isEmpty()) {
-                insert as user variablesToInsert;
-            }
-
-            result.put('status',   'success');
-            result.put('message',  'WhatsApp template cloned successfully.');
-            result.put('clonedId', cloned.Id);
-            return result;
-
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'cloneWBTemplate', e.getMessage());
-            result.put('status',  'error');
-            result.put('message', 'Error cloning template: ' + e.getMessage());
-            return result;
-        }
-    }
-
     @AuraEnabled
     public static Map<String, String> uploadFile(String base64Data, String fileName) {
         Map<String, String> resultMap = new Map<String, String>();
@@ -846,7 +719,6 @@ public with sharing class WAManageTemplatePageController {
         }
     }
 
-    @AuraEnabled
     public static String getPublicLink(String contentVersionId) {
         try {
             // Get the related ContentDocument Id

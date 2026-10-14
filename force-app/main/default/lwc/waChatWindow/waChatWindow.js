@@ -13,7 +13,7 @@ import sendWhatsappMessage from '@salesforce/apex/WAChatWindowController.sendWha
 import updateStatus from '@salesforce/apex/WAChatWindowController.updateStatus';
 import getTemplatesOnly from '@salesforce/apex/WAChatWindowController.getTemplatesOnly';
 import sendSelectedTemplate from '@salesforce/apex/WAChatWindowController.sendSelectedTemplate';
-import hasBusinessAccountId from '@salesforce/apex/WAChatWindowController.hasBusinessAccountId';
+import hasBusinessAccountId from '@salesforce/apex/WATemplateHomePageController.hasBusinessAccountId';
 
 // AWS & Static resources
 import getS3ConfigSettings from '@salesforce/apex/ImageAndMediaController.getS3ConfigSettings';

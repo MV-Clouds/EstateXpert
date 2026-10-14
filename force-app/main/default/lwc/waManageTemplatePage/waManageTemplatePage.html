@@ -123,106 +123,41 @@
                                 onchange={handleContentType} placeholder="Select Header Type">
                             </lightning-combobox>
                         </div>
+                        <!-- Media Section -->
                         <template if:true={addMedia}>
-                            <div class="add-variable">
-                                <div class="body-title">
-                                    <p>Variable Samples</p>
+                            <div class="choosefile">
+                                <div class="header">
+                                    <p class="title2">Media samples</p>
                                 </div>
                                 <div class="descp2">
                                     <p>Include samples of all variables in your message to help Meta review
                                         your template. Remember not to include any customer information to
                                         protect your customer's privacy.</p>
                                 </div>
-                                <template if:true={isImageFileUploader}>
-                                    <div class="chooseImage">
-                                        <p class="uploadlabel">Image</p>
-                                        <div class="custom-upload-button">
-                                            <label class="upload-label">
-                                                <img src="/resource/MVEX__uploadImgIcon" alt="Upload Icon"
-                                                    class="upload-icon" />
-                                                <template if:true={NoFileSelected}>
-                                                    <span>Choose JPG or PNG file</span>
-                                                </template>
-
-                                                <template if:true={isfilename}>
-                                                    <span>{fileName}</span>
-                                                </template>
-                                                <input type="file" accept="image/png, image/jpeg,image/jpg"
-                                                    class="file-input" onchange={handleFileChange} />
-                                            </label>
-                                        </div>
-                                        <template if:true={isfilename}>
-                                            <div>
-                                                <lightning-button-icon icon-name="utility:close"
-                                                    alternative-text="Remove" onclick={handleDelete}
-                                                    class="remove-File">
-                                                </lightning-button-icon>
-                                            </div>
-                                        </template>
-
+                                <div class="chooseMedia">
+                                    <p class="uploadlabel">{selectedContentType}</p>
+                                    <div class="custom-upload-button">
+                                        <label class="upload-label">
+                                            <img src={uploadMediaIcon} alt="Upload Icon" class="upload-icon" />
+                                            <template if:true={NoFileSelected}>
+                                                <span>Choose {mediaFileDescription}</span>
+                                            </template>
+                                            <template if:true={isfilename}>
+                                                <span>{fileName}</span>
+                                            </template>
+                                            <input type="file" accept={mediaAccept}
+                                                class="file-input" onchange={handleFileChange} />
+                                        </label>
                                     </div>
-                                </template>
-                                <template if:true={isVideoFileUploader}>
-                                    <div class="chooseVideo">
-                                        <p class="uploadlabel">Video</p>
-                                        <div class="custom-upload-button">
-                                            <label class="upload-label">
-                                                <img src="/resource/MVEX__uploadvideoIcon" alt="Upload Icon"
-                                                    class="upload-icon" />
-                                                <template if:true={NoFileSelected}>
-                                                    <span>Choose MP4 file</span>
-                                                </template>
-
-                                                <template if:true={isfilename}>
-                                                    <span>{fileName}</span>
-                                                </template>
-                                                <input type="file" accept="video/mp4" class="file-input"
-                                                    onchange={handleFileChange} />
-                                            </label>
+                                    <template if:true={isfilename}>
+                                        <div class="delete-icon">
+                                            <button type="button" class="delete-div" onclick={handleDelete} title="Remove file">
+                                                <lightning-icon icon-name="utility:delete" size="small"
+                                                    alternative-text="Delete icon"></lightning-icon>
+                                            </button>
                                         </div>
-                                        <template if:true={isfilename}>
-                                            <div>
-                                                <button class="native-close-button" onclick={handleDelete}
-                                                    title="Remove">
-                                                    <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M31.1 25.9l10.6-10.6c.3-.3.3-.8 0-1.1l-2.1-2.1c-.3-.3-.8-.3-1.1 0L27.9 22.8c-.3.3-.8.3-1.1 0L16.2 12.1c-.3-.3-.8-.3-1.1 0l-2.1 2.1c-.3.3-.3.8 0 1.1l10.6 10.6c.3.3.3.8 0 1.1L12.9 37.7c-.3.3-.3.8 0 1.1l2.1 2.1c.3.3.8.3 1.1 0l10.6-10.6c.3-.3.8-.3 1.1 0l10.6 10.6c.3.3.8.3 1.1 0l2.1-2.1c.3-.3.3-.8 0-1.1L29.9 27c-.2-.3-.2-.8.1-1.1z" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </template>
-                                <template if:true={isDocFileUploader}>
-                                    <div class="chooseDoc">
-                                        <p class="uploadlabel">Document</p>
-                                        <div class="custom-upload-button">
-                                            <label class="upload-label">
-                                                <img src="/resource/MVEX__uploadDocIcon" alt="Upload Icon"
-                                                    class="upload-icon" />
-                                                <template if:true={NoFileSelected}>
-                                                    <span>Choose PDF file</span>
-                                                </template>
-                                                <template if:true={isfilename}>
-                                                    <span>{fileName}</span>
-                                                </template>
-                                                <input type="file" accept="application/pdf" class="file-input"
-                                                    onchange={handleFileChange} />
-                                            </label>
-                                        </div>
-                                        <template if:true={isfilename}>
-                                            <div>
-                                                <button class="native-close-button" onclick={handleDelete}
-                                                    title="Remove">
-                                                    <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M31.1 25.9l10.6-10.6c.3-.3.3-.8 0-1.1l-2.1-2.1c-.3-.3-.8-.3-1.1 0L27.9 22.8c-.3.3-.8.3-1.1 0L16.2 12.1c-.3-.3-.8-.3-1.1 0l-2.1 2.1c-.3.3-.3.8 0 1.1l10.6 10.6c.3.3.3.8 0 1.1L12.9 37.7c-.3.3-.3.8 0 1.1l2.1 2.1c.3.3.8.3 1.1 0l10.6-10.6c.3-.3.8-.3 1.1 0l10.6 10.6c.3.3.8.3 1.1 0l2.1-2.1c.3-.3.3-.8 0-1.1L29.9 27c-.2-.3-.2-.8.1-1.1z" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </template>
+                                    </template>
+                                </div>
                             </div>
                         </template>
 
@@ -584,10 +519,7 @@
                                         <template if:true={button.isVisitSite}>
                                             <div class="urltype">
                                                 <label class="form-field-label">URL Type</label>
-                                                <lightning-combobox variant="label-hidden" class="urlInput"
-                                                    name="selectedUrlType" data-index={index}
-                                                    value={button.selectedUrlType} options={urlType}
-                                                    onchange={handleInputChange}></lightning-combobox>
+                                                <input class="slds-input urlInput" type="text" value="Static" readonly disabled />
                                             </div>
                                             <div class="webUrl">
                                                 <label class="form-field-label">Website URL</label>
@@ -615,8 +547,8 @@
                                                 <div class="count-input">
                                                     <lightning-input class="phone-btn" variant="label-hidden"
                                                         placeholder="Enter Phone Number" type="tel"
-                                                        pattern={phonePattern}
-                                                        message-when-pattern-mismatch={phoneErrorMessage}
+                                                        pattern="^[0-9]+$"
+                                                        message-when-pattern-mismatch="Enter a valid phone number"
                                                         name="phonenum" value={button.phonenum} data-index={index}
                                                         max-length={maxtelephonelength} onchange={handleInputChange}>
                                                     </lightning-input>
@@ -730,38 +662,23 @@
                                         <p>{header}</p>
                                     </div>
                                 </template>
-                                <template if:true={isImageFile}>
+                                <template if:true={isMediaPlaceholder}>
                                     <div class="imagedivWP">
-                                        <img src={imageUploadPreview} alt="">
+                                        <img src={mediaPlaceholderImg} alt="Preview placeholder">
                                     </div>
                                 </template>
-                                <template if:true={isImgSelected}>
-                                    <div>
-                                        <img src={filePreview} alt="File Preview" class="img-responsive" />
-                                    </div>
-                                </template>
-                                <template if:true={isVideoFile}>
-                                    <div class="imagedivWP">
-                                        <img src={tempVideoIcon} alt="">
-                                    </div>
-                                </template>
-
-                                <template if:true={isVidSelected}>
-                                    <video width="100%" height="150" controls>
-                                        <source src={filePreview} type="video/mp4">
-                                        Your browser does not support the video tag.
-                                    </video>
-                                </template>
-                                <template if:true={isDocFile}>
-                                    <div class="imagedivWP">
-                                        <img src={docUploadPreviewImg} alt="">
-                                    </div>
-                                </template>
-
-                                <template if:true={isDocSelected}>
-                                    <div class="imagedivWP position-relative">
-                                        <img src={NoPreviewAvailableImg} alt="no preview available">
-                                    </div>
+                                <template if:true={isMediaPreview}>
+                                    <template if:true={isVideoPreview}>
+                                        <video width="100%" height="150" controls>
+                                            <source src={filePreview} type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    </template>
+                                    <template if:false={isVideoPreview}>
+                                        <div class="imagedivWP position-relative">
+                                            <img src={mediaPreviewImg} alt="File Preview" class="img-responsive" />
+                                        </div>
+                                    </template>
                                 </template>
                                 <div class="TextBodyWP">
                                     <lightning-formatted-rich-text

@@ -6,18 +6,12 @@
  * @last modified on  : 09/10/2026
  **/
 public with sharing class WATemplateHomePageController {
-    @TestVisible
-    private static OAuth_Configuration__mdt mockConfig;
-
     /**
      * @description : Retrieves the WhatsApp OAuth Custom Metadata configuration record for Whatsapp_OAuth
      * @return OAuth_Configuration__mdt
      */
     public static OAuth_Configuration__mdt getConfig() {
         try {
-            if (mockConfig != null) {
-                return mockConfig;
-            }
             String CONFIGDEVNAME = WhatsappConnectController.CONFIG_DEV_NAME;
 
             List<OAuth_Configuration__mdt> configs = [SELECT Id, DeveloperName, MasterLabel, Client_Id__c, Client_Secret__c, Config_Id__c, API_Version__c, 

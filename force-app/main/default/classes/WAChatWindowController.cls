@@ -372,7 +372,7 @@ public with sharing class WAChatWindowController {
             chat.Message__c = message;
             chat.WA_Template__c = templateId;
             chat.Phone__c = phoneNumber;
-            chat.Type_of_Message__c = 'OutBound Messages';
+            chat.Type_of_Message__c = 'Outbound Messages';
             chat.Message_Status__c = null;
             chat.Message_Type__c = messageType;
             chat.Reply_to__c = replyToChatId;
@@ -719,7 +719,7 @@ public with sharing class WAChatWindowController {
             chat.Message__c = String.isNotBlank(template.Template_Body__c) ? template.Template_Body__c : template.Template_Name__c;
             chat.WA_Template__c = template.Id;
             chat.Phone__c = phoneNumber;
-            chat.Type_of_Message__c = 'OutBound Messages';
+            chat.Type_of_Message__c = 'Outbound Messages';
             chat.Message_Type__c = 'Template';
             chat.Sent_Template_Details__c = JSON.serialize(components);
             chat.Message_ID__c = whatsAppMessageID;
@@ -870,7 +870,7 @@ public with sharing class WAChatWindowController {
             WA_Chat__c chat = new WA_Chat__c();
             chat.Message__c = message;
             chat.Phone__c = phoneNumber;
-            chat.Type_of_Message__c = 'OutBound Messages';
+            chat.Type_of_Message__c = 'Outbound Messages';
             chat.Message_Status__c = null;
             chat.Message_Type__c = messageType;
             chat.Reply_to__c = replyToChatId;

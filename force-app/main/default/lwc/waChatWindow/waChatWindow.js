@@ -38,6 +38,7 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
     @track reactToMessage = null;
     @track noteText = 'The 24-hour conversation window has closed. Begin by sending an approved template.';
     @track showSpinner = false;
+    @track isSendingMessage = false;
     @track noChatMessages = true;
     @track showEmojiPicker = false;
     @track showAttachmentOptions = false;
@@ -107,6 +108,10 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
 
     get displayBackDrop() {
         return this.showEmojiPicker || this.showAttachmentOptions || this.audioPreview || this.showReactEmojiPicker;
+    }
+
+    get messageDraftClass() {
+        return (this.showAttachmentOptions || this.showEmojiPicker) ? 'message-draft-div has-open-popover' : 'message-draft-div';
     }
 
     get selectedTemplateRecord() {
@@ -323,7 +328,7 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             Id: rawChat.Id,
             Message__c: rawChat.Message__c ?? rawChat.MVEX__Message__c ?? '',
             Message_Type__c: rawChat.Message_Type__c ?? rawChat.MVEX__Message_Type__c ?? 'Text',
-            Type_of_Message__c: rawChat.Type_of_Message__c ?? rawChat.MVEX__Type_of_Message__c ?? 'OutBound Messages',
+            Type_of_Message__c: rawChat.Type_of_Message__c ?? rawChat.MVEX__Type_of_Message__c ?? 'Outbound Messages',
             Message_Status__c: rawChat.Message_Status__c ?? rawChat.MVEX__Message_Status__c ?? null,
             Message_ID__c: rawChat.Message_ID__c ?? rawChat.WhatsAppMessageId__c ?? rawChat.MVEX__WhatsAppMessageId__c ?? '',
             Reaction__c: rawChat.Reaction__c ?? rawChat.MVEX__Reaction__c ?? null,
@@ -334,6 +339,21 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             Sent_Template_Details__c: rawChat.Sent_Template_Details__c ?? rawChat.MVEX__Sent_Template_Details__c ?? null,
             CreatedDate: rawChat.CreatedDate
         };
+    }
+
+    /**
+     * Safely adds or updates a chat in the chats list avoiding duplicate entries
+     */
+    upsertChat(normChat) {
+        if (!normChat || !normChat.Id) return;
+        const chats = this.chats ? [...this.chats] : [];
+        const idx = chats.findIndex(c => c.Id === normChat.Id);
+        if (idx > -1) {
+            chats[idx] = { ...chats[idx], ...normChat };
+        } else {
+            chats.push(normChat);
+        }
+        this.chats = chats;
     }
 
     getInitialData() {
@@ -374,7 +394,7 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
 
                     // Mark unread inbound messages as seen
                     const chatIdsToSeen = [];
-                    this.chats.filter(ch => ch.Type_of_Message__c !== 'OutBound Messages').forEach(ch => {
+                    this.chats.filter(ch => !(ch.Type_of_Message__c || '').toLowerCase().includes('outbound')).forEach(ch => {
                         if (ch.Message_Status__c !== 'Seen') chatIdsToSeen.push(ch.Id);
                     });
                     if (chatIdsToSeen.length > 0) {
@@ -421,17 +441,19 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
 
             const processed = this.chats.map(ch => {
                 const item = this.normalizeChat(ch);
+                const isOutbound = (item.Type_of_Message__c || '').toLowerCase().includes('outbound');
 
+                item.isOutbound = isOutbound;
                 item.isText = item.Message_Type__c === 'Text';
                 item.isImage = item.Message_Type__c === 'Image';
                 item.isVideo = item.Message_Type__c === 'Video';
                 item.isAudio = item.Message_Type__c === 'Audio';
                 item.isDoc = item.Message_Type__c === 'Document';
                 item.isFlow = item.Message_Type__c === 'interactive';
-                item.isFlowResponse = item.isFlow && item.Type_of_Message__c !== 'OutBound Messages';
-                item.isTemplate = item.Message_Type__c === 'Template' || (item.isFlow && item.Type_of_Message__c === 'OutBound Messages');
+                item.isFlowResponse = item.isFlow && !isOutbound;
+                item.isTemplate = item.Message_Type__c === 'Template' || (item.isFlow && isOutbound);
                 item.isOther = !['Text', 'Image', 'Template', 'Video', 'Document', 'Audio', 'interactive'].includes(item.Message_Type__c);
-                item.messageBy = item.Type_of_Message__c === 'OutBound Messages' ? 'You' : (this.recordName || 'Contact');
+                item.messageBy = isOutbound ? 'You' : (this.recordName || 'Contact');
 
                 // Template card properties for native WhatsApp chat-window structure
                 if (item.isTemplate) {
@@ -453,13 +475,14 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                     item.hasButtons = item.templateButtons && item.templateButtons.length > 0;
                 }
 
-                // Status flags
-                item.isTick = ['Sent', 'Delivered', 'Seen'].includes(item.Message_Status__c);
-                item.isSeen = item.Message_Status__c === 'Seen';
-                item.isDelivered = item.Message_Status__c === 'Delivered';
-                item.isSent = item.Message_Status__c === 'Sent';
-                item.isFailed = item.Message_Status__c === 'Failed';
-                item.isSending = item.Message_Status__c == null;
+                // Status flags - only outbound (sent) messages show status ticks
+                const statusLower = (item.Message_Status__c || '').toLowerCase();
+                item.isSeen = isOutbound && (statusLower === 'seen' || statusLower === 'read');
+                item.isDelivered = isOutbound && statusLower === 'delivered';
+                item.isSent = isOutbound && statusLower === 'sent';
+                item.isFailed = isOutbound && statusLower === 'failed';
+                item.isSending = isOutbound && (!item.Message_Status__c || statusLower === 'sending');
+                item.isTick = isOutbound && (item.isSeen || item.isDelivered || item.isSent);
 
                 // File parsing
                 if ((item.isDoc || item.isAudio) && item.File_Data__c) {
@@ -479,8 +502,13 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                     }
                 }
 
-                // Bubble class
-                item.className = item.Type_of_Message__c === 'OutBound Messages' ? 'sent-message' : 'received-message';
+                // Bubble class & full-row class for WhatsApp inbound/outbound styling
+                item.className = isOutbound ? 'sent-message' : 'received-message';
+                item.rowClass = `message-full-length-div ${item.className}`;
+
+                // Copy text (available for text & template messages)
+                item.copyText = item.isTemplate ? (item.templateBody || item.Message__c || '') : (item.Message__c || '');
+                item.hasCopyText = !!(item.copyText && item.copyText.trim());
 
                 // Reactions
                 let yourReaction = item.Reaction__c?.split('<|USER|>')[0];
@@ -614,31 +642,59 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             if (fileInput) {
                 fileInput.value = null;
             }
+            this.handleCloseAllActionMenus();
         } catch (e) {
             console.error('Error in handleBackDropClick:::', e.message);
         }
     }
 
     handleToggleActions(event) {
+        event.stopPropagation();
         try {
-            event.currentTarget.classList.toggle('show-options');
+            const btn = event.currentTarget;
+            const wasOpen = btn.classList.contains('show-options');
+            this.handleCloseAllActionMenus();
+            if (!wasOpen) {
+                btn.classList.add('show-options');
+                const row = btn.closest('.message-full-length-div');
+                if (row) row.classList.add('menu-open-row');
+            }
         } catch (e) {
             console.error('Error in handleToggleActions:::', e.message);
         }
     }
 
+    handleCloseAllActionMenus() {
+        try {
+            this.template?.querySelectorAll('.action-options-btn.show-options').forEach(el => {
+                el.classList.remove('show-options');
+            });
+            this.template?.querySelectorAll('.menu-open-row').forEach(el => {
+                el.classList.remove('menu-open-row');
+            });
+        } catch (e) {
+            console.error('Error in handleCloseAllActionMenus:::', e.message);
+        }
+    }
+
     handleHideActions(event) {
         try {
-            event.currentTarget?.querySelector('.action-options-btn')?.classList.remove('show-options');
+            const row = event.currentTarget;
+            if (row && !row.classList.contains('menu-open-row')) {
+                row.querySelector('.action-options-btn')?.classList.remove('show-options');
+            }
         } catch (e) {
             console.error('Error in handleHideActions:::', e.message);
         }
     }
 
     handleChatAction(event) {
+        event.stopPropagation();
         try {
             const actionType = event.currentTarget.dataset.action;
             const chatId = event.currentTarget.dataset.chat;
+
+            this.handleCloseAllActionMenus();
 
             if (actionType === 'reply') {
                 this.replyToMessage = this.chats?.find(chat => chat.Id === chatId);
@@ -649,8 +705,19 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                 this.showReactEmojiPicker = true;
             } else if (actionType === 'copy') {
                 const text = event.currentTarget.dataset.message || '';
-                navigator.clipboard.writeText(text);
-                this.showToast('Copied', 'Message text copied to clipboard.', 'success');
+                if (text && navigator.clipboard) {
+                    navigator.clipboard.writeText(text);
+                    this.showToast('Copied', 'Message text copied to clipboard.', 'success');
+                } else if (text) {
+                    // Fallback copy
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = text;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    this.showToast('Copied', 'Message text copied to clipboard.', 'success');
+                }
             } else if (actionType === 'cancel-reply') {
                 this.replyToMessage = null;
             } else if (actionType === 'cancel-react') {
@@ -811,7 +878,10 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                     return;
                 }
                 event.preventDefault();
-                this.handleSendMessage();
+                event.stopPropagation();
+                if (!this.isSendingMessage) {
+                    this.handleSendMessage();
+                }
             }
         } catch (e) {
             console.error('Error in handleMessageTextChange:::', e.message);
@@ -905,7 +975,7 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             .then(chat => {
                 if (chat) {
                     const norm = this.normalizeChat(chat);
-                    this.chats.push(norm);
+                    this.upsertChat(norm);
                     this.processChats(true);
 
                     const payload = this.createJSONBody(this.phoneNumber, messageType, this.replyToMessage?.Message_ID__c || null, {
@@ -982,7 +1052,7 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             if (result && result.success) {
                 this.showToast('Success', 'Template sent successfully!', 'success');
                 if (result.chat) {
-                    this.chats.push(this.normalizeChat(result.chat));
+                    this.upsertChat(this.normalizeChat(result.chat));
                 }
                 this.handleBackDropClick();
                 this.processChats(true);
@@ -1057,7 +1127,10 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
     }
 
     handleSendMessage() {
-        this.showSpinner = true;
+        if (this.isSendingMessage) {
+            return;
+        }
+
         try {
             this.handleBackDropClick();
             const textarea = this.template.querySelector('.message-input');
@@ -1066,14 +1139,25 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             this.checkLastMessage();
             if (this.sendOnlyTemplate) {
                 this.showToast('Notice', 'Cannot send freeform text outside the 24-hour window. Please send an approved template.', 'info');
-                this.showSpinner = false;
                 return;
             }
 
             if (!message) {
-                this.showSpinner = false;
                 return;
             }
+
+            this.isSendingMessage = true;
+            this.showSpinner = true;
+
+            // Immediately clear textarea so double clicks/enter cannot re-read identical text
+            if (textarea) {
+                textarea.value = '';
+                textarea.style.height = 'auto';
+            }
+
+            const replyChatId = this.replyToMessage?.Id || null;
+            const replyMessageId = this.replyToMessage?.Message_ID__c || null;
+            this.replyToMessage = null;
 
             createChat({
                 chatData: {
@@ -1081,7 +1165,7 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                     templateId: null,
                     messageType: 'text',
                     recordId: this.recordId,
-                    replyToChatId: this.replyToMessage?.Id || null,
+                    replyToChatId: replyChatId,
                     phoneNumber: this.phoneNumber,
                     objectName: this.objectApiName
                 }
@@ -1089,15 +1173,10 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             .then(chat => {
                 if (chat) {
                     const norm = this.normalizeChat(chat);
-                    this.chats.push(norm);
-                    if (textarea) {
-                        textarea.value = '';
-                        textarea.style.height = 'auto';
-                    }
-                    this.replyToMessage = null;
+                    this.upsertChat(norm);
                     this.processChats(true);
 
-                    const textPayload = this.createJSONBody(this.phoneNumber, 'text', this.replyToMessage?.Message_ID__c || null, {
+                    const textPayload = this.createJSONBody(this.phoneNumber, 'text', replyMessageId, {
                         textBody: message
                     });
 
@@ -1111,25 +1190,32 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                                     this.chats[idx].Message_ID__c = updated.Message_ID__c;
                                 }
                             }
-                            this.showSpinner = false;
                             this.processChats();
                         })
                         .catch(err => {
-                            this.showSpinner = false;
                             console.error('Error in sendWhatsappMessage text:', err);
+                        })
+                        .finally(() => {
+                            this.showSpinner = false;
+                            this.isSendingMessage = false;
                         });
                 } else {
                     this.showSpinner = false;
+                    this.isSendingMessage = false;
+                    if (textarea) textarea.value = message;
                     this.showToast('Error', 'Message could not be created.', 'error');
                 }
             })
             .catch(e => {
                 this.showSpinner = false;
+                this.isSendingMessage = false;
+                if (textarea) textarea.value = message;
                 const msg = e?.body?.message === 'STORAGE_LIMIT_EXCEEDED' ? 'Storage Limit Exceeded.' : 'Message could not be sent.';
                 this.showToast('Error', msg, 'error');
             });
         } catch (e) {
             this.showSpinner = false;
+            this.isSendingMessage = false;
             console.error('Error in handleSendMessage:::', e.message);
         }
     }
@@ -1223,7 +1309,7 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             .then(chat => {
                 if (chat) {
                     const norm = this.normalizeChat(chat);
-                    this.chats.push(norm);
+                    this.upsertChat(norm);
                     this.processChats(true);
 
                     const payload = this.createJSONBody(this.phoneNumber, messageType, this.replyToMessage?.Message_ID__c || null, {

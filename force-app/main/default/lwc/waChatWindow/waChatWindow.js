@@ -110,6 +110,18 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
         return (this.showAttachmentOptions || this.showEmojiPicker) ? 'message-draft-div has-open-popover' : 'message-draft-div';
     }
 
+    get inputContainerClass() {
+        return this.isSendingMessage ? 'input-container is-disabled' : 'input-container';
+    }
+
+    get sendButtonClass() {
+        return this.isSendingMessage ? 'send-action-btn is-sending' : 'send-action-btn';
+    }
+
+    get sendButtonTitle() {
+        return this.isSendingMessage ? 'Sending...' : 'Send Message (Enter)';
+    }
+
     get selectedTemplateRecord() {
         return (this.allTemplates || []).find(t => t.Id === this.selectedTemplate);
     }
@@ -951,6 +963,10 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
 
     handleMessageTextChange(event) {
         try {
+            if (this.isSendingMessage) {
+                event.preventDefault();
+                return;
+            }
             const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
             if (!isMobile && event.key === 'Enter') {
                 if (event.shiftKey || event.ctrlKey || event.altKey) {
@@ -1224,7 +1240,6 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             }
 
             this.isSendingMessage = true;
-            this.showSpinner = true;
 
             // Immediately clear textarea so double clicks/enter cannot re-read identical text
             if (textarea) {
@@ -1235,6 +1250,22 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             const replyChatId = this.replyToMessage?.Id || null;
             const replyMessageId = this.replyToMessage?.Message_ID__c || null;
             this.replyToMessage = null;
+
+            // Optimistically insert pending chat with clock icon in chat bubble
+            const tempId = 'temp_' + Date.now();
+            const optimisticChat = {
+                Id: tempId,
+                Message__c: message,
+                Type_of_Message__c: 'Outbound Messages',
+                Message_Type__c: 'Text',
+                CreatedDate: new Date().toISOString(),
+                Message_Status__c: 'sending',
+                Reply_to__c: replyChatId,
+                Phone__c: this.phoneNumber,
+                Contact__c: this.recordId
+            };
+            this.upsertChat(optimisticChat);
+            this.processChats(true);
 
             createChat({
                 chatData: {
@@ -1249,7 +1280,12 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             .then(chat => {
                 if (chat) {
                     const norm = this.normalizeChat(chat);
-                    this.upsertChat(norm);
+                    const tempIdx = this.chats.findIndex(c => c.Id === tempId);
+                    if (tempIdx > -1) {
+                        this.chats.splice(tempIdx, 1, norm);
+                    } else {
+                        this.upsertChat(norm);
+                    }
                     this.processChats(true);
 
                     const textPayload = this.createJSONBody(this.phoneNumber, 'text', replyMessageId, {
@@ -1270,27 +1306,43 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                         })
                         .catch(err => {
                             console.error('Error in sendWhatsappMessage text:', err);
+                            const idx = this.chats.findIndex(c => c.Id === norm.Id);
+                            if (idx > -1) {
+                                this.chats[idx].Message_Status__c = 'failed';
+                                this.processChats();
+                            }
+                            this.showToast('Error', 'Message delivery failed.', 'error');
                         })
                         .finally(() => {
-                            this.showSpinner = false;
                             this.isSendingMessage = false;
+                            setTimeout(() => {
+                                const ta = this.template.querySelector('.message-input');
+                                if (ta) ta.focus();
+                            }, 50);
                         });
                 } else {
-                    this.showSpinner = false;
                     this.isSendingMessage = false;
+                    const tempIdx = this.chats.findIndex(c => c.Id === tempId);
+                    if (tempIdx > -1) {
+                        this.chats[tempIdx].Message_Status__c = 'failed';
+                        this.processChats();
+                    }
                     if (textarea) textarea.value = message;
                     this.showToast('Error', 'Message could not be created.', 'error');
                 }
             })
             .catch(e => {
-                this.showSpinner = false;
                 this.isSendingMessage = false;
+                const tempIdx = this.chats.findIndex(c => c.Id === tempId);
+                if (tempIdx > -1) {
+                    this.chats[tempIdx].Message_Status__c = 'failed';
+                    this.processChats();
+                }
                 if (textarea) textarea.value = message;
                 const msg = e?.body?.message === 'STORAGE_LIMIT_EXCEEDED' ? 'Storage Limit Exceeded.' : 'Message could not be sent.';
                 this.showToast('Error', msg, 'error');
             });
         } catch (e) {
-            this.showSpinner = false;
             this.isSendingMessage = false;
             console.error('Error in handleSendMessage:::', e.message);
         }

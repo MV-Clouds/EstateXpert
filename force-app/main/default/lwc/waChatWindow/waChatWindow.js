@@ -2,7 +2,7 @@ import { LightningElement, api, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import { loadScript, loadStyle } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { subscribe } from 'lightning/empApi';
+import { subscribe, unsubscribe } from 'lightning/empApi';
 
 // Apex imports from WAChatWindowController
 import getCombinedData from '@salesforce/apex/WAChatWindowController.getCombinedData';
@@ -282,8 +282,15 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
         this.handleSubscribe();
     }
 
+    disconnectedCallback() {
+        if (this.subscription) {
+            unsubscribe(this.subscription, () => {});
+            this.subscription = null;
+        }
+    }
+
     /**
-     * Subscribes to WhatsApp platform event updates (new, status, reactions, templates)
+     * Subscribes to WA_Refresh_Event__e platform event to refresh the chat window for matching contact
      */
     handleSubscribe() {
         const self = this;
@@ -292,80 +299,91 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                 const payload = response?.data?.payload;
                 if (!payload) return;
 
-                const actionType = payload.Type__c || payload.MVEX__Type__c;
-                if (actionType === 'refresh-template' || actionType === 'delete' || actionType === 'undelete') {
-                    self.refreshTemplateList();
+                const eventType = payload.Type__c || payload.MVEX__Type__c;
+                // If type is specified and not for chat, skip
+                if (eventType && !eventType.toLowerCase().includes('chat')) {
                     return;
                 }
 
-                const rawChatJson = payload.Chat_Data__c || payload.MVEX__Chat_Data__c;
-                const receivedChat = rawChatJson ? JSON.parse(rawChatJson) : null;
-                if (!receivedChat) return;
-
-                const eventPhone = payload.ContactId__c || payload.MVEX__ContactId__c;
-                if (eventPhone && self.phoneNumber && eventPhone !== self.phoneNumber) return;
-
-                const normChat = self.normalizeChat(receivedChat);
-                const chatIndex = self.chats?.findIndex(ch => ch.Id === normChat.Id);
-                const existingChat = chatIndex > -1 ? self.chats[chatIndex] : null;
-
-                switch (actionType) {
-                    case 'new':
-                        if (!existingChat) {
-                            self.chats = [...self.chats, normChat];
-                            self.processChats(true);
-                        }
-                        break;
-
-                    case 'status':
-                        if (existingChat && normChat.Message_Status__c !== undefined) {
-                            self.chats = self.chats.map((ch, idx) =>
-                                idx === chatIndex ? { ...ch, Message_Status__c: normChat.Message_Status__c } : ch
-                            );
-                            self.processChats();
-                        }
-                        break;
-
-                    case 'react':
-                        if (existingChat) {
-                            self.chats = self.chats.map((ch, idx) =>
-                                idx === chatIndex ? { ...ch, Reaction__c: normChat.Reaction__c } : ch
-                            );
-                            self.processChats();
-                        }
-                        break;
-
-                    case 'update':
-                        if (existingChat && normChat.Message__c !== undefined) {
-                            self.chats = self.chats.map((ch, idx) =>
-                                idx === chatIndex ? { ...ch, Message__c: normChat.Message__c } : ch
-                            );
-                            self.processChats();
-                        }
-                        break;
-
-                    case 'delete':
-                        if (self.chats && normChat.Id) {
-                            self.chats = self.chats.filter(ch => ch.Id !== normChat.Id);
-                            self.processChats();
-                        }
-                        break;
-
-                    default:
-                        break;
+                const eventPhone = payload.Phone__c || payload.MVEX__Phone__c;
+                // If phone is provided, match against this contact's phone
+                if (eventPhone && self.phoneNumber && !self.matchPhoneNumbers(eventPhone, self.phoneNumber)) {
+                    return;
                 }
+
+                self.refreshChatData(true);
             } catch (error) {
-                console.error('Error in handleSubscribe messageCallback:', error);
+                console.error('Error in WA_Refresh_Event__e messageCallback:', error);
             }
         };
 
-        // Attempt subscribe to standard event then namespace event fallback
-        subscribe('/event/Chat_Message__e', -1, messageCallback)
-            .then(res => { this.subscription = res; })
-            .catch(() => {
-                subscribe('/event/MVEX__Chat_Message__e', -1, messageCallback)
-                    .then(res => { this.subscription = res; })
-                    .catch(err => console.warn('Platform event subscription skipped:', err));
+        subscribe('/event/WA_Refresh_Event__e', -1, messageCallback)
+            .then(res => {
+                this.subscription = res;
+            })
+            .catch(err => {
+                console.warn('Could not subscribe to /event/WA_Refresh_Event__e:', err);
+            });
+    }
+
+    /**
+     * Checks if two phone numbers match regardless of country codes, spaces, or formatting
+     */
+    matchPhoneNumbers(phone1, phone2) {
+        if (!phone1 || !phone2) return false;
+        let d1 = String(phone1).replace(/\D/g, '');
+        let d2 = String(phone2).replace(/\D/g, '');
+        if (!d1 || !d2) return false;
+        if (d1 === d2) return true;
+
+        // Strip leading zeros
+        d1 = d1.replace(/^0+/, '');
+        d2 = d2.replace(/^0+/, '');
+        if (d1 === d2) return true;
+
+        // Compare if one ends with the other (country code differences)
+        const minLen = Math.min(d1.length, d2.length);
+        if (minLen >= 7 && (d1.endsWith(d2) || d2.endsWith(d1))) {
+            return true;
+        }
+        // Match last 10 digits
+        if (d1.length >= 10 && d2.length >= 10 && d1.slice(-10) === d2.slice(-10)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Refreshes chat data cleanly upon receiving platform event without full page spinner
+     */
+    refreshChatData(needScroll = true) {
+        if (!this.recordId) return;
+        getCombinedData({ contactId: this.recordId })
+            .then(combinedData => {
+                if (combinedData?.chats) {
+                    const rawChats = combinedData.chats || [];
+                    this.chats = rawChats.map(c => this.normalizeChat(c));
+                    this.processChats(needScroll);
+
+                    // Mark unread inbound messages as seen
+                    if (this.phoneNumber) {
+                        const chatIdsToSeen = [];
+                        this.chats
+                            .filter(ch => !(ch.Type_of_Message__c || '').toLowerCase().includes('outbound'))
+                            .forEach(ch => {
+                                if (ch.Message_Status__c !== 'Seen') chatIdsToSeen.push(ch.Id);
+                            });
+                        if (chatIdsToSeen.length > 0) {
+                            updateStatus({ messageIds: chatIdsToSeen });
+                        }
+                    }
+                }
+                if (combinedData?.templates && combinedData.templates.length > 0) {
+                    this.allTemplates = combinedData.templates;
+                }
+            })
+            .catch(e => {
+                console.error('Error refreshing chat data from refresh event:', e);
             });
     }
 

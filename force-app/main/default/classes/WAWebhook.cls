@@ -8,17 +8,6 @@ global without sharing class WAWebhook {
 
     private static final String CONFIG_DEV_NAME = 'Whatsapp_OAuth';
 
-    public static OAuth_Configuration__mdt getConfig() {
-        try {
-            List<OAuth_Configuration__mdt> configs = [SELECT Id, DeveloperName, MasterLabel, API_Version__c, Authorization_Endpoint__c, Access_Token__c, 
-                                                        Client_Phone_Number_ID__c FROM OAuth_Configuration__mdt WHERE DeveloperName = :CONFIG_DEV_NAME LIMIT 1];
-            return configs.isEmpty() ? null : configs[0];
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAWebhook', 'getConfig', e.getMessage());
-            return null;
-        }
-    }
-
     @HttpGet
     global static void doGet() {
         RestResponse response = RestContext.response;
@@ -123,279 +112,119 @@ global without sharing class WAWebhook {
             String recordName = '';
             String recordPhone = '';
             String objectApiName = 'Contact';
+
+            // Retrieve ObjectConfigInfo from Metadata (object is always Contact)
+            Map<String, Object> objConfigMap = getObjectConfigInfo();
+
+            // Resolve configured phone field from ObjectConfigInfo on Contact
             String phoneField = 'Phone';
-            SObject record;
-
-            // Fetch metadata record from MVEX__Object_Config__mdt
-            List<MVEX__Object_Config__mdt> objectConfigList = new List<MVEX__Object_Config__mdt>();
-            try {
-                objectConfigList = [SELECT Id, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt WHERE DeveloperName = 'objectConfigInfo' LIMIT 1];
-                if (objectConfigList.isEmpty()) {
-                    objectConfigList = [SELECT Id, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt LIMIT 1];
-                }
-            } catch (Exception mdtEx) {
-                System.debug('Error querying MVEX__Object_Config__mdt: ' + mdtEx.getMessage());
-            }
-
-            Map<String, Object> objConfigMap = new Map<String, Object>();
-            Map<String, Object> chatConfigData = new Map<String, Object>();
-
-            if (!objectConfigList.isEmpty()) {
-                try {
-                    if (String.isNotBlank(objectConfigList[0].MVEX__ObjectConfigInfo__c)) {
-                        objConfigMap = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].MVEX__ObjectConfigInfo__c);
-                    }
-                } catch (Exception ex) {
-                    System.debug('Error deserializing MVEX__ObjectConfigInfo__c: ' + ex.getMessage());
-                }
-
-                try {
-                    if (String.isNotBlank(objectConfigList[0].MVEX__ChatWindowConfigInfo__c)) {
-                        chatConfigData = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].MVEX__ChatWindowConfigInfo__c);
-                    }
-                } catch (Exception ex) {
-                    System.debug('Error deserializing MVEX__ChatWindowConfigInfo__c: ' + ex.getMessage());
-                }
-            }
-
-            // Resolve configured object name (supports 'object' from UI and 'objectApiName' fallback)
-            if (objConfigMap.containsKey('object') && objConfigMap.get('object') != null && String.isNotBlank(String.valueOf(objConfigMap.get('object')))) {
-                objectApiName = String.valueOf(objConfigMap.get('object'));
-            } else if (objConfigMap.containsKey('objectApiName') && objConfigMap.get('objectApiName') != null && String.isNotBlank(String.valueOf(objConfigMap.get('objectApiName')))) {
-                objectApiName = String.valueOf(objConfigMap.get('objectApiName'));
-            }
-            if (String.isBlank(objectApiName)) {
-                objectApiName = 'Contact';
-            }
-
-            // Resolve configured phone field
             if (objConfigMap.containsKey('phoneField') && objConfigMap.get('phoneField') != null && String.isNotBlank(String.valueOf(objConfigMap.get('phoneField')))) {
-                phoneField = String.valueOf(objConfigMap.get('phoneField'));
-            }
-
-            // Validate target SObject type against Schema
-            Schema.SObjectType targetSObjectType = Schema.getGlobalDescribe().get(objectApiName);
-            if (targetSObjectType == null) {
-                targetSObjectType = Schema.SObjectType.Contact.getSObjectType();
-                objectApiName = 'Contact';
-            }
-            Map<String, Schema.SObjectField> fieldMap = targetSObjectType.getDescribe().fields.getMap();
-
-            // Validate and match phone field against Schema
-            String resolvedPhoneField = null;
-            if (String.isNotBlank(phoneField) && fieldMap.containsKey(phoneField.toLowerCase())) {
-                resolvedPhoneField = fieldMap.get(phoneField.toLowerCase()).getDescribe().getName();
-            } else if (fieldMap.containsKey('phone')) {
-                resolvedPhoneField = 'Phone';
-            } else if (fieldMap.containsKey('mobilephone')) {
-                resolvedPhoneField = 'MobilePhone';
-            } else {
-                for (String fKey : fieldMap.keySet()) {
-                    if (fieldMap.get(fKey).getDescribe().getType() == Schema.DisplayType.PHONE) {
-                        resolvedPhoneField = fieldMap.get(fKey).getDescribe().getName();
-                        break;
-                    }
-                }
-            }
-            if (String.isBlank(resolvedPhoneField)) {
-                resolvedPhoneField = 'Phone';
-            }
-            phoneField = resolvedPhoneField;
-
-            Boolean isContact = objectApiName.equalsIgnoreCase('Contact');
-
-            // Parse requiredFields from MVEX__Object_Config__mdt
-            List<Object> requiredFieldsList = (List<Object>) objConfigMap.get('requiredFields');
-            Map<String, Object> requiredFieldsMap = new Map<String, Object>();
-            if (requiredFieldsList != null) {
-                for (Object obj : requiredFieldsList) {
-                    if (obj instanceof Map<String, Object>) {
-                        Map<String, Object> fieldData = (Map<String, Object>) obj;
-                        String fName = (String) fieldData.get('name');
-                        if (String.isNotBlank(fName)) {
-                            requiredFieldsMap.put(fName.toLowerCase(), fieldData);
-                        }
-                    }
+                String configuredPhone = String.valueOf(objConfigMap.get('phoneField')).trim();
+                Map<String, Schema.SObjectField> contactFieldsMap = Contact.SObjectType.getDescribe().fields.getMap();
+                if (contactFieldsMap.containsKey(configuredPhone.toLowerCase())) {
+                    phoneField = contactFieldsMap.get(configuredPhone.toLowerCase()).getDescribe().getName();
                 }
             }
 
-            // Build select fields set safely from fieldMap to avoid querying nonexistent columns
-            Set<String> selectFieldSet = new Set<String>{ 'Id' };
-            if (fieldMap.containsKey('name')) {
-                selectFieldSet.add('Name');
+            // Build candidate phone formats for matching existing Contact
+            Set<String> phoneCandidates = new Set<String>{ senderPhone, formattedNumber, strippedNumber };
+            if (String.isNotBlank(strippedNumber)) {
+                if (strippedNumber.length() > 10) {
+                    phoneCandidates.add(strippedNumber.substring(strippedNumber.length() - 10));
+                    phoneCandidates.add('0' + strippedNumber.substring(strippedNumber.length() - 10));
+                }
+                phoneCandidates.add('+' + strippedNumber);
             }
-            if (isContact) {
-                if (fieldMap.containsKey('firstname')) selectFieldSet.add('FirstName');
-                if (fieldMap.containsKey('lastname')) selectFieldSet.add('LastName');
-            }
-            if (fieldMap.containsKey(phoneField.toLowerCase())) {
-                selectFieldSet.add(phoneField);
-            }
-            String selectFields = String.join(new List<String>(selectFieldSet), ', ');
 
-            // Search for existing record by phone safely
-            List<SObject> records = new List<SObject>();
+            // Search for existing Contact by configured phone field
+            Contact contactRecord = null;
             try {
-                String query = 'SELECT ' + selectFields + ' FROM ' + String.escapeSingleQuotes(objectApiName) + 
-                               ' WHERE ' + String.escapeSingleQuotes(phoneField) + ' = :formattedNumber OR ' + 
-                               String.escapeSingleQuotes(phoneField) + ' = :strippedNumber LIMIT 1';
-                records = Database.query(query);
+                String query = 'SELECT Id, Name, ' + String.escapeSingleQuotes(phoneField) + 
+                               ' FROM Contact WHERE ' + String.escapeSingleQuotes(phoneField) + ' IN :phoneCandidates LIMIT 1';
+                List<Contact> records = Database.query(query);
+                if (!records.isEmpty()) {
+                    contactRecord = records[0];
+                }
             } catch (Exception qEx) {
-                System.debug('Error in primary phone query: ' + qEx.getMessage());
-                try {
-                    records = [SELECT Id, Name, FirstName, LastName, Phone FROM Contact WHERE Phone = :formattedNumber OR Phone = :strippedNumber LIMIT 1];
-                } catch (Exception fallbackEx) {
-                    System.debug('Error in fallback contact query: ' + fallbackEx.getMessage());
-                }
+                System.debug('Error querying Contact by ' + phoneField + ': ' + qEx.getMessage());
             }
 
-            // Fallback search on MobilePhone if object is Contact and primary search was Phone
-            if (records.isEmpty() && isContact && !phoneField.equalsIgnoreCase('MobilePhone') && fieldMap.containsKey('mobilephone')) {
-                try {
-                    Set<String> mobFieldSet = new Set<String>(selectFieldSet);
-                    mobFieldSet.add('MobilePhone');
-                    String mobSelect = String.join(new List<String>(mobFieldSet), ', ');
-                    List<SObject> mobileMatches = Database.query('SELECT ' + mobSelect + ' FROM Contact WHERE MobilePhone = :formattedNumber OR MobilePhone = :strippedNumber LIMIT 1');
-                    if (!mobileMatches.isEmpty()) {
-                        records = mobileMatches;
-                        phoneField = 'MobilePhone';
-                    }
-                } catch (Exception mobEx) {
-                    System.debug('Error in mobile phone fallback query: ' + mobEx.getMessage());
-                }
-            }
-
-            if (!records.isEmpty()) {
-                record = records[0];
-                recordId = (String) record.get('Id');
-                recordName = (String) record.get('Name');
-                recordPhone = (String) record.get(phoneField);
+            if (contactRecord != null) {
+                recordId = contactRecord.Id;
+                recordName = contactRecord.Name;
+                recordPhone = String.valueOf(contactRecord.get(phoneField));
             } else {
-                // Contact not found -> Create new contact with required configuration saved in MVEX__Object_Config__mdt
-                SObject newRecord = targetSObjectType.newSObject();
+                // Contact not found -> Create new Contact using requiredFields from ObjectConfigInfo
+                Contact newContact = new Contact();
+                Map<String, Schema.SObjectField> contactFields = Contact.SObjectType.getDescribe().fields.getMap();
 
-                // Apply required fields from configuration
-                for (String lowerFName : requiredFieldsMap.keySet()) {
-                    if (!fieldMap.containsKey(lowerFName)) {
-                        continue;
-                    }
-                    Schema.DescribeFieldResult dfr = fieldMap.get(lowerFName).getDescribe();
-                    if (!dfr.isCreateable()) {
-                        continue;
-                    }
+                // 1. Set configured phone field
+                if (contactFields.containsKey(phoneField.toLowerCase()) && contactFields.get(phoneField.toLowerCase()).getDescribe().isCreateable()) {
+                    newContact.put(phoneField, senderPhone);
+                } else {
+                    newContact.Phone = senderPhone;
+                }
 
-                    Map<String, Object> fieldData = (Map<String, Object>) requiredFieldsMap.get(lowerFName);
-                    Object rawVal = fieldData.get('value');
-                    String strVal = rawVal != null ? String.valueOf(rawVal).trim() : '';
+                // 2. Set required fields from ObjectConfigInfo (e.g. OwnerId, LastName, etc.)
+                Boolean lastNameSet = false;
+                if (objConfigMap.containsKey('requiredFields') && objConfigMap.get('requiredFields') instanceof List<Object>) {
+                    List<Object> requiredFieldsList = (List<Object>) objConfigMap.get('requiredFields');
+                    for (Object item : requiredFieldsList) {
+                        if (item instanceof Map<String, Object>) {
+                            Map<String, Object> fieldData = (Map<String, Object>) item;
+                            String fName = fieldData.get('name') != null ? String.valueOf(fieldData.get('name')).trim() : null;
+                            Object fVal = fieldData.get('value');
 
-                    if (String.isBlank(strVal)) {
-                        continue;
-                    }
+                            if (String.isNotBlank(fName) && contactFields.containsKey(fName.toLowerCase())) {
+                                Schema.DescribeFieldResult dfr = contactFields.get(fName.toLowerCase()).getDescribe();
+                                if (dfr.isCreateable() && fVal != null && String.isNotBlank(String.valueOf(fVal))) {
+                                    String realFieldName = dfr.getName();
+                                    String strVal = String.valueOf(fVal).trim();
 
-                    String realFieldName = dfr.getName();
-                    Schema.DisplayType dType = dfr.getType();
+                                    try {
+                                        Schema.DisplayType dType = dfr.getType();
+                                        if (dType == Schema.DisplayType.REFERENCE) {
+                                            if (strVal.length() == 15 || strVal.length() == 18) {
+                                                newContact.put(realFieldName, Id.valueOf(strVal));
+                                            }
+                                        } else if (dType == Schema.DisplayType.BOOLEAN) {
+                                            newContact.put(realFieldName, Boolean.valueOf(strVal));
+                                        } else if (dType == Schema.DisplayType.INTEGER) {
+                                            newContact.put(realFieldName, Integer.valueOf(strVal));
+                                        } else if (dType == Schema.DisplayType.DOUBLE || dType == Schema.DisplayType.PERCENT || dType == Schema.DisplayType.CURRENCY) {
+                                            newContact.put(realFieldName, Decimal.valueOf(strVal));
+                                        } else if (dType == Schema.DisplayType.DATE) {
+                                            newContact.put(realFieldName, Date.valueOf(strVal));
+                                        } else if (dType == Schema.DisplayType.DATETIME) {
+                                            newContact.put(realFieldName, Datetime.valueOf(strVal.replace('T', ' ')));
+                                        } else {
+                                            newContact.put(realFieldName, strVal);
+                                        }
 
-                    try {
-                        if (dType == Schema.DisplayType.DATE) {
-                            List<String> dateParts = strVal.split('-');
-                            if (dateParts.size() == 3) {
-                                newRecord.put(realFieldName, Date.newInstance(Integer.valueOf(dateParts[0]), Integer.valueOf(dateParts[1]), Integer.valueOf(dateParts[2])));
-                            } else {
-                                newRecord.put(realFieldName, Date.valueOf(strVal));
-                            }
-                        } else if (dType == Schema.DisplayType.DATETIME) {
-                            String cleanVal = strVal.substring(0, Math.min(19, strVal.length())).replace('T', ' ');
-                            newRecord.put(realFieldName, Datetime.valueOf(cleanVal));
-                        } else if (dType == Schema.DisplayType.TIME) {
-                            List<String> parts = strVal.split(':');
-                            if (parts.size() >= 2) {
-                                Integer hour = Integer.valueOf(parts[0]);
-                                Integer minute = Integer.valueOf(parts[1]);
-                                Integer second = 0;
-                                Integer millis = 0;
-                                if (parts.size() >= 3) {
-                                    List<String> secMillis = parts[2].split('\\.');
-                                    second = Integer.valueOf(secMillis[0]);
-                                    if (secMillis.size() > 1) {
-                                        millis = Integer.valueOf(secMillis[1]);
+                                        if (realFieldName.equalsIgnoreCase('LastName')) {
+                                            lastNameSet = true;
+                                        }
+                                    } catch (Exception fieldEx) {
+                                        System.debug('Error setting field ' + realFieldName + ' on new Contact: ' + fieldEx.getMessage());
                                     }
                                 }
-                                newRecord.put(realFieldName, Time.newInstance(hour, minute, second, millis));
                             }
-                        } else if (dType == Schema.DisplayType.BOOLEAN) {
-                            newRecord.put(realFieldName, Boolean.valueOf(strVal));
-                        } else if (dType == Schema.DisplayType.INTEGER) {
-                            newRecord.put(realFieldName, Integer.valueOf(strVal));
-                        } else if (dType == Schema.DisplayType.DOUBLE || dType == Schema.DisplayType.PERCENT || dType == Schema.DisplayType.CURRENCY) {
-                            newRecord.put(realFieldName, Decimal.valueOf(strVal));
-                        } else if (dType == Schema.DisplayType.REFERENCE) {
-                            try {
-                                if (strVal.length() == 15 || strVal.length() == 18) {
-                                    newRecord.put(realFieldName, Id.valueOf(strVal));
-                                }
-                            } catch (Exception idEx) {
-                                System.debug('Invalid Id for reference field ' + realFieldName + ': ' + idEx.getMessage());
-                            }
-                        } else {
-                            newRecord.put(realFieldName, strVal);
                         }
-                    } catch (Exception fieldEx) {
-                        System.debug('Error setting field ' + realFieldName + ': ' + fieldEx.getMessage());
                     }
                 }
 
-                // Set Phone on the new record
-                if (fieldMap.containsKey(phoneField.toLowerCase()) && fieldMap.get(phoneField.toLowerCase()).getDescribe().isCreateable()) {
-                    newRecord.put(fieldMap.get(phoneField.toLowerCase()).getDescribe().getName(), senderPhone);
-                } else if (fieldMap.containsKey('phone') && fieldMap.get('phone').getDescribe().isCreateable()) {
-                    newRecord.put('Phone', senderPhone);
-                }
-
-                // Set Name / LastName / FirstName (Contact.Name is read-only in Salesforce, must set LastName and FirstName)
-                if (isContact) {
-                    String fn = '';
-                    String ln = '';
-                    if (String.isNotBlank(senderName)) {
-                        String trimmed = senderName.trim();
-                        if (trimmed.contains(' ')) {
-                            fn = trimmed.substringBefore(' ').trim();
-                            ln = trimmed.substringAfter(' ').trim();
-                        } else {
-                            fn = trimmed;
-                        }
-                    }
-
-                    // Check if LastName was configured via requiredFields
-                    String configuredLn = null;
-                    try {
-                        configuredLn = (String) newRecord.get('LastName');
-                    } catch (Exception ignored) {}
-
-                    if (String.isBlank(ln)) {
-                        ln = String.isNotBlank(configuredLn) ? configuredLn : (String.isNotBlank(fn) ? fn : 'WhatsApp User');
-                    }
-
-                    if (fieldMap.containsKey('lastname') && fieldMap.get('lastname').getDescribe().isCreateable()) {
-                        newRecord.put('LastName', ln.length() > 80 ? ln.substring(0, 80) : ln);
-                    }
-                    if (String.isNotBlank(fn) && fn != ln && fieldMap.containsKey('firstname') && fieldMap.get('firstname').getDescribe().isCreateable()) {
-                        newRecord.put('FirstName', fn.length() > 40 ? fn.substring(0, 40) : fn);
-                    }
-                } else {
-                    String displayName = String.isNotBlank(senderName) ? senderName : 'WhatsApp ' + senderPhone;
-                    if (fieldMap.containsKey('name') && fieldMap.get('name').getDescribe().isCreateable()) {
-                        newRecord.put('Name', displayName.length() > 80 ? displayName.substring(0, 80) : displayName);
-                    } else if (fieldMap.containsKey('lastname') && fieldMap.get('lastname').getDescribe().isCreateable()) {
-                        newRecord.put('LastName', displayName.length() > 80 ? displayName.substring(0, 80) : displayName);
-                    }
+                // 3. Ensure LastName is populated (standard Contact requirement)
+                if (!lastNameSet || String.isBlank(newContact.LastName)) {
+                    newContact.LastName = String.isNotBlank(senderName) ? senderName : 'WhatsApp User';
+                } else if (String.isNotBlank(senderName) && String.isBlank(newContact.FirstName)) {
+                    newContact.FirstName = senderName.length() > 40 ? senderName.substring(0, 40) : senderName;
                 }
 
                 try {
-                    insert newRecord;
-                    record = newRecord;
-                    recordId = (String) newRecord.get('Id');
+                    insert newContact;
+                    recordId = newContact.Id;
+                    recordName = (String.isNotBlank(newContact.FirstName) ? newContact.FirstName + ' ' : '') + newContact.LastName;
                     recordPhone = senderPhone;
-                    recordName = isContact ? (String) newRecord.get('LastName') : (String) (fieldMap.containsKey('name') ? newRecord.get('Name') : senderName);
                 } catch (Exception insertEx) {
                     ErrorHandler.insertErrordata(insertEx, 'WAWebhook', 'processSingleMessage_insertContact', 'Failed to insert contact: ' + insertEx.getMessage());
                 }
@@ -412,7 +241,7 @@ global without sharing class WAWebhook {
                         reactToChat[0].Reaction__c = reactToChat[0].Reaction__c.split('<|USER|>')[0] + '<|USER|>' + (reactedEmoji != null ? reactedEmoji : '');
                         whatsappChat = reactToChat[0];
                         update whatsappChat;
-                        publishChatMessageEvent(JSON.serialize(whatsappChat), 'react', whatsappChat.Phone__c);
+                        publishRefreshEvent('Chat', whatsappChat.Phone__c);
                     }
                     return;
                 }
@@ -421,7 +250,7 @@ global without sharing class WAWebhook {
                 whatsappChat.Type_of_Message__c = 'Inbound Messages';
                 whatsappChat.Message_Type__c = messageType;
                 whatsappChat.Message_ID__c = whatsAppMessageID;
-                if (String.isNotBlank(recordId) && isContact) {
+                if (String.isNotBlank(recordId)) {
                     whatsappChat.Contact__c = recordId;
                 }
 
@@ -569,7 +398,7 @@ global without sharing class WAWebhook {
 
             List<WA_Chat__c> chatList = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, WA_Template__r.Template_Name__c, WA_Template__r.Name, CreatedDate, Contact__c, Phone__c, File_Data__c FROM WA_Chat__c WHERE Id = :whatsappChat.Id LIMIT 1];
             WA_Chat__c chatToSend = !chatList.isEmpty() ? chatList[0] : whatsappChat;
-            publishChatMessageEvent(JSON.serialize(chatToSend), 'new', whatsappChat.Phone__c);
+            publishRefreshEvent('Chat', whatsappChat.Phone__c);
 
             if (userRecs.isEmpty()) {
                 List<WA_Chat__c> lastSentChat = [SELECT Id, Phone__c, CreatedById FROM WA_Chat__c WHERE Phone__c = :formattedNumber AND Type_of_Message__c = 'Outbound Messages' ORDER BY CreatedDate DESC LIMIT 1];
@@ -718,10 +547,6 @@ global without sharing class WAWebhook {
             List<ContentVersion> cvList = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :contentVersion.Id LIMIT 1];
             String contentDocumentId = !cvList.isEmpty() ? cvList[0].ContentDocumentId : null;
 
-            CDLWrapper cdlWrap = new CDLWrapper((String) record.get('Id'), contentDocumentId);
-            String body = JSON.serialize(cdlWrap);
-            sendEmail(body);
-
             fileData = new Map<String, Object>{ 'fileName' => filename, 'documentId' => contentDocumentId, 'contentVersionId' => contentVersion.Id, 'mimeType' => mimeType };
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WAWebhook', 'saveMediaToSalesforce', e.getMessage());
@@ -750,7 +575,7 @@ global without sharing class WAWebhook {
             }
             sObject record = records[0];
 
-            List<CustomNotificationType> cnType = [SELECT Id FROM CustomNotificationType WHERE DeveloperName = 'EXPWhatsAppChatNotification' LIMIT 1];
+            List<CustomNotificationType> cnType = [SELECT Id FROM CustomNotificationType WHERE DeveloperName = 'EXP_WA_Chat' LIMIT 1];
             if (cnType.isEmpty()) {
                 return;
             }
@@ -820,7 +645,7 @@ global without sharing class WAWebhook {
                                             }
                                         }
                                         update waChat;
-                                        publishChatMessageEvent(JSON.serialize(waChat), 'status', waChat.Phone__c);
+                                        publishRefreshEvent('Chat', waChat.Phone__c);
                                     }
                                 }
                             }
@@ -882,44 +707,13 @@ global without sharing class WAWebhook {
 
                 update waTemplate;
 
-                publishTemplateUpdateEvent(waTemplate.Id, waTemplate.Status__c);
+                publishRefreshEvent('Template', null);
             } else {
                 System.debug('No WhatsApp Template found for Template Id: ' + templateId);
             }
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WAWebhook', 'updateWhatsAppTemplateStatus', e.getMessage());
             System.debug('Error in updateWhatsAppTemplateStatus: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
-        }
-    }
-
-    @future(callout = true)
-    public static void sendEmail(String body) {
-        try {
-            List<EmailServicesAddress> esaList = [SELECT EmailDomainName, LocalPart FROM EmailServicesAddress WHERE Function.FunctionName = 'EmailService_WhatsApp' LIMIT 1];
-            if (esaList.isEmpty()) {
-                return;
-            }
-            EmailServicesAddress esa = esaList[0];
-
-            Messaging.SingleEmailMessage emailNotification = new Messaging.SingleEmailMessage();        
-            List<String> toAddresses = new List<String>();
-            toAddresses.add(esa.LocalPart + '@' + esa.EmailDomainName);
-            emailNotification.setToAddresses(toAddresses);
-            emailNotification.setSubject('Three Object Form');
-            emailNotification.setPlainTextBody(body);
-            Messaging.sendEmail(new Messaging.SingleEmailMessage[]{ emailNotification });
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAWebhook', 'sendEmail', e.getMessage());
-            System.debug('Error in sendEmail: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
-        }
-    }
-
-    public class CDLWrapper {
-        public String linkedEntityId;
-        public String contentDocumentId;
-        public CDLWrapper(String linkedEntityId, String contentDocumentId) {
-            this.linkedEntityId = linkedEntityId;
-            this.contentDocumentId = contentDocumentId;
         }
     }
 
@@ -930,60 +724,33 @@ global without sharing class WAWebhook {
         return phoneNumber.replaceAll('[\\s\\-\\(\\)\\.]+', '');
     }
 
-    public static void publishChatMessageEvent(String chatJson, String type, String phone) {
+    public static void publishRefreshEvent(String type, String phone) {
         try {
-            Schema.SObjectType eventType = Schema.getGlobalDescribe().get('Chat_Message__e');
-            if (eventType == null) {
-                eventType = Schema.getGlobalDescribe().get('MVEX__Chat_Message__e');
-            }
-            if (eventType != null) {
-                sObject chatEvent = eventType.newSObject();
-                Map<String, Schema.SObjectField> fieldMap = eventType.getDescribe().fields.getMap();
-                if (fieldMap.containsKey('Chat_Data__c')) {
-                    chatEvent.put('Chat_Data__c', chatJson);
-                } else if (fieldMap.containsKey('MVEX__Chat_Data__c')) {
-                    chatEvent.put('MVEX__Chat_Data__c', chatJson);
-                }
-                if (fieldMap.containsKey('Type__c')) {
-                    chatEvent.put('Type__c', type);
-                } else if (fieldMap.containsKey('MVEX__Type__c')) {
-                    chatEvent.put('MVEX__Type__c', type);
-                }
-                if (fieldMap.containsKey('ContactId__c')) {
-                    chatEvent.put('ContactId__c', phone);
-                } else if (fieldMap.containsKey('MVEX__ContactId__c')) {
-                    chatEvent.put('MVEX__ContactId__c', phone);
-                }
-                EventBus.publish(chatEvent);
-            }
+            String cleanPhone = normalizePhoneNumber(phone);
+            WA_Refresh_Event__e refreshEvt = new WA_Refresh_Event__e();
+            refreshEvt.Type__c = type;
+            refreshEvt.Phone__c = cleanPhone;
+            EventBus.publish(refreshEvt);
         } catch (Exception e) {
-            System.debug('Could not publish chat message event: ' + e.getMessage());
+            System.debug('Could not publish WA_Refresh_Event__e: ' + e.getMessage());
         }
     }
 
-    public static void publishTemplateUpdateEvent(Id templateId, String status) {
+    /**
+     * @description : Retrieves ObjectConfigInfo JSON from Custom Metadata (MVEX__Object_Config__mdt)
+     * @return Map<String, Object>
+     */
+    public static Map<String, Object> getObjectConfigInfo() {
         try {
-            Schema.SObjectType eventType = Schema.getGlobalDescribe().get('Template_Update__e');
-            if (eventType == null) {
-                eventType = Schema.getGlobalDescribe().get('MVEX__Template_Update__e');
+            List<MVEX__Object_Config__mdt> configList = [SELECT Id, MVEX__ObjectConfigInfo__c FROM MVEX__Object_Config__mdt LIMIT 1];
+
+            if (!configList.isEmpty() && String.isNotBlank(configList[0].MVEX__ObjectConfigInfo__c)) {
+                return (Map<String, Object>) JSON.deserializeUntyped(configList[0].MVEX__ObjectConfigInfo__c);
             }
-            if (eventType != null) {
-                sObject templateStatusEvent = eventType.newSObject();
-                Map<String, Schema.SObjectField> fieldMap = eventType.getDescribe().fields.getMap();
-                if (fieldMap.containsKey('Template_Id__c')) {
-                    templateStatusEvent.put('Template_Id__c', templateId);
-                } else if (fieldMap.containsKey('MVEX__Template_Id__c')) {
-                    templateStatusEvent.put('MVEX__Template_Id__c', templateId);
-                }
-                if (fieldMap.containsKey('Template_Status__c')) {
-                    templateStatusEvent.put('Template_Status__c', status);
-                } else if (fieldMap.containsKey('MVEX__Template_Status__c')) {
-                    templateStatusEvent.put('MVEX__Template_Status__c', status);
-                }
-                EventBus.publish(templateStatusEvent);
-            }
-        } catch (Exception peEx) {
-            System.debug('Could not publish template update event: ' + peEx.getMessage());
+        } catch (Exception e) {
+            System.debug('Error in getObjectConfigInfo: ' + e.getMessage());
         }
+
+        return new Map<String, Object>();
     }
 }

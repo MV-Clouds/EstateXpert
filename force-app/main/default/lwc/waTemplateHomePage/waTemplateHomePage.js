@@ -41,7 +41,7 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
     @track sortField = 'LastModifiedDate';
     @track sortOrder = 'desc';
     @track showFilters = false;
-    channelName = '/event/MVEX__Template_Update__e';
+    channelName = '/event/WA_Refresh_Event__e';
     @track isManageTemplateView = false;
     @track manageTemplateId = null;
     @track isCloneMode = false;
@@ -439,17 +439,12 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
             const payload = event.data?.payload;
             if (!payload) return;
 
-            const templateId = payload.Template_Id__c || payload.MVEX__Template_Id__c;
-            const templateStatus = payload.Template_Status__c || payload.MVEX__Template_Status__c;
-            const shouldFetchAll = payload.Fetch_All_Templates__c || payload.MVEX__Fetch_All_Templates__c;
-
-            if (templateId && templateStatus) {
-                this.updateRecord(templateId, templateStatus);
+            const type = payload.Type__c || payload.MVEX__Type__c;
+            if (type && !type.toLowerCase().includes('template')) {
+                return;
             }
 
-            if (shouldFetchAll) {
-                this.fetchAllTemplate(false);
-            }
+            this.fetchAllTemplate(false);
         };
 
         subscribe(this.channelName, -1, messageCallback)

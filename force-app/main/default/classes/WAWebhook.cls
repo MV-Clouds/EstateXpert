@@ -129,7 +129,10 @@ global without sharing class WAWebhook {
             // Fetch metadata record from MVEX__Object_Config__mdt
             List<MVEX__Object_Config__mdt> objectConfigList = new List<MVEX__Object_Config__mdt>();
             try {
-                objectConfigList = [SELECT Id, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt LIMIT 1];
+                objectConfigList = [SELECT Id, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt WHERE DeveloperName = 'objectConfigInfo' LIMIT 1];
+                if (objectConfigList.isEmpty()) {
+                    objectConfigList = [SELECT Id, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt LIMIT 1];
+                }
             } catch (Exception mdtEx) {
                 System.debug('Error querying MVEX__Object_Config__mdt: ' + mdtEx.getMessage());
             }
@@ -179,15 +182,25 @@ global without sharing class WAWebhook {
             Map<String, Schema.SObjectField> fieldMap = targetSObjectType.getDescribe().fields.getMap();
 
             // Validate and match phone field against Schema
-            if (!fieldMap.containsKey(phoneField.toLowerCase())) {
-                if (fieldMap.containsKey('phone')) {
-                    phoneField = 'Phone';
-                } else if (fieldMap.containsKey('mobilephone')) {
-                    phoneField = 'MobilePhone';
-                }
+            String resolvedPhoneField = null;
+            if (String.isNotBlank(phoneField) && fieldMap.containsKey(phoneField.toLowerCase())) {
+                resolvedPhoneField = fieldMap.get(phoneField.toLowerCase()).getDescribe().getName();
+            } else if (fieldMap.containsKey('phone')) {
+                resolvedPhoneField = 'Phone';
+            } else if (fieldMap.containsKey('mobilephone')) {
+                resolvedPhoneField = 'MobilePhone';
             } else {
-                phoneField = fieldMap.get(phoneField.toLowerCase()).getDescribe().getName();
+                for (String fKey : fieldMap.keySet()) {
+                    if (fieldMap.get(fKey).getDescribe().getType() == Schema.DisplayType.PHONE) {
+                        resolvedPhoneField = fieldMap.get(fKey).getDescribe().getName();
+                        break;
+                    }
+                }
             }
+            if (String.isBlank(resolvedPhoneField)) {
+                resolvedPhoneField = 'Phone';
+            }
+            phoneField = resolvedPhoneField;
 
             Boolean isContact = objectApiName.equalsIgnoreCase('Contact');
 
@@ -206,19 +219,49 @@ global without sharing class WAWebhook {
                 }
             }
 
-            // Search for existing record by phone (both formatted with '+' and stripped without '+')
-            String selectFields = isContact ? 'Id, Name, FirstName, LastName, ' + phoneField : 'Id, Name, ' + phoneField;
-            String query = 'SELECT ' + selectFields + ' FROM ' + String.escapeSingleQuotes(objectApiName) + 
-                           ' WHERE ' + String.escapeSingleQuotes(phoneField) + ' = :formattedNumber OR ' + 
-                           String.escapeSingleQuotes(phoneField) + ' = :strippedNumber LIMIT 1';
-            List<SObject> records = Database.query(query);
+            // Build select fields set safely from fieldMap to avoid querying nonexistent columns
+            Set<String> selectFieldSet = new Set<String>{ 'Id' };
+            if (fieldMap.containsKey('name')) {
+                selectFieldSet.add('Name');
+            }
+            if (isContact) {
+                if (fieldMap.containsKey('firstname')) selectFieldSet.add('FirstName');
+                if (fieldMap.containsKey('lastname')) selectFieldSet.add('LastName');
+            }
+            if (fieldMap.containsKey(phoneField.toLowerCase())) {
+                selectFieldSet.add(phoneField);
+            }
+            String selectFields = String.join(new List<String>(selectFieldSet), ', ');
+
+            // Search for existing record by phone safely
+            List<SObject> records = new List<SObject>();
+            try {
+                String query = 'SELECT ' + selectFields + ' FROM ' + String.escapeSingleQuotes(objectApiName) + 
+                               ' WHERE ' + String.escapeSingleQuotes(phoneField) + ' = :formattedNumber OR ' + 
+                               String.escapeSingleQuotes(phoneField) + ' = :strippedNumber LIMIT 1';
+                records = Database.query(query);
+            } catch (Exception qEx) {
+                System.debug('Error in primary phone query: ' + qEx.getMessage());
+                try {
+                    records = [SELECT Id, Name, FirstName, LastName, Phone FROM Contact WHERE Phone = :formattedNumber OR Phone = :strippedNumber LIMIT 1];
+                } catch (Exception fallbackEx) {
+                    System.debug('Error in fallback contact query: ' + fallbackEx.getMessage());
+                }
+            }
 
             // Fallback search on MobilePhone if object is Contact and primary search was Phone
             if (records.isEmpty() && isContact && !phoneField.equalsIgnoreCase('MobilePhone') && fieldMap.containsKey('mobilephone')) {
-                List<SObject> mobileMatches = Database.query('SELECT Id, Name, FirstName, LastName, Phone, MobilePhone FROM Contact WHERE MobilePhone = :formattedNumber OR MobilePhone = :strippedNumber LIMIT 1');
-                if (!mobileMatches.isEmpty()) {
-                    records = mobileMatches;
-                    phoneField = 'MobilePhone';
+                try {
+                    Set<String> mobFieldSet = new Set<String>(selectFieldSet);
+                    mobFieldSet.add('MobilePhone');
+                    String mobSelect = String.join(new List<String>(mobFieldSet), ', ');
+                    List<SObject> mobileMatches = Database.query('SELECT ' + mobSelect + ' FROM Contact WHERE MobilePhone = :formattedNumber OR MobilePhone = :strippedNumber LIMIT 1');
+                    if (!mobileMatches.isEmpty()) {
+                        records = mobileMatches;
+                        phoneField = 'MobilePhone';
+                    }
+                } catch (Exception mobEx) {
+                    System.debug('Error in mobile phone fallback query: ' + mobEx.getMessage());
                 }
             }
 
@@ -524,20 +567,23 @@ global without sharing class WAWebhook {
 
             insert whatsappChat;
 
-            WA_Chat__c chatToSend = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, WA_Template__r.Template_Name__c, WA_Template__r.Name, CreatedDate, Contact__c, Phone__c, File_Data__c FROM WA_Chat__c WHERE Id = :whatsappChat.Id LIMIT 1];
+            List<WA_Chat__c> chatList = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, WA_Template__r.Template_Name__c, WA_Template__r.Name, CreatedDate, Contact__c, Phone__c, File_Data__c FROM WA_Chat__c WHERE Id = :whatsappChat.Id LIMIT 1];
+            WA_Chat__c chatToSend = !chatList.isEmpty() ? chatList[0] : whatsappChat;
             publishChatMessageEvent(JSON.serialize(chatToSend), 'new', whatsappChat.Phone__c);
 
             if (userRecs.isEmpty()) {
                 List<WA_Chat__c> lastSentChat = [SELECT Id, Phone__c, CreatedById FROM WA_Chat__c WHERE Phone__c = :formattedNumber AND Type_of_Message__c = 'Outbound Messages' ORDER BY CreatedDate DESC LIMIT 1];
-                if (!lastSentChat.isEmpty()) {
-                    sendNotificationForContact(recordId, objectApiName, lastSentChat[0].CreatedById);
-                } else {
-                    sendNotificationForContact(recordId, objectApiName, null);
+                if (String.isNotBlank(recordId)) {
+                    if (!lastSentChat.isEmpty()) {
+                        sendNotificationForContact(recordId, objectApiName, lastSentChat[0].CreatedById);
+                    } else {
+                        sendNotificationForContact(recordId, objectApiName, null);
+                    }
                 }
             }
 
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAWebhook', 'processSingleMessage', e.getMessage());
+            ErrorHandler.insertErrordata(e, 'WAWebhook', 'processSingleMessage', e.getMessage() + ' (Line: ' + e.getLineNumber() + ')');
         }
     }
 
@@ -669,8 +715,8 @@ global without sharing class WAWebhook {
             );
             insert contentVersion;
 
-            ContentVersion insertedContentVersion = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :contentVersion.Id LIMIT 1];
-            String contentDocumentId = insertedContentVersion.ContentDocumentId;
+            List<ContentVersion> cvList = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :contentVersion.Id LIMIT 1];
+            String contentDocumentId = !cvList.isEmpty() ? cvList[0].ContentDocumentId : null;
 
             CDLWrapper cdlWrap = new CDLWrapper((String) record.get('Id'), contentDocumentId);
             String body = JSON.serialize(cdlWrap);
@@ -685,7 +731,19 @@ global without sharing class WAWebhook {
 
     public static void sendNotificationForContact(String recordId, String objectApiName, String addresseeId) {
         try {
-            String query = 'SELECT Id, Name, CreatedById FROM ' + objectApiName + ' WHERE Id = :recordId LIMIT 1';
+            if (String.isBlank(recordId) || (recordId.length() != 15 && recordId.length() != 18)) {
+                return;
+            }
+            if (String.isBlank(objectApiName)) {
+                objectApiName = 'Contact';
+            }
+            Schema.SObjectType sObjType = Schema.getGlobalDescribe().get(objectApiName);
+            if (sObjType == null) {
+                return;
+            }
+            Map<String, Schema.SObjectField> sObjFields = sObjType.getDescribe().fields.getMap();
+            String nameCol = sObjFields.containsKey('name') ? 'Name' : (sObjFields.containsKey('lastname') ? 'LastName' : 'Id');
+            String query = 'SELECT Id, ' + nameCol + ', CreatedById FROM ' + String.escapeSingleQuotes(objectApiName) + ' WHERE Id = :recordId LIMIT 1';
             List<SObject> records = Database.query(query);
             if (records.isEmpty()) {
                 return;
@@ -697,11 +755,17 @@ global without sharing class WAWebhook {
                 return;
             }
 
-            String messageContent = (String) record.get('Name') + ' has sent a new message. Tap to view.';
+            String recDisplayName = record.get(nameCol) != null ? String.valueOf(record.get(nameCol)) : 'WhatsApp Contact';
+            String messageContent = recDisplayName + ' has sent a new message. Tap to view.';
             Set<String> addressee = new Set<String>();
-            addressee.add((Id) record.get('CreatedById'));
+            if (record.get('CreatedById') != null) {
+                addressee.add(String.valueOf(record.get('CreatedById')));
+            }
             if (String.isNotBlank(addresseeId)) {
-                addressee.add((Id) addresseeId);
+                addressee.add(addresseeId);
+            }
+            if (addressee.isEmpty()) {
+                return;
             }
             Messaging.CustomNotification customNotificationObj = new Messaging.CustomNotification();
             customNotificationObj.setBody(messageContent);

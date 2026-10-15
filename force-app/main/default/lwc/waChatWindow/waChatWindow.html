@@ -1,11 +1,11 @@
 <template>
     <template if:true={hasBusinessAccountConfigured}>
         <template if:true={showChatWindow}>
-            <div class={mainChatWindowContainerClass}>
+            <div class="main-chat-window-div">
                 <!-- Chat Spinner Scoped Inside Component -->
-                <div class="chat-spinner-overlay" if:true={showSpinner}>
-                    <lightning-spinner alternative-text="Loading" size="small" variant="brand"></lightning-spinner>
-                </div>
+                <template if:true={showSpinner}>
+                    <c-spinner-component is-absolute="true"></c-spinner-component>
+                </template>
 
                 <!-- Backdrop for modals / drawers -->
                 <div class="backdrop-div" if:true={displayBackDrop} onclick={handleBackDropClick}></div>
@@ -35,6 +35,26 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Warning Banner Above Chats (when older chats exist and phone/error notice is active) -->
+                <template if:true={showChatWarningBanner}>
+                    <div class="chat-warning-banner">
+                        <div class="warning-banner-left">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            <span class="warning-banner-text">{chatWarningBannerText}</span>
+                        </div>
+                        <button class="warning-banner-close-btn" onclick={handleDismissErrorBanner} title="Dismiss notice">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </template>
 
                 <!-- Chat Feed -->
                 <div class="chat-div" onscroll={handleScroll} onclick={handleCloseAllActionMenus}>
@@ -317,23 +337,32 @@
                         </div>
                     </template>
 
-                    <!-- Empty State -->
-                    <div class="no-chat-messages-div" if:true={noChatMessages}>
-                        <div class="empty-state-icon">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0176D3" stroke-width="1.5">
-                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                            </svg>
+                    <!-- Empty State: When There Are No Messages -->
+                    <template if:true={noChatMessages}>
+                        <!-- Error / Missing Phone Number Empty State in place of chats -->
+                        <div class="no-chat-messages-div chat-error-empty-state" if:true={showChatEmptyErrorState}>
+                            <div class="empty-state-icon error-state-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                            </div>
+                            <div class="bold-text">{chatEmptyErrorTitle}</div>
+                            <div class="sub-text">{chatwindowerror}</div>
                         </div>
-                        <div class="bold-text">No Conversation Yet</div>
-                        <div class="sub-text">Start engaging with this customer by sending an approved template</div>
-                        <button class="exp-blue-btn-css mt-3" data-media="Template" onclick={handleAttachmentOptionClick}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                            </svg>
-                            Send Template
-                        </button>
-                    </div>
+
+                        <!-- Normal Empty State (No Conversation Yet) -->
+                        <div class="no-chat-messages-div" if:true={showChatEmptyNormalState}>
+                            <div class="empty-state-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0176D3" stroke-width="1.5">
+                                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                                </svg>
+                            </div>
+                            <div class="bold-text">No Conversation Yet</div>
+                            <div class="sub-text">Start engaging with this customer by sending an approved template</div>
+                        </div>
+                    </template>
                 </div>
 
                 <!-- Reaction Emoji Tray -->
@@ -370,6 +399,7 @@
                 </template>
 
                 <!-- Composer / Message Draft Section -->
+                <template if:false={showchatwindowerror}>
                 <div class={messageDraftClass}>
                     <!-- Reply Context Strip -->
                     <div class="reply-to-message-div" if:true={replyToMessage}>
@@ -389,17 +419,14 @@
                     <template if:true={sendOnlyTemplate}>
                         <div class="send-only-template-banner">
                             <div class="notice-left">
-                                <div class="notice-icon-box" title="24-Hour Policy Information">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                                    </svg>
-                                </div>
-                                <div class="notice-text-content">
-                                    <span class="notice-badge">24h Policy</span>
-                                    <span class="notice-text">{noteText}</span>
-                                </div>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="notice-inline-icon">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                                <span class="notice-text">
+                                    <strong class="notice-text-bold">{footerNoticePrefix}</strong> {footerNoticeText}
+                                </span>
                             </div>
                             <button class="exp-blue-btn-css send-template-action-btn" data-media="Template" onclick={handleAttachmentOptionClick}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -434,7 +461,7 @@
 
                             <!-- Emoji Button -->
                             <button class="composer-icon-btn" onclick={handleEmojiButtonClick} title="Insert Emoji">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="1.8">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="1.8">
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
                                     <line x1="9" y1="9" x2="9.01" y2="9"></line>
@@ -445,7 +472,7 @@
                             <!-- Attachment Button -->
                             <div class="attachment-trigger-wrap">
                                 <button class="composer-icon-btn" onclick={handleAttachmentButtonClick} title="Attach file or template">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="1.8">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="1.8">
                                         <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
                                     </svg>
                                 </button>
@@ -517,7 +544,7 @@
 
                             <!-- Send Button -->
                             <button class="send-action-btn" onclick={handleSendMessage} disabled={isSendingMessage} title="Send Message (Enter)">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                     <line x1="22" y1="2" x2="11" y2="13"></line>
                                     <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                                 </svg>
@@ -525,6 +552,20 @@
                         </div>
                     </template>
                 </div>
+                </template>
+
+                <!-- Composer Disabled Notice when phone number is missing -->
+                <template if:true={showchatwindowerror}>
+                    <div class="composer-disabled-banner">
+                        <div class="composer-disabled-content">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <span>Messaging is disabled because this record has no valid phone number.</span>
+                        </div>
+                    </div>
+                </template>
 
             <!-- Unified Popup Modal (Files / Templates) Scoped to WaChatWindow -->
             <template if:true={showPopup}>
@@ -700,39 +741,25 @@
             </template>
             </div>
         </template>
-
-        <!-- Config / Record Error Modal -->
-        <template if:true={showchatwindowerror}>
-            <div class="chatwindow-error-banner">
-                <div class="error-card">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
-                    <h3 class="error-title">Notice</h3>
-                    <p class="error-desc">{chatwindowerror}</p>
-                </div>
-            </div>
-        </template>
     </template>
 
     <!-- WhatsApp Business Account Missing State -->
     <template if:false={hasBusinessAccountConfigured}>
         <div class="configuration-error-card">
-            <!-- Scoped Spinner -->
-            <div class="chat-spinner-overlay" if:true={showSpinner}>
-                <lightning-spinner alternative-text="Loading" size="small" variant="brand"></lightning-spinner>
-            </div>
-            <div class="config-error-icon-box">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0176D3" stroke-width="1.8">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            <div class="config-error-icon-box whatsapp-icon-box">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                        d="M12 2C6.48 2 2 6.48 2 12C2 13.85 2.5 15.58 3.38 17.07L2.05 21.95L7.07 20.64C8.52 21.5 10.2 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM17.02 14.88C16.81 15.47 15.98 15.98 15.34 16.12C14.9 16.22 14.33 16.3 12.4 15.5C9.94 14.48 8.35 11.99 8.23 11.83C8.11 11.67 7.25 10.53 7.25 9.35C7.25 8.17 7.86 7.59 8.1 7.34C8.3 7.14 8.63 7.05 8.93 7.05C9.03 7.05 9.12 7.05 9.2 7.06C9.44 7.07 9.56 7.08 9.72 7.47C9.92 7.96 10.41 9.15 10.47 9.27C10.53 9.39 10.59 9.55 10.51 9.71C10.43 9.87 10.38 9.94 10.26 10.08C10.14 10.22 10.01 10.38 9.9 10.51C9.77 10.65 9.64 10.8 9.79 11.06C9.94 11.31 10.46 12.16 11.23 12.85C12.22 13.73 13.03 14.01 13.32 14.13C13.57 14.23 13.72 14.21 13.9 14C14.12 13.75 14.39 13.36 14.67 12.97C14.87 12.69 15.11 12.73 15.37 12.83C15.63 12.92 17.02 13.61 17.31 13.75C17.6 13.89 17.79 13.96 17.86 14.08C17.93 14.2 17.93 14.77 17.02 14.88Z"
+                        fill="#25D366" />
                 </svg>
             </div>
             <h2 class="configuration-error-title">WhatsApp Integration Required</h2>
             <p class="configuration-error-message">
                 WhatsApp Business Account is not yet connected. Please configure your WhatsApp integration in the Control Center to start messaging.
             </p>
+            <a class="credentials-missing-link" href="javascript:void(0);" onclick={navigateToWhatsAppIntegration}>
+                Click here to configure WhatsApp Integration
+            </a>
         </div>
     </template>
 </template>

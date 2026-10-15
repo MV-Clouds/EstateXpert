@@ -157,6 +157,75 @@
 }
 
 /* =========================================================================
+   WARNING BANNER ABOVE CHATS
+   ========================================================================= */
+
+.chat-warning-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px;
+    background: #FFFBEB;
+    border-bottom: 1px solid #FDE68A;
+    color: #92400E;
+    z-index: 5;
+    animation: slideDownBanner 0.2s ease-out;
+}
+
+@keyframes slideDownBanner {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.warning-banner-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.warning-banner-left svg {
+    flex-shrink: 0;
+}
+
+.warning-banner-text {
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #92400E;
+    word-break: break-word;
+}
+
+.warning-banner-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: #B45309;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.warning-banner-close-btn:hover {
+    background: #FDE68A;
+    color: #78350F;
+}
+
+/* =========================================================================
    CHAT MESSAGES FEED
    ========================================================================= */
 
@@ -801,6 +870,21 @@
     margin-top: 14px;
 }
 
+.empty-state-icon.error-state-icon {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+}
+
+.chat-error-empty-state .bold-text {
+    color: #991B1B;
+}
+
+.chat-error-empty-state .sub-text {
+    color: #7F1D1D;
+    max-width: 360px;
+    line-height: 1.5;
+}
+
 /* =========================================================================
    REACTION EMOJI TRAY
    ========================================================================= */
@@ -934,7 +1018,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 10px 16px;
+    padding: 8px 14px;
     background: #FFFBEB;
     border-top: 1px solid #FDE68A;
 }
@@ -942,47 +1026,25 @@
 .notice-left {
     display: flex;
     align-items: center;
-    gap: 10px;
-    flex: 1;
-}
-
-.notice-icon-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
-    background: #FEF3C7;
-    border: 1px solid #FDE68A;
-    border-radius: 50%;
-    color: #D97706;
-}
-
-.notice-text-content {
-    display: flex;
-    align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
+    flex: 1;
+    min-width: 0;
 }
 
-.notice-badge {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    background: #FDE68A;
-    color: #92400E;
-    padding: 2px 7px;
-    border-radius: 4px;
-    letter-spacing: 0.4px;
-    white-space: nowrap;
+.notice-inline-icon {
+    flex-shrink: 0;
+    color: #D97706;
 }
 
 .notice-text {
     font-size: 12px;
     color: #92400E;
-    font-weight: 500;
     line-height: 1.4;
+}
+
+.notice-text-bold {
+    font-weight: 700;
+    color: #78350F;
 }
 
 /* Composer Bar */
@@ -990,16 +1052,16 @@
     position: relative;
     display: flex;
     align-items: flex-end;
-    gap: 8px;
-    padding: 10px 14px;
+    gap: 6px;
+    padding: 6px 12px;
 }
 
 .composer-icon-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 30px;
+    height: 30px;
     background: transparent;
     border: none;
     border-radius: 50%;
@@ -1016,10 +1078,13 @@
 .input-container {
     flex: 1;
     display: flex;
+    align-items: center;
     background: #F8FAFC;
     border: 1px solid var(--border-light);
-    border-radius: 20px;
-    padding: 4px 12px;
+    border-radius: 18px;
+    padding: 2px 10px;
+    min-height: 32px;
+    box-sizing: border-box;
     transition: border-color 0.2s, background 0.2s;
 }
 
@@ -1035,11 +1100,11 @@
     outline: none;
     background: transparent;
     font-family: inherit;
-    font-size: 13.5px;
-    line-height: 1.4;
+    font-size: 13px;
+    line-height: 1.35;
     resize: none;
-    max-height: 120px;
-    padding: 6px 0;
+    max-height: 100px;
+    padding: 4px 0;
     color: var(--text-primary);
 }
 
@@ -1051,8 +1116,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
+    width: 30px;
+    height: 30px;
     background: var(--primary-color);
     color: #FFFFFF;
     border: none;
@@ -1060,13 +1125,13 @@
     cursor: pointer;
     transition: all 0.2s ease;
     flex-shrink: 0;
-    box-shadow: 0 2px 4px rgba(1, 118, 211, 0.3);
+    box-shadow: 0 1.5px 3px rgba(1, 118, 211, 0.25);
 }
 
 .send-action-btn:hover {
     background: var(--primary-hover);
     transform: scale(1.06);
-    box-shadow: 0 4px 8px rgba(1, 118, 211, 0.35);
+    box-shadow: 0 3px 6px rgba(1, 118, 211, 0.35);
 }
 
 .send-action-btn:disabled {
@@ -1083,7 +1148,7 @@
 
 .attachment-popover {
     position: absolute;
-    bottom: 50px;
+    bottom: 42px;
     left: 0;
     background: #FFFFFF;
     border: 1px solid var(--border-light);
@@ -1133,7 +1198,7 @@
 /* Emoji Picker in Composer */
 .emoji-picker-container {
     position: absolute;
-    bottom: 60px;
+    bottom: 46px;
     left: 12px;
     width: 320px;
     max-height: 260px;
@@ -1613,37 +1678,23 @@
     width: 100%;
 }
 
-/* Error States */
-.chatwindow-error-banner {
-    padding: 24px;
+/* Composer Disabled Notice */
+.composer-disabled-banner {
+    padding: 14px 20px;
+    background: #F8FAFC;
+    border-top: 1px solid var(--border-light);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.error-card {
+.composer-disabled-content {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    text-align: center;
-    padding: 24px;
-    background: #FEF2F2;
-    border: 1px solid #FECACA;
-    border-radius: 12px;
-    max-width: 400px;
-}
-
-.error-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #991B1B;
-    margin: 8px 0 4px;
-}
-
-.error-desc {
+    gap: 8px;
     font-size: 13px;
-    color: #7F1D1D;
-    margin: 0;
+    font-weight: 500;
+    color: #64748B;
 }
 
 .configuration-error-card {
@@ -1654,11 +1705,10 @@
     justify-content: center;
     padding: 40px 24px;
     text-align: center;
-    background: #FFFFFF;
+    background: #F0F8FE;
     border: 1px solid var(--border-light);
-    border-radius: 12px;
-    margin: 16px;
-    min-height: 220px;
+    border-radius: 4px;
+    min-height: 350px;
 }
 
 .config-error-icon-box {
@@ -1670,6 +1720,12 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 16px;
+}
+
+.config-error-icon-box.whatsapp-icon-box {
+    background: #E1FCEF;
+    border: 1px solid #BBF7D0;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.15);
 }
 
 .configuration-error-title {
@@ -1684,4 +1740,23 @@
     color: var(--text-secondary);
     max-width: 440px;
     line-height: 1.5;
+    margin: 0;
+}
+
+.credentials-missing-link {
+    margin-top: 14px;
+    font-size: 14px;
+    color: var(--primary-color, #0176D3);
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.15s ease-in-out;
+}
+
+.credentials-missing-link:hover {
+    color: var(--primary-hover, #014486);
+    text-decoration: underline;
 }

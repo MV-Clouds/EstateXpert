@@ -8,281 +8,82 @@
  **/
 public with sharing class WAChatWindowController {    
     /**
-     * @description : Retrieves list of objects configured for WhatsApp Chat Window from MVEX__Object_Config__mdt
-     * @return List<String>
+     * @description : Retrieves the configured Contact phone field from MVEX__ChatWindowConfigInfo__c in MVEX__Object_Config__mdt
+     * @return String - API name of the configured phone field on Contact
      */
-    @AuraEnabled
-    public static List<String> getObjectPicklistOptions() {
+    private static String getContactPhoneField() {
         try {
-            List<String> options = new List<String>();
-            List<MVEX__Object_Config__mdt> objectConfigList = [SELECT MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt WITH USER_MODE LIMIT 1];
-            
-            if (!objectConfigList.isEmpty() && String.isNotBlank(objectConfigList[0].MVEX__ChatWindowConfigInfo__c)) {
-                Map<String, Object> chatConfigData = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].MVEX__ChatWindowConfigInfo__c);
-                for (String key : chatConfigData.keySet()) {
-                    options.add(key);
-                }
-            }
-            return options;
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAChatWindowController', 'getObjectPicklistOptions', e.getMessage());
-            return null;
-        }
-    }
+            List<MVEX__Object_Config__mdt> configList = [SELECT Id, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt WITH USER_MODE LIMIT 1];
 
-    /**
-     * @description : Resolves phoneField and nameField for a given object from MVEX__Object_Config__mdt custom metadata.
-     *                Supports both map structure {"Contact": {"phoneField": "...", "nameField": "..."}}
-     *                and string structure {"Contact": "MobilePhone"} as configured by whatsappConnectComp.
-     * @param objectApiName - Name of the object (e.g. 'Contact')
-     * @return Map<String, String> containing 'phoneField' and 'nameField'
-     */
-    public static Map<String, String> resolveObjectFields(String objectApiName) {
-        Map<String, String> result = new Map<String, String>{
-            'phoneField' => 'MobilePhone',
-            'nameField' => 'Name'
-        };
-
-        if (String.isBlank(objectApiName)) {
-            objectApiName = 'Contact';
-        }
-
-        try {
-            List<MVEX__Object_Config__mdt> configList = [SELECT Id, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt 
-                                                            WITH USER_MODE LIMIT 1];
-
-            if (configList.isEmpty()) {
-                return result;
+            if (configList.isEmpty() || String.isBlank(configList[0].MVEX__ChatWindowConfigInfo__c)) {
+                return null;
             }
 
-            MVEX__Object_Config__mdt cfg = configList[0];
-
-            // 1. Check MVEX__ChatWindowConfigInfo__c
-            if (String.isNotBlank(cfg.MVEX__ChatWindowConfigInfo__c)) {
-                try {
-                    Map<String, Object> chatConfigMap = (Map<String, Object>) JSON.deserializeUntyped(cfg.MVEX__ChatWindowConfigInfo__c);
-                    if (chatConfigMap != null && chatConfigMap.containsKey(objectApiName)) {
-                        Object objEntry = chatConfigMap.get(objectApiName);
-                        if (objEntry instanceof Map<String, Object>) {
-                            Map<String, Object> entryMap = (Map<String, Object>) objEntry;
-                            if (entryMap.containsKey('phoneField') && entryMap.get('phoneField') != null) {
-                                result.put('phoneField', String.valueOf(entryMap.get('phoneField')));
-                            }
-                            if (entryMap.containsKey('nameField') && entryMap.get('nameField') != null) {
-                                result.put('nameField', String.valueOf(entryMap.get('nameField')));
-                            }
-                        } else if (objEntry instanceof String && String.isNotBlank(String.valueOf(objEntry))) {
-                            result.put('phoneField', String.valueOf(objEntry));
-                        }
-                    }
-                } catch (Exception ex) {
-                    System.debug('Error parsing MVEX__ChatWindowConfigInfo__c: ' + ex.getMessage());
-                }
-            }
-
-            // 2. Check MVEX__ObjectConfigInfo__c if phoneField is still blank or default
-            if (String.isNotBlank(cfg.MVEX__ObjectConfigInfo__c)) {
-                try {
-                    Map<String, Object> objConfigMap = (Map<String, Object>) JSON.deserializeUntyped(cfg.MVEX__ObjectConfigInfo__c);
-                    String configuredObj = (String) objConfigMap.get('object');
-                    if (String.isBlank(configuredObj)) {
-                        configuredObj = (String) objConfigMap.get('objectApiName');
-                    }
-                    if ((String.isBlank(configuredObj) || configuredObj.equalsIgnoreCase(objectApiName)) &&
-                        objConfigMap.containsKey('phoneField') && objConfigMap.get('phoneField') != null) {
-                        String pf = String.valueOf(objConfigMap.get('phoneField'));
-                        if (String.isNotBlank(pf)) {
-                            result.put('phoneField', pf);
-                        }
-                    }
-                } catch (Exception ex) {
-                    System.debug('Error parsing MVEX__ObjectConfigInfo__c: ' + ex.getMessage());
-                }
-            }
-
-            // 3. Validate against SObject fields describe
-            Schema.SObjectType sObjType = Schema.getGlobalDescribe().get(objectApiName);
-            if (sObjType != null) {
-                Map<String, Schema.SObjectField> fieldsMap = sObjType.getDescribe().fields.getMap();
-                String resolvedPhone = result.get('phoneField');
-                if (String.isNotBlank(resolvedPhone) && !fieldsMap.containsKey(resolvedPhone.toLowerCase())) {
-                    if (fieldsMap.containsKey('mobilephone')) {
-                        result.put('phoneField', 'MobilePhone');
-                    } else if (fieldsMap.containsKey('phone')) {
-                        result.put('phoneField', 'Phone');
+            Map<String, Object> chatConfigMap = (Map<String, Object>) JSON.deserializeUntyped(configList[0].MVEX__ChatWindowConfigInfo__c);
+            if (chatConfigMap != null) {
+                Object contactEntry = null;
+                for (String key : chatConfigMap.keySet()) {
+                    if (key.equalsIgnoreCase('Contact')) {
+                        contactEntry = chatConfigMap.get(key);
+                        break;
                     }
                 }
-                String resolvedName = result.get('nameField');
-                if (String.isNotBlank(resolvedName) && !fieldsMap.containsKey(resolvedName.toLowerCase()) && fieldsMap.containsKey('name')) {
-                    result.put('nameField', 'Name');
+
+                String phoneField = null;
+                if (contactEntry instanceof Map<String, Object>) {
+                    Map<String, Object> entryMap = (Map<String, Object>) contactEntry;
+                    if (entryMap.containsKey('phoneField') && entryMap.get('phoneField') != null) {
+                        phoneField = String.valueOf(entryMap.get('phoneField')).trim();
+                    }
+                } else if (contactEntry instanceof String && String.isNotBlank(String.valueOf(contactEntry))) {
+                    phoneField = String.valueOf(contactEntry).trim();
+                }
+
+                if (String.isNotBlank(phoneField)) {
+                    Schema.DescribeSObjectResult describeResult = Contact.SObjectType.getDescribe();
+                    if (describeResult.fields.getMap().containsKey(phoneField.toLowerCase())) {
+                        return phoneField;
+                    }
                 }
             }
         } catch (Exception e) {
-            System.debug('Error in resolveObjectFields: ' + e.getMessage());
+            System.debug('Error in getContactPhoneField: ' + e.getMessage());
         }
-
-        return result;
+        return null;
     }
 
     /**
-     * @description : Retrieves contacts/records for the selected object with latest chat info and unread count
-     * @param objectApiName - API name of the object (e.g., 'Contact', 'Lead')
-     * @return Map<String, Map<String, Object>>
-     */
-    @AuraEnabled
-    public static Map<String, Map<String, Object>> getChatsForSelectedObject(String objectApiName) {
-        try {
-            Map<String, String> fieldMapping = resolveObjectFields(objectApiName);
-            String phoneField = fieldMapping.get('phoneField');
-            String nameField = fieldMapping.get('nameField');
-
-            List<sObject> recordData = new List<sObject>();
-            if (String.isNotBlank(nameField) && String.isNotBlank(phoneField)) {
-                String query = '';
-                if (objectApiName == 'Lead') {
-                    query = 'SELECT Id, ' + String.escapeSingleQuotes(nameField) + ', ' + String.escapeSingleQuotes(phoneField) + 
-                            ' FROM ' + String.escapeSingleQuotes(objectApiName) + 
-                            ' WHERE ' + String.escapeSingleQuotes(phoneField) + ' != null AND Status != \'Closed - Converted\' WITH USER_MODE LIMIT 50000';
-                } else {
-                    query = 'SELECT Id, ' + String.escapeSingleQuotes(nameField) + ', ' + String.escapeSingleQuotes(phoneField) + 
-                            ' FROM ' + String.escapeSingleQuotes(objectApiName) + 
-                            ' WHERE ' + String.escapeSingleQuotes(phoneField) + ' != null WITH USER_MODE LIMIT 50000';
-                }
-                recordData = Database.query(query);
-            }
-    
-            Set<String> phoneSet = new Set<String>();
-            for (sObject rec : recordData) {
-                String phoneVal = (String) rec.get(phoneField);
-                if (String.isNotBlank(phoneVal)) {
-                    phoneSet.add(phoneVal);
-                }
-            }
-    
-            // Get last chat time per phone from WA_Chat__c
-            Map<String, DateTime> phoneToLastChat = new Map<String, DateTime>();
-            if (!phoneSet.isEmpty()) {
-                List<AggregateResult> chatAgg = [SELECT Phone__c, MAX(CreatedDate) maxDate FROM WA_Chat__c WHERE Phone__c IN :phoneSet WITH USER_MODE GROUP BY Phone__c];
-                for (AggregateResult ar : chatAgg) {
-                    phoneToLastChat.put((String) ar.get('Phone__c'), (DateTime) ar.get('maxDate'));
-                }
-            }
-    
-            // Get count of unread inbound messages per phone
-            Map<String, Integer> phoneToUnreadInboundCount = new Map<String, Integer>();
-            if (!phoneSet.isEmpty()) {
-                List<AggregateResult> unreadInboundAgg = [SELECT Phone__c, COUNT(Id) countId FROM WA_Chat__c WHERE Phone__c IN :phoneSet AND 
-                                                                Message_Status__c != 'Seen' AND Type_of_Message__c = 'Inbound Messages' WITH USER_MODE GROUP BY Phone__c];
-                for (AggregateResult ar : unreadInboundAgg) {
-                    phoneToUnreadInboundCount.put((String) ar.get('Phone__c'), (Integer) ar.get('countId'));
-                }
-            }
-    
-            // Sort records by latest chat date descending
-            recordData.sort(new RecordChatComparator(phoneToLastChat, phoneField));
-    
-            Map<String, Map<String, Object>> contactData = new Map<String, Map<String, Object>>();
-            for (sObject rec : recordData) {
-                Map<String, Object> contactDetails = new Map<String, Object>();
-                String rPhone = (String) rec.get(phoneField);
-                contactDetails.put('Id', (String) rec.get('Id'));
-                contactDetails.put('Name', (String) rec.get(nameField));
-                contactDetails.put('Phone', rPhone);
-                contactDetails.put('unreadOutboundCount', phoneToUnreadInboundCount.containsKey(rPhone) ? phoneToUnreadInboundCount.get(rPhone) : 0);
-                contactData.put((String) rec.get('Id'), contactDetails);
-            }
-    
-            return contactData;
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAChatWindowController', 'getChatsForSelectedObject', e.getMessage());
-            return null;
-        }
-    }
-
-    // Inner comparator class for sorting contacts by chat date
-    public class RecordChatComparator implements Comparator<sObject> {
-        Map<String, DateTime> phoneToChatMap;
-        String phoneFieldName;
-
-        public RecordChatComparator(Map<String, DateTime> phoneChatMap, String phoneField) {
-            this.phoneToChatMap = phoneChatMap;
-            this.phoneFieldName = phoneField;
-        }
-
-        public Integer compare(sObject a, sObject b) {
-            String aPhone = (String) a.get(phoneFieldName);
-            String bPhone = (String) b.get(phoneFieldName);
-
-            DateTime aDate = phoneToChatMap.containsKey(aPhone) ? phoneToChatMap.get(aPhone) : DateTime.newInstance(1900, 1, 1);
-            DateTime bDate = phoneToChatMap.containsKey(bPhone) ? phoneToChatMap.get(bPhone) : DateTime.newInstance(1900, 1, 1);
-
-            if (aDate > bDate) return -1;
-            if (aDate < bDate) return 1;
-            return 0;
-        }
-    }
-
-    /**
-     * @description : Fetches all chat history and available templates for the given record
-     * @param contactId - Id of the record
-     * @param objectApiName - API Name of the object
+     * @description : Fetches all chat history and available templates for the given Contact record
+     * @param contactId - Id of the Contact record
      * @return Map<String, Object>
      */
     @AuraEnabled
-    public static Map<String, Object> getCombinedData(String contactId, String objectApiName) {
+    public static Map<String, Object> getCombinedData(String contactId) {
         Map<String, Object> combinedData = new Map<String, Object>();
         try {
-            if (String.isBlank(objectApiName)) {
-                objectApiName = 'Contact';
-            }
-
             List<WA_Chat__c> chats = new List<WA_Chat__c>();
             List<WA_Template__c> templates = new List<WA_Template__c>();
 
-            Map<String, String> fieldMapping = resolveObjectFields(objectApiName);
-            String phoneField = fieldMapping.get('phoneField');
-            String nameField = fieldMapping.get('nameField');
-
+            String phoneField = getContactPhoneField();
             sObject recordData;
             String phoneNumber = '';
             String recordName = '';
 
-            Set<String> queryFields = new Set<String>{ 'Id' };
-            if (String.isNotBlank(nameField)) {
-                queryFields.add(nameField);
-            } else {
-                queryFields.add('Name');
-            }
+            Set<String> queryFields = new Set<String>{ 'Id', 'Name' };
             if (String.isNotBlank(phoneField)) {
                 queryFields.add(phoneField);
             }
 
-            Schema.SObjectType sObjType = Schema.getGlobalDescribe().get(objectApiName);
-            if (sObjType != null) {
-                Map<String, Schema.SObjectField> fMap = sObjType.getDescribe().fields.getMap();
-                if (fMap.containsKey('mobilephone')) queryFields.add('MobilePhone');
-                if (fMap.containsKey('phone')) queryFields.add('Phone');
-            }
-
             if (String.isNotBlank(contactId)) {
                 String query = 'SELECT ' + String.join(new List<String>(queryFields), ', ') + 
-                               ' FROM ' + String.escapeSingleQuotes(objectApiName) + ' WHERE Id = :contactId WITH USER_MODE LIMIT 1';
-                List<sObject> recs = Database.query(query);
+                               ' FROM Contact WHERE Id = :contactId LIMIT 1';
+                List<sObject> recs = Database.query(query, AccessLevel.USER_MODE);
                 if (!recs.isEmpty()) {
                     recordData = recs[0];
                     if (String.isNotBlank(phoneField) && recordData.get(phoneField) != null) {
                         phoneNumber = String.valueOf(recordData.get(phoneField));
                     }
-                    if (String.isBlank(phoneNumber)) {
-                        if (queryFields.contains('MobilePhone') && recordData.get('MobilePhone') != null) {
-                            phoneNumber = String.valueOf(recordData.get('MobilePhone'));
-                        } else if (queryFields.contains('Phone') && recordData.get('Phone') != null) {
-                            phoneNumber = String.valueOf(recordData.get('Phone'));
-                        }
-                    }
-                    if (String.isNotBlank(nameField) && recordData.get(nameField) != null) {
-                        recordName = String.valueOf(recordData.get(nameField));
-                    } else if (recordData.get('Name') != null) {
+                    if (recordData.get('Name') != null) {
                         recordName = String.valueOf(recordData.get('Name'));
                     }
                 }
@@ -298,6 +99,11 @@ public with sharing class WAChatWindowController {
                            WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
                            WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, File_Data__c, 
                            Sent_Template_Details__c FROM WA_Chat__c WHERE Phone__c IN :phoneCandidates WITH USER_MODE ORDER BY CreatedDate ASC];
+            } else if (String.isNotBlank(contactId)) {
+                chats = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
+                            WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
+                            WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, File_Data__c, 
+                            Sent_Template_Details__c FROM WA_Chat__c WHERE Contact__c = :contactId WITH USER_MODE ORDER BY CreatedDate ASC];
             }
 
             // Fetch eligible templates
@@ -317,7 +123,7 @@ public with sharing class WAChatWindowController {
 
             for (Id templateId : templateIdToObjectNames.keySet()) {
                 Set<String> objectNames = templateIdToObjectNames.get(templateId);
-                if (objectNames.size() == 1 && objectNames.contains(objectApiName)) {
+                if (objectNames.size() == 1 && objectNames.contains('Contact')) {
                     matchingTemplateIds.add(templateId);
                 }
             }
@@ -542,11 +348,10 @@ public with sharing class WAChatWindowController {
      * @description : Method to fetch template data and resolved merge fields
      * @param templateId - Id of the WA_Template__c record
      * @param contactId - Id of the record to resolve variables
-     * @param objectApiName - API name of the object
      * @return Map<String, Object>
      */
     @AuraEnabled
-    public static Map<String, Object> getTemplateData(String templateId, String contactId, String objectApiName) {
+    public static Map<String, Object> getTemplateData(String templateId, String contactId) {
         try {
             Map<String, Object> templateData = new Map<String, Object>();
             List<WA_Template__c> templates = [SELECT Id, Template_Name__c, Template_Miscellaneous_Data__c, Button_Body__c, Button_Label__c, 
@@ -577,8 +382,8 @@ public with sharing class WAChatWindowController {
 
                 if (!fieldSelectionCause.isEmpty()) {
                     String query = 'SELECT ' + String.join(new List<String>(fieldSelectionCause), ', ') + 
-                                   ' FROM ' + String.escapeSingleQuotes(objectApiName) + ' WHERE Id = :contactId WITH USER_MODE LIMIT 1';
-                    List<sObject> records = Database.query(query);
+                                   ' FROM Contact WHERE Id = :contactId LIMIT 1';
+                    List<sObject> records = Database.query(query, AccessLevel.USER_MODE);
                     if (!records.isEmpty()) {
                         sObject record = records[0];
                         for (WA_Template_Variable__c tv : template.WA_Template_Variables__r) {
@@ -615,12 +420,11 @@ public with sharing class WAChatWindowController {
      * @description : Builds and dispatches a WhatsApp template message directly from the Chat Window
      * @param templateId - Id of the WA_Template__c
      * @param recordId - Record Id (e.g., Contact or Lead Id)
-     * @param objectApiName - API Name of the record object
      * @param phoneNumber - Recipient phone number
      * @return Map<String, Object> - result containing newly created WA_Chat__c record
      */
     @AuraEnabled
-    public static Map<String, Object> sendSelectedTemplate(String templateId, String recordId, String objectApiName, String phoneNumber) {
+    public static Map<String, Object> sendSelectedTemplate(String templateId, String recordId, String phoneNumber) {
         Map<String, Object> result = new Map<String, Object>();
         try {
             if (String.isBlank(templateId) || String.isBlank(phoneNumber)) {
@@ -629,7 +433,7 @@ public with sharing class WAChatWindowController {
                 return result;
             }
 
-            Map<String, Object> templateData = getTemplateData(templateId, recordId, objectApiName);
+            Map<String, Object> templateData = getTemplateData(templateId, recordId);
             if (templateData == null || !templateData.containsKey('template')) {
                 result.put('success', false);
                 result.put('message', 'Template not found.');
@@ -724,9 +528,8 @@ public with sharing class WAChatWindowController {
             chat.Sent_Template_Details__c = JSON.serialize(components);
             chat.Message_ID__c = whatsAppMessageID;
             chat.Message_Status__c = isCalloutSuccess ? 'Sent' : 'Failed';
-            if (objectApiName == 'Contact' && String.isNotBlank(recordId)) {
-                chat.Contact__c = recordId;
-            }
+            chat.Contact__c = recordId;
+
             insert as user chat;
 
             // Re-query chat with complete template relationship fields for UI
@@ -754,40 +557,6 @@ public with sharing class WAChatWindowController {
             result.put('success', false);
             result.put('message', e.getMessage());
             return result;
-        }
-    }
-
-    /**
-     * @description : Builds WhatsApp interactive message payload JSON
-     * @param templateId - Template Id
-     * @param contactId - Record Id
-     * @param objectApiName - API Name
-     * @param phoneNumber - Recipient phone number
-     * @return String
-     */
-    @AuraEnabled
-    public static String buildInteractivePayload(String templateId, String contactId, String objectApiName, String phoneNumber) {
-        try {
-            Map<String, Object> templateData = getTemplateData(templateId, contactId, objectApiName);
-            if (templateData == null || !templateData.containsKey('template')) {
-                return null;
-            }
-
-            WA_Template__c template = (WA_Template__c) templateData.get('template');
-            if (template == null || String.isBlank(template.Template_Body__c)) {
-                return null;
-            }
-
-            String payload = template.Template_Body__c;
-            if (String.isNotBlank(phoneNumber)) {
-                String normalizedPhone = phoneNumber.replaceAll('\\s+', '');
-                payload = payload.replace('{{RECIPIENT_NUMBER}}', normalizedPhone);
-            }
-
-            return payload;
-        } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAChatWindowController', 'buildInteractivePayload', e.getMessage());
-            return null;
         }
     }
 
@@ -960,11 +729,10 @@ public with sharing class WAChatWindowController {
 
     /**
      * @description : Lightweight method to fetch approved templates for a given object
-     * @param objectApiName - API Name of the object
      * @return List<WA_Template__c>
      */
     @AuraEnabled
-    public static List<WA_Template__c> getTemplatesOnly(String objectApiName) {
+    public static List<WA_Template__c> getTemplatesOnly() {
         try {
             Set<Id> matchingTemplateIds = new Set<Id>();
             Set<Id> allTemplateIdsWithVariables = new Set<Id>();
@@ -982,7 +750,7 @@ public with sharing class WAChatWindowController {
 
             for (Id templateId : templateIdToObjectNames.keySet()) {
                 Set<String> objectNames = templateIdToObjectNames.get(templateId);
-                if (objectNames.size() == 1 && objectNames.contains(objectApiName)) {
+                if (objectNames.size() == 1 && objectNames.contains('Contact')) {
                     matchingTemplateIds.add(templateId);
                 }
             }

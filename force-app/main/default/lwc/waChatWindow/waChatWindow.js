@@ -443,7 +443,9 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                     item.isVideoHeader = item.headerType === 'VIDEO';
                     item.isDocHeader = item.headerType === 'DOCUMENT';
                     item.hasTemplateHeader = item.isTextHeader || item.isImageHeader || item.isVideoHeader || item.isDocHeader;
-                    item.headerMediaUrl = temp?.Image_Header_Handle__c || '';
+                    item.headerMediaUrl = (['IMAGE', 'VIDEO', 'DOCUMENT'].includes(item.headerType) && temp?.Header_Body__c)
+                        ? temp.Header_Body__c
+                        : (temp?.Image_Header_Handle__c || '');
 
                     item.templateBody = item.Message__c || temp?.Template_Body__c || '';
                     item.templateFooter = temp?.Footer_Body__c || '';

@@ -928,9 +928,33 @@
     line-height: 1;
 }
 
+.exp-action-menu-item .exp-menu-icon svg path,
+.exp-action-menu-item .exp-menu-icon svg circle,
+.exp-action-menu-item .exp-menu-icon svg rect {
+    stroke: #212529;
+    fill: none;
+    transition: stroke 0.15s ease, fill 0.15s ease;
+}
+
+.exp-action-menu-item:hover .exp-menu-icon svg {
+    fill: none;
+}
+
+.exp-action-menu-item:hover .exp-menu-icon svg path,
+.exp-action-menu-item:hover .exp-menu-icon svg circle,
+.exp-action-menu-item:hover .exp-menu-icon svg rect {
+    stroke: currentColor;
+    fill: none;
+}
+
 .exp-action-menu-item:hover .exp-menu-icon-download svg path,
-.exp-action-menu-item:hover .exp-menu-icon-edit svg path {
+.exp-action-menu-item:hover .exp-menu-icon-preview svg path,
+.exp-action-menu-item:hover .exp-menu-icon-preview svg circle,
+.exp-action-menu-item:hover .exp-menu-icon-edit svg path,
+.exp-action-menu-item:hover .exp-menu-icon-clone svg rect,
+.exp-action-menu-item:hover .exp-menu-icon-clone svg path {
     stroke: #0176D3;
+    fill: none;
 }
 
 .exp-action-menu-item.exp-action-menu-item-delete {
@@ -944,7 +968,7 @@
 
 .exp-action-menu-item.exp-action-menu-item-delete:hover .exp-menu-icon-delete svg,
 .exp-action-menu-item.exp-action-menu-item-delete:hover .exp-menu-icon-delete svg path {
-    fill: #dc2626;
+    fill: none;
     stroke: #dc2626;
 }
 

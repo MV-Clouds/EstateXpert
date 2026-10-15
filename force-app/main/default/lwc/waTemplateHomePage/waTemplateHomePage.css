@@ -510,12 +510,58 @@
 }
 
 .exp-action-menu-item.exp-menu-item-disabled .exp-menu-icon svg path,
+.exp-action-menu-item.exp-menu-item-disabled .exp-menu-icon svg circle,
+.exp-action-menu-item.exp-menu-item-disabled .exp-menu-icon svg rect,
 .exp-action-menu-item.exp-menu-item-disabled .exp-menu-icon-edit svg path,
 .exp-action-menu-item.exp-menu-item-disabled .exp-menu-icon-delete svg path,
 .exp-action-menu-item[aria-disabled="true"] .exp-menu-icon svg path,
+.exp-action-menu-item[aria-disabled="true"] .exp-menu-icon svg circle,
+.exp-action-menu-item[aria-disabled="true"] .exp-menu-icon svg rect,
 .exp-action-menu-item[aria-disabled="true"] .exp-menu-icon-edit svg path,
 .exp-action-menu-item[aria-disabled="true"] .exp-menu-icon-delete svg path {
     stroke: #9CA3AF !important;
+    fill: none !important;
+}
+
+/* Action Menu Icon Hover - Match text color on border/stroke only, without filling */
+.exp-action-menu-item .exp-menu-icon svg,
+.exp-action-menu-item .exp-menu-icon svg path,
+.exp-action-menu-item .exp-menu-icon svg circle,
+.exp-action-menu-item .exp-menu-icon svg rect {
+    transition: stroke 0.15s ease, fill 0.15s ease;
+}
+
+.exp-action-menu-item:not(.exp-menu-item-disabled):not([aria-disabled="true"]) .exp-menu-icon svg path,
+.exp-action-menu-item:not(.exp-menu-item-disabled):not([aria-disabled="true"]) .exp-menu-icon svg circle,
+.exp-action-menu-item:not(.exp-menu-item-disabled):not([aria-disabled="true"]) .exp-menu-icon svg rect {
+    stroke: #212529;
+    fill: none;
+}
+
+.exp-action-menu-item:not(.exp-menu-item-disabled):not([aria-disabled="true"]):hover .exp-menu-icon svg {
+    fill: none !important;
+}
+
+.exp-action-menu-item:not(.exp-menu-item-disabled):not([aria-disabled="true"]):hover .exp-menu-icon svg path,
+.exp-action-menu-item:not(.exp-menu-item-disabled):not([aria-disabled="true"]):hover .exp-menu-icon svg circle,
+.exp-action-menu-item:not(.exp-menu-item-disabled):not([aria-disabled="true"]):hover .exp-menu-icon svg rect {
+    stroke: currentColor !important;
+    fill: none !important;
+}
+
+.exp-action-menu-item:not(.exp-menu-item-disabled):not([aria-disabled="true"]):hover .exp-menu-icon-preview svg path,
+.exp-action-menu-item:not(.exp-menu-item-disabled):not([aria-disabled="true"]):hover .exp-menu-icon-preview svg circle,
+.exp-action-menu-item:not(.exp-menu-item-disabled):not([aria-disabled="true"]):hover .exp-menu-icon-edit svg path,
+.exp-action-menu-item:not(.exp-menu-item-disabled):not([aria-disabled="true"]):hover .exp-menu-icon-clone svg rect,
+.exp-action-menu-item:not(.exp-menu-item-disabled):not([aria-disabled="true"]):hover .exp-menu-icon-clone svg path {
+    stroke: #0176D3 !important;
+    fill: none !important;
+}
+
+.exp-action-menu-item.exp-action-menu-item-delete:not(.exp-menu-item-disabled):not([aria-disabled="true"]):hover .exp-menu-icon-delete svg,
+.exp-action-menu-item.exp-action-menu-item-delete:not(.exp-menu-item-disabled):not([aria-disabled="true"]):hover .exp-menu-icon-delete svg path {
+    stroke: #dc2626 !important;
+    fill: none !important;
 }
 
 /* When preview modal is open, prevent table rows from staying highlighted with hover color */

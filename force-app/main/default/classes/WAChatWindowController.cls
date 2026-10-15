@@ -472,7 +472,7 @@ public with sharing class WAChatWindowController {
 
             String accessToken = config.Access_Token__c;
             String authEndpoint = config.Authorization_Endpoint__c != null ? config.Authorization_Endpoint__c.removeEnd('/') : 'https://graph.facebook.com';
-            String apiVersion = config.API_Version__c != null ? config.API_Version__c : 'v21.0';
+            String apiVersion = config.API_Version__c != null ? config.API_Version__c : 'v26.0';
             String endpoint = authEndpoint + '/' + apiVersion + '/' + config.Client_Phone_Number_ID__c + '/messages';
 
             HttpRequest httpReq = new HttpRequest();
@@ -687,7 +687,7 @@ public with sharing class WAChatWindowController {
 
             String accessToken = config.Access_Token__c;
             String authEndpoint = config.Authorization_Endpoint__c != null ? config.Authorization_Endpoint__c.removeEnd('/') : 'https://graph.facebook.com';
-            String apiVersion = config.API_Version__c != null ? config.API_Version__c : 'v21.0';
+            String apiVersion = config.API_Version__c != null ? config.API_Version__c : 'v26.0';
             String endpoint = authEndpoint + '/' + apiVersion + '/' + config.Client_Phone_Number_ID__c + '/messages';
 
             HttpRequest httpReq = new HttpRequest();
@@ -812,7 +812,7 @@ public with sharing class WAChatWindowController {
 
             String accessToken = config.Access_Token__c;
             String authEndpoint = config.Authorization_Endpoint__c != null ? config.Authorization_Endpoint__c.removeEnd('/') : 'https://graph.facebook.com';
-            String apiVersion = config.API_Version__c != null ? config.API_Version__c : 'v21.0';
+            String apiVersion = config.API_Version__c != null ? config.API_Version__c : 'v26.0';
             String endpoint = authEndpoint + '/' + apiVersion + '/' + config.Client_Phone_Number_ID__c + '/messages';
 
             for (WA_Chat__c chat : chats) {

@@ -24,7 +24,7 @@
     </values>
     <values>
         <field>Client_Id__c</field>
-        <value xsi:type="xsd:string">514916280628381</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Client_Phone_Number_ID__c</field>
@@ -32,11 +32,11 @@
     </values>
     <values>
         <field>Client_Secret__c</field>
-        <value xsi:type="xsd:string">6e1719dde4e730a3a55e0eab8899f62b</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Config_Id__c</field>
-        <value xsi:type="xsd:string">8971126402921271</value>
+        <value xsi:nil="true"/>
     </values>
     <values>
         <field>Connected_Date__c</field>

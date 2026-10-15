@@ -118,104 +118,243 @@ global without sharing class WAWebhook {
             String senderName = profile != null ? (String) profile.get('name') : '';
             String senderPhone = formattedNumber;
             List<User> userRecs = [SELECT Id, Name, Phone FROM User WHERE Phone = :formattedNumber LIMIT 1];
+            String strippedNumber = formattedNumber.replace('+', '');
             String recordId = '';
             String recordName = '';
             String recordPhone = '';
-            String objectApiName = '';
+            String objectApiName = 'Contact';
+            String phoneField = 'Phone';
             SObject record;
 
             // Fetch metadata record from MVEX__Object_Config__mdt
-            List<MVEX__Object_Config__mdt> objectConfigList = [SELECT Id, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt LIMIT 1];
-            if (objectConfigList.isEmpty()) {
-                return;
+            List<MVEX__Object_Config__mdt> objectConfigList = new List<MVEX__Object_Config__mdt>();
+            try {
+                objectConfigList = [SELECT Id, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt LIMIT 1];
+            } catch (Exception mdtEx) {
+                System.debug('Error querying MVEX__Object_Config__mdt: ' + mdtEx.getMessage());
+            }
+
+            Map<String, Object> objConfigMap = new Map<String, Object>();
+            Map<String, Object> chatConfigData = new Map<String, Object>();
+
+            if (!objectConfigList.isEmpty()) {
+                try {
+                    if (String.isNotBlank(objectConfigList[0].MVEX__ObjectConfigInfo__c)) {
+                        objConfigMap = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].MVEX__ObjectConfigInfo__c);
+                    }
+                } catch (Exception ex) {
+                    System.debug('Error deserializing MVEX__ObjectConfigInfo__c: ' + ex.getMessage());
+                }
+
+                try {
+                    if (String.isNotBlank(objectConfigList[0].MVEX__ChatWindowConfigInfo__c)) {
+                        chatConfigData = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].MVEX__ChatWindowConfigInfo__c);
+                    }
+                } catch (Exception ex) {
+                    System.debug('Error deserializing MVEX__ChatWindowConfigInfo__c: ' + ex.getMessage());
+                }
+            }
+
+            // Resolve configured object name (supports 'object' from UI and 'objectApiName' fallback)
+            if (objConfigMap.containsKey('object') && objConfigMap.get('object') != null && String.isNotBlank(String.valueOf(objConfigMap.get('object')))) {
+                objectApiName = String.valueOf(objConfigMap.get('object'));
+            } else if (objConfigMap.containsKey('objectApiName') && objConfigMap.get('objectApiName') != null && String.isNotBlank(String.valueOf(objConfigMap.get('objectApiName')))) {
+                objectApiName = String.valueOf(objConfigMap.get('objectApiName'));
+            }
+            if (String.isBlank(objectApiName)) {
+                objectApiName = 'Contact';
+            }
+
+            // Resolve configured phone field
+            if (objConfigMap.containsKey('phoneField') && objConfigMap.get('phoneField') != null && String.isNotBlank(String.valueOf(objConfigMap.get('phoneField')))) {
+                phoneField = String.valueOf(objConfigMap.get('phoneField'));
+            }
+
+            // Validate target SObject type against Schema
+            Schema.SObjectType targetSObjectType = Schema.getGlobalDescribe().get(objectApiName);
+            if (targetSObjectType == null) {
+                targetSObjectType = Schema.SObjectType.Contact.getSObjectType();
+                objectApiName = 'Contact';
+            }
+            Map<String, Schema.SObjectField> fieldMap = targetSObjectType.getDescribe().fields.getMap();
+
+            // Validate and match phone field against Schema
+            if (!fieldMap.containsKey(phoneField.toLowerCase())) {
+                if (fieldMap.containsKey('phone')) {
+                    phoneField = 'Phone';
+                } else if (fieldMap.containsKey('mobilephone')) {
+                    phoneField = 'MobilePhone';
+                }
             } else {
-                Map<String, Object> objConfigMap = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].MVEX__ObjectConfigInfo__c);
-                Map<String, Object> chatConfigData = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].MVEX__ChatWindowConfigInfo__c);
+                phoneField = fieldMap.get(phoneField.toLowerCase()).getDescribe().getName();
+            }
 
-                objectApiName = (String) objConfigMap.get('objectApiName');
-                String phoneField = (String) objConfigMap.get('phoneField');
-                
-                Map<String, Object> chatConfig = (Map<String, Object>) chatConfigData.get(objectApiName);
-                String nameField = chatConfig != null ? (String) chatConfig.get('nameField') : 'Name';
+            Boolean isContact = objectApiName.equalsIgnoreCase('Contact');
 
-                List<Object> requiredFieldsList = (List<Object>) objConfigMap.get('requiredFields'); 
-                Map<String, Object> requiredFieldsMap = new Map<String, Object>();
-                if (requiredFieldsList != null) {
-                    for (Object obj : requiredFieldsList) {
+            // Parse requiredFields from MVEX__Object_Config__mdt
+            List<Object> requiredFieldsList = (List<Object>) objConfigMap.get('requiredFields');
+            Map<String, Object> requiredFieldsMap = new Map<String, Object>();
+            if (requiredFieldsList != null) {
+                for (Object obj : requiredFieldsList) {
+                    if (obj instanceof Map<String, Object>) {
                         Map<String, Object> fieldData = (Map<String, Object>) obj;
-                        requiredFieldsMap.put((String) fieldData.get('name'), fieldData);
+                        String fName = (String) fieldData.get('name');
+                        if (String.isNotBlank(fName)) {
+                            requiredFieldsMap.put(fName.toLowerCase(), fieldData);
+                        }
                     }
                 }
-    
-                String query = 'SELECT Id, Name, ' + phoneField + ' FROM ' + objectApiName + ' WHERE ' + phoneField + ' = :formattedNumber LIMIT 1';
-                List<SObject> records = Database.query(query);
-                
-                if (!records.isEmpty()) {
-                    record = records[0];
-                    recordId = (String) record.get('Id');
-                    recordName = (String) record.get('Name');
-                    recordPhone = (String) record.get(phoneField);
-                } else if (userRecs.isEmpty()) {
-                    SObject newRecord = Schema.getGlobalDescribe().get(objectApiName).newSObject();
-                    
-                    for (String fieldName : requiredFieldsMap.keySet()) {
-                        Map<String, Object> fieldData = (Map<String, Object>) requiredFieldsMap.get(fieldName);
-                        String value = (String) fieldData.get('value');
-                        String fieldType = (String) fieldData.get('type');
+            }
 
-                        if (fieldType == 'Date') {
-                            if (value != null && value != '') {
-                                List<String> dateParts = value.split('-');
-                                if (dateParts.size() == 3) {
-                                    newRecord.put(fieldName, Date.newInstance(Integer.valueOf(dateParts[0]), Integer.valueOf(dateParts[1]), Integer.valueOf(dateParts[2])));
-                                }
+            // Search for existing record by phone (both formatted with '+' and stripped without '+')
+            String selectFields = isContact ? 'Id, Name, FirstName, LastName, ' + phoneField : 'Id, Name, ' + phoneField;
+            String query = 'SELECT ' + selectFields + ' FROM ' + String.escapeSingleQuotes(objectApiName) + 
+                           ' WHERE ' + String.escapeSingleQuotes(phoneField) + ' = :formattedNumber OR ' + 
+                           String.escapeSingleQuotes(phoneField) + ' = :strippedNumber LIMIT 1';
+            List<SObject> records = Database.query(query);
+
+            // Fallback search on MobilePhone if object is Contact and primary search was Phone
+            if (records.isEmpty() && isContact && !phoneField.equalsIgnoreCase('MobilePhone') && fieldMap.containsKey('mobilephone')) {
+                List<SObject> mobileMatches = Database.query('SELECT Id, Name, FirstName, LastName, Phone, MobilePhone FROM Contact WHERE MobilePhone = :formattedNumber OR MobilePhone = :strippedNumber LIMIT 1');
+                if (!mobileMatches.isEmpty()) {
+                    records = mobileMatches;
+                    phoneField = 'MobilePhone';
+                }
+            }
+
+            if (!records.isEmpty()) {
+                record = records[0];
+                recordId = (String) record.get('Id');
+                recordName = (String) record.get('Name');
+                recordPhone = (String) record.get(phoneField);
+            } else {
+                // Contact not found -> Create new contact with required configuration saved in MVEX__Object_Config__mdt
+                SObject newRecord = targetSObjectType.newSObject();
+
+                // Apply required fields from configuration
+                for (String lowerFName : requiredFieldsMap.keySet()) {
+                    if (!fieldMap.containsKey(lowerFName)) {
+                        continue;
+                    }
+                    Schema.DescribeFieldResult dfr = fieldMap.get(lowerFName).getDescribe();
+                    if (!dfr.isCreateable()) {
+                        continue;
+                    }
+
+                    Map<String, Object> fieldData = (Map<String, Object>) requiredFieldsMap.get(lowerFName);
+                    Object rawVal = fieldData.get('value');
+                    String strVal = rawVal != null ? String.valueOf(rawVal).trim() : '';
+
+                    if (String.isBlank(strVal)) {
+                        continue;
+                    }
+
+                    String realFieldName = dfr.getName();
+                    Schema.DisplayType dType = dfr.getType();
+
+                    try {
+                        if (dType == Schema.DisplayType.DATE) {
+                            List<String> dateParts = strVal.split('-');
+                            if (dateParts.size() == 3) {
+                                newRecord.put(realFieldName, Date.newInstance(Integer.valueOf(dateParts[0]), Integer.valueOf(dateParts[1]), Integer.valueOf(dateParts[2])));
+                            } else {
+                                newRecord.put(realFieldName, Date.valueOf(strVal));
                             }
-                        } else if (fieldType == 'Datetime') {
-                            if (value != null && value != '') {
-                                String cleanValue = value.substring(0, 19).replace('T', ' ');
-                                Datetime myDate = Datetime.valueOf(cleanValue);
-                                newRecord.put(fieldName, myDate);
-                            }
-                        } else if (fieldType == 'Time') {
-                            if (value != null && value != '') {
-                                List<String> parts = value.split(':');
+                        } else if (dType == Schema.DisplayType.DATETIME) {
+                            String cleanVal = strVal.substring(0, Math.min(19, strVal.length())).replace('T', ' ');
+                            newRecord.put(realFieldName, Datetime.valueOf(cleanVal));
+                        } else if (dType == Schema.DisplayType.TIME) {
+                            List<String> parts = strVal.split(':');
+                            if (parts.size() >= 2) {
                                 Integer hour = Integer.valueOf(parts[0]);
                                 Integer minute = Integer.valueOf(parts[1]);
-                                List<String> secMillis = parts[2].split('\\.');
-                                Integer second = Integer.valueOf(secMillis[0]);
-                                Integer millisecond = Integer.valueOf(secMillis[1]);
-                                Time myTime = Time.newInstance(hour, minute, second, millisecond);
-                                newRecord.put(fieldName, myTime);
+                                Integer second = 0;
+                                Integer millis = 0;
+                                if (parts.size() >= 3) {
+                                    List<String> secMillis = parts[2].split('\\.');
+                                    second = Integer.valueOf(secMillis[0]);
+                                    if (secMillis.size() > 1) {
+                                        millis = Integer.valueOf(secMillis[1]);
+                                    }
+                                }
+                                newRecord.put(realFieldName, Time.newInstance(hour, minute, second, millis));
                             }
-                        } else if (fieldType == 'Boolean') {
-                            if (value != null && value != '') {
-                                newRecord.put(fieldName, Boolean.valueOf(value));
-                            }
-                        } else if (fieldType == 'Double' || fieldType == 'Percent') {
-                            if (value != null && value != '') {
-                                newRecord.put(fieldName, Decimal.valueOf(value));
+                        } else if (dType == Schema.DisplayType.BOOLEAN) {
+                            newRecord.put(realFieldName, Boolean.valueOf(strVal));
+                        } else if (dType == Schema.DisplayType.INTEGER) {
+                            newRecord.put(realFieldName, Integer.valueOf(strVal));
+                        } else if (dType == Schema.DisplayType.DOUBLE || dType == Schema.DisplayType.PERCENT || dType == Schema.DisplayType.CURRENCY) {
+                            newRecord.put(realFieldName, Decimal.valueOf(strVal));
+                        } else if (dType == Schema.DisplayType.REFERENCE) {
+                            try {
+                                if (strVal.length() == 15 || strVal.length() == 18) {
+                                    newRecord.put(realFieldName, Id.valueOf(strVal));
+                                }
+                            } catch (Exception idEx) {
+                                System.debug('Invalid Id for reference field ' + realFieldName + ': ' + idEx.getMessage());
                             }
                         } else {
-                            newRecord.put(fieldName, value);
+                            newRecord.put(realFieldName, strVal);
+                        }
+                    } catch (Exception fieldEx) {
+                        System.debug('Error setting field ' + realFieldName + ': ' + fieldEx.getMessage());
+                    }
+                }
+
+                // Set Phone on the new record
+                if (fieldMap.containsKey(phoneField.toLowerCase()) && fieldMap.get(phoneField.toLowerCase()).getDescribe().isCreateable()) {
+                    newRecord.put(fieldMap.get(phoneField.toLowerCase()).getDescribe().getName(), senderPhone);
+                } else if (fieldMap.containsKey('phone') && fieldMap.get('phone').getDescribe().isCreateable()) {
+                    newRecord.put('Phone', senderPhone);
+                }
+
+                // Set Name / LastName / FirstName (Contact.Name is read-only in Salesforce, must set LastName and FirstName)
+                if (isContact) {
+                    String fn = '';
+                    String ln = '';
+                    if (String.isNotBlank(senderName)) {
+                        String trimmed = senderName.trim();
+                        if (trimmed.contains(' ')) {
+                            fn = trimmed.substringBefore(' ').trim();
+                            ln = trimmed.substringAfter(' ').trim();
+                        } else {
+                            fn = trimmed;
                         }
                     }
 
-                    if (String.isNotBlank(nameField)) {
-                        newRecord.put(nameField, senderName.length() > 80 ? senderName.substring(0, 80) : senderName);
-                    } else {
-                        newRecord.put('Name', senderName.length() > 80 ? senderName.substring(0, 80) : senderName);
+                    // Check if LastName was configured via requiredFields
+                    String configuredLn = null;
+                    try {
+                        configuredLn = (String) newRecord.get('LastName');
+                    } catch (Exception ignored) {}
+
+                    if (String.isBlank(ln)) {
+                        ln = String.isNotBlank(configuredLn) ? configuredLn : (String.isNotBlank(fn) ? fn : 'WhatsApp User');
                     }
-                    if (String.isNotBlank(phoneField)) {
-                        newRecord.put(phoneField, senderPhone);
-                    } else {
-                        newRecord.put('Phone', senderPhone);
+
+                    if (fieldMap.containsKey('lastname') && fieldMap.get('lastname').getDescribe().isCreateable()) {
+                        newRecord.put('LastName', ln.length() > 80 ? ln.substring(0, 80) : ln);
                     }
-                    
+                    if (String.isNotBlank(fn) && fn != ln && fieldMap.containsKey('firstname') && fieldMap.get('firstname').getDescribe().isCreateable()) {
+                        newRecord.put('FirstName', fn.length() > 40 ? fn.substring(0, 40) : fn);
+                    }
+                } else {
+                    String displayName = String.isNotBlank(senderName) ? senderName : 'WhatsApp ' + senderPhone;
+                    if (fieldMap.containsKey('name') && fieldMap.get('name').getDescribe().isCreateable()) {
+                        newRecord.put('Name', displayName.length() > 80 ? displayName.substring(0, 80) : displayName);
+                    } else if (fieldMap.containsKey('lastname') && fieldMap.get('lastname').getDescribe().isCreateable()) {
+                        newRecord.put('LastName', displayName.length() > 80 ? displayName.substring(0, 80) : displayName);
+                    }
+                }
+
+                try {
                     insert newRecord;
                     record = newRecord;
                     recordId = (String) newRecord.get('Id');
-                    recordName = (String) newRecord.get('Name');
-                    recordPhone = (String) newRecord.get(phoneField);
+                    recordPhone = senderPhone;
+                    recordName = isContact ? (String) newRecord.get('LastName') : (String) (fieldMap.containsKey('name') ? newRecord.get('Name') : senderName);
+                } catch (Exception insertEx) {
+                    ErrorHandler.insertErrordata(insertEx, 'WAWebhook', 'processSingleMessage_insertContact', 'Failed to insert contact: ' + insertEx.getMessage());
                 }
             }
 
@@ -239,7 +378,7 @@ global without sharing class WAWebhook {
                 whatsappChat.Type_of_Message__c = 'Inbound Messages';
                 whatsappChat.Message_Type__c = messageType;
                 whatsappChat.Message_ID__c = whatsAppMessageID;
-                if (recordId != null && recordId != '' && objectApiName == 'Contact') {
+                if (String.isNotBlank(recordId) && isContact) {
                     whatsappChat.Contact__c = recordId;
                 }
 
@@ -257,8 +396,7 @@ global without sharing class WAWebhook {
                     whatsappChat.Message__c = messageBody;
                 }
 
-                if (userRecs.isEmpty()) {
-                    if (messageType.equalsIgnoreCase('image')) {
+                if (messageType.equalsIgnoreCase('image')) {
                         Map<String, Object> image = (Map<String, Object>) message.get('image');
                         String imageId = (String) image.get('id');
                         String mimeType = (String) image.get('mime_type');
@@ -383,7 +521,6 @@ global without sharing class WAWebhook {
                         }
                     }
                 }
-            }
 
             insert whatsappChat;
 

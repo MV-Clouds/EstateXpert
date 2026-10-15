@@ -16,6 +16,8 @@ export default class WaTemplatePreview extends LightningElement {
     @track replacedHeaderText = '';
     @track headerMediaUrl = '';
     @track documentName = 'Document.pdf';
+    @track imageLoadFailed = false;
+    @track videoLoadFailed = false;
     @track rawBodyText = '';
     @track replacedBodyText = '';
     @track footerText = '';
@@ -34,6 +36,7 @@ export default class WaTemplatePreview extends LightningElement {
 
     _templateId;
     _previewData;
+    _currentTemplate;
     _searchTimeout;
 
     @api
@@ -109,13 +112,136 @@ export default class WaTemplatePreview extends LightningElement {
     }
 
     /**
+     * Strips HTML tags or entities if a field was rich-text formatted.
+     */
+    cleanMediaUrl(val) {
+        if (!val || typeof val !== 'string') return '';
+        let str = val.trim();
+        if (str.includes('<') && str.includes('>')) {
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(str, 'text/html');
+                str = doc.documentElement.textContent || '';
+                str = str.trim();
+            } catch (e) {
+                str = str.replace(/<[^>]+>/g, '').trim();
+            }
+        }
+        return str;
+    }
+
+    /**
+     * Checks if a string looks like a valid URL or media source path.
+     */
+    isLikelyUrl(val) {
+        if (!val || typeof val !== 'string') return false;
+        const str = val.trim().toLowerCase();
+        return (
+            str.startsWith('http://') ||
+            str.startsWith('https://') ||
+            str.startsWith('/') ||
+            str.startsWith('data:') ||
+            str.startsWith('blob:') ||
+            str.includes('amazonaws.com') ||
+            str.includes('.s3.')
+        );
+    }
+
+    /**
+     * Formats URL with protocol if missing (e.g. direct S3 hostnames).
+     */
+    normalizeMediaUrl(val) {
+        const cleaned = this.cleanMediaUrl(val);
+        if (!cleaned) return '';
+        if (cleaned.startsWith('//')) {
+            return `https:${cleaned}`;
+        }
+        if ((cleaned.includes('amazonaws.com') || cleaned.includes('.s3.')) && !cleaned.startsWith('http://') && !cleaned.startsWith('https://')) {
+            return `https://${cleaned}`;
+        }
+        return cleaned;
+    }
+
+    /**
+     * Extracts a human-readable file name from URL path or query string.
+     */
+    extractFileName(url) {
+        if (!url || typeof url !== 'string') return '';
+        try {
+            const clean = url.split('?')[0].split('#')[0];
+            const lastPart = clean.substring(clean.lastIndexOf('/') + 1);
+            return decodeURIComponent(lastPart);
+        } catch (e) {
+            return '';
+        }
+    }
+
+    /**
+     * Resolves the media URL from template fields:
+     * 1. Header_Body__c (when header is Image, Video, or Document, this stores the media link)
+     * 2. Template_Miscellaneous_Data__c (contentVersionId -> /sfc/servlet.shepherd/version/download/...)
+     * 3. Image_Header_Handle__c (if containing a URL rather than an opaque Meta handle)
+     */
+    resolveMediaUrl(template, headerType) {
+        if (!template) return '';
+
+        const normalizedType = (headerType || '').trim().toLowerCase();
+        const isMedia = ['image', 'video', 'document', 'location'].includes(normalizedType);
+
+        // 1. Check Header_Body__c (standard location for tempImgUrl / media link)
+        const rawHeaderBody = template.Header_Body__c || template.MVEX__Header_Body__c || template.MVEX__WBHeader_Body__c;
+        const cleanedHeaderBody = this.normalizeMediaUrl(rawHeaderBody);
+        if (isMedia && this.isLikelyUrl(cleanedHeaderBody)) {
+            return cleanedHeaderBody;
+        }
+
+        // 2. Check Template_Miscellaneous_Data__c for contentVersionId or stored file URLs
+        const rawMisc = template.Template_Miscellaneous_Data__c || template.MVEX__Template_Miscellaneous_Data__c;
+        if (rawMisc) {
+            try {
+                const misc = typeof rawMisc === 'string' ? JSON.parse(rawMisc) : rawMisc;
+                if (misc && misc.contentVersionId) {
+                    return `/sfc/servlet.shepherd/version/download/${misc.contentVersionId}`;
+                }
+                if (misc && misc.awsFileUrl && this.isLikelyUrl(misc.awsFileUrl)) {
+                    return this.normalizeMediaUrl(misc.awsFileUrl);
+                }
+                if (misc && misc.fileUrl && this.isLikelyUrl(misc.fileUrl)) {
+                    return this.normalizeMediaUrl(misc.fileUrl);
+                }
+            } catch (e) {
+                console.warn('Could not parse Template_Miscellaneous_Data__c:', e);
+            }
+        }
+
+        // 3. Check Image_Header_Handle__c (in case a direct URL was stored instead of handle)
+        const rawHandle = template.Image_Header_Handle__c || template.MVEX__Image_Header_Handle__c || template.Header_Handle__c || template.MVEX__Header_Handle__c || template.MVEX__WBImage_Header_Handle__c;
+        const cleanedHandle = this.normalizeMediaUrl(rawHandle);
+        if (this.isLikelyUrl(cleanedHandle)) {
+            return cleanedHandle;
+        }
+
+        // 4. Fallback if Header_Body__c is non-empty without spaces/newlines
+        if (isMedia && cleanedHeaderBody && !cleanedHeaderBody.includes('\n') && !cleanedHeaderBody.includes(' ')) {
+            return cleanedHeaderBody;
+        }
+
+        return '';
+    }
+
+    /**
      * Parses the template record, headers, body formatting, variables, and buttons.
      */
     processTemplateData(data) {
         try {
             const template = data.template || data;
+            this._currentTemplate = template;
             const variables = data.variables || [];
             this.variables = variables;
+
+            // Reset media load flags
+            this.imageLoadFailed = false;
+            this.videoLoadFailed = false;
 
             // Handle detected objects for merge variables
             const detected = data.detectedObjects || [];
@@ -132,10 +258,23 @@ export default class WaTemplatePreview extends LightningElement {
             }
 
             // Header handling
-            this.headerType = template.Header_Type__c || 'None';
-            this.rawHeaderText = template.Header_Body__c || '';
-            this.headerMediaUrl = template.Image_Header_Handle__c || '';
-            this.documentName = template.File_Name__c || 'Document.pdf';
+            this.headerType = template.Header_Type__c || template.MVEX__Header_Type__c || template.headerType || 'None';
+            const normalizedType = this.normalizedHeaderType;
+
+            if (normalizedType === 'text') {
+                this.rawHeaderText = template.Header_Body__c || template.MVEX__Header_Body__c || template.MVEX__WBHeader_Body__c || '';
+                this.headerMediaUrl = '';
+            } else if (['image', 'video', 'document', 'location'].includes(normalizedType)) {
+                this.rawHeaderText = '';
+                this.headerMediaUrl = this.resolveMediaUrl(template, this.headerType);
+            } else {
+                this.rawHeaderText = '';
+                this.headerMediaUrl = '';
+            }
+
+            const explicitName = template.File_Name__c || template.MVEX__File_Name__c;
+            const extractedName = this.extractFileName(this.headerMediaUrl);
+            this.documentName = explicitName || extractedName || 'Document.pdf';
 
             // Body handling
             this.rawBodyText = template.Template_Body__c || '';
@@ -255,6 +394,13 @@ export default class WaTemplatePreview extends LightningElement {
                 this.replacedHeaderText = result.replacedHeader || '';
                 this.replacedBodyText = result.replacedBody || '';
                 this.replacements = result.replacements || {};
+
+                // If media header and replaced header contains a dynamic URL from the record
+                if (this.isMediaHeader && result.replacedHeader && this.isLikelyUrl(result.replacedHeader)) {
+                    this.headerMediaUrl = this.normalizeMediaUrl(result.replacedHeader);
+                    this.imageLoadFailed = false;
+                    this.videoLoadFailed = false;
+                }
             }
         } catch (error) {
             console.error('Error fetching preview data with record:', error);
@@ -272,6 +418,11 @@ export default class WaTemplatePreview extends LightningElement {
         this.replacedBodyText = '';
         this.replacements = {};
         this.isComboboxOpen = false;
+        if (this._currentTemplate && this.isMediaHeader) {
+            this.headerMediaUrl = this.resolveMediaUrl(this._currentTemplate, this.headerType);
+            this.imageLoadFailed = false;
+            this.videoLoadFailed = false;
+        }
     }
 
     /**
@@ -285,6 +436,11 @@ export default class WaTemplatePreview extends LightningElement {
         this.replacedHeaderText = '';
         this.replacedBodyText = '';
         this.replacements = {};
+        if (this._currentTemplate && this.isMediaHeader) {
+            this.headerMediaUrl = this.resolveMediaUrl(this._currentTemplate, this.headerType);
+            this.imageLoadFailed = false;
+            this.videoLoadFailed = false;
+        }
     }
 
     /**
@@ -451,36 +607,54 @@ export default class WaTemplatePreview extends LightningElement {
         return this.applyFormatting(this.rawBodyText, false);
     }
 
+    handleImageError() {
+        this.imageLoadFailed = true;
+    }
+
+    handleVideoError() {
+        this.videoLoadFailed = true;
+    }
+
+    get normalizedHeaderType() {
+        return (this.headerType || '').trim().toLowerCase();
+    }
+
     get isTextHeader() {
-        return this.headerType === 'Text' && !!this.displayedHeaderText;
+        return this.normalizedHeaderType === 'text' && !!this.displayedHeaderText;
     }
 
     get isImageHeader() {
-        return this.headerType === 'Image';
+        return this.normalizedHeaderType === 'image';
     }
 
     get isVideoHeader() {
-        return this.headerType === 'Video';
+        return this.normalizedHeaderType === 'video';
     }
 
     get isDocHeader() {
-        return this.headerType === 'Document';
+        return this.normalizedHeaderType === 'document';
+    }
+
+    get isLocationHeader() {
+        return this.normalizedHeaderType === 'location';
+    }
+
+    get isMediaHeader() {
+        return ['image', 'video', 'document', 'location'].includes(this.normalizedHeaderType);
     }
 
     get hasValidImageUrl() {
-        return !!this.headerMediaUrl && (
-            this.headerMediaUrl.startsWith('http://') ||
-            this.headerMediaUrl.startsWith('https://') ||
-            this.headerMediaUrl.startsWith('data:image/')
-        );
+        if (this.imageLoadFailed) return false;
+        return !!this.headerMediaUrl && this.isLikelyUrl(this.headerMediaUrl);
     }
 
     get hasValidVideoUrl() {
-        return !!this.headerMediaUrl && (
-            this.headerMediaUrl.startsWith('http://') ||
-            this.headerMediaUrl.startsWith('https://') ||
-            this.headerMediaUrl.startsWith('data:video/')
-        );
+        if (this.videoLoadFailed) return false;
+        return !!this.headerMediaUrl && this.isLikelyUrl(this.headerMediaUrl);
+    }
+
+    get hasValidDocUrl() {
+        return !!this.headerMediaUrl && this.isLikelyUrl(this.headerMediaUrl);
     }
 
     get imageUploadPreview() {

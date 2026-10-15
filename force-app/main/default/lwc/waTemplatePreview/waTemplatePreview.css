@@ -458,6 +458,52 @@
     letter-spacing: 0.5px;
 }
 
+.header-doc-download-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    color: #0176D3;
+    background: #EFF6FF;
+    border: 1px solid #DBEAFE;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.header-doc-download-btn:hover {
+    background: #0176D3;
+    color: #FFFFFF;
+    border-color: #0176D3;
+}
+
+.header-location-block {
+    width: 100%;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #E2E8F0;
+    border: 1px solid #CBD5E1;
+}
+
+.header-location-map {
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: repeating-linear-gradient(45deg, #E2E8F0, #E2E8F0 10px, #F1F5F9 10px, #F1F5F9 20px);
+    gap: 4px;
+}
+
+.header-location-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+}
+
 /* Body Section */
 .body-text-block {
     font-size: 13.5px;

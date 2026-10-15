@@ -188,7 +188,7 @@ public with sharing class WhatsappConnectController {
                 : 'https://graph.facebook.com';
             String apiVer = (config != null && String.isNotBlank(config.API_Version__c)) 
                 ? (config.API_Version__c.trim().startsWithIgnoreCase('v') ? config.API_Version__c.trim() : 'v' + config.API_Version__c.trim()) 
-                : 'v21.0';
+                : 'v26.0';
 
             // Build Batch operations to validate all credentials in a SINGLE callout:
             // Op 0: Phone Number ID check (fields: id, display_phone_number)

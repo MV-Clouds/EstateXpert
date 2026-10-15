@@ -131,7 +131,8 @@
                             <template if:true={isImageHeader}>
                                 <div class="header-media-block">
                                     <template if:true={hasValidImageUrl}>
-                                        <img src={headerMediaUrl} alt="Header Preview" class="header-media-img" />
+                                        <img src={headerMediaUrl} alt="Header Preview" class="header-media-img"
+                                            onerror={handleImageError} />
                                     </template>
                                     <template if:false={hasValidImageUrl}>
                                         <img src={imageUploadPreview} alt="Image Header"
@@ -144,7 +145,7 @@
                                 <div class="header-media-block">
                                     <template if:true={hasValidVideoUrl}>
                                         <video src={headerMediaUrl} controls playsinline
-                                            class="header-media-video"></video>
+                                            class="header-media-video" onerror={handleVideoError}></video>
                                     </template>
                                     <template if:false={hasValidVideoUrl}>
                                         <img src={tempVideoIcon} alt="Video Header" class="header-media-placeholder" />
@@ -156,8 +157,31 @@
                                 <div class="header-doc-block">
                                     <img src={docUploadPreviewImg} alt="Document" class="header-doc-icon" />
                                     <div class="header-doc-info">
-                                        <p class="header-doc-name">{documentName}</p>
+                                        <p class="header-doc-name" title={documentName}>{documentName}</p>
                                         <span class="header-doc-badge">DOCUMENT</span>
+                                    </div>
+                                    <template if:true={hasValidDocUrl}>
+                                        <a href={headerMediaUrl} target="_blank" rel="noopener noreferrer"
+                                            class="header-doc-download-btn" title="View Document">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round">
+                                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                                <polyline points="15 3 21 3 21 9"></polyline>
+                                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                                            </svg>
+                                        </a>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template if:true={isLocationHeader}>
+                                <div class="header-location-block">
+                                    <div class="header-location-map">
+                                        <svg class="header-location-pin" width="28" height="28" viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z" fill="#EF4444"/>
+                                        </svg>
+                                        <span class="header-location-label">Location</span>
                                     </div>
                                 </div>
                             </template>

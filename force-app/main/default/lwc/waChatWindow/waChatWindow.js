@@ -98,6 +98,97 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
         return this.phoneNumber ? this.phoneNumber : 'No Phone Number';
     }
 
+    get lastSuccessfulChat() {
+        if (!this.chats || this.chats.length === 0) {
+            return null;
+        }
+
+        const validChats = this.chats.filter(c => {
+            if (!c || !c.CreatedDate) return false;
+            const isOutbound = (c.Type_of_Message__c || '').toLowerCase().includes('outbound');
+            const isInbound = (c.Type_of_Message__c || '').toLowerCase().includes('inbound');
+            const status = (c.Message_Status__c || '').toLowerCase();
+
+            // Inbound messages received from contact are considered successful
+            if (isInbound) {
+                return true;
+            }
+
+            // Outbound messages sent to contact must be successfully sent, delivered, or seen
+            if (isOutbound) {
+                return status === 'sent' || status === 'delivered' || status === 'seen' || status === 'read';
+            }
+
+            return false;
+        });
+
+        if (validChats.length === 0) {
+            return null;
+        }
+
+        validChats.sort((a, b) => new Date(b.CreatedDate) - new Date(a.CreatedDate));
+        return validChats[0];
+    }
+
+    get lastActivityInfo() {
+        const lastChat = this.lastSuccessfulChat;
+        if (!lastChat || !lastChat.CreatedDate) {
+            return '';
+        }
+
+        const isOutbound = (lastChat.Type_of_Message__c || '').toLowerCase().includes('outbound');
+        const prefix = isOutbound ? 'Last sent' : 'Last received';
+
+        const d = new Date(lastChat.CreatedDate);
+        if (isNaN(d.getTime())) {
+            return '';
+        }
+
+        return `${prefix}: ${this.formatActivityDate(d)}`;
+    }
+
+    get lastActivityFullDate() {
+        const lastChat = this.lastSuccessfulChat;
+        if (!lastChat || !lastChat.CreatedDate) return '';
+        const d = new Date(lastChat.CreatedDate);
+        return isNaN(d.getTime()) ? '' : d.toLocaleString();
+    }
+
+    formatActivityDate(date) {
+        if (!date) return '';
+        const now = new Date();
+        const isToday = (
+            date.getDate() === now.getDate() &&
+            date.getMonth() === now.getMonth() &&
+            date.getFullYear() === now.getFullYear()
+        );
+
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const isYesterday = (
+            date.getDate() === yesterday.getDate() &&
+            date.getMonth() === yesterday.getMonth() &&
+            date.getFullYear() === yesterday.getFullYear()
+        );
+
+        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        if (isToday) {
+            return `Today, ${timeStr}`;
+        }
+        if (isYesterday) {
+            return `Yesterday, ${timeStr}`;
+        }
+
+        const isSameYear = date.getFullYear() === now.getFullYear();
+        const dateOptions = isSameYear 
+            ? { day: 'numeric', month: 'short' } 
+            : { day: 'numeric', month: 'short', year: 'numeric' };
+
+        const dateStr = date.toLocaleDateString([], dateOptions);
+        return `${dateStr}, ${timeStr}`;
+    }
+
     get showPopup() {
         return this.showFileUploader || this.showTemplateSelection || this.showTemplatePreview;
     }
@@ -115,7 +206,7 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
     }
 
     get sendButtonClass() {
-        return this.isSendingMessage ? 'send-action-btn is-sending' : 'send-action-btn';
+        return this.isSendingMessage ? 'send-action-btn is-sending' : 'send-action-btn send-action-margin';
     }
 
     get sendButtonTitle() {

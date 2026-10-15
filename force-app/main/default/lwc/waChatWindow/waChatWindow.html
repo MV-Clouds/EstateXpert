@@ -28,11 +28,15 @@
                         </div>
                     </div>
                     <div class="header-actions">
-                        <button class="header-action-btn" title="Refresh messages" onclick={handleManualRefresh}>
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-                            </svg>
-                        </button>
+                        <template if:true={lastActivityInfo}>
+                            <div class="last-activity-badge" title={lastActivityFullDate}>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="last-activity-icon">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                <span class="last-activity-text">{lastActivityInfo}</span>
+                            </div>
+                        </template>
                     </div>
                 </div>
 

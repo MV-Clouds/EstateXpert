@@ -31,6 +31,100 @@ public with sharing class WAChatWindowController {
     }
 
     /**
+     * @description : Resolves phoneField and nameField for a given object from MVEX__Object_Config__mdt custom metadata.
+     *                Supports both map structure {"Contact": {"phoneField": "...", "nameField": "..."}}
+     *                and string structure {"Contact": "MobilePhone"} as configured by whatsappConnectComp.
+     * @param objectApiName - Name of the object (e.g. 'Contact')
+     * @return Map<String, String> containing 'phoneField' and 'nameField'
+     */
+    public static Map<String, String> resolveObjectFields(String objectApiName) {
+        Map<String, String> result = new Map<String, String>{
+            'phoneField' => 'MobilePhone',
+            'nameField' => 'Name'
+        };
+
+        if (String.isBlank(objectApiName)) {
+            objectApiName = 'Contact';
+        }
+
+        try {
+            List<MVEX__Object_Config__mdt> configList = [SELECT Id, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt 
+                                                            WITH USER_MODE LIMIT 1];
+
+            if (configList.isEmpty()) {
+                return result;
+            }
+
+            MVEX__Object_Config__mdt cfg = configList[0];
+
+            // 1. Check MVEX__ChatWindowConfigInfo__c
+            if (String.isNotBlank(cfg.MVEX__ChatWindowConfigInfo__c)) {
+                try {
+                    Map<String, Object> chatConfigMap = (Map<String, Object>) JSON.deserializeUntyped(cfg.MVEX__ChatWindowConfigInfo__c);
+                    if (chatConfigMap != null && chatConfigMap.containsKey(objectApiName)) {
+                        Object objEntry = chatConfigMap.get(objectApiName);
+                        if (objEntry instanceof Map<String, Object>) {
+                            Map<String, Object> entryMap = (Map<String, Object>) objEntry;
+                            if (entryMap.containsKey('phoneField') && entryMap.get('phoneField') != null) {
+                                result.put('phoneField', String.valueOf(entryMap.get('phoneField')));
+                            }
+                            if (entryMap.containsKey('nameField') && entryMap.get('nameField') != null) {
+                                result.put('nameField', String.valueOf(entryMap.get('nameField')));
+                            }
+                        } else if (objEntry instanceof String && String.isNotBlank(String.valueOf(objEntry))) {
+                            result.put('phoneField', String.valueOf(objEntry));
+                        }
+                    }
+                } catch (Exception ex) {
+                    System.debug('Error parsing MVEX__ChatWindowConfigInfo__c: ' + ex.getMessage());
+                }
+            }
+
+            // 2. Check MVEX__ObjectConfigInfo__c if phoneField is still blank or default
+            if (String.isNotBlank(cfg.MVEX__ObjectConfigInfo__c)) {
+                try {
+                    Map<String, Object> objConfigMap = (Map<String, Object>) JSON.deserializeUntyped(cfg.MVEX__ObjectConfigInfo__c);
+                    String configuredObj = (String) objConfigMap.get('object');
+                    if (String.isBlank(configuredObj)) {
+                        configuredObj = (String) objConfigMap.get('objectApiName');
+                    }
+                    if ((String.isBlank(configuredObj) || configuredObj.equalsIgnoreCase(objectApiName)) &&
+                        objConfigMap.containsKey('phoneField') && objConfigMap.get('phoneField') != null) {
+                        String pf = String.valueOf(objConfigMap.get('phoneField'));
+                        if (String.isNotBlank(pf)) {
+                            result.put('phoneField', pf);
+                        }
+                    }
+                } catch (Exception ex) {
+                    System.debug('Error parsing MVEX__ObjectConfigInfo__c: ' + ex.getMessage());
+                }
+            }
+
+            // 3. Validate against SObject fields describe
+            Schema.SObjectType sObjType = Schema.getGlobalDescribe().get(objectApiName);
+            if (sObjType != null) {
+                Map<String, Schema.SObjectField> fieldsMap = sObjType.getDescribe().fields.getMap();
+                String resolvedPhone = result.get('phoneField');
+                if (String.isNotBlank(resolvedPhone) && !fieldsMap.containsKey(resolvedPhone.toLowerCase())) {
+                    if (fieldsMap.containsKey('mobilephone')) {
+                        result.put('phoneField', 'MobilePhone');
+                    } else if (fieldsMap.containsKey('phone')) {
+                        result.put('phoneField', 'Phone');
+                    }
+                }
+                String resolvedName = result.get('nameField');
+                if (String.isNotBlank(resolvedName) && !fieldsMap.containsKey(resolvedName.toLowerCase()) && fieldsMap.containsKey('name')) {
+                    result.put('nameField', 'Name');
+                }
+            }
+        } catch (Exception e) {
+            System.debug('Error in resolveObjectFields: ' + e.getMessage());
+        }
+
+        return result;
+    }
+
+    /**
      * @description : Retrieves contacts/records for the selected object with latest chat info and unread count
      * @param objectApiName - API name of the object (e.g., 'Contact', 'Lead')
      * @return Map<String, Map<String, Object>>
@@ -38,21 +132,9 @@ public with sharing class WAChatWindowController {
     @AuraEnabled
     public static Map<String, Map<String, Object>> getChatsForSelectedObject(String objectApiName) {
         try {
-            List<MVEX__Object_Config__mdt> objectConfigList = [SELECT Id, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt WITH USER_MODE LIMIT 1];
-            String phoneField = '';
-            String nameField = '';
-            if (objectConfigList.isEmpty() || String.isBlank(objectConfigList[0].MVEX__ChatWindowConfigInfo__c)) {
-                System.debug('Object Config not found or MVEX__ChatWindowConfigInfo__c is empty');
-                return new Map<String, Map<String, Object>>();
-            }
-
-            Map<String, Object> chatConfigData = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].MVEX__ChatWindowConfigInfo__c);
-            Map<String, Object> chatConfig = (Map<String, Object>) chatConfigData.get(objectApiName);
-            if (chatConfig == null) {
-                return new Map<String, Map<String, Object>>();
-            }
-            phoneField = (String) chatConfig.get('phoneField');
-            nameField = (String) chatConfig.get('nameField');
+            Map<String, String> fieldMapping = resolveObjectFields(objectApiName);
+            String phoneField = fieldMapping.get('phoneField');
+            String nameField = fieldMapping.get('nameField');
 
             List<sObject> recordData = new List<sObject>();
             if (String.isNotBlank(nameField) && String.isNotBlank(phoneField)) {
@@ -89,13 +171,8 @@ public with sharing class WAChatWindowController {
             // Get count of unread inbound messages per phone
             Map<String, Integer> phoneToUnreadInboundCount = new Map<String, Integer>();
             if (!phoneSet.isEmpty()) {
-                List<AggregateResult> unreadInboundAgg = [
-                    SELECT Phone__c, COUNT(Id) countId 
-                    FROM WA_Chat__c 
-                    WHERE Phone__c IN :phoneSet AND Message_Status__c != 'Seen' AND Type_of_Message__c = 'Inbound Messages' 
-                    WITH USER_MODE 
-                    GROUP BY Phone__c
-                ];
+                List<AggregateResult> unreadInboundAgg = [SELECT Phone__c, COUNT(Id) countId FROM WA_Chat__c WHERE Phone__c IN :phoneSet AND 
+                                                                Message_Status__c != 'Seen' AND Type_of_Message__c = 'Inbound Messages' WITH USER_MODE GROUP BY Phone__c];
                 for (AggregateResult ar : unreadInboundAgg) {
                     phoneToUnreadInboundCount.put((String) ar.get('Phone__c'), (Integer) ar.get('countId'));
                 }
@@ -155,51 +232,72 @@ public with sharing class WAChatWindowController {
     public static Map<String, Object> getCombinedData(String contactId, String objectApiName) {
         Map<String, Object> combinedData = new Map<String, Object>();
         try {
+            if (String.isBlank(objectApiName)) {
+                objectApiName = 'Contact';
+            }
+
             List<WA_Chat__c> chats = new List<WA_Chat__c>();
             List<WA_Template__c> templates = new List<WA_Template__c>();
 
-            List<MVEX__Object_Config__mdt> objectConfigList = [SELECT Id, MVEX__ObjectConfigInfo__c, MVEX__ChatWindowConfigInfo__c FROM MVEX__Object_Config__mdt WITH USER_MODE LIMIT 1];
-            String phoneField = '';
-            String nameField = '';
-            if (objectConfigList.isEmpty() || String.isBlank(objectConfigList[0].MVEX__ChatWindowConfigInfo__c)) {
-                combinedData.put('error', 'Chat Window configuration not found.');
-                return combinedData;
-            }
-
-            Map<String, Object> chatConfigData = (Map<String, Object>) JSON.deserializeUntyped(objectConfigList[0].MVEX__ChatWindowConfigInfo__c);
-            Map<String, Object> chatConfig = (Map<String, Object>) chatConfigData.get(objectApiName);
-            if (chatConfig == null) {
-                combinedData.put('error', 'Chat Configuration not found for object ' + objectApiName + '.');
-                return combinedData;
-            }
-            phoneField = (String) chatConfig.get('phoneField');
-            nameField = (String) chatConfig.get('nameField');
+            Map<String, String> fieldMapping = resolveObjectFields(objectApiName);
+            String phoneField = fieldMapping.get('phoneField');
+            String nameField = fieldMapping.get('nameField');
 
             sObject recordData;
             String phoneNumber = '';
             String recordName = '';
-            if (String.isNotBlank(nameField) && String.isNotBlank(phoneField) && String.isNotBlank(contactId)) {
-                String query = 'SELECT Id, ' + String.escapeSingleQuotes(nameField) + ', ' + String.escapeSingleQuotes(phoneField) + 
+
+            Set<String> queryFields = new Set<String>{ 'Id' };
+            if (String.isNotBlank(nameField)) {
+                queryFields.add(nameField);
+            } else {
+                queryFields.add('Name');
+            }
+            if (String.isNotBlank(phoneField)) {
+                queryFields.add(phoneField);
+            }
+
+            Schema.SObjectType sObjType = Schema.getGlobalDescribe().get(objectApiName);
+            if (sObjType != null) {
+                Map<String, Schema.SObjectField> fMap = sObjType.getDescribe().fields.getMap();
+                if (fMap.containsKey('mobilephone')) queryFields.add('MobilePhone');
+                if (fMap.containsKey('phone')) queryFields.add('Phone');
+            }
+
+            if (String.isNotBlank(contactId)) {
+                String query = 'SELECT ' + String.join(new List<String>(queryFields), ', ') + 
                                ' FROM ' + String.escapeSingleQuotes(objectApiName) + ' WHERE Id = :contactId WITH USER_MODE LIMIT 1';
                 List<sObject> recs = Database.query(query);
                 if (!recs.isEmpty()) {
                     recordData = recs[0];
-                    phoneNumber = (String) recordData.get(phoneField);
-                    recordName = (String) recordData.get(nameField);
+                    if (String.isNotBlank(phoneField) && recordData.get(phoneField) != null) {
+                        phoneNumber = String.valueOf(recordData.get(phoneField));
+                    }
+                    if (String.isBlank(phoneNumber)) {
+                        if (queryFields.contains('MobilePhone') && recordData.get('MobilePhone') != null) {
+                            phoneNumber = String.valueOf(recordData.get('MobilePhone'));
+                        } else if (queryFields.contains('Phone') && recordData.get('Phone') != null) {
+                            phoneNumber = String.valueOf(recordData.get('Phone'));
+                        }
+                    }
+                    if (String.isNotBlank(nameField) && recordData.get(nameField) != null) {
+                        recordName = String.valueOf(recordData.get(nameField));
+                    } else if (recordData.get('Name') != null) {
+                        recordName = String.valueOf(recordData.get('Name'));
+                    }
                 }
             }
 
             if (String.isNotBlank(phoneNumber)) {
-                chats = [
-                    SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, 
-                           Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
-                           WA_Template__r.Template_Name__c, CreatedDate, Phone__c, File_Data__c, 
-                           Sent_Template_Details__c 
-                    FROM WA_Chat__c 
-                    WHERE Phone__c = :phoneNumber 
-                    WITH USER_MODE 
-                    ORDER BY CreatedDate ASC
-                ];
+                String cleanPhone = phoneNumber.replaceAll('[\\s\\-\\(\\)\\.]+', '');
+                String cleanWithPlus = cleanPhone.startsWith('+') ? cleanPhone : ('+' + cleanPhone);
+                String cleanWithoutPlus = cleanPhone.startsWith('+') ? cleanPhone.substring(1) : cleanPhone;
+                Set<String> phoneCandidates = new Set<String>{ phoneNumber, cleanPhone, cleanWithPlus, cleanWithoutPlus };
+
+                chats = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
+                           WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
+                           WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, File_Data__c, 
+                           Sent_Template_Details__c FROM WA_Chat__c WHERE Phone__c IN :phoneCandidates WITH USER_MODE ORDER BY CreatedDate ASC];
             }
 
             // Fetch eligible templates
@@ -207,12 +305,7 @@ public with sharing class WAChatWindowController {
             Map<Id, Set<String>> templateIdToObjectNames = new Map<Id, Set<String>>();
             Set<Id> allTemplatesWithVariables = new Set<Id>();
 
-            for (WA_Template_Variable__c tv : [
-                SELECT WA_Template__c, Object_Name__c, WA_Template__r.Status__c 
-                FROM WA_Template_Variable__c 
-                WHERE WA_Template__c != null 
-                WITH USER_MODE
-            ]) {
+            for (WA_Template_Variable__c tv : [SELECT WA_Template__c, Object_Name__c, WA_Template__r.Status__c FROM WA_Template_Variable__c WHERE WA_Template__c != null WITH USER_MODE]) {
                 allTemplatesWithVariables.add(tv.WA_Template__c);
                 if (tv.WA_Template__r.Status__c == 'Active-Quality Pending' && String.isNotBlank(tv.Object_Name__c)) {
                     if (!templateIdToObjectNames.containsKey(tv.WA_Template__c)) {
@@ -230,22 +323,13 @@ public with sharing class WAChatWindowController {
             }
 
             if (!matchingTemplateIds.isEmpty()) {
-                templates.addAll([
-                    SELECT Id, Name, Template_Name__c, Header_Type__c, Template_Category__c, Language__c, Status__c 
-                    FROM WA_Template__c 
-                    WHERE Id IN :matchingTemplateIds 
-                    WITH USER_MODE 
-                    ORDER BY LastModifiedDate DESC
-                ]);
+                templates.addAll([SELECT Id, Name, Template_Name__c, Header_Type__c, Template_Category__c, Language__c, Status__c FROM WA_Template__c 
+                                    WHERE Id IN :matchingTemplateIds WITH USER_MODE ORDER BY LastModifiedDate DESC]);
             }
 
-            List<WA_Template__c> templatesWithoutVariables = [
-                SELECT Id, Name, Template_Name__c, Header_Type__c, Template_Category__c, Language__c, Status__c 
-                FROM WA_Template__c 
-                WHERE Status__c = 'Active-Quality Pending' AND Id NOT IN :allTemplatesWithVariables 
-                WITH USER_MODE 
-                ORDER BY LastModifiedDate DESC
-            ];
+            List<WA_Template__c> templatesWithoutVariables = [SELECT Id, Name, Template_Name__c, Header_Type__c, Template_Category__c, Language__c, Status__c 
+                                                                FROM WA_Template__c WHERE Status__c = 'Active-Quality Pending' AND Id NOT IN :allTemplatesWithVariables 
+                                                                WITH USER_MODE ORDER BY LastModifiedDate DESC];
             templates.addAll(templatesWithoutVariables);
 
             // Deduplicate templates
@@ -260,7 +344,9 @@ public with sharing class WAChatWindowController {
             combinedData.put('record', recordData);
             combinedData.put('phoneNumber', phoneNumber);
             combinedData.put('recordName', recordName);
+            combinedData.put('phoneField', phoneField);
         } catch (Exception e) {
+            combinedData.put('error', e.getMessage());
             ErrorHandler.insertErrordata(e, 'WAChatWindowController', 'getCombinedData', e.getMessage());
         }
         return combinedData;
@@ -320,15 +406,11 @@ public with sharing class WAChatWindowController {
             }
 
             insert as user chat;
-            chat = [
-                SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, 
-                       Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
-                       WA_Template__r.Template_Name__c, CreatedDate, File_Data__c, 
-                       Sent_Template_Details__c 
-                FROM WA_Chat__c 
-                WHERE Id = :chat.Id 
-                WITH USER_MODE
-            ];
+
+            chat = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
+                        WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
+                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, File_Data__c, 
+                        Sent_Template_Details__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
             return chat;
         } catch (Exception e) {
             if (e.getMessage().contains('STORAGE_LIMIT_EXCEEDED')) {
@@ -436,21 +518,19 @@ public with sharing class WAChatWindowController {
             }
 
             update as user chat;
-            chat = [
-                SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, 
-                       Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
-                       WA_Template__r.Template_Name__c, CreatedDate, Sent_Template_Details__c 
-                FROM WA_Chat__c 
-                WHERE Id = :chat.Id 
-                WITH USER_MODE
-            ];
+            chat = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
+                        WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
+                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Sent_Template_Details__c 
+                        FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
             resultMap.put('chat', chat);
             return resultMap;
 
         } catch (Exception e) {
             if (!isReaction) {
                 chat.Message_Status__c = 'Failed';
-                update as user chat;
+                try {
+                    update as user chat;
+                } catch (Exception ue) {}
             }
             ErrorHandler.insertErrordata(e, 'WAChatWindowController', 'sendWhatsappMessage', e.getMessage());
         }
@@ -469,16 +549,11 @@ public with sharing class WAChatWindowController {
     public static Map<String, Object> getTemplateData(String templateId, String contactId, String objectApiName) {
         try {
             Map<String, Object> templateData = new Map<String, Object>();
-            List<WA_Template__c> templates = [
-                SELECT Id, Template_Name__c, Template_Miscellaneous_Data__c, Button_Body__c, Button_Label__c, 
-                       Button_Type__c, Footer_Body__c, Header_Body__c, Header_Type__c, Language__c, 
-                       Template_Body__c, Template_Category__c, Template_Variable_Count__c,
-                       (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c FROM WA_Template_Variables__r) 
-                FROM WA_Template__c 
-                WHERE Id = :templateId 
-                WITH USER_MODE 
-                LIMIT 1
-            ];
+            List<WA_Template__c> templates = [SELECT Id, Template_Name__c, Template_Miscellaneous_Data__c, Button_Body__c, Button_Label__c, 
+                                                Button_Type__c, Footer_Body__c, Header_Body__c, Header_Type__c, Language__c, 
+                                                Template_Body__c, Template_Category__c, Template_Variable_Count__c,
+                                                (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c FROM WA_Template_Variables__r) 
+                                                FROM WA_Template__c WHERE Id = :templateId WITH USER_MODE LIMIT 1];
 
             if (templates.isEmpty()) {
                 return null;
@@ -602,26 +677,76 @@ public with sharing class WAChatWindowController {
 
             String jsonPayload = JSON.serialize(templatePayload);
 
-            // Create outbound WA_Chat__c record
+            // 1. MAKE HTTP CALLOUT FIRST (NO DML BEFORE THIS CALLOUT)
+            OAuth_Configuration__mdt config = WhatsappConnectController.getConfig();
+            if (config == null || String.isBlank(config.Access_Token__c) || String.isBlank(config.Client_Phone_Number_ID__c)) {
+                result.put('success', false);
+                result.put('message', 'WhatsApp OAuth configuration not found or access token is missing.');
+                return result;
+            }
+
+            String accessToken = config.Access_Token__c;
+            String authEndpoint = config.Authorization_Endpoint__c != null ? config.Authorization_Endpoint__c.removeEnd('/') : 'https://graph.facebook.com';
+            String apiVersion = config.API_Version__c != null ? config.API_Version__c : 'v21.0';
+            String endpoint = authEndpoint + '/' + apiVersion + '/' + config.Client_Phone_Number_ID__c + '/messages';
+
+            HttpRequest httpReq = new HttpRequest();
+            httpReq.setEndpoint(endpoint);
+            httpReq.setMethod('POST');
+            httpReq.setHeader('Content-Type', 'application/json');
+            httpReq.setHeader('Authorization', 'Bearer ' + accessToken);
+            httpReq.setBody(jsonPayload);
+
+            Http http = new Http();
+            HttpResponse response = http.send(httpReq);
+            System.debug('Template status: ' + response.getStatusCode());
+            System.debug('Template response: ' + response.getBody());
+            Integer statusCode = response != null ? response.getStatusCode() : 0;
+            String whatsAppMessageID = null;
+            Boolean isCalloutSuccess = (statusCode == 200);
+
+            if (isCalloutSuccess) {
+                Map<String, Object> jsonMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
+                List<Object> messages = (List<Object>) jsonMap.get('messages');
+                if (messages != null && !messages.isEmpty()) {
+                    Map<String, Object> firstMsg = (Map<String, Object>) messages[0];
+                    whatsAppMessageID = (String) firstMsg.get('id');
+                }
+            }
+
+            // 2. NOW PERFORM DML (AFTER CALLOUT HAS COMPLETED)
             WA_Chat__c chat = new WA_Chat__c();
-            chat.Message__c = template.Template_Body__c;
+            chat.Message__c = String.isNotBlank(template.Template_Body__c) ? template.Template_Body__c : template.Template_Name__c;
             chat.WA_Template__c = template.Id;
             chat.Phone__c = phoneNumber;
             chat.Type_of_Message__c = 'OutBound Messages';
             chat.Message_Type__c = 'Template';
             chat.Sent_Template_Details__c = JSON.serialize(components);
+            chat.Message_ID__c = whatsAppMessageID;
+            chat.Message_Status__c = isCalloutSuccess ? 'Sent' : 'Failed';
             if (objectApiName == 'Contact' && String.isNotBlank(recordId)) {
                 chat.Contact__c = recordId;
             }
             insert as user chat;
 
-            // Dispatch message via WhatsApp API
-            Map<String, Object> sendResult = sendWhatsappMessage(jsonPayload, chat.Id, false, null);
-            WA_Chat__c updatedChat = (WA_Chat__c) sendResult.get('chat');
+            // Re-query chat with complete template relationship fields for UI
+            chat = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
+                        WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
+                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, 
+                        File_Data__c, Sent_Template_Details__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
+
+            // 3. Log error if callout failed (safe to log after callout)
+            if (!isCalloutSuccess) {
+                String errorBody = response != null ? response.getBody() : 'No response from WhatsApp API';
+                ErrorHandler.insertErrordata(null, 'WAChatWindowController', 'sendSelectedTemplate', 'API Exception sending template: ' + errorBody);
+                result.put('success', false);
+                result.put('message', 'Failed to send template. WhatsApp API returned status ' + statusCode + ': ' + errorBody);
+                result.put('chat', chat);
+                return result;
+            }
 
             result.put('success', true);
-            result.put('chat', updatedChat != null ? updatedChat : chat);
-            result.put('errorMessage', sendResult.get('errorMessage'));
+            result.put('chat', chat);
             return result;
 
         } catch (Exception e) {
@@ -753,14 +878,8 @@ public with sharing class WAChatWindowController {
             chat.File_Data__c = JSON.serialize(fileData);
 
             insert as user chat;
-            chat = [
-                SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, 
-                       Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
-                       WA_Template__r.Template_Name__c, CreatedDate, File_Data__c 
-                FROM WA_Chat__c 
-                WHERE Id = :chat.Id 
-                WITH USER_MODE
-            ];
+            chat = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
+                        WA_Template__r.Template_Name__c, CreatedDate, File_Data__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
 
             return chat;
         } catch (Exception e) {
@@ -788,18 +907,10 @@ public with sharing class WAChatWindowController {
                 }
             }
 
-            List<WA_Template__c> templates = [
-                SELECT Id, Template_Name__c, Button_Body__c, Button_Label__c, Button_Type__c, 
-                       Footer_Body__c, Header_Body__c, Header_Type__c, Language__c, 
-                       Template_Body__c, Template_Category__c, Template_Miscellaneous_Data__c, 
-                       Template_Variable_Count__c,
-                       (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c FROM WA_Template_Variables__r) 
-                FROM WA_Template__c 
-                WHERE Id = :templateId 
-                WITH USER_MODE 
-                ORDER BY CreatedDate DESC 
-                LIMIT 1
-            ];
+            List<WA_Template__c> templates = [SELECT Id, Template_Name__c, Button_Body__c, Button_Label__c, Button_Type__c, Footer_Body__c, Header_Body__c, 
+                                                Header_Type__c, Language__c, Template_Body__c, Template_Category__c, Template_Miscellaneous_Data__c, 
+                                                Template_Variable_Count__c,(SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c 
+                                                FROM WA_Template_Variables__r) FROM WA_Template__c WHERE Id = :templateId WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 1];
 
             if (!templates.isEmpty()) {
                 WA_Template__c template = templates[0];
@@ -859,12 +970,7 @@ public with sharing class WAChatWindowController {
             Set<Id> allTemplateIdsWithVariables = new Set<Id>();
             Map<Id, Set<String>> templateIdToObjectNames = new Map<Id, Set<String>>();
 
-            for (WA_Template_Variable__c tv : [
-                SELECT WA_Template__c, Object_Name__c, WA_Template__r.Status__c 
-                FROM WA_Template_Variable__c 
-                WHERE WA_Template__c != null 
-                WITH USER_MODE
-            ]) {
+            for (WA_Template_Variable__c tv : [SELECT WA_Template__c, Object_Name__c, WA_Template__r.Status__c FROM WA_Template_Variable__c WHERE WA_Template__c != null WITH USER_MODE]) {
                 allTemplateIdsWithVariables.add(tv.WA_Template__c);
                 if (tv.WA_Template__r.Status__c == 'Active-Quality Pending' && String.isNotBlank(tv.Object_Name__c)) {
                     if (!templateIdToObjectNames.containsKey(tv.WA_Template__c)) {
@@ -881,14 +987,8 @@ public with sharing class WAChatWindowController {
                 }
             }
 
-            return [
-                SELECT Id, Name, Template_Name__c, Header_Type__c, Template_Category__c, Language__c, Status__c 
-                FROM WA_Template__c 
-                WHERE Id IN :matchingTemplateIds 
-                   OR (Status__c = 'Active-Quality Pending' AND Id NOT IN :allTemplateIdsWithVariables) 
-                WITH USER_MODE 
-                ORDER BY LastModifiedDate DESC
-            ];
+            return [SELECT Id, Name, Template_Name__c, Header_Type__c, Template_Category__c, Language__c, Status__c FROM WA_Template__c WHERE Id IN :matchingTemplateIds 
+                    OR (Status__c = 'Active-Quality Pending' AND Id NOT IN :allTemplateIdsWithVariables) WITH USER_MODE ORDER BY LastModifiedDate DESC];
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WAChatWindowController', 'getTemplatesOnly', e.getMessage());
             return new List<WA_Template__c>();

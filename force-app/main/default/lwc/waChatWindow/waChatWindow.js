@@ -36,14 +36,14 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
     @track emojiCategories = [];
     @track replyToMessage = null;
     @track reactToMessage = null;
-    @track noteText = '';
+    @track noteText = 'The 24-hour conversation window has closed. Begin by sending an approved template.';
     @track showSpinner = false;
     @track noChatMessages = true;
     @track showEmojiPicker = false;
     @track showAttachmentOptions = false;
     @track scrollBottom = false;
     @track showReactEmojiPicker = false;
-    @track sendOnlyTemplate = false;
+    @track sendOnlyTemplate = true;
     @track acceptedFormats = [];
     @track showFileUploader = false;
     @track showTemplateSelection = false;
@@ -106,8 +106,26 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
     }
 
     get displayBackDrop() {
-        return this.showEmojiPicker || this.showAttachmentOptions || this.showFileUploader ||
-               this.showTemplateSelection || this.showTemplatePreview || this.audioPreview || this.showReactEmojiPicker;
+        return this.showEmojiPicker || this.showAttachmentOptions || this.audioPreview || this.showReactEmojiPicker;
+    }
+
+    get selectedTemplateRecord() {
+        return (this.allTemplates || []).find(t => t.Id === this.selectedTemplate);
+    }
+
+    get previewTemplateName() {
+        const t = this.selectedTemplateRecord;
+        return t?.Template_Name__c || t?.MVEX__Template_Name__c || t?.Name || 'Template Preview';
+    }
+
+    get previewTemplateCategory() {
+        const t = this.selectedTemplateRecord;
+        return t?.Template_Category__c || t?.MVEX__Template_Category__c || 'Marketing';
+    }
+
+    get previewTemplateLanguage() {
+        const t = this.selectedTemplateRecord;
+        return t?.Language__c || t?.MVEX__Language__c || '';
     }
 
     get popupTitle() {
@@ -240,7 +258,6 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                         if (!existingChat) {
                             self.chats = [...self.chats, normChat];
                             self.processChats(true);
-                            self.sendOnlyTemplate = false;
                         }
                         break;
 
@@ -321,18 +338,23 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
 
     getInitialData() {
         this.showSpinner = true;
+        this.sendOnlyTemplate = true;
+        this.noteText = 'The 24-hour conversation window has closed. Begin by sending an approved template.';
         try {
             getCombinedData({ contactId: this.recordId, objectApiName: this.objectApiName })
                 .then(combinedData => {
                     if (combinedData?.record) {
-                        if (!combinedData.phoneNumber) {
-                            this.chatwindowerror = 'The selected record does not have a mobile phone number.';
+                        this.recordData = combinedData.record;
+                        this.phoneNumber = combinedData.phoneNumber || (this.recordData ? this.recordData[combinedData.phoneField || 'MobilePhone'] || this.recordData.Phone || this.recordData.MobilePhone : '');
+                        this.recordName = combinedData.recordName || (this.recordData ? this.recordData.Name : '');
+
+                        if (!this.phoneNumber) {
+                            this.chatwindowerror = 'The selected record does not have a phone number configured in WhatsApp settings.';
                             this.showchatwindowerror = true;
                             this.showSpinner = false;
                             return;
                         }
-                        combinedData.phoneNumber = combinedData.phoneNumber.replaceAll(' ', '');
-                        this.recordData = combinedData.record;
+                        this.phoneNumber = this.phoneNumber.replaceAll(' ', '');
                     } else {
                         if (combinedData?.error) {
                             this.chatwindowerror = combinedData.error;
@@ -347,8 +369,6 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                     this.allTemplates = combinedData.templates && combinedData.templates.length > 0 ? combinedData.templates : [];
                     const rawChats = combinedData.chats || [];
                     this.chats = rawChats.map(c => this.normalizeChat(c));
-                    this.phoneNumber = combinedData.phoneNumber;
-                    this.recordName = combinedData.recordName;
                     this.showSpinner = false;
                     this.processChats(true);
 
@@ -412,6 +432,24 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                 item.isTemplate = item.Message_Type__c === 'Template' || (item.isFlow && item.Type_of_Message__c === 'OutBound Messages');
                 item.isOther = !['Text', 'Image', 'Template', 'Video', 'Document', 'Audio', 'interactive'].includes(item.Message_Type__c);
                 item.messageBy = item.Type_of_Message__c === 'OutBound Messages' ? 'You' : (this.recordName || 'Contact');
+
+                // Template card properties for native WhatsApp chat-window structure
+                if (item.isTemplate) {
+                    const temp = item.WA_Template__r;
+                    item.templateHeader = temp?.Header_Body__c || '';
+                    item.headerType = (temp?.Header_Type__c || 'NONE').toUpperCase();
+                    item.isTextHeader = item.headerType === 'TEXT' && !!item.templateHeader;
+                    item.isImageHeader = item.headerType === 'IMAGE';
+                    item.isVideoHeader = item.headerType === 'VIDEO';
+                    item.isDocHeader = item.headerType === 'DOCUMENT';
+                    item.hasTemplateHeader = item.isTextHeader || item.isImageHeader || item.isVideoHeader || item.isDocHeader;
+                    item.headerMediaUrl = temp?.Image_Header_Handle__c || '';
+
+                    item.templateBody = item.Message__c || temp?.Template_Body__c || '';
+                    item.templateFooter = temp?.Footer_Body__c || '';
+                    item.templateButtons = this.parseTemplateButtons(temp?.Button_Body__c);
+                    item.hasButtons = item.templateButtons && item.templateButtons.length > 0;
+                }
 
                 // Status flags
                 item.isTick = ['Sent', 'Delivered', 'Seen'].includes(item.Message_Status__c);
@@ -489,14 +527,44 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
     }
 
     /**
+     * Parses raw button JSON from WA_Template__c into structured action buttons
+     */
+    parseTemplateButtons(rawButtons) {
+        if (!rawButtons) return [];
+        let parsed = [];
+        try {
+            if (typeof rawButtons === 'string') {
+                parsed = JSON.parse(rawButtons);
+            } else if (Array.isArray(rawButtons)) {
+                parsed = rawButtons;
+            }
+        } catch (e) {
+            return [];
+        }
+        if (!Array.isArray(parsed)) return [];
+        return parsed.map((btn, index) => {
+            const btnType = (btn.type || btn.buttonType || '').toUpperCase();
+            return {
+                id: `btn-${index}`,
+                btntext: btn.text || btn.label || btn.btntext || 'Action',
+                type: btnType,
+                isUrl: btnType === 'URL',
+                isCall: btnType === 'PHONE_NUMBER' || btnType === 'CALL_PHONE',
+                isQuickReply: !['URL', 'PHONE_NUMBER', 'CALL_PHONE'].includes(btnType)
+            };
+        });
+    }
+
+    /**
      * Checks WhatsApp 24-hour conversation care window:
      * Outside of 24h from last inbound message, only approved templates may be sent.
      */
     checkLastMessage() {
         try {
-            const inboundMessages = (this.chats || []).filter(msg =>
-                msg.Type_of_Message__c === 'Inbound Messages' && msg.CreatedDate
-            );
+            const inboundMessages = (this.chats || []).filter(msg => {
+                const type = (msg.Type_of_Message__c || '').toLowerCase();
+                return type.includes('inbound') && msg.CreatedDate;
+            });
 
             if (inboundMessages.length > 0) {
                 const sorted = [...inboundMessages].sort((a, b) => new Date(b.CreatedDate) - new Date(a.CreatedDate));
@@ -517,6 +585,8 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             }
         } catch (e) {
             console.error('Error in checkLastMessage:::', e.message);
+            this.sendOnlyTemplate = true;
+            this.noteText = "The 24-hour conversation window has closed. Begin by sending an approved template.";
         }
     }
 

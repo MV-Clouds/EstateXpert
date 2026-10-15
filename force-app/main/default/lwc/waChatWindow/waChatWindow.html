@@ -165,9 +165,50 @@
                                             <div class="other-message-sub-text">Preview is not available for this media type.</div>
                                         </div>
 
-                                        <!-- Template Message -->
+                                        <!-- Template Message (Native WhatsApp Bubble Structure) -->
                                         <div class="template-message-div" if:true={chat.isTemplate}>
-                                            <c-wa-template-preview template-id={chat.WA_Template__c}></c-wa-template-preview>
+                                            <!-- Header -->
+                                            <template if:true={chat.hasTemplateHeader}>
+                                                <div class="template-bubble-header-text" if:true={chat.isTextHeader}>
+                                                    {chat.templateHeader}
+                                                </div>
+                                                <div class="template-bubble-header-media" if:true={chat.isImageHeader}>
+                                                    <img src={chat.headerMediaUrl} alt="Header" />
+                                                </div>
+                                                <div class="template-bubble-header-media" if:true={chat.isVideoHeader}>
+                                                    <video src={chat.headerMediaUrl} controls></video>
+                                                </div>
+                                                <div class="template-bubble-header-doc" if:true={chat.isDocHeader}>
+                                                    <span class="template-doc-icon">📄</span>
+                                                    <span class="template-doc-title">{chat.templateHeader}</span>
+                                                </div>
+                                            </template>
+
+                                            <!-- Body Text -->
+                                            <div class="template-bubble-body">
+                                                {chat.templateBody}
+                                            </div>
+
+                                            <!-- Footer -->
+                                            <template if:true={chat.templateFooter}>
+                                                <div class="template-bubble-footer">
+                                                    {chat.templateFooter}
+                                                </div>
+                                            </template>
+
+                                            <!-- Action Buttons -->
+                                            <template if:true={chat.hasButtons}>
+                                                <div class="template-bubble-actions">
+                                                    <template for:each={chat.templateButtons} for:item="btn">
+                                                        <div key={btn.id} class="template-bubble-btn">
+                                                            <span if:true={btn.isUrl} class="btn-icon">🌐</span>
+                                                            <span if:true={btn.isCall} class="btn-icon">📞</span>
+                                                            <span if:true={btn.isQuickReply} class="btn-icon">💬</span>
+                                                            <span class="btn-label">{btn.btntext}</span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
                                         </div>
 
                                         <!-- Meta info: Timestamp & Status -->
@@ -284,7 +325,7 @@
                             </svg>
                         </div>
                         <div class="bold-text">No Conversation Yet</div>
-                        <div class="sub-text">Start engaging with this customer by sending an approved template or a message!</div>
+                        <div class="sub-text">Start engaging with this customer by sending an approved template</div>
                         <button class="exp-blue-btn-css mt-3" data-media="Template" onclick={handleAttachmentOptionClick}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -313,125 +354,7 @@
                     </div>
                 </div>
 
-                <!-- Unified Popup Dialog (Files / Templates) -->
-                <div class="popup-container-wrapper" if:true={showPopup}>
-                    <div class="popup-dialog-card">
-                        <div class="popup-dialog-header">
-                            <div class="popup-dialog-title-block">
-                                <h3 class="popup-dialog-title">{popupTitle}</h3>
-                                <p class="popup-dialog-subtitle">{popupSubtitle}</p>
-                            </div>
-                            <button class="exp-close-icon-css" onclick={handleBackDropClick} title="Close">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <path d="M18 6L6 18M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </div>
 
-                        <div class="popup-dialog-body">
-                            <!-- File Uploader View -->
-                            <div class="files-uploader-div" if:true={showFileUploader}>
-                                <template if:false={isAWSEnabled}>
-                                    <div class="standard-file-uploader-box">
-                                        <lightning-file-upload class="file-uploader" label={uploadLabel} name="fileUploader"
-                                            accept={acceptedFormats} record-id={recordId} onuploadfinished={handleUploadFinished}
-                                            variant="label-hidden"></lightning-file-upload>
-                                    </div>
-                                </template>
-                                <template if:true={isAWSEnabled}>
-                                    <div class="upload-container">
-                                        <label class="custom-file-upload">
-                                            <lightning-icon icon-name="utility:upload" size="small"></lightning-icon>
-                                            <span class="upload-prompt">Click to select {uploadFileType}</span>
-                                            <input type="file" class="file-input" onchange={handleSelectedFiles}
-                                                accept={acceptedFormats} disabled={selectedFileName} />
-                                        </label>
-
-                                        <template if:true={selectedFileName}>
-                                            <div class="file-details">
-                                                <span class="file-name">{selectedFileName}</span>
-                                                <button class="remove-file-btn" onclick={removeFile} title="Remove file">✕</button>
-                                            </div>
-                                            <div class="upload-actions">
-                                                <button class="exp-blue-btn-css" onclick={handleUploadClick}>Send File</button>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </template>
-                            </div>
-
-                            <!-- Template Selection View -->
-                            <template if:true={showTemplateSelection}>
-                                <div class="template-select-div">
-                                    <div class="search-template-bar">
-                                        <svg class="search-template-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2">
-                                            <circle cx="11" cy="11" r="8"></circle>
-                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                        </svg>
-                                        <input placeholder="Search templates by name..." type="text" class="search-template-input"
-                                            onkeyup={handleSearchTemplate} onchange={handleSearchTemplate}
-                                            value={templateSearchKey}>
-                                    </div>
-
-                                    <div class="templates-list-div" if:true={filteredTemplate}>
-                                        <template for:each={filteredTemplate} for:item="template">
-                                            <div key={template.Id} class="template-card-row" data-id={template.Id}
-                                                onclick={handleShowTemplatePreview}>
-                                                <div class="template-row-left">
-                                                    <div class="template-card-title">{template.displayName}</div>
-                                                    <div class="template-card-meta">
-                                                        <span class="template-badge-cat">{template.Template_Category__c}</span>
-                                                        <span class="template-badge-lang">{template.Language__c}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="template-row-right">
-                                                    <button class="preview-template-action-btn">
-                                                        Preview
-                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                            <path d="M9 18l6-6-6-6"/>
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-
-                                    <div class="no-templates-div" if:false={filteredTemplate}>
-                                        <p class="no-templates-text">No templates found matching your search.</p>
-                                    </div>
-                                </div>
-                            </template>
-
-                            <!-- Template Preview & Send View -->
-                            <template if:true={showTemplatePreview}>
-                                <div class="template-preview-send-modal-body">
-                                    <div class="template-preview-embed">
-                                        <c-wa-template-preview template-id={selectedTemplate}></c-wa-template-preview>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-
-                        <!-- Modal Footer (only on template preview) -->
-                        <template if:true={showTemplatePreview}>
-                            <div class="popup-dialog-footer">
-                                <button class="exp-white-btn-css" onclick={handleBackToList}>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M15 18l-6-6 6-6"/>
-                                    </svg>
-                                    Back to Templates
-                                </button>
-                                <button class="exp-blue-btn-css" onclick={handleSendSelectedTemplateClick}>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <line x1="22" y1="2" x2="11" y2="13"></line>
-                                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                                    </svg>
-                                    Send Template
-                                </button>
-                            </div>
-                        </template>
-                    </div>
-                </div>
 
                 <!-- Audio Preview Player -->
                 <template if:true={audioPreview}>
@@ -598,6 +521,184 @@
                     </template>
                 </div>
             </div>
+
+            <!-- Unified Popup Modal (Files / Templates) as Standard SLDS Dialog -->
+            <template if:true={showPopup}>
+                <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-chat"
+                    class="slds-modal slds-fade-in-open slds-modal_small">
+                    <div class="slds-modal__container">
+                        <!-- Cross icon OUTSIDE the modal container -->
+                        <div class="slds-modal__close exp-close-icon-css" onclick={handleBackDropClick} title="Close">
+                            <svg width="16" height="16" viewBox="0 0 20 20" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M2.53317 19.3333L0.666504 17.4667L8.13317 9.99999L0.666504 2.53332L2.53317 0.666656L9.99984 8.13332L17.4665 0.666656L19.3332 2.53332L11.8665 9.99999L19.3332 17.4667L17.4665 19.3333L9.99984 11.8667L2.53317 19.3333Z"
+                                    fill="#1F2937" />
+                            </svg>
+                        </div>
+
+                        <!-- Proper Header matching other modals -->
+                        <div class="slds-modal__header exp-popup-header">
+                            <div class="exp-popup-header-left">
+                                <div class="exp-popup-icon-box">
+                                    <template if:false={showFileUploader}>
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                d="M12 2C6.48 2 2 6.48 2 12C2 13.85 2.5 15.58 3.38 17.07L2.05 21.95L7.07 20.64C8.52 21.5 10.2 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM17.02 14.88C16.81 15.47 15.98 15.98 15.34 16.12C14.9 16.22 14.33 16.3 12.4 15.5C9.94 14.48 8.35 11.99 8.23 11.83C8.11 11.67 7.25 10.53 7.25 9.35C7.25 8.17 7.86 7.59 8.1 7.34C8.3 7.14 8.63 7.05 8.93 7.05C9.03 7.05 9.12 7.05 9.2 7.06C9.44 7.07 9.56 7.08 9.72 7.47C9.92 7.96 10.41 9.15 10.47 9.27C10.53 9.39 10.59 9.55 10.51 9.71C10.43 9.87 10.38 9.94 10.26 10.08C10.14 10.22 10.01 10.38 9.9 10.51C9.77 10.65 9.64 10.8 9.79 11.06C9.94 11.31 10.46 12.16 11.23 12.85C12.22 13.73 13.03 14.01 13.32 14.13C13.57 14.23 13.72 14.21 13.9 14C14.12 13.75 14.39 13.36 14.67 12.97C14.87 12.69 15.11 12.73 15.37 12.83C15.63 12.92 17.02 13.61 17.31 13.75C17.6 13.89 17.79 13.96 17.86 14.08C17.93 14.2 17.93 14.77 17.02 14.88Z"
+                                                fill="#25D366" />
+                                        </svg>
+                                    </template>
+                                    <template if:true={showFileUploader}>
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0176D3"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="17 8 12 3 7 8"></polyline>
+                                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                                        </svg>
+                                    </template>
+                                </div>
+                                <div class="exp-popup-title-group">
+                                    <template if:true={showTemplatePreview}>
+                                        <h1 id="modal-heading-chat" class="exp-popup-title">{previewTemplateName}</h1>
+                                        <p class="exp-popup-subtitle">
+                                            Category: <strong>{previewTemplateCategory}</strong>
+                                            <template if:true={previewTemplateLanguage}> &bull; Language:
+                                                <strong>{previewTemplateLanguage}</strong></template>
+                                        </p>
+                                    </template>
+                                    <template if:true={showTemplateSelection}>
+                                        <h1 class="exp-popup-title">Select WhatsApp Template</h1>
+                                        <p class="exp-popup-subtitle">Pick an approved Meta template to start or continue the conversation</p>
+                                    </template>
+                                    <template if:true={showFileUploader}>
+                                        <h1 class="exp-popup-title">Upload {uploadFileType}</h1>
+                                        <p class="exp-popup-subtitle">Choose a file to attach and send to recipient</p>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="slds-modal__content exp-chat-modal-body">
+                            <!-- File Uploader View -->
+                            <div class="files-uploader-div" if:true={showFileUploader}>
+                                <template if:false={isAWSEnabled}>
+                                    <div class="standard-file-uploader-box">
+                                        <lightning-file-upload class="file-uploader" label={uploadLabel} name="fileUploader"
+                                            accept={acceptedFormats} record-id={recordId} onuploadfinished={handleUploadFinished}
+                                            variant="label-hidden"></lightning-file-upload>
+                                    </div>
+                                </template>
+                                <template if:true={isAWSEnabled}>
+                                    <div class="upload-container">
+                                        <label class="custom-file-upload">
+                                            <lightning-icon icon-name="utility:upload" size="small"></lightning-icon>
+                                            <span class="upload-prompt">Click to select {uploadFileType}</span>
+                                            <input type="file" class="file-input" onchange={handleSelectedFiles}
+                                                accept={acceptedFormats} disabled={selectedFileName} />
+                                        </label>
+
+                                        <template if:true={selectedFileName}>
+                                            <div class="file-details">
+                                                <span class="file-name">{selectedFileName}</span>
+                                                <button class="remove-file-btn" onclick={removeFile} title="Remove file">✕</button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Template Selection View -->
+                            <template if:true={showTemplateSelection}>
+                                <div class="template-select-div">
+                                    <div class="search-template-bar">
+                                        <svg class="search-template-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        </svg>
+                                        <input placeholder="Search templates by name..." type="text" class="search-template-input"
+                                            onkeyup={handleSearchTemplate} onchange={handleSearchTemplate}
+                                            value={templateSearchKey}>
+                                    </div>
+
+                                    <div class="templates-list-div" if:true={filteredTemplate}>
+                                        <template for:each={filteredTemplate} for:item="template">
+                                            <div key={template.Id} class="template-card-row" data-id={template.Id}
+                                                onclick={handleShowTemplatePreview}>
+                                                <div class="template-row-left">
+                                                    <div class="template-card-title">{template.displayName}</div>
+                                                    <div class="template-card-meta">
+                                                        <span class="template-badge-cat">{template.Template_Category__c}</span>
+                                                        <span class="template-badge-lang">{template.Language__c}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="template-row-right">
+                                                    <button class="preview-template-action-btn">
+                                                        Preview
+                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                            <path d="M9 18l6-6-6-6"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <div class="no-templates-div" if:false={filteredTemplate}>
+                                        <p class="no-templates-text">No templates found matching your search.</p>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Template Preview & Send View -->
+                            <template if:true={showTemplatePreview}>
+                                <div class="template-preview-send-modal-body">
+                                    <div class="template-preview-embed">
+                                        <c-wa-template-preview template-id={selectedTemplate}></c-wa-template-preview>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="slds-modal__footer exp-popup-footer">
+                            <div></div>
+                            <div class="exp-popup-footer-right">
+                                <template if:true={showTemplatePreview}>
+                                    <button class="exp-white-btn-css" onclick={handleBackToList}>
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M15 18l-6-6 6-6"/>
+                                        </svg>
+                                        Back to Templates
+                                    </button>
+                                    <button class="exp-blue-btn-css" onclick={handleSendSelectedTemplateClick}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                        </svg>
+                                        Send Template
+                                    </button>
+                                </template>
+
+                                <template if:true={showTemplateSelection}>
+                                    <button class="exp-white-btn-css" onclick={handleBackDropClick}>Close</button>
+                                </template>
+
+                                <template if:true={showFileUploader}>
+                                    <button class="exp-white-btn-css" onclick={handleBackDropClick}>Close</button>
+                                    <template if:true={isAWSEnabled}>
+                                        <template if:true={selectedFileName}>
+                                            <button class="exp-blue-btn-css" onclick={handleUploadClick}>Send File</button>
+                                        </template>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open" role="presentation" onclick={handleBackDropClick}></div>
+            </template>
         </template>
 
         <!-- Config / Record Error Modal -->

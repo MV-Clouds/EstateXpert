@@ -134,50 +134,54 @@
                                         your template. Remember not to include any customer information to
                                         protect your customer's privacy.</p>
                                 </div>
-                                <div class="upload-limit-banner">
-                                    <div class="limit-banner-header">
-                                        <span class="limit-title">{selectedContentType} Upload Limits</span>
-                                        <span class="limit-storage-badge {templateStorageBadgeClass}">{templateStorageLabel}</span>
-                                    </div>
-                                    <div class="limit-banner-body">
-                                        <div class="limit-item">
-                                            <span class="limit-label">Max File Size:</span>
-                                            <span class="limit-value">{templateLimitSizeLabel}</span>
-                                        </div>
-                                        <div class="limit-item">
-                                            <span class="limit-label">Supported Formats:</span>
-                                            <span class="limit-value">{templateLimitFormatsLabel}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="chooseMedia">
-                                    <p class="uploadlabel">{selectedContentType}</p>
-                                    <div class="media-upload-row">
-                                        <div class="custom-upload-button">
-                                            <label class="upload-label">
-                                                <img src={uploadMediaIcon} alt="Upload Icon" class="upload-icon" />
-                                                <template if:true={NoFileSelected}>
-                                                    <span>Choose {mediaFileDescription}</span>
-                                                </template>
-                                                <template if:true={isfilename}>
-                                                    <span>{fileName}</span>
-                                                </template>
-                                                <input type="file" accept={mediaAccept} class="file-input"
-                                                    onchange={handleFileChange} />
-                                            </label>
-                                        </div>
-                                        <template if:true={isfilename}>
-                                            <div class="delete-icon">
-                                                <button type="button"
-                                                    class="remove-button delete-div exp-delete-icon-css"
-                                                    onclick={handleDelete} title="Remove file">
-                                                    <lightning-icon icon-name="utility:delete" size="x-small"
-                                                        alternative-text="Delete icon"
-                                                        class="remove-icon"></lightning-icon>
-                                                </button>
+                                <div class="compact-media-section">
+                                    <template if:false={isfilename}>
+                                        <label class="compact-upload-card">
+                                            <div class="compact-upload-left">
+                                                <div class="compact-upload-icon-wrap">
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0176D3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                                    </svg>
+                                                </div>
+                                                <div class="compact-upload-text-group">
+                                                    <span class="compact-upload-title">Choose {selectedContentType} file</span>
+                                                    <span class="compact-upload-specs">
+                                                        Max {templateLimitSizeLabel} &bull; {templateLimitFormatsLabel}
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </template>
-                                    </div>
+                                            <div class="compact-storage-tag {templateStorageBadgeClass}">{templateStorageLabel}</div>
+                                            <input type="file" accept={mediaAccept} class="file-input" onchange={handleFileChange} />
+                                        </label>
+                                    </template>
+
+                                    <template if:true={isfilename}>
+                                        <div class="compact-file-card">
+                                            <div class="compact-file-left">
+                                                <div class="compact-file-icon-wrap">
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00A884" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                        <polyline points="10 9 9 9 8 9"></polyline>
+                                                    </svg>
+                                                </div>
+                                                <div class="compact-file-info">
+                                                    <span class="compact-file-name" title={fileName}>{fileName}</span>
+                                                    <span class="compact-file-meta">Selected &bull; {templateStorageLabel}</span>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="compact-remove-btn" onclick={handleDelete} title="Remove file">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
                         </template>

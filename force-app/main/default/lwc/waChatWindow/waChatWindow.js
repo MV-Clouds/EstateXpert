@@ -8,6 +8,7 @@ import { subscribe, unsubscribe } from 'lightning/empApi';
 import getCombinedData from '@salesforce/apex/WAChatWindowController.getCombinedData';
 import createChat from '@salesforce/apex/WAChatWindowController.createChat';
 import createChatForAWSFiles from '@salesforce/apex/WAChatWindowController.createChatForAWSFiles';
+import uploadChatFile from '@salesforce/apex/WAChatWindowController.uploadChatFile';
 import updateReaction from '@salesforce/apex/WAChatWindowController.updateReaction';
 import sendWhatsappMessage from '@salesforce/apex/WAChatWindowController.sendWhatsappMessage';
 import updateStatus from '@salesforce/apex/WAChatWindowController.updateStatus';
@@ -1507,14 +1508,39 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             getS3ConfigSettings()
                 .then(res => {
                     if (res != null) {
-                        this.confData = res;
-                        this.isAWSEnabled = true;
+                        this.confData = res.awsConfigData;
+                        this.isAWSEnabled = !!res.isIntegrated;
                     }
                 })
                 .catch(err => console.warn('S3 config skipped:', err));
         } catch (err) {
             console.warn('getS3ConfigDataAsync error:', err);
         }
+    }
+
+    get storageLocationLabel() {
+        return this.isAWSEnabled ? 'Storage: AWS S3' : 'Storage: Salesforce Storage';
+    }
+
+    get storageBadgeClass() {
+        return this.isAWSEnabled ? 'storage-badge-aws' : 'storage-badge-salesforce';
+    }
+
+    get currentUploadLimitLabel() {
+        if (this.isAWSEnabled) {
+            if (this.uploadFileType === 'Image') return '5 MB';
+            if (this.uploadFileType === 'Video' || this.uploadFileType === 'Audio') return '16 MB';
+            return '100 MB';
+        }
+        return '4.5 MB (Salesforce storage limit)';
+    }
+
+    get currentUploadFormatsLabel() {
+        if (this.uploadFileType === 'Image') return 'JPG, JPEG, PNG';
+        if (this.uploadFileType === 'Video') return 'MP4, 3GP';
+        if (this.uploadFileType === 'Audio') return 'MP3, AAC, OGG, AMR, M4A';
+        if (this.uploadFileType === 'Document') return 'PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT';
+        return this.acceptedFormats ? this.acceptedFormats.join(', ') : '';
     }
 
     handleSelectedFiles(event) {
@@ -1524,14 +1550,21 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                 const fileType = file.type;
                 const sizeMB = file.size / (1024 * 1024);
                 let maxSize = 100;
-                if (fileType.includes('image/')) maxSize = 5;
-                else if (fileType.includes('video/') || fileType.includes('audio/')) maxSize = 16;
+                if (this.isAWSEnabled) {
+                    if (fileType.includes('image/')) maxSize = 5;
+                    else if (fileType.includes('video/') || fileType.includes('audio/')) maxSize = 16;
+                    else maxSize = 100;
+                } else {
+                    maxSize = 4.5;
+                }
 
                 if (sizeMB <= maxSize) {
                     this.selectedFilesToUpload = [file];
                     this.selectedFileName = file.name;
                 } else {
-                    this.showToast('File Too Large', `${file.name} exceeds ${maxSize}MB limit`, 'error');
+                    const storageName = this.isAWSEnabled ? 'AWS S3' : 'Salesforce Storage';
+                    this.showToast('File Too Large', `${file.name} exceeds ${maxSize}MB limit for ${storageName}`, 'error');
+                    event.target.value = '';
                 }
             }
         } catch (e) {
@@ -1549,7 +1582,92 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
     async handleUploadClick() {
         if (this.selectedFilesToUpload.length > 0) {
             this.showSpinner = true;
-            await this.uploadToAWS();
+            if (this.isAWSEnabled) {
+                await this.uploadToAWS();
+            } else {
+                await this.uploadToSalesforce();
+            }
+        }
+    }
+
+    async uploadToSalesforce() {
+        try {
+            this.showSpinner = true;
+            const file = this.selectedFilesToUpload[0];
+            const reader = new FileReader();
+
+            reader.onload = async () => {
+                try {
+                    const base64Data = reader.result.split(',')[1];
+                    let messageType = 'Document';
+                    if (file.type.includes('image/')) messageType = 'Image';
+                    else if (file.type.includes('video/')) messageType = 'Video';
+                    else if (file.type.includes('audio/')) messageType = 'Audio';
+
+                    const chat = await uploadChatFile({
+                        chatData: {
+                            base64Data: base64Data,
+                            fileName: file.name,
+                            mimeType: file.type,
+                            messageType: messageType,
+                            recordId: this.recordId,
+                            replyToChatId: this.replyToMessage?.Id || null,
+                            phoneNumber: this.phoneNumber
+                        }
+                    });
+
+                    if (chat) {
+                        const norm = this.normalizeChat(chat);
+                        this.upsertChat(norm);
+                        this.processChats(true);
+
+                        const payload = this.createJSONBody(this.phoneNumber, messageType, this.replyToMessage?.Message_ID__c || null, {
+                            link: norm.Message__c,
+                            fileName: file.name
+                        });
+
+                        sendWhatsappMessage({ jsonData: payload, chatId: norm.Id, isReaction: false, reaction: null })
+                            .then(res => {
+                                if (res.chat) {
+                                    const updated = this.normalizeChat(res.chat);
+                                    const idx = this.chats.findIndex(c => c.Id === updated.Id);
+                                    if (idx > -1) {
+                                        this.chats[idx].Message_Status__c = updated.Message_Status__c;
+                                        this.chats[idx].Message_ID__c = updated.Message_ID__c;
+                                        this.chats[idx].Failed_Reason__c = updated.Failed_Reason__c;
+                                    }
+                                }
+                                this.showSpinner = false;
+                                this.processChats(true);
+                            })
+                            .catch(err => {
+                                this.showSpinner = false;
+                                console.error('Error in sendWhatsappMessage Salesforce storage:', err);
+                            });
+
+                        this.handleBackDropClick();
+                    } else {
+                        this.showSpinner = false;
+                        this.showToast('Error', 'Could not create chat record for Salesforce file.', 'error');
+                    }
+                } catch (e) {
+                    this.showSpinner = false;
+                    this.showToast('Error', e?.body?.message || 'Failed to upload file to Salesforce storage.', 'error');
+                    console.error('Error in uploadToSalesforce onload:', e);
+                }
+            };
+
+            reader.onerror = (err) => {
+                this.showSpinner = false;
+                this.showToast('Error', 'Failed to read file.', 'error');
+                console.error('FileReader error:', err);
+            };
+
+            reader.readAsDataURL(file);
+        } catch (error) {
+            this.showSpinner = false;
+            console.error('Error in uploadToSalesforce:', error);
+            this.showToast('Error', 'Salesforce storage upload failed.', 'error');
         }
     }
 

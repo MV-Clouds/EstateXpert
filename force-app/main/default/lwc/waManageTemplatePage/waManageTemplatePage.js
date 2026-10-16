@@ -191,6 +191,31 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         return this.selectedContentType === 'Text';
     }
 
+    get templateStorageLabel() {
+        return this.isAWSEnabled ? 'Storage: AWS S3' : 'Storage: Salesforce Storage';
+    }
+
+    get templateStorageBadgeClass() {
+        return this.isAWSEnabled ? 'storage-badge-aws' : 'storage-badge-salesforce';
+    }
+
+    get templateLimitSizeLabel() {
+        if (this.isAWSEnabled) {
+            if (this.selectedContentType === 'Image') return '5 MB';
+            if (this.selectedContentType === 'Video') return '16 MB';
+            if (this.selectedContentType === 'Document') return '100 MB';
+            return '16 MB';
+        }
+        return '4 MB (Salesforce storage limit)';
+    }
+
+    get templateLimitFormatsLabel() {
+        if (this.selectedContentType === 'Image') return 'JPG, JPEG, PNG';
+        if (this.selectedContentType === 'Video') return 'MP4';
+        if (this.selectedContentType === 'Document') return 'PDF only (Meta requirement)';
+        return '';
+    }
+
     get addMedia() {
         return ['Image', 'Video', 'Document'].includes(this.selectedContentType);
     }
@@ -843,9 +868,19 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 return;
             }
 
-            const maxSize = 4;
+            let maxSize = 4;
+            if (this.isAWSEnabled) {
+                if (this.selectedContentType === 'Image') maxSize = 5;
+                else if (this.selectedContentType === 'Video') maxSize = 16;
+                else if (this.selectedContentType === 'Document') maxSize = 100;
+            } else {
+                maxSize = 4;
+            }
+
             if (file.size > maxSize * 1024 * 1024) {
-                this.showToast(`${file.name} exceeds the ${maxSize}MB limit`, 'error');
+                const storageName = this.isAWSEnabled ? 'AWS S3' : 'Salesforce Storage';
+                this.showToast(`${file.name} exceeds the ${maxSize}MB limit for ${storageName}`, 'error');
+                event.target.value = '';
                 return;
             }
 

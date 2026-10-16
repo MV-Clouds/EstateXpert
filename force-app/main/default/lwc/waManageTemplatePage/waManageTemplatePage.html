@@ -134,6 +134,22 @@
                                         your template. Remember not to include any customer information to
                                         protect your customer's privacy.</p>
                                 </div>
+                                <div class="upload-limit-banner">
+                                    <div class="limit-banner-header">
+                                        <span class="limit-title">{selectedContentType} Upload Limits</span>
+                                        <span class="limit-storage-badge {templateStorageBadgeClass}">{templateStorageLabel}</span>
+                                    </div>
+                                    <div class="limit-banner-body">
+                                        <div class="limit-item">
+                                            <span class="limit-label">Max File Size:</span>
+                                            <span class="limit-value">{templateLimitSizeLabel}</span>
+                                        </div>
+                                        <div class="limit-item">
+                                            <span class="limit-label">Supported Formats:</span>
+                                            <span class="limit-value">{templateLimitFormatsLabel}</span>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="chooseMedia">
                                     <p class="uploadlabel">{selectedContentType}</p>
                                     <div class="media-upload-row">
@@ -693,27 +709,22 @@
                                     <p class="timefooterWP">11:59</p>
                                 </div>
 
-                            </div>
-
-
-                            <div class="codelinktempprev">
-                                <template for:each={buttonList} for:item="button" for:index="index">
-
-                                    <div key={button.id} class="button-label-preview button-tabs">
-                                        <lightning-icon icon-name={button.iconName} class="custom-icon"
-                                            alternative-text="Icon" size="x-small"></lightning-icon>
-                                        <p>{button.btntext}</p>
-                                    </div>
-                                </template>
-                                <template for:each={customButtonList} for:item="customButton" for:index="index">
-
-                                    <div key={customButton.id} class="button-label-preview button-tabs">
-                                        <lightning-icon icon-name={customButton.iconName} class="custom-icon"
-                                            alternative-text="Icon" size="x-small"></lightning-icon>
-
-                                        <p>{customButton.Cbtntext}</p>
-                                    </div>
-                                </template>
+                                <div class="codelinktempprev">
+                                    <template for:each={buttonList} for:item="button" for:index="index">
+                                        <div key={button.id} class="button-label-preview button-tabs">
+                                            <lightning-icon icon-name={button.iconName} class="custom-icon"
+                                                alternative-text="Icon" size="x-small"></lightning-icon>
+                                            <p>{button.btntext}</p>
+                                        </div>
+                                    </template>
+                                    <template for:each={customButtonList} for:item="customButton" for:index="index">
+                                        <div key={customButton.id} class="button-label-preview button-tabs">
+                                            <lightning-icon icon-name={customButton.iconName} class="custom-icon"
+                                                alternative-text="Icon" size="x-small"></lightning-icon>
+                                            <p>{customButton.Cbtntext}</p>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
                         </div>
                     </div>

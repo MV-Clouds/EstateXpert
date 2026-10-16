@@ -699,17 +699,101 @@ public with sharing class WAChatWindowController {
             chat.Message_Status__c = null;
             chat.Message_Type__c = messageType;
             chat.Reply_to__c = replyToChatId;
+            if (String.isNotBlank(recordId) && recordId.startsWith('003')) {
+                chat.Contact__c = recordId;
+            }
             Map<String, Object> fileData = new Map<String, Object>{ 'fileName' => fileName, 'mimeType' => mimeType };
             chat.File_Data__c = JSON.serialize(fileData);
 
             insert as user chat;
             chat = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
-                        WA_Template__r.Template_Name__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
+                        WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
+                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, WA_Template__r.File_Name__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c, 
+                        Sent_Template_Details__c, Failed_Reason__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
 
             return chat;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WAChatWindowController', 'createChatForAWSFiles', e.getMessage());
             return null;
+        }
+    }
+
+    /**
+     * @description : Uploads a chat file to Salesforce storage (ContentVersion + ContentDistribution) and creates a chat record
+     * @param chatData - Map containing base64Data, fileName, mimeType, messageType, recordId, replyToChatId, phoneNumber
+     * @return WA_Chat__c
+     */
+    @AuraEnabled
+    public static WA_Chat__c uploadChatFile(Map<String, String> chatData) {
+        try {
+            String base64Data = chatData.get('base64Data');
+            String fileName = chatData.get('fileName');
+            String mimeType = chatData.get('mimeType');
+            String messageType = chatData.get('messageType');
+            String recordId = chatData.get('recordId');
+            String replyToChatId = chatData.get('replyToChatId');
+            String phoneNumber = chatData.get('phoneNumber');
+
+            if (String.isBlank(base64Data) || String.isBlank(fileName)) {
+                throw new AuraHandledException('File data or file name is missing.');
+            }
+
+            // Create ContentVersion
+            ContentVersion cv = new ContentVersion();
+            cv.Title = fileName;
+            cv.PathOnClient = '/' + fileName;
+            cv.VersionData = EncodingUtil.base64Decode(base64Data);
+            insert as user cv;
+
+            // Query ContentDocumentId and Id
+            cv = [SELECT Id, ContentDocumentId, ContentSize, Title FROM ContentVersion WHERE Id = :cv.Id WITH USER_MODE LIMIT 1];
+
+            // Create ContentDistribution for public download link
+            ContentDistribution cd = new ContentDistribution();
+            cd.Name = fileName;
+            cd.ContentVersionId = cv.Id;
+            cd.PreferencesAllowViewInBrowser = true;
+            cd.PreferencesLinkLatestVersion = true;
+            cd.PreferencesNotifyOnVisit = false;
+            cd.PreferencesPasswordRequired = false;
+            cd.PreferencesAllowOriginalDownload = true;
+            insert as user cd;
+
+            // Query the ContentDownloadUrl
+            cd = [SELECT DistributionPublicUrl, ContentDownloadUrl FROM ContentDistribution WHERE Id = :cd.Id WITH USER_MODE LIMIT 1];
+            String downloadUrl = cd.ContentDownloadUrl;
+
+            // Create WA_Chat__c record
+            WA_Chat__c chat = new WA_Chat__c();
+            chat.Message__c = downloadUrl;
+            chat.Phone__c = phoneNumber;
+            chat.Normalize_Phone__c = normalizePhoneNumber(phoneNumber);
+            chat.Type_of_Message__c = 'Outbound Messages';
+            chat.Message_Status__c = null;
+            chat.Message_Type__c = messageType;
+            chat.Reply_to__c = replyToChatId;
+            if (String.isNotBlank(recordId) && recordId.startsWith('003')) {
+                chat.Contact__c = recordId;
+            }
+            Map<String, Object> fileData = new Map<String, Object>{
+                'fileName' => fileName,
+                'mimeType' => mimeType,
+                'documentId' => cv.ContentDocumentId,
+                'contentVersionId' => cv.Id
+            };
+            chat.File_Data__c = JSON.serialize(fileData);
+
+            insert as user chat;
+
+            chat = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
+                        WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
+                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, WA_Template__r.File_Name__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c, 
+                        Sent_Template_Details__c, Failed_Reason__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
+
+            return chat;
+        } catch (Exception e) {
+            ErrorHandler.insertErrordata(e, 'WAChatWindowController', 'uploadChatFile', e.getMessage());
+            throw new AuraHandledException(e.getMessage());
         }
     }
 

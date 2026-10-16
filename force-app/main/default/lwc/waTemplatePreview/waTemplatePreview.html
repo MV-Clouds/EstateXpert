@@ -211,20 +211,20 @@
                                     </svg>
                                 </span>
                             </div>
-                        </div>
 
-                        <!-- Button Area (attached directly underneath chat bubble) -->
-                        <template if:true={hasButtons}>
-                            <div class="action-buttons-container">
-                                <template for:each={buttons} for:item="btn">
-                                    <div key={btn.id} class="preview-action-row" title={btn.btntext}>
-                                        <lightning-icon icon-name={btn.iconName} size="x-small"
-                                            class="preview-btn-icon"></lightning-icon>
-                                        <span class="preview-btn-label">{btn.btntext}</span>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
+                            <!-- Button Area (attached directly inside chat bubble) -->
+                            <template if:true={hasButtons}>
+                                <div class="action-buttons-container">
+                                    <template for:each={buttons} for:item="btn">
+                                        <div key={btn.id} class="preview-action-row" title={btn.btntext}>
+                                            <lightning-icon icon-name={btn.iconName} size="x-small"
+                                                class="preview-btn-icon"></lightning-icon>
+                                            <span class="preview-btn-label">{btn.btntext}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
             </div>

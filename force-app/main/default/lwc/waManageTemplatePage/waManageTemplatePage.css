@@ -898,6 +898,80 @@
     display: none;
 }
 
+/* Upload Limit Banner */
+.upload-limit-banner {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 0.75rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+}
+
+.limit-banner-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.limit-title {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #1E293B;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.limit-storage-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    letter-spacing: 0.3px;
+}
+
+.storage-badge-aws {
+    background: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FDE68A;
+}
+
+.storage-badge-salesforce {
+    background: #E0F2FE;
+    color: #0369A1;
+    border: 1px solid #BAE6FD;
+}
+
+.limit-banner-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.limit-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    line-height: 1.4;
+}
+
+.limit-label {
+    font-weight: 500;
+    color: #64748B;
+    min-width: 110px;
+}
+
+.limit-value {
+    font-weight: 600;
+    color: #334155;
+}
+
 .chooseMedia,
 .chooseImage,
 .chooseVideo,
@@ -1051,6 +1125,7 @@
     background-color: white;
     max-width: 100%;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .TextHeadingWP {
@@ -1084,17 +1159,16 @@
     align-items: center;
     justify-content: center;
     background-color: #ccd0d5;
-    border-radius: 4px;
     box-sizing: border-box;
-    width: 100%;
-    min-width: 0;
-    height: 140px;
+    width: calc(100% + 1.5rem);
+    margin: -0.75rem -0.75rem 8px -0.75rem;
+    height: 160px;
     overflow: hidden;
 }
 
 .imagedivWP img {
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 
@@ -1317,13 +1391,12 @@
 }
 
 .codelinktempprev {
-    color: #4194C2;
-    align-items: center;
-    text-align: center;
-    position: relative;
-    margin-top: 6px;
-    width: 100%;
-    max-width: 100%;
+    color: #00A884;
+    display: flex;
+    flex-direction: column;
+    margin: 8px -0.75rem -0.75rem -0.75rem;
+    width: calc(100% + 1.5rem);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
     box-sizing: border-box;
 }
 
@@ -1332,16 +1405,47 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    font-size: 12px;
-    cursor: pointer;
-    border: 1px solid white;
-    border-radius: 6px;
-    padding: 6px 10px;
-    margin-top: 5px;
-    background-color: white;
-    color: #4194C2;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: default;
+    border: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 0;
+    padding: 10px 14px;
+    margin: 0;
+    background-color: transparent;
+    color: #00A884;
+    box-shadow: none;
     box-sizing: border-box;
+    transition: background-color 0.15s ease;
+    gap: 8px;
+}
+
+.button-label-preview:first-child {
+    border-top: none;
+}
+
+.button-label-preview:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.button-label-preview:hover {
+    background-color: rgba(0, 168, 132, 0.05);
+}
+
+.button-label-preview p {
+    color: #00A884;
+    font-size: 13.5px;
+    font-weight: 500;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.button-label-preview .custom-icon {
+    --slds-c-icon-color-foreground-default: #00A884;
 }
 
 .select-button {

@@ -223,14 +223,78 @@
                                                 </div>
                                             </template>
 
-                                            <!-- Action Buttons -->
+                                            <!-- Meta info for template message: Timestamp & Status (placed before action buttons) -->
+                                            <div class="template-bubble-meta">
+                                                <span class="template-timestamp-text">
+                                                    <lightning-formatted-date-time value={chat.CreatedDate} hour="2-digit"
+                                                        minute="2-digit"></lightning-formatted-date-time>
+                                                </span>
+
+                                                <!-- Status icons -->
+                                                <div class="status-icon-wrap" if:true={chat.isTick}>
+                                                    <!-- Double Blue Tick (Seen / Read) -->
+                                                    <span class="status-icon status-seen" if:true={chat.isSeen} title="Read">
+                                                        <svg class="seen-tick" width="16" height="11" viewBox="0 0 16 11" fill="none">
+                                                            <path d="M11.05 0.5L5.45 6.1L3.95 4.6L2.9 5.65L5.45 8.2L12.1 1.55L11.05 0.5Z" fill="#53BDEB" />
+                                                            <path d="M14.05 0.5L8.45 6.1L7.9 5.55L6.85 6.6L8.45 8.2L15.1 1.55L14.05 0.5Z" fill="#53BDEB" />
+                                                        </svg>
+                                                    </span>
+                                                    <!-- Double Gray Tick (Delivered) -->
+                                                    <span class="status-icon status-delivered" if:true={chat.isDelivered} title="Delivered">
+                                                        <svg width="16" height="11" viewBox="0 0 16 11" fill="none">
+                                                            <path d="M11.05 0.5L5.45 6.1L3.95 4.6L2.9 5.65L5.45 8.2L12.1 1.55L11.05 0.5Z" fill="#8696A0" />
+                                                            <path d="M14.05 0.5L8.45 6.1L7.9 5.55L6.85 6.6L8.45 8.2L15.1 1.55L14.05 0.5Z" fill="#8696A0" />
+                                                        </svg>
+                                                    </span>
+                                                    <!-- Single Gray Tick (Sent) -->
+                                                    <span class="status-icon status-sent" if:true={chat.isSent} title="Sent">
+                                                        <svg width="14" height="11" viewBox="0 0 14 11" fill="none">
+                                                            <path d="M12.1 1.55L5.45 8.2L2.9 5.65L3.95 4.6L5.45 6.1L11.05 0.5L12.1 1.55Z" fill="#8696A0" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+
+                                                <!-- Sending Clock Icon -->
+                                                <span class="status-icon status-sending" if:true={chat.isSending} title="Sending...">
+                                                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                                                        <circle cx="8" cy="8" r="6.5" stroke="#8696A0" stroke-width="1.5" />
+                                                        <polyline points="8 4.5 8 8 10.5 9.5" stroke="#8696A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                </span>
+
+                                                <!-- Static Failed Delivery Icon -->
+                                                <span class="status-icon status-failed" if:true={chat.isFailed} title={chat.failedTooltip}>
+                                                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                                                        <circle cx="8" cy="8" r="7" stroke="#EF4444" stroke-width="1.5" />
+                                                        <line x1="8" y1="4.5" x2="8" y2="8.5" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" />
+                                                        <circle cx="8" cy="11.5" r="0.9" fill="#EF4444" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+
+                                            <!-- Action Buttons (Attached directly inside template bubble) -->
                                             <template if:true={chat.hasButtons}>
                                                 <div class="template-bubble-actions">
                                                     <template for:each={chat.templateButtons} for:item="btn">
                                                         <div key={btn.id} class="template-bubble-btn">
-                                                            <span if:true={btn.isUrl} class="btn-icon">🌐</span>
-                                                            <span if:true={btn.isCall} class="btn-icon">📞</span>
-                                                            <span if:true={btn.isQuickReply} class="btn-icon">💬</span>
+                                                            <span if:true={btn.isUrl} class="btn-icon">
+                                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                                                </svg>
+                                                            </span>
+                                                            <span if:true={btn.isCall} class="btn-icon">
+                                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                                                </svg>
+                                                            </span>
+                                                            <span if:true={btn.isQuickReply} class="btn-icon">
+                                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <polyline points="9 17 4 12 9 7"></polyline>
+                                                                    <path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
+                                                                </svg>
+                                                            </span>
                                                             <span class="btn-label">{btn.btntext}</span>
                                                         </div>
                                                     </template>
@@ -238,52 +302,54 @@
                                             </template>
                                         </div>
 
-                                        <!-- Meta info: Timestamp & Status -->
-                                        <div class="timestamp">
-                                            <lightning-formatted-date-time value={chat.CreatedDate} hour="2-digit"
-                                                minute="2-digit"></lightning-formatted-date-time>
+                                        <!-- Meta info: Timestamp & Status (for Non-Template Messages) -->
+                                        <template if:false={chat.isTemplate}>
+                                            <div class="timestamp">
+                                                <lightning-formatted-date-time value={chat.CreatedDate} hour="2-digit"
+                                                    minute="2-digit"></lightning-formatted-date-time>
 
-                                            <!-- Status icons -->
-                                            <div class="status-icon-wrap" if:true={chat.isTick}>
-                                                <!-- Double Blue Tick (Seen / Read) -->
-                                                <span class="status-icon status-seen" if:true={chat.isSeen} title="Read">
-                                                    <svg class="seen-tick" width="16" height="11" viewBox="0 0 16 11" fill="none">
-                                                        <path d="M11.05 0.5L5.45 6.1L3.95 4.6L2.9 5.65L5.45 8.2L12.1 1.55L11.05 0.5Z" fill="#53BDEB" />
-                                                        <path d="M14.05 0.5L8.45 6.1L7.9 5.55L6.85 6.6L8.45 8.2L15.1 1.55L14.05 0.5Z" fill="#53BDEB" />
+                                                <!-- Status icons -->
+                                                <div class="status-icon-wrap" if:true={chat.isTick}>
+                                                    <!-- Double Blue Tick (Seen / Read) -->
+                                                    <span class="status-icon status-seen" if:true={chat.isSeen} title="Read">
+                                                        <svg class="seen-tick" width="16" height="11" viewBox="0 0 16 11" fill="none">
+                                                            <path d="M11.05 0.5L5.45 6.1L3.95 4.6L2.9 5.65L5.45 8.2L12.1 1.55L11.05 0.5Z" fill="#53BDEB" />
+                                                            <path d="M14.05 0.5L8.45 6.1L7.9 5.55L6.85 6.6L8.45 8.2L15.1 1.55L14.05 0.5Z" fill="#53BDEB" />
+                                                        </svg>
+                                                    </span>
+                                                    <!-- Double Gray Tick (Delivered) -->
+                                                    <span class="status-icon status-delivered" if:true={chat.isDelivered} title="Delivered">
+                                                        <svg width="16" height="11" viewBox="0 0 16 11" fill="none">
+                                                            <path d="M11.05 0.5L5.45 6.1L3.95 4.6L2.9 5.65L5.45 8.2L12.1 1.55L11.05 0.5Z" fill="#8696A0" />
+                                                            <path d="M14.05 0.5L8.45 6.1L7.9 5.55L6.85 6.6L8.45 8.2L15.1 1.55L14.05 0.5Z" fill="#8696A0" />
+                                                        </svg>
+                                                    </span>
+                                                    <!-- Single Gray Tick (Sent) -->
+                                                    <span class="status-icon status-sent" if:true={chat.isSent} title="Sent">
+                                                        <svg width="14" height="11" viewBox="0 0 14 11" fill="none">
+                                                            <path d="M12.1 1.55L5.45 8.2L2.9 5.65L3.95 4.6L5.45 6.1L11.05 0.5L12.1 1.55Z" fill="#8696A0" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+
+                                                <!-- Sending Clock Icon -->
+                                                <span class="status-icon status-sending" if:true={chat.isSending} title="Sending...">
+                                                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                                                        <circle cx="8" cy="8" r="6.5" stroke="#8696A0" stroke-width="1.5" />
+                                                        <polyline points="8 4.5 8 8 10.5 9.5" stroke="#8696A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                                                     </svg>
                                                 </span>
-                                                <!-- Double Gray Tick (Delivered) -->
-                                                <span class="status-icon status-delivered" if:true={chat.isDelivered} title="Delivered">
-                                                    <svg width="16" height="11" viewBox="0 0 16 11" fill="none">
-                                                        <path d="M11.05 0.5L5.45 6.1L3.95 4.6L2.9 5.65L5.45 8.2L12.1 1.55L11.05 0.5Z" fill="#8696A0" />
-                                                        <path d="M14.05 0.5L8.45 6.1L7.9 5.55L6.85 6.6L8.45 8.2L15.1 1.55L14.05 0.5Z" fill="#8696A0" />
-                                                    </svg>
-                                                </span>
-                                                <!-- Single Gray Tick (Sent) -->
-                                                <span class="status-icon status-sent" if:true={chat.isSent} title="Sent">
-                                                    <svg width="14" height="11" viewBox="0 0 14 11" fill="none">
-                                                        <path d="M12.1 1.55L5.45 8.2L2.9 5.65L3.95 4.6L5.45 6.1L11.05 0.5L12.1 1.55Z" fill="#8696A0" />
+
+                                                <!-- Static Failed Delivery Icon -->
+                                                <span class="status-icon status-failed" if:true={chat.isFailed} title={chat.failedTooltip}>
+                                                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                                                        <circle cx="8" cy="8" r="7" stroke="#EF4444" stroke-width="1.5" />
+                                                        <line x1="8" y1="4.5" x2="8" y2="8.5" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" />
+                                                        <circle cx="8" cy="11.5" r="0.9" fill="#EF4444" />
                                                     </svg>
                                                 </span>
                                             </div>
-
-                                            <!-- Sending Clock Icon -->
-                                            <span class="status-icon status-sending" if:true={chat.isSending} title="Sending...">
-                                                <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-                                                    <circle cx="8" cy="8" r="6.5" stroke="#8696A0" stroke-width="1.5" />
-                                                    <polyline points="8 4.5 8 8 10.5 9.5" stroke="#8696A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                                </svg>
-                                            </span>
-
-                                            <!-- Static Failed Delivery Icon -->
-                                            <span class="status-icon status-failed" if:true={chat.isFailed} title={chat.failedTooltip}>
-                                                <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-                                                    <circle cx="8" cy="8" r="7" stroke="#EF4444" stroke-width="1.5" />
-                                                    <line x1="8" y1="4.5" x2="8" y2="8.5" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" />
-                                                    <circle cx="8" cy="11.5" r="0.9" fill="#EF4444" />
-                                                </svg>
-                                            </span>
-                                        </div>
+                                        </template>
 
                                         <!-- Reactions -->
                                         <div class="reaction-tray" if:true={chat.isReaction}>
@@ -639,30 +705,38 @@
                         <div class="chat-custom-modal-body exp-chat-modal-body">
                             <!-- File Uploader View -->
                             <div class="files-uploader-div" if:true={showFileUploader}>
-                                <template if:false={isAWSEnabled}>
-                                    <div class="standard-file-uploader-box">
-                                        <lightning-file-upload class="file-uploader" label={uploadLabel} name="fileUploader"
-                                            accept={acceptedFormats} record-id={recordId} onuploadfinished={handleUploadFinished}
-                                            variant="label-hidden"></lightning-file-upload>
+                                <div class="upload-limit-banner">
+                                    <div class="limit-banner-header">
+                                        <span class="limit-title">{uploadFileType} Upload Limits</span>
+                                        <span class="limit-storage-badge {storageBadgeClass}">{storageLocationLabel}</span>
                                     </div>
-                                </template>
-                                <template if:true={isAWSEnabled}>
-                                    <div class="upload-container">
-                                        <label class="custom-file-upload">
-                                            <lightning-icon icon-name="utility:upload" size="small"></lightning-icon>
-                                            <span class="upload-prompt">Click to select {uploadFileType}</span>
-                                            <input type="file" class="file-input" onchange={handleSelectedFiles}
-                                                accept={acceptedFormats} disabled={selectedFileName} />
-                                        </label>
+                                    <div class="limit-banner-body">
+                                        <div class="limit-item">
+                                            <span class="limit-label">Max File Size:</span>
+                                            <span class="limit-value">{currentUploadLimitLabel}</span>
+                                        </div>
+                                        <div class="limit-item">
+                                            <span class="limit-label">Supported Formats:</span>
+                                            <span class="limit-value">{currentUploadFormatsLabel}</span>
+                                        </div>
+                                    </div>
+                                </div>
 
-                                        <template if:true={selectedFileName}>
-                                            <div class="file-details">
-                                                <span class="file-name">{selectedFileName}</span>
-                                                <button class="remove-file-btn" onclick={removeFile} title="Remove file">✕</button>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </template>
+                                <div class="upload-container">
+                                    <label class="custom-file-upload">
+                                        <lightning-icon icon-name="utility:upload" size="small"></lightning-icon>
+                                        <span class="upload-prompt">Click to select {uploadFileType}</span>
+                                        <input type="file" class="file-input" onchange={handleSelectedFiles}
+                                            accept={acceptedFormats} disabled={selectedFileName} />
+                                    </label>
+
+                                    <template if:true={selectedFileName}>
+                                        <div class="file-details">
+                                            <span class="file-name">{selectedFileName}</span>
+                                            <button class="remove-file-btn" onclick={removeFile} title="Remove file">✕</button>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
 
                             <!-- Template Selection View -->
@@ -759,17 +833,15 @@
                                         </svg>
                                         Close
                                     </button>
-                                    <template if:true={isAWSEnabled}>
-                                        <template if:true={selectedFileName}>
-                                            <button class="exp-blue-btn-css" onclick={handleUploadClick}>
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                    stroke="currentColor" stroke-width="2">
-                                                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                                                </svg>
-                                                Send File
-                                            </button>
-                                        </template>
+                                    <template if:true={selectedFileName}>
+                                        <button class="exp-blue-btn-css" onclick={handleUploadClick}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2">
+                                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                            </svg>
+                                            Send File
+                                        </button>
                                     </template>
                                 </template>
                             </div>

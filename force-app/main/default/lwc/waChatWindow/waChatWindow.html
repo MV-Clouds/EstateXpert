@@ -276,7 +276,7 @@
                                             </span>
 
                                             <!-- Static Failed Delivery Icon -->
-                                            <span class="status-icon status-failed" if:true={chat.isFailed} title="Failed to send">
+                                            <span class="status-icon status-failed" if:true={chat.isFailed} title={chat.failedTooltip}>
                                                 <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
                                                     <circle cx="8" cy="8" r="7" stroke="#EF4444" stroke-width="1.5" />
                                                     <line x1="8" y1="4.5" x2="8" y2="8.5" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" />
@@ -300,24 +300,26 @@
                                     <!-- Message Actions Popover on Hover / Click -->
                                     <div class="action-options-btn" onclick={handleToggleActions} title="Message options">
                                         <div class="action-options-div">
-                                            <div class="action-option" data-action="reply" data-chat={chat.Id}
-                                                onclick={handleChatAction} title="Reply to message">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0176D3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <polyline points="9 17 4 12 9 7"></polyline>
-                                                    <path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
-                                                </svg>
-                                                <span class="action-command">Reply</span>
-                                            </div>
-                                            <div class="action-option" data-action="react" data-chat={chat.Id}
-                                                onclick={handleChatAction} title="React with emoji">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <circle cx="12" cy="12" r="10"></circle>
-                                                    <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-                                                    <line x1="9" y1="9" x2="9.01" y2="9"></line>
-                                                    <line x1="15" y1="9" x2="15.01" y2="9"></line>
-                                                </svg>
-                                                <span class="action-command">React</span>
-                                            </div>
+                                            <template if:false={chat.isFailed}>
+                                                <div class="action-option" data-action="reply" data-chat={chat.Id}
+                                                    onclick={handleChatAction} title="Reply to message">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0176D3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <polyline points="9 17 4 12 9 7"></polyline>
+                                                        <path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
+                                                    </svg>
+                                                    <span class="action-command">Reply</span>
+                                                </div>
+                                                <div class="action-option" data-action="react" data-chat={chat.Id}
+                                                    onclick={handleChatAction} title="React with emoji">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <circle cx="12" cy="12" r="10"></circle>
+                                                        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                                        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                                        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                                                    </svg>
+                                                    <span class="action-command">React</span>
+                                                </div>
+                                            </template>
                                             <template if:true={chat.hasCopyText}>
                                                 <div class="action-option" data-action="copy"
                                                     data-message={chat.copyText} onclick={handleChatAction} title="Copy text">

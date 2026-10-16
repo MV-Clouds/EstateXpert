@@ -94,15 +94,15 @@ public with sharing class WAChatWindowController {
 
                 chats = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
                            WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
-                           WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c, 
-                           Sent_Template_Details__c FROM WA_Chat__c 
+                           WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, WA_Template__r.File_Name__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c, 
+                           Sent_Template_Details__c, Failed_Reason__c FROM WA_Chat__c 
                            WHERE (Phone__c IN :phoneCandidates OR Normalize_Phone__c IN :phoneCandidates OR (Contact__c != null AND Contact__c = :contactId)) 
                            WITH USER_MODE ORDER BY CreatedDate ASC];
             } else if (String.isNotBlank(contactId)) {
                 chats = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
                             WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
-                            WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c, 
-                            Sent_Template_Details__c FROM WA_Chat__c WHERE Contact__c = :contactId WITH USER_MODE ORDER BY CreatedDate ASC];
+                            WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, WA_Template__r.File_Name__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c, 
+                            Sent_Template_Details__c, Failed_Reason__c FROM WA_Chat__c WHERE Contact__c = :contactId WITH USER_MODE ORDER BY CreatedDate ASC];
             }
 
             // Fetch eligible templates
@@ -215,8 +215,8 @@ public with sharing class WAChatWindowController {
 
             chat = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
                         WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
-                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c, 
-                        Sent_Template_Details__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
+                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, WA_Template__r.File_Name__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c, 
+                        Sent_Template_Details__c, Failed_Reason__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
             return chat;
         } catch (Exception e) {
             if (e.getMessage().contains('STORAGE_LIMIT_EXCEEDED')) {
@@ -267,6 +267,7 @@ public with sharing class WAChatWindowController {
             if (config == null || String.isBlank(config.Access_Token__c) || String.isBlank(config.Client_Phone_Number_ID__c)) {
                 if (!isReaction) {
                     chat.Message_Status__c = 'Failed';
+                    chat.Failed_Reason__c = '{"error":{"message":"WhatsApp OAuth configuration not found or access token is missing."}}';
                 } else if (reaction != null && reaction.contains('<|USER|>')) {
                     chat.Reaction__c = '<|USER|>' + reaction.substringAfter('<|USER|>');
                 }
@@ -307,6 +308,7 @@ public with sharing class WAChatWindowController {
             } else {
                 if (!isReaction) {
                     chat.Message_Status__c = 'Failed';
+                    chat.Failed_Reason__c = response != null ? response.getBody() : 'No response from WhatsApp API';
                 }
                 ErrorHandler.insertErrordata(null, 'WAChatWindowController', 'sendWhatsappMessage', 'API Exception sending message: ' + (response != null ? response.getBody() : 'No response'));
             }
@@ -326,7 +328,7 @@ public with sharing class WAChatWindowController {
             update as user chat;
             chat = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
                         WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
-                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Sent_Template_Details__c 
+                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, WA_Template__r.File_Name__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c, Sent_Template_Details__c, Failed_Reason__c 
                         FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
             resultMap.put('chat', chat);
             return resultMap;
@@ -334,6 +336,7 @@ public with sharing class WAChatWindowController {
         } catch (Exception e) {
             if (!isReaction) {
                 chat.Message_Status__c = 'Failed';
+                chat.Failed_Reason__c = '{"error":{"message":"' + String.escapeSingleQuotes(e.getMessage()) + '"}}';
                 try {
                     update as user chat;
                 } catch (Exception ue) {}
@@ -356,7 +359,7 @@ public with sharing class WAChatWindowController {
             Map<String, Object> templateData = new Map<String, Object>();
             List<WA_Template__c> templates = [SELECT Id, Template_Name__c, Template_Miscellaneous_Data__c, Button_Body__c, Button_Label__c, 
                                                 Button_Type__c, Footer_Body__c, Header_Body__c, Header_Type__c, Language__c, 
-                                                Template_Body__c, Template_Category__c, Template_Variable_Count__c,
+                                                Template_Body__c, Template_Category__c, Template_Variable_Count__c, File_Name__c, Image_Header_Handle__c,
                                                 (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c FROM WA_Template_Variables__r) 
                                                 FROM WA_Template__c WHERE Id = :templateId WITH USER_MODE LIMIT 1];
 
@@ -448,7 +451,55 @@ public with sharing class WAChatWindowController {
             List<Map<String, Object>> components = new List<Map<String, Object>>();
 
             // Header component
-            if (headerParams != null && !headerParams.isEmpty()) {
+            String headerType = String.isNotBlank(template.Header_Type__c) ? template.Header_Type__c.toLowerCase() : '';
+            if (headerType == 'image' || headerType == 'video' || headerType == 'document') {
+                String mediaUrl = template.Header_Body__c;
+                // Fallback: If Header_Body__c is empty, check ContentDistribution from templateMiscellaneousData
+                if (String.isBlank(mediaUrl) && String.isNotBlank(template.Template_Miscellaneous_Data__c)) {
+                    try {
+                        Map<String, Object> misc = (Map<String, Object>) JSON.deserializeUntyped(template.Template_Miscellaneous_Data__c);
+                        String cvId = (String) misc.get('contentVersionId');
+                        if (String.isNotBlank(cvId)) {
+                            List<ContentDistribution> cdList = [SELECT ContentDownloadUrl FROM ContentDistribution WHERE ContentVersionId = :cvId AND PreferencesAllowOriginalDownload = true WITH USER_MODE LIMIT 1];
+                            if (!cdList.isEmpty() && String.isNotBlank(cdList[0].ContentDownloadUrl)) {
+                                mediaUrl = cdList[0].ContentDownloadUrl;
+                            }
+                        }
+                    } catch (Exception ex) {
+                        System.debug('Error resolving media URL from ContentDistribution: ' + ex.getMessage());
+                    }
+                }
+                // Fallback: Check if Image_Header_Handle__c contains a direct URL
+                if (String.isBlank(mediaUrl) && String.isNotBlank(template.Image_Header_Handle__c) && 
+                    (template.Image_Header_Handle__c.startsWithIgnoreCase('http://') || template.Image_Header_Handle__c.startsWithIgnoreCase('https://'))) {
+                    mediaUrl = template.Image_Header_Handle__c;
+                }
+
+                if (String.isNotBlank(mediaUrl)) {
+                    mediaUrl = mediaUrl.trim();
+                    Map<String, Object> mediaMap = new Map<String, Object>{ 'link' => mediaUrl };
+                    Map<String, Object> headerParam = new Map<String, Object>{ 'type' => headerType };
+
+                    if (headerType == 'document') {
+                        String docName = String.isNotBlank(template.File_Name__c) ? template.File_Name__c : 'document.pdf';
+                        mediaMap.put('filename', docName);
+                        headerParam.put('document', mediaMap);
+                    } else if (headerType == 'video') {
+                        headerParam.put('video', mediaMap);
+                    } else { // image
+                        headerParam.put('image', mediaMap);
+                    }
+
+                    components.add(new Map<String, Object>{
+                        'type' => 'header',
+                        'parameters' => new List<Map<String, Object>>{ headerParam }
+                    });
+                } else {
+                    result.put('success', false);
+                    result.put('message', 'Media URL for header is missing. Please ensure a media file is uploaded for this template.');
+                    return result;
+                }
+            } else if (headerParams != null && !headerParams.isEmpty()) {
                 List<Map<String, Object>> hParams = new List<Map<String, Object>>();
                 for (Object param : headerParams) {
                     hParams.add(new Map<String, Object>{ 'type' => 'text', 'text' => String.valueOf(param) });
@@ -529,6 +580,9 @@ public with sharing class WAChatWindowController {
             chat.Sent_Template_Details__c = JSON.serialize(components);
             chat.Message_ID__c = whatsAppMessageID;
             chat.Message_Status__c = isCalloutSuccess ? 'Sent' : 'Failed';
+            if (!isCalloutSuccess) {
+                chat.Failed_Reason__c = response != null ? response.getBody() : 'No response from WhatsApp API';
+            }
             chat.Contact__c = recordId;
 
             insert as user chat;
@@ -536,8 +590,8 @@ public with sharing class WAChatWindowController {
             // Re-query chat with complete template relationship fields for UI
             chat = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
                         WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
-                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, Normalize_Phone__c, 
-                        File_Data__c, Sent_Template_Details__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
+                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, WA_Template__r.File_Name__c, CreatedDate, Phone__c, Normalize_Phone__c, 
+                        File_Data__c, Sent_Template_Details__c, Failed_Reason__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
 
             // 3. Log error if callout failed (safe to log after callout)
             if (!isCalloutSuccess) {
@@ -680,7 +734,7 @@ public with sharing class WAChatWindowController {
 
             List<WA_Template__c> templates = [SELECT Id, Template_Name__c, Button_Body__c, Button_Label__c, Button_Type__c, Footer_Body__c, Header_Body__c, 
                                                 Header_Type__c, Language__c, Template_Body__c, Template_Category__c, Template_Miscellaneous_Data__c, 
-                                                Template_Variable_Count__c,(SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c 
+                                                Template_Variable_Count__c, File_Name__c, Image_Header_Handle__c, (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c 
                                                 FROM WA_Template_Variables__r) FROM WA_Template__c WHERE Id = :templateId WITH USER_MODE ORDER BY CreatedDate DESC LIMIT 1];
 
             if (!templates.isEmpty()) {

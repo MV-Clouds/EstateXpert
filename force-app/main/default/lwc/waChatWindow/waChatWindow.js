@@ -510,6 +510,7 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             Reply_to__c: rawChat.Reply_to__c ?? rawChat.Reply_To__c ?? rawChat.MVEX__Reply_to__c ?? null,
             File_Data__c: rawChat.File_Data__c ?? rawChat.MVEX__File_Data__c ?? null,
             Sent_Template_Details__c: rawChat.Sent_Template_Details__c ?? rawChat.MVEX__Sent_Template_Details__c ?? null,
+            Failed_Reason__c: rawChat.Failed_Reason__c ?? rawChat.MVEX__Failed_Reason__c ?? '',
             Phone__c: rawChat.Phone__c ?? rawChat.MVEX__Phone__c ?? '',
             Normalize_Phone__c: rawChat.Normalize_Phone__c ?? rawChat.MVEX__Normalize_Phone__c ?? '',
             CreatedDate: rawChat.CreatedDate
@@ -647,13 +648,13 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                 // Template card properties for native WhatsApp chat-window structure
                 if (item.isTemplate) {
                     const temp = item.WA_Template__r;
-                    item.templateHeader = temp?.Header_Body__c || '';
                     item.headerType = (temp?.Header_Type__c || 'NONE').toUpperCase();
-                    item.isTextHeader = item.headerType === 'TEXT' && !!item.templateHeader;
+                    item.isTextHeader = item.headerType === 'TEXT' && !!temp?.Header_Body__c;
                     item.isImageHeader = item.headerType === 'IMAGE';
                     item.isVideoHeader = item.headerType === 'VIDEO';
                     item.isDocHeader = item.headerType === 'DOCUMENT';
                     item.hasTemplateHeader = item.isTextHeader || item.isImageHeader || item.isVideoHeader || item.isDocHeader;
+                    item.templateHeader = (item.isDocHeader && temp?.File_Name__c) ? temp.File_Name__c : (temp?.Header_Body__c || '');
                     item.headerMediaUrl = (['IMAGE', 'VIDEO', 'DOCUMENT'].includes(item.headerType) && temp?.Header_Body__c)
                         ? temp.Header_Body__c
                         : (temp?.Image_Header_Handle__c || '');
@@ -672,6 +673,28 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                 item.isFailed = isOutbound && statusLower === 'failed';
                 item.isSending = isOutbound && (!item.Message_Status__c || statusLower === 'sending');
                 item.isTick = isOutbound && (item.isSeen || item.isDelivered || item.isSent);
+
+                // Failed tooltip extraction from Failed_Reason__c JSON
+                item.failedTooltip = 'Failed to send';
+                if (item.isFailed && item.Failed_Reason__c) {
+                    try {
+                        const parsed = typeof item.Failed_Reason__c === 'string' 
+                            ? JSON.parse(item.Failed_Reason__c) 
+                            : item.Failed_Reason__c;
+                        if (parsed?.error?.message) {
+                            item.failedTooltip = parsed.error.message;
+                            if (parsed?.error?.error_data?.details) {
+                                item.failedTooltip += '\n' + parsed.error.error_data.details;
+                            }
+                        } else if (parsed?.message) {
+                            item.failedTooltip = parsed.message;
+                        } else {
+                            item.failedTooltip = item.Failed_Reason__c;
+                        }
+                    } catch (e) {
+                        item.failedTooltip = item.Failed_Reason__c;
+                    }
+                }
 
                 // File parsing
                 if ((item.isDoc || item.isAudio) && item.File_Data__c) {
@@ -697,6 +720,9 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
 
                 // Copy text (available for text & template messages)
                 item.copyText = item.isTemplate ? (item.templateBody || item.Message__c || '') : (item.Message__c || '');
+                if (!item.copyText && item.isFailed) {
+                    item.copyText = item.Message__c || '';
+                }
                 item.hasCopyText = !!(item.copyText && item.copyText.trim());
 
                 // Reactions
@@ -1273,6 +1299,11 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                 this.processChats(true);
             } else {
                 this.showToast('Error', result?.message || 'Failed to send template.', 'error');
+                if (result && result.chat) {
+                    this.upsertChat(this.normalizeChat(result.chat));
+                }
+                this.handleBackDropClick();
+                this.processChats(true);
             }
         } catch (error) {
             console.error('Error in handleSendSelectedTemplateClick:', error);

@@ -136,27 +136,32 @@
                                 </div>
                                 <div class="chooseMedia">
                                     <p class="uploadlabel">{selectedContentType}</p>
-                                    <div class="custom-upload-button">
-                                        <label class="upload-label">
-                                            <img src={uploadMediaIcon} alt="Upload Icon" class="upload-icon" />
-                                            <template if:true={NoFileSelected}>
-                                                <span>Choose {mediaFileDescription}</span>
-                                            </template>
-                                            <template if:true={isfilename}>
-                                                <span>{fileName}</span>
-                                            </template>
-                                            <input type="file" accept={mediaAccept}
-                                                class="file-input" onchange={handleFileChange} />
-                                        </label>
-                                    </div>
-                                    <template if:true={isfilename}>
-                                        <div class="delete-icon">
-                                            <button type="button" class="delete-div" onclick={handleDelete} title="Remove file">
-                                                <lightning-icon icon-name="utility:delete" size="small"
-                                                    alternative-text="Delete icon"></lightning-icon>
-                                            </button>
+                                    <div class="media-upload-row">
+                                        <div class="custom-upload-button">
+                                            <label class="upload-label">
+                                                <img src={uploadMediaIcon} alt="Upload Icon" class="upload-icon" />
+                                                <template if:true={NoFileSelected}>
+                                                    <span>Choose {mediaFileDescription}</span>
+                                                </template>
+                                                <template if:true={isfilename}>
+                                                    <span>{fileName}</span>
+                                                </template>
+                                                <input type="file" accept={mediaAccept} class="file-input"
+                                                    onchange={handleFileChange} />
+                                            </label>
                                         </div>
-                                    </template>
+                                        <template if:true={isfilename}>
+                                            <div class="delete-icon">
+                                                <button type="button"
+                                                    class="remove-button delete-div exp-delete-icon-css"
+                                                    onclick={handleDelete} title="Remove file">
+                                                    <lightning-icon icon-name="utility:delete" size="x-small"
+                                                        alternative-text="Delete icon"
+                                                        class="remove-icon"></lightning-icon>
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
                             </div>
                         </template>
@@ -517,10 +522,6 @@
 
                                         <!-- 'Visit Website' specific fields -->
                                         <template if:true={button.isVisitSite}>
-                                            <div class="urltype">
-                                                <label class="form-field-label">URL Type</label>
-                                                <input class="slds-input urlInput" type="text" value="Static" readonly disabled />
-                                            </div>
                                             <div class="webUrl">
                                                 <label class="form-field-label">Website URL</label>
                                                 <div class="count-input">
@@ -546,8 +547,7 @@
                                                 <label class="form-field-label">Phone Number</label>
                                                 <div class="count-input">
                                                     <lightning-input class="phone-btn" variant="label-hidden"
-                                                        placeholder="Enter Phone Number" type="tel"
-                                                        pattern="^[0-9]+$"
+                                                        placeholder="Enter Phone Number" type="tel" pattern="^[0-9]+$"
                                                         message-when-pattern-mismatch="Enter a valid phone number"
                                                         name="phonenum" value={button.phonenum} data-index={index}
                                                         max-length={maxtelephonelength} onchange={handleInputChange}>

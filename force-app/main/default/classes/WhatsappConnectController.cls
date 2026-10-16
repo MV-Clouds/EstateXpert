@@ -17,7 +17,7 @@ public with sharing class WhatsappConnectController {
     public static String lastModifiedDate {get; set;}
     public static String namespace {get; set;}
 
-    public static final String CONFIG_DEV_NAME = 'Whatsapp_OAuth';
+    public static final String CONFIG_DEV_NAME = 'Whatsapp_OAuth_1';
 
     public WhatsappConnectController() {
         String className = WhatsappConnectController.class.getName();

@@ -43,7 +43,7 @@
     height: var(--height-of-main-chat-container);
     background-color: var(--bg-page);
     border: 1px solid var(--border-light);
-    border-radius: 12px;
+    border-radius: 4px;
     overflow: hidden;
     box-shadow: var(--shadow-sm);
 }

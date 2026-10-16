@@ -6,7 +6,7 @@ global without sharing class WAWebhook {
     public static List<MVEX__AWS_Config__c> configList = [SELECT Id, MVEX__AWS_Access_Key__c, MVEX__AWS_Secret_Access_Key__c, MVEX__S3_Bucket_Name__c, MVEX__S3_Region_Name__c, CreatedDate, LastModifiedDate FROM MVEX__AWS_Config__c LIMIT 1];
     public static MVEX__AWS_Config__c configData = !configList.isEmpty() ? configList[0] : null;
 
-    private static final String CONFIG_DEV_NAME = 'Whatsapp_OAuth';
+    private static final String CONFIG_DEV_NAME = 'Whatsapp_OAuth_1';
 
     @HttpGet
     global static void doGet() {
@@ -647,9 +647,10 @@ global without sharing class WAWebhook {
                                 }
                             }
 
-                            if (value.containsKey('event')) {
-                                String event = (String) value.get('event');
-                                String templateId = String.valueOf(value.get('message_template_id'));
+                            String field = change.containsKey('field') ? String.valueOf(change.get('field')) : '';
+                            if (value.containsKey('event') || field == 'template_category_update' || field == 'message_template_status_update' || value.containsKey('message_template_id')) {
+                                String event = value.containsKey('event') ? (String) value.get('event') : (field == 'template_category_update' ? 'CATEGORY_UPDATE' : null);
+                                String templateId = value.get('message_template_id') != null ? String.valueOf(value.get('message_template_id')) : null;
                                 updateWhatsAppTemplateStatus(templateId, event, value);
                             }
                         }
@@ -667,29 +668,69 @@ global without sharing class WAWebhook {
 
     public static void updateWhatsAppTemplateStatus(String templateId, String event, Map<String, Object> valueMap) {
         try {
-            List<WA_Template__c> templates = [SELECT Id, Status__c, Previous_Status__c, Quality_Rating__c, Rejection_Reason__c, Last_Status_Update_Time__c 
-                                                FROM WA_Template__c WHERE Template_Id__c = :templateId LIMIT 1];
+            String templateName = valueMap != null && valueMap.containsKey('message_template_name') && valueMap.get('message_template_name') != null
+                ? String.valueOf(valueMap.get('message_template_name'))
+                : null;
+
+            List<WA_Template__c> templates = new List<WA_Template__c>();
+            if (String.isNotBlank(templateId)) {
+                templates = [SELECT Id, Status__c, Previous_Status__c, Quality_Rating__c, Rejection_Reason__c, Last_Status_Update_Time__c, Template_Category__c, Template_Id__c 
+                             FROM WA_Template__c WHERE Template_Id__c = :templateId LIMIT 1];
+            }
+            if (templates.isEmpty() && String.isNotBlank(templateName)) {
+                templates = [SELECT Id, Status__c, Previous_Status__c, Quality_Rating__c, Rejection_Reason__c, Last_Status_Update_Time__c, Template_Category__c, Template_Id__c 
+                             FROM WA_Template__c WHERE Template_Name__c = :templateName LIMIT 1];
+            }
 
             if (!templates.isEmpty()) {
                 WA_Template__c waTemplate = templates[0];
-                waTemplate.Previous_Status__c = waTemplate.Status__c;
                 waTemplate.Last_Status_Update_Time__c = System.now();
+
+                if (String.isNotBlank(templateId) && String.isBlank(waTemplate.Template_Id__c)) {
+                    waTemplate.Template_Id__c = templateId;
+                }
 
                 String upperEvent = String.isNotBlank(event) ? event.toUpperCase() : '';
                 if (upperEvent == 'APPROVED') {
+                    waTemplate.Previous_Status__c = waTemplate.Status__c;
                     waTemplate.Status__c = 'Active-Quality Pending';
                     waTemplate.Rejection_Reason__c = null;
                 } else if (upperEvent == 'PENDING' || upperEvent == 'IN_REVIEW') {
+                    waTemplate.Previous_Status__c = waTemplate.Status__c;
                     waTemplate.Status__c = 'In-Review';
                 } else if (upperEvent == 'REJECTED') {
+                    waTemplate.Previous_Status__c = waTemplate.Status__c;
                     waTemplate.Status__c = 'Rejected';
                 } else if (upperEvent == 'PAUSED') {
+                    waTemplate.Previous_Status__c = waTemplate.Status__c;
                     waTemplate.Status__c = 'Paused';
                 } else if (upperEvent == 'DISABLED') {
+                    waTemplate.Previous_Status__c = waTemplate.Status__c;
                     waTemplate.Status__c = 'Disabled';
                 }
 
                 if (valueMap != null) {
+                    // Update template category if changed or returned from Meta
+                    String rawCategory = null;
+                    if (valueMap.containsKey('new_category') && valueMap.get('new_category') != null) {
+                        rawCategory = String.valueOf(valueMap.get('new_category'));
+                    } else if (valueMap.containsKey('correct_category') && valueMap.get('correct_category') != null) {
+                        rawCategory = String.valueOf(valueMap.get('correct_category'));
+                    } else if (valueMap.containsKey('message_template_category') && valueMap.get('message_template_category') != null) {
+                        rawCategory = String.valueOf(valueMap.get('message_template_category'));
+                    } else if (valueMap.containsKey('category') && valueMap.get('category') != null) {
+                        rawCategory = String.valueOf(valueMap.get('category'));
+                    } else if (valueMap.containsKey('template_category') && valueMap.get('template_category') != null) {
+                        rawCategory = String.valueOf(valueMap.get('template_category'));
+                    }
+
+                    if (String.isNotBlank(rawCategory)) {
+                        String formattedCategory = formatCategory(rawCategory);
+                        if (String.isNotBlank(formattedCategory)) {
+                            waTemplate.Template_Category__c = formattedCategory;
+                        }
+                    }
+
                     if (valueMap.containsKey('reason') && valueMap.get('reason') != null) {
                         String r = String.valueOf(valueMap.get('reason')).trim();
                         if (String.isNotBlank(r) && !r.equalsIgnoreCase('NONE')) {
@@ -700,7 +741,7 @@ global without sharing class WAWebhook {
                                 }
                             }
                             waTemplate.Rejection_Reason__c = r;
-                        } else {
+                        } else if (upperEvent == 'APPROVED') {
                             waTemplate.Rejection_Reason__c = null;
                         }
                     }
@@ -719,6 +760,21 @@ global without sharing class WAWebhook {
             ErrorHandler.insertErrordata(e, 'WAWebhook', 'updateWhatsAppTemplateStatus', e.getMessage());
             System.debug('Error in updateWhatsAppTemplateStatus: ' + e.getMessage() + '\n' + e + '\n Exception line no: ' + e.getLineNumber());
         }
+    }
+
+    public static String formatCategory(String category) {
+        if (String.isBlank(category)) {
+            return null;
+        }
+        String cat = category.trim();
+        if (cat.equalsIgnoreCase('MARKETING')) {
+            return 'Marketing';
+        } else if (cat.equalsIgnoreCase('UTILITY')) {
+            return 'Utility';
+        } else if (cat.equalsIgnoreCase('AUTHENTICATION')) {
+            return 'Authentication';
+        }
+        return cat.substring(0, 1).toUpperCase() + cat.substring(1).toLowerCase();
     }
 
     public static String normalizePhoneNumber(String phoneNumber) {

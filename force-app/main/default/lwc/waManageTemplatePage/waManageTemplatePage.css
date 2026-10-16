@@ -853,31 +853,52 @@
 }
 
 .custom-upload-button {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     border: 1px solid #b7b6b6;
-    border-radius: 5px;
-    padding: 0.4rem;
-    padding-right: 0.6rem;
-    padding-left: 0.6rem;
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
     cursor: pointer;
+    background-color: #ffffff;
+    max-width: 320px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.custom-upload-button:hover {
+    border-color: #888888;
 }
 
 .upload-label {
     display: flex;
     align-items: center;
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.upload-label span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    color: #1f2937;
 }
 
 .upload-icon {
     width: 20px;
     height: 20px;
     margin-right: 8px;
+    flex-shrink: 0;
 }
 
 .file-input {
     display: none;
 }
 
+.chooseMedia,
 .chooseImage,
 .chooseVideo,
 .chooseDoc {
@@ -887,6 +908,21 @@
     position: relative;
     gap: 0.75rem;
     align-items: center;
+    flex-wrap: wrap;
+}
+
+.media-upload-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.delete-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .uploadlabel {
@@ -944,6 +980,18 @@
 
 .remove-button:hover lightning-icon {
     --slds-c-icon-color-foreground-default: #dc2626;
+}
+
+.remove-button svg {
+    fill: #000000;
+    color: #000000;
+    transition: all 0.2s ease;
+}
+
+.remove-button:hover svg,
+.remove-button:hover svg path {
+    fill: #dc2626 !important;
+    color: #dc2626 !important;
 }
 
 .creattempdiv3 {

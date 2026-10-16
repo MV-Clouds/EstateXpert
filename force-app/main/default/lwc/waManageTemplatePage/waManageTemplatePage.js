@@ -72,8 +72,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     // Core Form Fields
     templateName = '';
     selectedLanguage = 'en_US';
-    activeTab = 'Utility';
-    selectedOption = 'Custom';
+    activeTab = 'Marketing';
+    selectedOption = 'CustomMarketing';
     selectedContentType = 'None';
     header = '';
     tempBody = 'Hello! Thank you for choosing us for your property needs. Our team will be happy to assist you.';
@@ -608,7 +608,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 .then((data) => {
                     const { template, templateVariables } = data;
 
-                    this.activeTab = template.Template_Category__c || template.MVEX__Template_Category__c || 'Utility';
+                    this.activeTab = template.Template_Category__c || template.MVEX__Template_Category__c || 'Marketing';
                     this.selectedOption = template.Template_Type__c || template.MVEX__Template_Type__c || (this.activeTab === 'Marketing' ? 'CustomMarketing' : 'Custom');
 
                     setTimeout(() => {
@@ -957,12 +957,14 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     handleDelete() {
+        this.isLoading = true;
         const isOriginalInEdit = (this.isEditTemplate || this.isTemplateClone) &&
             this.originalContentVersionId !== null &&
             this.contentVersionId === this.originalContentVersionId;
 
         if (isOriginalInEdit) {
             this.resetFileData();
+            this.isLoading = false;
             return;
         }
 
@@ -980,6 +982,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 });
             } catch (e) {
                 this.resetFileData();
+            } finally {
+                this.isLoading = false;
             }
         } else if (this.contentVersionId) {
             deleteFile({ contentVersionId: this.contentVersionId })
@@ -987,9 +991,16 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                     this.showToast('File deleted successfully', 'success');
                     this.resetFileData();
                 })
-                .catch(() => this.showToast('Error deleting file!', 'error'));
+                .catch((error) => {
+                    console.error('Error deleting file - ', error);
+                    this.showToast('Error deleting file!', 'error');
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                });
         } else {
             this.resetFileData();
+            this.isLoading = false;
         }
     }
 
@@ -1914,8 +1925,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         this.originalHeader = '';
         this.nextIndex = 1;
         this.headIndex = 1;
-        this.activeTab = 'Utility';
-        this.selectedOption = 'Custom';
+        this.activeTab = 'Marketing';
+        this.selectedOption = 'CustomMarketing';
         this.resetFileData();
     }
 

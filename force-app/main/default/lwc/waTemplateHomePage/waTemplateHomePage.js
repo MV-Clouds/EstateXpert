@@ -604,6 +604,15 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                                 : 'exp-action-menu-item exp-action-menu-item-delete';
                             const deleteTitle = isDeleteDisabled ? deleteDisabledReason : 'Delete';
 
+                            // Normalize Rejection Reason: ignore "NONE", "none", or empty strings
+                            const rawReason = (record.Rejection_Reason__c || '').trim();
+                            const hasRejectionReason = rawReason !== '' && !/^none$/i.test(rawReason);
+                            const rejectionReason = hasRejectionReason ? rawReason : '';
+                            const hasStatusInfo = hasCooldown || hasRejectionReason;
+                            const statusInfoBtnClass = hasRejectionReason
+                                ? 'exp-status-info-btn exp-info-btn-danger'
+                                : 'exp-status-info-btn exp-info-btn-warning';
+
                             return {
                                 ...record,
                                 id: record.Id,
@@ -613,7 +622,12 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
                                 LanguageLabel: this.handleEmptyValue(record.LanguageLabel),
                                 Status__c: this.handleEmptyValue(statusVal),
                                 Quality_Rating__c: record.Quality_Rating__c || '',
-                                Rejection_Reason__c: record.Rejection_Reason__c || '',
+                                Rejection_Reason__c: rejectionReason,
+                                rejectionReason,
+                                hasRejectionReason,
+                                hasStatusInfo,
+                                statusInfoBtnClass,
+                                statusPopupClass: 'exp-status-info-popup open-downwards',
                                 hasCooldown,
                                 cooldownBadgeText,
                                 isEditDisabled,
@@ -790,14 +804,16 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
         const startIndex = (this.currentPage - 1) * this.pageSize;
         const endIndex = Math.min(startIndex + this.pageSize, this.totalItems);
         const pagedList = this.filteredRecords.slice(startIndex, endIndex);
-        this.visibleRecords = pagedList.map((item) => {
+        this.visibleRecords = pagedList.map((item, index) => {
             const isActionMenuOpen = this.openActionMenuId === item.id;
             const openUpwards = isActionMenuOpen && this.openActionMenuUpwards;
+            const isNearBottom = index >= Math.max(pagedList.length - 2, 1);
             return {
                 ...item,
                 isActionMenuOpen,
                 actionButtonClass: `exp-action-dots-btn ${isActionMenuOpen ? 'active' : ''}`,
                 actionMenuClass: `exp-action-dropdown-menu ${openUpwards ? 'open-upwards' : 'open-downwards'}`,
+                statusPopupClass: `exp-status-info-popup ${isNearBottom ? 'open-upwards' : 'open-downwards'}`,
                 rowClass: `table-tr ${isActionMenuOpen ? 'has-open-menu' : ''}`
             };
         });

@@ -463,34 +463,223 @@
     }
 }
 
-/* Status cell enhancements */
+/* Status cell enhancements - Inline status and info trigger */
 .exp-status-cell-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+}
+
+/* Ensure row/cell stacks cleanly when popup is hovered */
+.table-tr:hover td.exp-table-status-col,
+.table-tr:focus-within td.exp-table-status-col {
+    position: relative;
+    z-index: 120;
+}
+
+.exp-status-info-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.exp-status-info-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    flex-shrink: 0;
+}
+
+.exp-status-info-btn:focus-visible {
+    outline: 2px solid #0176D3;
+    outline-offset: 1px;
+}
+
+/* Warning theme (cooldown only) */
+.exp-info-btn-warning {
+    background-color: #FEF3C7;
+    color: #B45309;
+    border-color: #FDE68A;
+}
+
+.exp-info-btn-warning:hover {
+    background-color: #FDE68A;
+    color: #92400E;
+    transform: scale(1.1);
+}
+
+/* Danger theme (rejection reason) */
+.exp-info-btn-danger {
+    background-color: #FEE2E2;
+    color: #DC2626;
+    border-color: #FECACA;
+}
+
+.exp-info-btn-danger:hover {
+    background-color: #FECACA;
+    color: #B91C1C;
+    transform: scale(1.1);
+}
+
+/* User-friendly hover tooltip popup */
+.exp-status-info-popup {
+    position: absolute;
+    left: 50%;
+    min-width: 210px;
+    max-width: 280px;
+    background: #FFFFFF;
+    color: #1E293B;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), 
+                visibility 0.18s cubic-bezier(0.16, 1, 0.3, 1), 
+                transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    text-align: left;
+    white-space: normal;
+}
+
+.exp-status-info-popup.open-downwards {
+    top: calc(100% + 8px);
+    bottom: auto;
+    transform: translateX(-50%) translateY(-4px);
+}
+
+.exp-status-info-popup.open-upwards {
+    bottom: calc(100% + 8px);
+    top: auto;
+    transform: translateX(-50%) translateY(4px);
+}
+
+/* Downwards popup arrow (points upwards to icon) */
+.exp-status-info-popup.open-downwards::after {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent #FFFFFF transparent;
+}
+.exp-status-info-popup.open-downwards::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 7px;
+    border-style: solid;
+    border-color: transparent transparent #E2E8F0 transparent;
+}
+
+/* Upwards popup arrow (points downwards to icon) */
+.exp-status-info-popup.open-upwards::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: #FFFFFF transparent transparent transparent;
+}
+.exp-status-info-popup.open-upwards::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 7px;
+    border-style: solid;
+    border-color: #E2E8F0 transparent transparent transparent;
+}
+
+/* Hover and focus activation */
+.exp-status-info-wrapper:hover .exp-status-info-popup,
+.exp-status-info-wrapper:focus-within .exp-status-info-popup {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.exp-status-info-wrapper:hover .exp-status-info-popup.open-downwards,
+.exp-status-info-wrapper:focus-within .exp-status-info-popup.open-downwards {
+    transform: translateX(-50%) translateY(0);
+}
+
+.exp-status-info-wrapper:hover .exp-status-info-popup.open-upwards,
+.exp-status-info-wrapper:focus-within .exp-status-info-popup.open-upwards {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Popup content sections */
+.exp-popup-section {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    align-items: center;
 }
 
-.exp-cooldown-badge {
-    font-size: 11px;
-    color: #B45309;
-    background: #FEF3C7;
+.exp-popup-section + .exp-popup-section {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #E2E8F0;
+}
+
+.exp-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.exp-popup-tag {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     padding: 2px 6px;
     border-radius: 4px;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    font-weight: 500;
+    display: inline-block;
 }
 
-.exp-rejection-reason {
-    font-size: 11px;
+.exp-tag-danger {
+    background: #FEE2E2;
     color: #DC2626;
-    max-width: 140px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+}
+
+.exp-tag-warning {
+    background: #FEF3C7;
+    color: #B45309;
+}
+
+.exp-popup-text {
+    font-size: 12px;
     font-weight: 500;
+    color: #1E293B;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.exp-popup-hint {
+    font-size: 11px;
+    color: #64748B;
+    line-height: 1.35;
 }
 
 

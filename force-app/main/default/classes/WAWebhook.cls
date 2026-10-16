@@ -694,11 +694,18 @@ global without sharing class WAWebhook {
 
                 if (valueMap != null) {
                     if (valueMap.containsKey('reason') && valueMap.get('reason') != null) {
-                        String r = String.valueOf(valueMap.get('reason'));
-                        if (valueMap.containsKey('other_info') && valueMap.get('other_info') != null) {
-                            r += ' - ' + String.valueOf(valueMap.get('other_info'));
+                        String r = String.valueOf(valueMap.get('reason')).trim();
+                        if (String.isNotBlank(r) && !r.equalsIgnoreCase('NONE')) {
+                            if (valueMap.containsKey('other_info') && valueMap.get('other_info') != null) {
+                                String other = String.valueOf(valueMap.get('other_info')).trim();
+                                if (String.isNotBlank(other) && !other.equalsIgnoreCase('NONE')) {
+                                    r += ' - ' + other;
+                                }
+                            }
+                            waTemplate.Rejection_Reason__c = r;
+                        } else {
+                            waTemplate.Rejection_Reason__c = null;
                         }
-                        waTemplate.Rejection_Reason__c = r;
                     }
                     if (valueMap.containsKey('new_quality_score') && valueMap.get('new_quality_score') != null) {
                         waTemplate.Quality_Rating__c = String.valueOf(valueMap.get('new_quality_score'));

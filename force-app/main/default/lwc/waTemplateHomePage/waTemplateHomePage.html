@@ -259,17 +259,38 @@
                                                         role="gridcell" data-label="Status">
                                                         <div class="exp-status-cell-wrapper">
                                                             <span class={record.statusClass}>{record.Status__c}</span>
-                                                            <template if:true={record.hasCooldown}>
-                                                                <span class="exp-cooldown-badge"
-                                                                    title="Meta 24-hour edit cooldown is active">
-                                                                    ⏱️ {record.cooldownBadgeText}
-                                                                </span>
-                                                            </template>
-                                                            <template if:true={record.Rejection_Reason__c}>
-                                                                <span class="exp-rejection-reason"
-                                                                    title={record.Rejection_Reason__c}>
-                                                                    ⚠️ {record.Rejection_Reason__c}
-                                                                </span>
+                                                            <template if:true={record.hasStatusInfo}>
+                                                                <div class="exp-status-info-wrapper">
+                                                                    <button type="button" class={record.statusInfoBtnClass}
+                                                                        aria-label="Status Information" tabindex="0">
+                                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                                                            stroke="currentColor" stroke-width="2.3"
+                                                                            stroke-linecap="round" stroke-linejoin="round">
+                                                                            <circle cx="12" cy="12" r="10"></circle>
+                                                                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                                                                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                                                        </svg>
+                                                                    </button>
+                                                                    <div class={record.statusPopupClass} role="tooltip">
+                                                                        <template if:true={record.hasRejectionReason}>
+                                                                            <div class="exp-popup-section exp-popup-rejection">
+                                                                                <div class="exp-popup-header">
+                                                                                    <span class="exp-popup-tag exp-tag-danger">Rejection Reason</span>
+                                                                                </div>
+                                                                                <div class="exp-popup-text">{record.rejectionReason}</div>
+                                                                            </div>
+                                                                        </template>
+                                                                        <template if:true={record.hasCooldown}>
+                                                                            <div class="exp-popup-section exp-popup-cooldown">
+                                                                                <div class="exp-popup-header">
+                                                                                    <span class="exp-popup-tag exp-tag-warning">Edit Cooldown</span>
+                                                                                </div>
+                                                                                <div class="exp-popup-text">⏱️ {record.cooldownBadgeText}</div>
+                                                                                <div class="exp-popup-hint">Meta allows editing approved templates once every 24 hours.</div>
+                                                                            </div>
+                                                                        </template>
+                                                                    </div>
+                                                                </div>
                                                             </template>
                                                         </div>
                                                     </td>

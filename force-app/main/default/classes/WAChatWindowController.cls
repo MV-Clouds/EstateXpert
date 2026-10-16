@@ -90,19 +90,18 @@ public with sharing class WAChatWindowController {
             }
 
             if (String.isNotBlank(phoneNumber)) {
-                String cleanPhone = phoneNumber.replaceAll('[\\s\\-\\(\\)\\.]+', '');
-                String cleanWithPlus = cleanPhone.startsWith('+') ? cleanPhone : ('+' + cleanPhone);
-                String cleanWithoutPlus = cleanPhone.startsWith('+') ? cleanPhone.substring(1) : cleanPhone;
-                Set<String> phoneCandidates = new Set<String>{ phoneNumber, cleanPhone, cleanWithPlus, cleanWithoutPlus };
+                Set<String> phoneCandidates = getPhoneCandidates(phoneNumber);
 
                 chats = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
                            WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
-                           WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, File_Data__c, 
-                           Sent_Template_Details__c FROM WA_Chat__c WHERE Phone__c IN :phoneCandidates WITH USER_MODE ORDER BY CreatedDate ASC];
+                           WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c, 
+                           Sent_Template_Details__c FROM WA_Chat__c 
+                           WHERE (Phone__c IN :phoneCandidates OR Normalize_Phone__c IN :phoneCandidates OR (Contact__c != null AND Contact__c = :contactId)) 
+                           WITH USER_MODE ORDER BY CreatedDate ASC];
             } else if (String.isNotBlank(contactId)) {
                 chats = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
                             WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
-                            WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, File_Data__c, 
+                            WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c, 
                             Sent_Template_Details__c FROM WA_Chat__c WHERE Contact__c = :contactId WITH USER_MODE ORDER BY CreatedDate ASC];
             }
 
@@ -178,6 +177,7 @@ public with sharing class WAChatWindowController {
             chat.Message__c = message;
             chat.WA_Template__c = templateId;
             chat.Phone__c = phoneNumber;
+            chat.Normalize_Phone__c = normalizePhoneNumber(phoneNumber);
             chat.Type_of_Message__c = 'Outbound Messages';
             chat.Message_Status__c = null;
             chat.Message_Type__c = messageType;
@@ -215,7 +215,7 @@ public with sharing class WAChatWindowController {
 
             chat = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
                         WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
-                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, File_Data__c, 
+                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c, 
                         Sent_Template_Details__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
             return chat;
         } catch (Exception e) {
@@ -523,6 +523,7 @@ public with sharing class WAChatWindowController {
             chat.Message__c = String.isNotBlank(template.Template_Body__c) ? template.Template_Body__c : template.Template_Name__c;
             chat.WA_Template__c = template.Id;
             chat.Phone__c = phoneNumber;
+            chat.Normalize_Phone__c = normalizePhoneNumber(phoneNumber);
             chat.Type_of_Message__c = 'Outbound Messages';
             chat.Message_Type__c = 'Template';
             chat.Sent_Template_Details__c = JSON.serialize(components);
@@ -535,7 +536,7 @@ public with sharing class WAChatWindowController {
             // Re-query chat with complete template relationship fields for UI
             chat = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
                         WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
-                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, 
+                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, CreatedDate, Phone__c, Normalize_Phone__c, 
                         File_Data__c, Sent_Template_Details__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
 
             // 3. Log error if callout failed (safe to log after callout)
@@ -639,6 +640,7 @@ public with sharing class WAChatWindowController {
             WA_Chat__c chat = new WA_Chat__c();
             chat.Message__c = message;
             chat.Phone__c = phoneNumber;
+            chat.Normalize_Phone__c = normalizePhoneNumber(phoneNumber);
             chat.Type_of_Message__c = 'Outbound Messages';
             chat.Message_Status__c = null;
             chat.Message_Type__c = messageType;
@@ -648,7 +650,7 @@ public with sharing class WAChatWindowController {
 
             insert as user chat;
             chat = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
-                        WA_Template__r.Template_Name__c, CreatedDate, File_Data__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
+                        WA_Template__r.Template_Name__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
 
             return chat;
         } catch (Exception e) {
@@ -761,5 +763,32 @@ public with sharing class WAChatWindowController {
             ErrorHandler.insertErrordata(e, 'WAChatWindowController', 'getTemplatesOnly', e.getMessage());
             return new List<WA_Template__c>();
         }
+    }
+
+    /**
+     * @description : Normalizes a phone number by removing all non-digit characters for matching
+     * @param phoneNumber - Input phone number
+     * @return String - Digits-only normalized phone number
+     */
+    public static String normalizePhoneNumber(String phoneNumber) {
+        if (String.isBlank(phoneNumber)) {
+            return '';
+        }
+        return phoneNumber.replaceAll('[^0-9]', '');
+    }
+
+    /**
+     * @description : Generates candidate variations of a phone number (raw and characters removed) for matching
+     * @param phoneNumber - Input phone number
+     * @return Set<String> - Set of candidate phone variations
+     */
+    public static Set<String> getPhoneCandidates(String phoneNumber) {
+        Set<String> candidates = new Set<String>();
+        if (String.isNotBlank(phoneNumber)) {
+            candidates.add(phoneNumber.trim());
+            candidates.add(normalizePhoneNumber(phoneNumber));
+        }
+        candidates.remove('');
+        return candidates;
     }
 }

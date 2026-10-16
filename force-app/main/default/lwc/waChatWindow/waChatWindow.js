@@ -409,7 +409,7 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                     return;
                 }
 
-                const eventPhone = payload.Phone__c || payload.MVEX__Phone__c;
+                const eventPhone = payload.Normalize_Phone__c || payload.Phone__c || payload.MVEX__Phone__c;
                 // If phone is provided, match against this contact's phone
                 if (eventPhone && self.phoneNumber && !self.matchPhoneNumbers(eventPhone, self.phoneNumber)) {
                     return;
@@ -510,6 +510,8 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             Reply_to__c: rawChat.Reply_to__c ?? rawChat.Reply_To__c ?? rawChat.MVEX__Reply_to__c ?? null,
             File_Data__c: rawChat.File_Data__c ?? rawChat.MVEX__File_Data__c ?? null,
             Sent_Template_Details__c: rawChat.Sent_Template_Details__c ?? rawChat.MVEX__Sent_Template_Details__c ?? null,
+            Phone__c: rawChat.Phone__c ?? rawChat.MVEX__Phone__c ?? '',
+            Normalize_Phone__c: rawChat.Normalize_Phone__c ?? rawChat.MVEX__Normalize_Phone__c ?? '',
             CreatedDate: rawChat.CreatedDate
         };
     }
@@ -548,8 +550,6 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                         if (!this.phoneNumber) {
                             this.chatwindowerror = 'The selected record does not have a phone number configured in WhatsApp settings.';
                             this.showchatwindowerror = true;
-                        } else {
-                            this.phoneNumber = this.phoneNumber.replaceAll(' ', '');
                         }
                     } else {
                         if (combinedData?.error) {
@@ -1284,7 +1284,8 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
 
     createJSONBody(to, type, replyId, data) {
         try {
-            let payload = `{ "messaging_product": "whatsapp", "to": "${to}", "type": "${type.toLowerCase()}"`;
+            const apiTo = (to || '').replace(/\D/g, '');
+            let payload = `{ "messaging_product": "whatsapp", "to": "${apiTo}", "type": "${type.toLowerCase()}"`;
 
             if (replyId) {
                 payload += `, "context": {"message_id": "${replyId}"}`;

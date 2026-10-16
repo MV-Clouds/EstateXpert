@@ -98,10 +98,12 @@ global without sharing class WAWebhook {
                 return;
             }
 
-            if (!senderId.contains('+')) {
+            String rawSenderId = senderId;
+            if (senderId != null && !senderId.contains('+')) {
                 senderId = '+' + senderId;
             }
-            String formattedNumber = normalizePhoneNumber(senderId);
+            String formattedNumber = senderId != null ? senderId.replaceAll('[\\s\\-\\(\\)\\.]+', '') : '';
+            String normalizedSenderPhone = normalizePhoneNumber(rawSenderId);
 
             Map<String, Object> profile = (Map<String, Object>) sender.get('profile');
             String senderName = profile != null ? (String) profile.get('name') : '';
@@ -126,15 +128,9 @@ global without sharing class WAWebhook {
                 }
             }
 
-            // Build candidate phone formats for matching existing Contact
-            Set<String> phoneCandidates = new Set<String>{ senderPhone, formattedNumber, strippedNumber };
-            if (String.isNotBlank(strippedNumber)) {
-                if (strippedNumber.length() > 10) {
-                    phoneCandidates.add(strippedNumber.substring(strippedNumber.length() - 10));
-                    phoneCandidates.add('0' + strippedNumber.substring(strippedNumber.length() - 10));
-                }
-                phoneCandidates.add('+' + strippedNumber);
-            }
+            // Build candidate phone formats for matching existing Contact and Chat records
+            Set<String> phoneCandidates = getPhoneCandidates(senderPhone);
+            phoneCandidates.addAll(getPhoneCandidates(rawSenderId));
 
             // Search for existing Contact by configured phone field
             Contact contactRecord = null;
@@ -235,7 +231,7 @@ global without sharing class WAWebhook {
 
             if (existingChatRecords.isEmpty()) {
                 if (messageType.equalsIgnoreCase('reaction')) {
-                    List<WA_Chat__c> reactToChat = [SELECT Id, Reaction__c, Contact__c, Phone__c FROM WA_Chat__c WHERE Message_ID__c = :reactToMessageId];
+                    List<WA_Chat__c> reactToChat = [SELECT Id, Reaction__c, Contact__c, Phone__c, Normalize_Phone__c FROM WA_Chat__c WHERE Message_ID__c = :reactToMessageId];
                     if (!reactToChat.isEmpty()) {
                         reactToChat[0].Reaction__c = reactToChat[0].Reaction__c != null ? reactToChat[0].Reaction__c : '<|USER|>';
                         reactToChat[0].Reaction__c = reactToChat[0].Reaction__c.split('<|USER|>')[0] + '<|USER|>' + (reactedEmoji != null ? reactedEmoji : '');
@@ -247,6 +243,7 @@ global without sharing class WAWebhook {
                 }
 
                 whatsappChat.Phone__c = senderPhone;
+                whatsappChat.Normalize_Phone__c = normalizedSenderPhone;
                 whatsappChat.Type_of_Message__c = 'Inbound Messages';
                 whatsappChat.Message_Type__c = messageType;
                 whatsappChat.Message_ID__c = whatsAppMessageID;
@@ -396,12 +393,12 @@ global without sharing class WAWebhook {
 
             insert whatsappChat;
 
-            List<WA_Chat__c> chatList = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, WA_Template__r.Template_Name__c, WA_Template__r.Name, CreatedDate, Contact__c, Phone__c, File_Data__c FROM WA_Chat__c WHERE Id = :whatsappChat.Id LIMIT 1];
+            List<WA_Chat__c> chatList = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, WA_Template__r.Template_Name__c, WA_Template__r.Name, CreatedDate, Contact__c, Phone__c, Normalize_Phone__c, File_Data__c FROM WA_Chat__c WHERE Id = :whatsappChat.Id LIMIT 1];
             WA_Chat__c chatToSend = !chatList.isEmpty() ? chatList[0] : whatsappChat;
             publishRefreshEvent('Chat', whatsappChat.Phone__c);
 
             if (userRecs.isEmpty()) {
-                List<WA_Chat__c> lastSentChat = [SELECT Id, Phone__c, CreatedById FROM WA_Chat__c WHERE Phone__c = :formattedNumber AND Type_of_Message__c = 'Outbound Messages' ORDER BY CreatedDate DESC LIMIT 1];
+                List<WA_Chat__c> lastSentChat = [SELECT Id, Phone__c, Normalize_Phone__c, CreatedById FROM WA_Chat__c WHERE (Phone__c IN :phoneCandidates OR Normalize_Phone__c IN :phoneCandidates) AND Type_of_Message__c = 'Outbound Messages' ORDER BY CreatedDate DESC LIMIT 1];
                 if (String.isNotBlank(recordId)) {
                     if (!lastSentChat.isEmpty()) {
                         sendNotificationForContact(recordId, objectApiName, lastSentChat[0].CreatedById);
@@ -625,7 +622,7 @@ global without sharing class WAWebhook {
                                     String status = (String) statusMap.get('status');
                                     String waid = statusMap != null ? (String) statusMap.get('id') : null;
 
-                                    List<WA_Chat__c> waChats = [SELECT Id, Message_Status__c, Message_ID__c, Phone__c FROM WA_Chat__c WHERE Message_ID__c = :waid LIMIT 1];
+                                    List<WA_Chat__c> waChats = [SELECT Id, Message_Status__c, Message_ID__c, Phone__c, Normalize_Phone__c FROM WA_Chat__c WHERE Message_ID__c = :waid LIMIT 1];
                                     if (!waChats.isEmpty()) {
                                         WA_Chat__c waChat = waChats[0];
                                         if (status == 'sent' && waChat.Message_Status__c != 'Delivered' && waChat.Message_Status__c != 'Seen') {
@@ -726,9 +723,19 @@ global without sharing class WAWebhook {
 
     public static String normalizePhoneNumber(String phoneNumber) {
         if (String.isBlank(phoneNumber)) {
-            return phoneNumber;
+            return '';
         }
-        return phoneNumber.replaceAll('[\\s\\-\\(\\)\\.]+', '');
+        return phoneNumber.replaceAll('[^0-9]', '');
+    }
+
+    public static Set<String> getPhoneCandidates(String phoneNumber) {
+        Set<String> candidates = new Set<String>();
+        if (String.isNotBlank(phoneNumber)) {
+            candidates.add(phoneNumber.trim());
+            candidates.add(normalizePhoneNumber(phoneNumber));
+        }
+        candidates.remove('');
+        return candidates;
     }
 
     public static void publishRefreshEvent(String type, String phone) {

@@ -147,11 +147,24 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
         return `${prefix}: ${this.formatActivityDate(d)}`;
     }
 
+    formatTimeAMPM(date) {
+        if (!date) return '';
+        let hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+        return `${hours}:${minutesStr} ${ampm}`;
+    }
+
     get lastActivityFullDate() {
         const lastChat = this.lastSuccessfulChat;
         if (!lastChat || !lastChat.CreatedDate) return '';
         const d = new Date(lastChat.CreatedDate);
-        return isNaN(d.getTime()) ? '' : d.toLocaleString();
+        if (isNaN(d.getTime())) return '';
+        const dateStr = d.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
+        return `${dateStr}, ${this.formatTimeAMPM(d)}`;
     }
 
     formatActivityDate(date) {
@@ -171,7 +184,7 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             date.getFullYear() === yesterday.getFullYear()
         );
 
-        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const timeStr = this.formatTimeAMPM(date);
 
         if (isToday) {
             return `Today, ${timeStr}`;

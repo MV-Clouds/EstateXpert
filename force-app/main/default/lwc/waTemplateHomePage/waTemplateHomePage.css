@@ -647,6 +647,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    padding: unset !important;
+    padding-bottom: 8px !important;
 }
 
 .exp-popup-tag {

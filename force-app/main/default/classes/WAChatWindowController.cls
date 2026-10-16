@@ -187,28 +187,79 @@ public with sharing class WAChatWindowController {
             }
 
             if (messageType == 'Image' || messageType == 'Document' || messageType == 'Video' || messageType == 'Audio') {
-                List<ContentVersion> cv = [SELECT Id, ContentSize, Title, ContentDocumentId FROM ContentVersion WHERE Id = :message WITH USER_MODE];
+                List<ContentVersion> cv = [
+                    SELECT Id, ContentSize, Title, ContentDocumentId, FileExtension 
+                    FROM ContentVersion 
+                    WHERE Id = :message OR ContentDocumentId = :message 
+                    WITH USER_MODE 
+                    ORDER BY CreatedDate DESC 
+                    LIMIT 1
+                ];
                 if (cv.isEmpty()) {
                     return null;
                 }
-                if (cv[0].ContentSize > 5000000) {
+
+                Long maxBytes = 100L * 1024 * 1024;
+                if (messageType == 'Image') {
+                    maxBytes = 5L * 1024 * 1024;
+                } else if (messageType == 'Video' || messageType == 'Audio') {
+                    maxBytes = 16L * 1024 * 1024;
+                }
+
+                if (cv[0].ContentSize > maxBytes) {
                     ContentDocument cd = new ContentDocument(Id = cv[0].ContentDocumentId);
                     delete as user cd;
-                    throw new AuraHandledException('FILE_SIZE_EXCEEDED');
+                    String maxLabel = (messageType == 'Image') ? '5 MB' : ((messageType == 'Document') ? '100 MB' : '16 MB');
+                    throw new AuraHandledException('File size exceeds the ' + maxLabel + ' limit for ' + messageType + '.');
                 }
-                ContentDistribution cd = new ContentDistribution();
-                cd.Name = cv[0].Title;
-                cd.ContentVersionId = message;
-                cd.PreferencesAllowViewInBrowser = true;
-                cd.PreferencesLinkLatestVersion = true;
-                cd.PreferencesNotifyOnVisit = false;
-                cd.PreferencesPasswordRequired = false;
-                cd.PreferencesAllowOriginalDownload = true;
-                insert as user cd;
 
-                chat.Message__c = [SELECT ContentDownloadUrl FROM ContentDistribution WHERE Id = :cd.Id WITH USER_MODE].ContentDownloadUrl;
-                Map<String, Object> fileData = new Map<String, Object>{ 'fileName' => cv[0].Title, 'documentId' => cv[0].ContentDocumentId, 'contentVersionId' => message };
+                List<ContentDistribution> cdList = [
+                    SELECT Id, DistributionPublicUrl, ContentDownloadUrl 
+                    FROM ContentDistribution 
+                    WHERE ContentVersionId = :cv[0].Id 
+                    WITH USER_MODE 
+                    LIMIT 1
+                ];
+                String downloadUrl;
+                if (!cdList.isEmpty() && String.isNotBlank(cdList[0].ContentDownloadUrl)) {
+                    downloadUrl = cdList[0].ContentDownloadUrl;
+                } else {
+                    ContentDistribution cd = new ContentDistribution();
+                    cd.Name = cv[0].Title != null ? cv[0].Title : 'Chat Media';
+                    cd.ContentVersionId = cv[0].Id;
+                    cd.PreferencesAllowViewInBrowser = true;
+                    cd.PreferencesLinkLatestVersion = true;
+                    cd.PreferencesNotifyOnVisit = false;
+                    cd.PreferencesPasswordRequired = false;
+                    cd.PreferencesAllowOriginalDownload = true;
+                    insert as user cd;
+                    downloadUrl = [SELECT ContentDownloadUrl FROM ContentDistribution WHERE Id = :cd.Id WITH USER_MODE].ContentDownloadUrl;
+                }
+
+                chat.Message__c = downloadUrl;
+                Map<String, Object> fileData = new Map<String, Object>{
+                    'fileName' => cv[0].Title,
+                    'documentId' => cv[0].ContentDocumentId,
+                    'contentVersionId' => cv[0].Id
+                };
                 chat.File_Data__c = JSON.serialize(fileData);
+
+                if (String.isNotBlank(recordId)) {
+                    List<ContentDocumentLink> existingLinks = [
+                        SELECT Id FROM ContentDocumentLink 
+                        WHERE ContentDocumentId = :cv[0].ContentDocumentId AND LinkedEntityId = :recordId 
+                        WITH USER_MODE 
+                        LIMIT 1
+                    ];
+                    if (existingLinks.isEmpty()) {
+                        ContentDocumentLink cdl = new ContentDocumentLink();
+                        cdl.ContentDocumentId = cv[0].ContentDocumentId;
+                        cdl.LinkedEntityId = recordId;
+                        cdl.ShareType = 'V';
+                        cdl.Visibility = 'AllUsers';
+                        insert as user cdl;
+                    }
+                }
             }
 
             insert as user chat;
@@ -719,81 +770,31 @@ public with sharing class WAChatWindowController {
     }
 
     /**
-     * @description : Uploads a chat file to Salesforce storage (ContentVersion + ContentDistribution) and creates a chat record
-     * @param chatData - Map containing base64Data, fileName, mimeType, messageType, recordId, replyToChatId, phoneNumber
-     * @return WA_Chat__c
+     * @description : Deletes a ContentDocument uploaded to Salesforce
+     * @param documentId - ContentDocumentId or ContentVersionId
+     * @return String status message
      */
     @AuraEnabled
-    public static WA_Chat__c uploadChatFile(Map<String, String> chatData) {
+    public static String deleteFile(String documentId) {
         try {
-            String base64Data = chatData.get('base64Data');
-            String fileName = chatData.get('fileName');
-            String mimeType = chatData.get('mimeType');
-            String messageType = chatData.get('messageType');
-            String recordId = chatData.get('recordId');
-            String replyToChatId = chatData.get('replyToChatId');
-            String phoneNumber = chatData.get('phoneNumber');
-
-            if (String.isBlank(base64Data) || String.isBlank(fileName)) {
-                throw new AuraHandledException('File data or file name is missing.');
+            if (String.isBlank(documentId)) {
+                return 'No file ID provided';
             }
-
-            // Create ContentVersion
-            ContentVersion cv = new ContentVersion();
-            cv.Title = fileName;
-            cv.PathOnClient = '/' + fileName;
-            cv.VersionData = EncodingUtil.base64Decode(base64Data);
-            insert as user cv;
-
-            // Query ContentDocumentId and Id
-            cv = [SELECT Id, ContentDocumentId, ContentSize, Title FROM ContentVersion WHERE Id = :cv.Id WITH USER_MODE LIMIT 1];
-
-            // Create ContentDistribution for public download link
-            ContentDistribution cd = new ContentDistribution();
-            cd.Name = fileName;
-            cd.ContentVersionId = cv.Id;
-            cd.PreferencesAllowViewInBrowser = true;
-            cd.PreferencesLinkLatestVersion = true;
-            cd.PreferencesNotifyOnVisit = false;
-            cd.PreferencesPasswordRequired = false;
-            cd.PreferencesAllowOriginalDownload = true;
-            insert as user cd;
-
-            // Query the ContentDownloadUrl
-            cd = [SELECT DistributionPublicUrl, ContentDownloadUrl FROM ContentDistribution WHERE Id = :cd.Id WITH USER_MODE LIMIT 1];
-            String downloadUrl = cd.ContentDownloadUrl;
-
-            // Create WA_Chat__c record
-            WA_Chat__c chat = new WA_Chat__c();
-            chat.Message__c = downloadUrl;
-            chat.Phone__c = phoneNumber;
-            chat.Normalize_Phone__c = normalizePhoneNumber(phoneNumber);
-            chat.Type_of_Message__c = 'Outbound Messages';
-            chat.Message_Status__c = null;
-            chat.Message_Type__c = messageType;
-            chat.Reply_to__c = replyToChatId;
-            if (String.isNotBlank(recordId) && recordId.startsWith('003')) {
-                chat.Contact__c = recordId;
+            List<ContentDocument> docs = [
+                SELECT Id 
+                FROM ContentDocument 
+                WHERE Id = :documentId OR LatestPublishedVersionId = :documentId 
+                WITH USER_MODE 
+                LIMIT 1
+            ];
+            if (!docs.isEmpty()) {
+                delete as user docs;
+                return 'File deleted successfully!';
             }
-            Map<String, Object> fileData = new Map<String, Object>{
-                'fileName' => fileName,
-                'mimeType' => mimeType,
-                'documentId' => cv.ContentDocumentId,
-                'contentVersionId' => cv.Id
-            };
-            chat.File_Data__c = JSON.serialize(fileData);
-
-            insert as user chat;
-
-            chat = [SELECT Id, Type_of_Message__c, Message_ID__c, Message__c, Message_Status__c, Message_Type__c, Reply_to__c, Reaction__c, WA_Template__c, 
-                        WA_Template__r.Template_Name__c, WA_Template__r.Header_Type__c, WA_Template__r.Header_Body__c, WA_Template__r.Template_Body__c, 
-                        WA_Template__r.Footer_Body__c, WA_Template__r.Button_Body__c, WA_Template__r.Image_Header_Handle__c, WA_Template__r.File_Name__c, CreatedDate, Phone__c, Normalize_Phone__c, File_Data__c, 
-                        Sent_Template_Details__c, Failed_Reason__c FROM WA_Chat__c WHERE Id = :chat.Id WITH USER_MODE];
-
-            return chat;
+            return 'No file found to delete.';
         } catch (Exception e) {
-            ErrorHandler.insertErrordata(e, 'WAChatWindowController', 'uploadChatFile', e.getMessage());
-            throw new AuraHandledException(e.getMessage());
+            ErrorHandler.insertErrordata(e, 'WAChatWindowController', 'deleteFile', e.getMessage());
+            return 'Error: ' + e.getMessage();
         }
     }
 

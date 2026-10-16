@@ -7,6 +7,21 @@
             <div class="divcontainer2">
                 <div class="createtempdiv2">
                     <div class="slds-theme_default templateContent3 template-details-card">
+                        <template if:true={isEditBlocked}>
+                            <div class="exp-edit-blocked-banner">
+                                <div class="exp-edit-blocked-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                </div>
+                                <div class="exp-edit-blocked-content">
+                                    <h4 class="exp-edit-blocked-title">Template Editing Restricted</h4>
+                                    <p class="exp-edit-blocked-desc">{editBlockReason}</p>
+                                </div>
+                            </div>
+                        </template>
                         <div class="tempHead">
                             <p class="name-language">Template Details</p>
                         </div>
@@ -136,33 +151,66 @@
                                 </div>
                                 <div class="compact-media-section">
                                     <template if:false={isfilename}>
-                                        <label class="compact-upload-card">
-                                            <div class="compact-upload-left">
-                                                <div class="compact-upload-icon-wrap">
-                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0176D3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                                        <polyline points="17 8 12 3 7 8"></polyline>
-                                                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                                                    </svg>
+                                        <template if:true={isAWSEnabled}>
+                                            <label class="compact-upload-card">
+                                                <div class="compact-upload-left">
+                                                    <div class="compact-upload-icon-wrap">
+                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                            stroke="#0176D3" stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                            <polyline points="17 8 12 3 7 8"></polyline>
+                                                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="compact-upload-text-group">
+                                                        <span class="compact-upload-title">Choose {selectedContentType}
+                                                            file</span>
+                                                        <span class="compact-upload-specs">
+                                                            Max {templateLimitSizeLabel} &bull;
+                                                            {templateLimitFormatsLabel}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                                <div class="compact-upload-text-group">
-                                                    <span class="compact-upload-title">Choose {selectedContentType} file</span>
-                                                    <span class="compact-upload-specs">
-                                                        Max {templateLimitSizeLabel} &bull; {templateLimitFormatsLabel}
-                                                    </span>
+                                                <div class="compact-storage-tag {templateStorageBadgeClass}">
+                                                    {templateStorageLabel}</div>
+                                                <input type="file" accept={mediaAccept} class="file-input"
+                                                    onchange={handleFileChange} />
+                                            </label>
+                                        </template>
+
+                                        <template if:false={isAWSEnabled}>
+                                            <div class="sf-file-upload-card">
+                                                <div class="sf-upload-header">
+                                                    <div class="compact-upload-text-group">
+                                                        <span class="compact-upload-title">Upload {selectedContentType}
+                                                            sample</span>
+                                                        <span class="compact-upload-specs">
+                                                            Max {templateLimitSizeLabel} &bull;
+                                                            {templateLimitFormatsLabel} (1 file only)
+                                                        </span>
+                                                    </div>
+                                                    <div class="compact-storage-tag {templateStorageBadgeClass}">
+                                                        {templateStorageLabel}</div>
                                                 </div>
+                                                <lightning-file-upload name="headerFileUpload" label=""
+                                                    accept={mediaAcceptExtensions}
+                                                    onuploadfinished={handleUploadFinished}>
+                                                </lightning-file-upload>
                                             </div>
-                                            <div class="compact-storage-tag {templateStorageBadgeClass}">{templateStorageLabel}</div>
-                                            <input type="file" accept={mediaAccept} class="file-input" onchange={handleFileChange} />
-                                        </label>
+                                        </template>
                                     </template>
 
                                     <template if:true={isfilename}>
                                         <div class="compact-file-card">
                                             <div class="compact-file-left">
                                                 <div class="compact-file-icon-wrap">
-                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00A884" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                        stroke="#00A884" stroke-width="2" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <path
+                                                            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z">
+                                                        </path>
                                                         <polyline points="14 2 14 8 20 8"></polyline>
                                                         <line x1="16" y1="13" x2="8" y2="13"></line>
                                                         <line x1="16" y1="17" x2="8" y2="17"></line>
@@ -171,13 +219,19 @@
                                                 </div>
                                                 <div class="compact-file-info">
                                                     <span class="compact-file-name" title={fileName}>{fileName}</span>
-                                                    <span class="compact-file-meta">Selected &bull; {templateStorageLabel}</span>
+                                                    <span class="compact-file-meta">Selected &bull;
+                                                        {templateStorageLabel}</span>
                                                 </div>
                                             </div>
-                                            <button type="button" class="compact-remove-btn" onclick={handleDelete} title="Remove file">
-                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <button type="button" class="compact-remove-btn" onclick={handleDelete}
+                                                title="Remove file">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
                                                     <polyline points="3 6 5 6 21 6"></polyline>
-                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                    <path
+                                                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                                    </path>
                                                 </svg>
                                             </button>
                                         </div>

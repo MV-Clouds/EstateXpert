@@ -203,6 +203,7 @@
         opacity: 0;
         transform: translateY(-6px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -302,8 +303,13 @@
 }
 
 @keyframes highlightPulse {
-    0% { background-color: #FEF08A; }
-    100% { background-color: inherit; }
+    0% {
+        background-color: #FEF08A;
+    }
+
+    100% {
+        background-color: inherit;
+    }
 }
 
 /* Message Bubble Base */
@@ -1234,7 +1240,7 @@
 .send-action-margin svg {
     margin-left: -1px;
     margin-bottom: -1px;
-} 
+}
 
 .send-btn-spinner {
     animation: sendBtnSpin 0.75s linear infinite;
@@ -1245,6 +1251,7 @@
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }
@@ -1298,11 +1305,25 @@
     color: #FFFFFF;
 }
 
-.icon-doc { background: #EF4444; }
-.icon-photo { background: #8B5CF6; }
-.icon-video { background: #0D9488; }
-.icon-audio { background: #10B981; }
-.icon-template { background: #0176D3; }
+.icon-doc {
+    background: #EF4444;
+}
+
+.icon-photo {
+    background: #8B5CF6;
+}
+
+.icon-video {
+    background: #0D9488;
+}
+
+.icon-audio {
+    background: #10B981;
+}
+
+.icon-template {
+    background: #0176D3;
+}
 
 /* Emoji Picker in Composer */
 .emoji-picker-container {
@@ -1475,6 +1496,7 @@
         opacity: 0;
         transform: scale(0.96) translateY(6px);
     }
+
     to {
         opacity: 1;
         transform: scale(1) translateY(0);
@@ -1801,31 +1823,204 @@
     display: none;
 }
 
-.file-details {
+/* Salesforce Uploader Clean Card (No Dotted Outer Box) */
+.sf-uploader-wrapper {
+    width: 100%;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    transition: all 0.2s ease;
+}
+
+.sf-uploader-wrapper:hover {
+    border-color: #CBD5E1;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+.sf-uploader-prompt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 14px;
+    background: #F8FAFC;
+    border-radius: 8px;
+    border: 1px solid #F1F5F9;
+    box-sizing: border-box;
+}
+
+.sf-media-icon-badge {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sf-media-icon-badge.badge-image {
+    background: #EFF6FF;
+    color: #2563EB;
+}
+
+.sf-media-icon-badge.badge-video {
+    background: #F5F3FF;
+    color: #7C3AED;
+}
+
+.sf-media-icon-badge.badge-audio {
+    background: #ECFDF5;
+    color: #059669;
+}
+
+.sf-media-icon-badge.badge-document {
+    background: #FFFBEB;
+    color: #D97706;
+}
+
+.sf-prompt-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+}
+
+.sf-prompt-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1E293B;
+    line-height: 1.3;
+}
+
+.sf-prompt-subtitle {
+    font-size: 11.5px;
+    color: #64748B;
+    line-height: 1.3;
+}
+
+.sf-file-upload-action {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.sf-file-upload-action lightning-file-upload {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+/* Selected File Card State */
+.selected-file-card {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 8px 12px;
-    background: #F1F5F9;
-    border-radius: 6px;
+    padding: 12px 14px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    box-sizing: border-box;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
-.file-name {
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--text-primary);
+.selected-file-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.selected-file-icon-wrap {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: #F0FDF4;
+    border: 1px solid #DCFCE7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.selected-file-details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+}
+
+.selected-file-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0F172A;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
-.remove-file-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    font-weight: bold;
+.selected-file-subtext {
+    font-size: 11.5px;
+    color: #16A34A;
+    font-weight: 500;
+}
+
+.selected-file-remove-btn {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    color: #64748B;
     cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.selected-file-remove-btn:hover {
+    background: #FEE2E2;
+    border-color: #FECACA;
+    color: #DC2626;
+}
+
+.selected-file-remove-btn:disabled {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.85;
+    background: #F1F5F9;
+    border-color: #E2E8F0;
+}
+
+.delete-icon-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid #CBD5E1;
+    border-top-color: #DC2626;
+    border-radius: 50%;
+    animation: deleteIconSpin 0.7s linear infinite;
+    box-sizing: border-box;
+}
+
+@keyframes deleteIconSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .remove-file-btn:hover {

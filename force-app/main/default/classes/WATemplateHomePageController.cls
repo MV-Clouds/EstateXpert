@@ -31,7 +31,7 @@ public with sharing class WATemplateHomePageController {
                                                 Image_Header_Handle__c, Status__c, Quality_Rating__c, Rejection_Reason__c, Previous_Status__c,
                                                 Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c, Last_Status_Update_Time__c,
                                                 LastModifiedById, LastModifiedDate, CreatedDate FROM WA_Template__c 
-                                                WITH USER_MODE ORDER BY LastModifiedDate DESC LIMIT 50000];
+                                                ORDER BY LastModifiedDate DESC LIMIT 50000];
             return templates;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WATemplateHomePageController', 'getWhatsAppTemplates', e.getMessage());
@@ -49,7 +49,7 @@ public with sharing class WATemplateHomePageController {
     @AuraEnabled
     public static String deleteTemplete(String templateId) {
         try {
-            WA_Template__c wbTempRec = [SELECT Id, Name, Template_Name__c, Status__c, Template_Id__c FROM WA_Template__c WHERE Id = :templateId WITH USER_MODE LIMIT 1];
+            WA_Template__c wbTempRec = [SELECT Id, Name, Template_Name__c, Status__c, Template_Id__c, Previous_Status__c, Last_Meta_Edit_Time__c FROM WA_Template__c WHERE Id = :templateId LIMIT 1];
 
             // If template is Draft or has no Meta ID, delete directly from Salesforce
             if (wbTempRec.Status__c == 'Draft' || wbTempRec.Status__c == 'DRAFT' || String.isBlank(wbTempRec.Template_Id__c) || wbTempRec.Template_Id__c == 'DRAFT') {
@@ -132,9 +132,11 @@ public with sharing class WATemplateHomePageController {
 
             List<WA_Template__c> sourceTemplates = [SELECT Id, Template_Name__c, Template_Category__c, Language__c, Header_Type__c, Header_Body__c, File_Name__c, 
                                                         Image_Header_Handle__c, Template_Body__c, Footer_Body__c, Button_Body__c, Button_Label__c, Button_Type__c,
-                                                        Template_Miscellaneous_Data__c, (SELECT Name, Object_Name__c, Field_Name__c, Type__c, Alternate_Text__c 
+                                                        Template_Miscellaneous_Data__c, Status__c, Quality_Rating__c, Rejection_Reason__c, Previous_Status__c,
+                                                        Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c, Last_Status_Update_Time__c,
+                                                        (SELECT Name, Object_Name__c, Field_Name__c, Type__c, Alternate_Text__c 
                                                         FROM WA_Template_Variables__r ORDER BY Name ASC) FROM WA_Template__c WHERE Id = :escapedTemplateId 
-                                                        WITH USER_MODE LIMIT 1];
+                                                        LIMIT 1];
 
             if (sourceTemplates.isEmpty()) {
                 result.put('status',  'error');
@@ -211,11 +213,12 @@ public with sharing class WATemplateHomePageController {
                        Footer_Body__c, Header_Body__c, Header_Type__c, toLabel(Language__c) LanguageLabel, Language__c, 
                        Template_Body__c, Template_Category__c, Template_Miscellaneous_Data__c, 
                        File_Name__c, Image_Header_Handle__c, Status__c, Quality_Rating__c,
+                       Rejection_Reason__c, Previous_Status__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c,
+                       Edit_Count_30_Days__c, Last_Status_Update_Time__c,
                        (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c 
                         FROM WA_Template_Variables__r ORDER BY Name ASC) 
                 FROM WA_Template__c 
                 WHERE Id = :templateId 
-                WITH USER_MODE 
                 LIMIT 1
             ];
 
@@ -373,11 +376,12 @@ public with sharing class WATemplateHomePageController {
                 SELECT Id, Name, Template_Name__c, Button_Body__c, Button_Label__c, Button_Type__c, Image_Header_Handle__c, 
                        Footer_Body__c, Header_Body__c, Header_Type__c, toLabel(Language__c) LanguageLabel, Language__c, File_Name__c, 
                        Template_Body__c, Template_Category__c, Template_Miscellaneous_Data__c, Status__c, Quality_Rating__c,
+                       Rejection_Reason__c, Previous_Status__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c,
+                       Edit_Count_30_Days__c, Last_Status_Update_Time__c,
                        (SELECT Id, Name, Field_Name__c, Object_Name__c, Type__c, Alternate_Text__c 
                         FROM WA_Template_Variables__r ORDER BY Name ASC) 
                 FROM WA_Template__c 
                 WHERE Id = :templateId 
-                WITH USER_MODE 
                 LIMIT 1
             ];
 

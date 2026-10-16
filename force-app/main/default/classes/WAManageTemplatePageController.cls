@@ -17,8 +17,10 @@ public with sharing class WAManageTemplatePageController {
     public static List<WA_Template__c> getWhatsAppTemplates() {
         try {
             List<WA_Template__c> templates = [SELECT Id, Name, Template_Id__c, Template_Name__c, Template_Category__c, toLabel(Language__c) LanguageLabel,
-                                                File_Name__c, Image_Header_Handle__c, Status__c, LastModifiedById, LastModifiedDate, CreatedDate
-                                                FROM WA_Template__c WITH USER_MODE ORDER BY LastModifiedDate DESC LIMIT 50000];
+                                                File_Name__c, Image_Header_Handle__c, Status__c, Quality_Rating__c, Rejection_Reason__c, Previous_Status__c,
+                                                Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c, Last_Status_Update_Time__c,
+                                                LastModifiedById, LastModifiedDate, CreatedDate
+                                                FROM WA_Template__c ORDER BY LastModifiedDate DESC LIMIT 50000];
             return templates;
         } catch (Exception e) {
             ErrorHandler.insertErrordata(e, 'WAManageTemplatePageController', 'getWhatsAppTemplates', e.getMessage());
@@ -76,8 +78,8 @@ public with sharing class WAManageTemplatePageController {
             List<WA_Template__c> templates = [SELECT Id, Name, Template_Name__c, Button_Body__c, Status__c, Image_Header_Handle__c, Template_Id__c, Button_Label__c, 
                                                 Button_Type__c, File_Name__c, Footer_Body__c, Header_Body__c, Header_Type__c, Language__c, Template_Body__c, 
                                                 Template_Category__c, Template_Miscellaneous_Data__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c,
-                                                Edit_Count_30_Days__c, Quality_Rating__c, Rejection_Reason__c, Previous_Status__c
-                                                FROM WA_Template__c  WHERE Id = :templateId WITH USER_MODE
+                                                Edit_Count_30_Days__c, Quality_Rating__c, Rejection_Reason__c, Previous_Status__c, Last_Status_Update_Time__c
+                                                FROM WA_Template__c WHERE Id = :templateId
                                                 ORDER BY LastModifiedDate DESC LIMIT 1];
 
             if (templates.isEmpty()) {
@@ -101,7 +103,7 @@ public with sharing class WAManageTemplatePageController {
             }
 
             List<WA_Template_Variable__c> templateVariables = [SELECT Name, Object_Name__c, Field_Name__c, Type__c, Alternate_Text__c FROM WA_Template_Variable__c 
-                                                                WHERE WA_Template__c = :template.Id WITH USER_MODE];
+                                                                WHERE WA_Template__c = :template.Id];
 
             if (!templateVariables.isEmpty()) {
                 for (WA_Template_Variable__c variable : templateVariables) {
@@ -336,9 +338,13 @@ public with sharing class WAManageTemplatePageController {
             }
 
             // Pre-callout eligibility validation against Meta 24h & 30-day rules
-            List<WA_Template__c> currentTemps = [SELECT Id, Status__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c FROM WA_Template__c 
-                                                    WHERE (Template_Id__c = :templateId AND Template_Id__c != null) OR (Template_Name__c = :templateName AND 
-                                                    Template_Name__c != null) WITH USER_MODE LIMIT 1];
+            List<WA_Template__c> currentTemps = [SELECT Id, Status__c, Previous_Status__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c, Template_Id__c, Template_Name__c,
+                                                        Last_Status_Update_Time__c, Quality_Rating__c, Rejection_Reason__c 
+                                                    FROM WA_Template__c 
+                                                    WHERE (Template_Id__c = :templateId AND Template_Id__c != null) 
+                                                       OR (Template_Name__c = :templateName AND Template_Name__c != null)
+                                                       OR (Id = :templateId)
+                                                    ORDER BY LastModifiedDate DESC LIMIT 1];
             if (!currentTemps.isEmpty()) {
                 Map<String, Object> eligibility = evaluateEditEligibility(currentTemps[0]);
                 if (eligibility.get('canEdit') == false) {
@@ -348,10 +354,18 @@ public with sharing class WAManageTemplatePageController {
                     return response;
                 }
             }
+
+            String metaTemplateId = templateId;
+            if (!currentTemps.isEmpty() && String.isNotBlank(currentTemps[0].Template_Id__c)) {
+                metaTemplateId = currentTemps[0].Template_Id__c;
+            }
             
             String token = config.Access_Token__c;
-            String apiVersion = config.API_Version__c;
-            String endpoint = config.Authorization_Endpoint__c + '/' + apiVersion + '/' + templateId;
+            String apiEndpoint = String.isNotBlank(config.Authorization_Endpoint__c) 
+                ? config.Authorization_Endpoint__c.removeEnd('/') : 'https://graph.facebook.com';
+            String apiVersion = (config.API_Version__c != null && config.API_Version__c.trim().startsWithIgnoreCase('v')) 
+                ? config.API_Version__c.trim() : 'v' + (config.API_Version__c != null ? config.API_Version__c.trim() : '24.0');
+            String endpoint = apiEndpoint + '/' + apiVersion + '/' + metaTemplateId;
 
             WATemplateWrapper.TemplateWrapper templateWrapper = (WATemplateWrapper.TemplateWrapper) JSON.deserialize(serializedWrapper, WATemplateWrapper.TemplateWrapper.class);
 
@@ -369,11 +383,45 @@ public with sharing class WAManageTemplatePageController {
 
             if (res.getStatusCode() == 200) {
                 Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
-                Id updatedTemplateId = WATemplateWrapper.handleSuccessResponse((String) responseMap.get('id'), (String) responseMap.get('status'), payload, templateWrapper);
+                String metaId = (responseMap.containsKey('id') && responseMap.get('id') != null) ? (String) responseMap.get('id') : metaTemplateId;
+                String metaStatus = 'IN_REVIEW';
+
+                Id updatedTemplateId = WATemplateWrapper.handleSuccessResponse(metaId, metaStatus, payload, templateWrapper);
+                if (updatedTemplateId == null && !currentTemps.isEmpty()) {
+                    updatedTemplateId = currentTemps[0].Id;
+                }
+
+                // Explicitly update the Salesforce record with In-Review status and 24h edit timestamp
+                if (updatedTemplateId != null) {
+                    try {
+                        WA_Template__c tempToUpdate = [SELECT Id, Status__c, Previous_Status__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c, Last_Status_Update_Time__c, Template_Id__c, Template_Name__c FROM WA_Template__c WHERE Id = :updatedTemplateId LIMIT 1];
+                        tempToUpdate.Previous_Status__c = tempToUpdate.Status__c;
+                        tempToUpdate.Status__c = 'In-Review';
+                        tempToUpdate.Last_Meta_Edit_Time__c = System.now();
+                        tempToUpdate.Last_Status_Update_Time__c = System.now();
+                        List<String> activeTimestamps = purgeAndGetActiveTimestamps(tempToUpdate.Edit_Timestamps_JSON__c);
+                        activeTimestamps.add(JSON.serialize(System.now()).replaceAll('"', ''));
+                        tempToUpdate.Edit_Timestamps_JSON__c = JSON.serialize(activeTimestamps);
+                        tempToUpdate.Edit_Count_30_Days__c = activeTimestamps.size();
+                        update tempToUpdate;
+                    } catch (Exception updateEx) {
+                        ErrorHandler.insertErrorData(updateEx, 'WAManageTemplatePageController', 'editWhatsappTemplate', 'Direct update failed: ' + updateEx.getMessage());
+                    }
+                }
+
+                // Publish platform event to notify waTemplateHomePage to refresh
+                try {
+                    PlatformEventController.publishRefreshEvent('Template');
+                } catch (Exception peEx) {
+                    // ignore platform event error
+                }
+
                 response.put('success', true);
                 response.put('status', 'success');
-                response.put('message', 'Template is being updated, you will be notified once it is ready.');
-            } else if (res.getStatusCode() != 200 && String.isNotEmpty(res.getBody())) {
+                response.put('templateId', updatedTemplateId);
+                response.put('message', 'Template updated successfully and submitted for review.');
+            } else {
+                String errorMsg = res.getBody();
                 try {
                     Map<String, Object> resMap = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
                     if (resMap.containsKey('error')) {
@@ -383,17 +431,25 @@ public with sharing class WAManageTemplatePageController {
 
                         if (errorCode == 100 && errorMessage != null && errorMessage.toLowerCase().contains('file handle that has expired')) {
                             uploadFileToMetaAndGetHeaderHandle(templateName, serializedWrapper, payloadWrapper, templateId);
+                            response.put('success', false);
+                            response.put('status', 'warning');
+                            response.put('message', 'Header file handle expired. Refreshing handle and retrying...');
+                            return response;
+                        }
+
+                        if (errorMap.containsKey('error_user_msg') && errorMap.get('error_user_msg') != null) {
+                            errorMsg = (String) errorMap.get('error_user_msg');
+                        } else if (errorMessage != null) {
+                            errorMsg = errorMessage;
                         }
                     }
                 } catch (Exception er) {
                     System.debug('Error parsing error response: ' + er.getMessage());
                 }
                 response.put('success', false);
-                response.put('status', 'warning');
-                response.put('message', 'Template is being updated, you will be notified once it is ready.');
-            } else {
-                response.put('success', false);
+                response.put('status', 'error');
                 response.put('errorMessage', res.getBody());
+                response.put('message', errorMsg);
                 ErrorHandler.insertErrordata(null, 'WAManageTemplatePageController', 'editWhatsappTemplate', 'HTTP callout failed with status: ' + res.getStatusCode() + ' and body: ' + res.getBody());
             }
         } catch (Exception e) {
@@ -661,33 +717,97 @@ public with sharing class WAManageTemplatePageController {
     }
 
     @AuraEnabled
-    public static Map<String, String> uploadFile(String base64Data, String fileName) {
+    public static Map<String, String> getPublicLink(String fileId, String headerType) {
         Map<String, String> resultMap = new Map<String, String>();
         try {
-            ContentVersion cv = new ContentVersion();
-            cv.Title = fileName;
-            cv.PathOnClient = '/' + fileName;
-            cv.VersionData = EncodingUtil.base64Decode(base64Data);
-            insert as user cv;
+            if (String.isBlank(fileId)) {
+                throw new AuraHandledException('File ID is required.');
+            }
 
-            String publicUrl = getPublicLink(cv.Id);
+            List<ContentVersion> cvList = [
+                SELECT Id, Title, ContentDocumentId, ContentSize, FileExtension 
+                FROM ContentVersion 
+                WHERE Id = :fileId OR ContentDocumentId = :fileId 
+                WITH USER_MODE 
+                ORDER BY CreatedDate DESC 
+                LIMIT 1
+            ];
+
+            if (cvList.isEmpty()) {
+                throw new AuraHandledException('Uploaded file version not found.');
+            }
+
+            ContentVersion cv = cvList[0];
+
+            if (String.isNotBlank(headerType)) {
+                Long maxBytes = 100L * 1024 * 1024; // Document limit 100 MB
+                if (headerType == 'Image') {
+                    maxBytes = 5L * 1024 * 1024; // 5 MB
+                } else if (headerType == 'Video') {
+                    maxBytes = 16L * 1024 * 1024; // 16 MB
+                }
+
+                if (cv.ContentSize > maxBytes) {
+                    delete as user new ContentDocument(Id = cv.ContentDocumentId);
+                    String maxLabel = (headerType == 'Image') ? '5 MB' : ((headerType == 'Video') ? '16 MB' : '100 MB');
+                    throw new AuraHandledException('File size exceeds the ' + maxLabel + ' limit for ' + headerType + '.');
+                }
+            }
+
+            List<ContentDistribution> existingDist = [
+                SELECT Id, DistributionPublicUrl, ContentDownloadUrl 
+                FROM ContentDistribution 
+                WHERE ContentVersionId = :cv.Id 
+                WITH USER_MODE 
+                LIMIT 1
+            ];
+
+            String downloadUrl;
+            if (!existingDist.isEmpty() && String.isNotBlank(existingDist[0].ContentDownloadUrl)) {
+                downloadUrl = existingDist[0].ContentDownloadUrl;
+            } else {
+                ContentDistribution distribution = new ContentDistribution();
+                distribution.Name = cv.Title != null ? cv.Title : 'Public Link';
+                distribution.ContentVersionId = cv.Id;
+                distribution.PreferencesAllowViewInBrowser = true;
+                distribution.PreferencesLinkLatestVersion = true;
+                distribution.PreferencesNotifyOnVisit = false;
+                distribution.PreferencesPasswordRequired = false;
+                distribution.PreferencesAllowOriginalDownload = true;
+                insert as user distribution;
+
+                distribution = [
+                    SELECT DistributionPublicUrl, ContentDownloadUrl 
+                    FROM ContentDistribution 
+                    WHERE Id = :distribution.Id 
+                    WITH USER_MODE 
+                    LIMIT 1
+                ];
+                downloadUrl = distribution.ContentDownloadUrl;
+            }
 
             resultMap.put('contentVersionId', cv.Id);
-            resultMap.put('publicUrl', publicUrl);
+            resultMap.put('contentDocumentId', cv.ContentDocumentId);
+            resultMap.put('publicUrl', downloadUrl);
+            resultMap.put('fileName', cv.Title);
             return resultMap;
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'WAManageTemplatePageController', 'uploadFile', e.getMessage());
-            return null;
+            ErrorHandler.insertErrorData(e, 'WAManageTemplatePageController', 'getPublicLink', e.getMessage());
+            throw new AuraHandledException(e.getMessage());
         }
     }
 
     @AuraEnabled
     public static String deleteFile(String contentVersionId) {
         try {
-            List<ContentDocument> docs = [SELECT Id FROM ContentDocument WHERE LatestPublishedVersionId = :contentVersionId WITH USER_MODE LIMIT 1];
+            List<ContentDocument> docs = [
+                SELECT Id 
+                FROM ContentDocument 
+                WHERE Id = :contentVersionId OR LatestPublishedVersionId = :contentVersionId 
+                WITH USER_MODE 
+                LIMIT 1
+            ];
             if (!docs.isEmpty()) {
-                Id contentDocumentId = docs[0].Id;
-                
                 delete as user docs;
                 return 'File deleted successfully!';
             } else {
@@ -695,34 +815,6 @@ public with sharing class WAManageTemplatePageController {
             }
         } catch (Exception e) {
             ErrorHandler.insertErrorData(e, 'WAManageTemplatePageController', 'deleteFile', e.getMessage());
-            return 'Error: ' + e.getMessage();
-        }
-    }
-
-    public static String getPublicLink(String contentVersionId) {
-        try {
-            // Get the related ContentDocument Id
-            ContentVersion contentVersion = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :contentVersionId WITH USER_MODE LIMIT 1];
-            
-            // Create a new ContentDistribution (public link)
-            ContentDistribution distribution = new ContentDistribution();
-            distribution.Name = 'Public Link';
-            distribution.ContentVersionId = contentVersion.Id;
-            distribution.PreferencesAllowViewInBrowser= true;
-            distribution.PreferencesLinkLatestVersion=true;
-            distribution.PreferencesNotifyOnVisit=false;
-            distribution.PreferencesPasswordRequired=false;
-            distribution.PreferencesAllowOriginalDownload= true;
-
-            insert as user distribution;
-            
-            // Query the created ContentDistribution to get the public URL
-            distribution = [SELECT DistributionPublicUrl,ContentDownloadUrl FROM ContentDistribution WHERE Id = :distribution.Id WITH USER_MODE LIMIT 1];
-        
-            // Return the public URL
-            return distribution.ContentDownloadUrl;
-        } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'WAManageTemplatePageController', 'getPublicLink', e.getMessage());
             return 'Error: ' + e.getMessage();
         }
     }

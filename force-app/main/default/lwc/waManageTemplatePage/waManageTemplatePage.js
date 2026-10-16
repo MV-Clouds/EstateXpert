@@ -10,7 +10,7 @@ import editWhatsappTemplate from '@salesforce/apex/WAManageTemplatePageControlle
 import getObjectFields from '@salesforce/apex/WAManageTemplatePageController.getObjectFields';
 import getWhatsAppTemplates from '@salesforce/apex/WAManageTemplatePageController.getWhatsAppTemplates';
 import getDynamicObjectData from '@salesforce/apex/WAManageTemplatePageController.getDynamicObjectData';
-import uploadFile from '@salesforce/apex/WAManageTemplatePageController.uploadFile';
+import getPublicLink from '@salesforce/apex/WAManageTemplatePageController.getPublicLink';
 import deleteFile from '@salesforce/apex/WAManageTemplatePageController.deleteFile';
 import getS3ConfigSettings from '@salesforce/apex/ImageAndMediaController.getS3ConfigSettings';
 import AWS_SDK from "@salesforce/resourceUrl/AWSSDK";
@@ -135,6 +135,8 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     // Edit Mode & Indexing
     _edittemplateid;
     isEditTemplate = false;
+    isEditBlocked = false;
+    editBlockReason = '';
     originalTemplateName = '';
     originalHeader = '';
     metaTemplateId = '';
@@ -200,13 +202,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     get templateLimitSizeLabel() {
-        if (this.isAWSEnabled) {
-            if (this.selectedContentType === 'Image') return '5 MB';
-            if (this.selectedContentType === 'Video') return '16 MB';
-            if (this.selectedContentType === 'Document') return '100 MB';
-            return '16 MB';
-        }
-        return '4 MB (Salesforce storage limit)';
+        if (this.selectedContentType === 'Image') return '5 MB';
+        if (this.selectedContentType === 'Video') return '16 MB';
+        if (this.selectedContentType === 'Document') return '100 MB';
+        return '16 MB';
     }
 
     get templateLimitFormatsLabel() {
@@ -262,6 +261,13 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     get mediaAccept() {
         return this.selectedContentType === 'Image' ? 'image/png, image/jpeg, image/jpg'
             : (this.selectedContentType === 'Video' ? 'video/mp4' : 'application/pdf');
+    }
+
+    get mediaAcceptExtensions() {
+        if (this.selectedContentType === 'Image') return ['.jpg', '.jpeg', '.png'];
+        if (this.selectedContentType === 'Video') return ['.mp4'];
+        if (this.selectedContentType === 'Document') return ['.pdf'];
+        return [];
     }
 
     // Buttons State Getters
@@ -395,6 +401,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     get isSubmitDisabled() {
+        if (!this.isTemplateClone && this.isEditBlocked) {
+            return true;
+        }
+
         const areButtonFieldsFilled = this.buttonList.every(b => b.btntext && (b.webURL || b.phonenum));
         const areCustomButtonsFilled = this.customButtonList.every(b => b.Cbtntext);
         const hasButtonError = this.customButtonList.some(b => b.hasError) || this.buttonList.some(b => b.hasError);
@@ -633,6 +643,14 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 .then((data) => {
                     const { template, templateVariables } = data;
 
+                    if (!this.isTemplateClone) {
+                        this.isEditBlocked = data.canEdit === false;
+                        this.editBlockReason = data.editBlockReason || '';
+                    } else {
+                        this.isEditBlocked = false;
+                        this.editBlockReason = '';
+                    }
+
                     this.activeTab = template.Template_Category__c || template.MVEX__Template_Category__c || 'Marketing';
                     this.selectedOption = template.Template_Type__c || template.MVEX__Template_Type__c || (this.activeTab === 'Marketing' ? 'CustomMarketing' : 'Custom');
 
@@ -868,14 +886,10 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
                 return;
             }
 
-            let maxSize = 4;
-            if (this.isAWSEnabled) {
-                if (this.selectedContentType === 'Image') maxSize = 5;
-                else if (this.selectedContentType === 'Video') maxSize = 16;
-                else if (this.selectedContentType === 'Document') maxSize = 100;
-            } else {
-                maxSize = 4;
-            }
+            let maxSize = 100;
+            if (this.selectedContentType === 'Image') maxSize = 5;
+            else if (this.selectedContentType === 'Video') maxSize = 16;
+            else if (this.selectedContentType === 'Document') maxSize = 100;
 
             if (file.size > maxSize * 1024 * 1024) {
                 const storageName = this.isAWSEnabled ? 'AWS S3' : 'Salesforce Storage';
@@ -892,13 +906,6 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
             if (this.isAWSEnabled) {
                 await this.uploadToAWS([file]);
-            } else {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    this.fileData = reader.result.split(',')[1];
-                    this.handleUpload();
-                };
-                reader.readAsDataURL(file);
             }
         } catch (error) {
             this.isLoading = false;
@@ -938,24 +945,40 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
         }
     }
 
-    handleUpload() {
-        if (!this.fileData) {
-            this.showToast('Please select a file first!', 'error');
-            return;
-        }
+    async handleUploadFinished(event) {
+        try {
+            const uploadedFiles = event.detail.files;
+            if (!uploadedFiles || uploadedFiles.length === 0) return;
 
-        this.isLoading = true;
-        uploadFile({ base64Data: this.fileData, fileName: this.fileName })
-            .then((result) => {
+            const uploadedFile = uploadedFiles[0];
+            this.isLoading = true;
+            this.fileName = uploadedFile.name;
+            this.file = uploadedFile;
+
+            const fileId = uploadedFile.documentId || uploadedFile.contentVersionId;
+            const result = await getPublicLink({
+                fileId: fileId,
+                headerType: this.selectedContentType
+            });
+
+            if (result && result.publicUrl) {
                 this.contentVersionId = result.contentVersionId;
                 this.filePreview = (result.publicUrl || '').replace('/sfc/p/#', '/sfc/p/');
                 this.uploadFileToMeta();
-            })
-            .catch((error) => {
+            } else {
                 this.isLoading = false;
-                this.showToast('Error uploading file!', 'error');
-                console.error('Error uploading file - ', error);
-            });
+                this.showToast('Failed to generate public link for uploaded file.', 'error');
+            }
+        } catch (error) {
+            this.isLoading = false;
+            this.fileName = '';
+            this.file = null;
+            this.contentVersionId = null;
+            this.filePreview = '';
+            const msg = error?.body?.message || error?.message || 'Error uploading file.';
+            this.showToast(msg, 'error');
+            console.error('Error in handleUploadFinished:', error);
+        }
     }
 
     uploadFileToMeta() {
@@ -1057,9 +1080,14 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     }
 
     handleContentType(event) {
+        const prevType = this.selectedContentType;
         this.selectedContentType = event.detail?.value !== undefined ? event.detail.value : event.target.value;
-        if (this.selectedContentType === 'None' || this.selectedContentType === 'Text') {
-            this.resetFileData();
+        if (prevType !== this.selectedContentType) {
+            if (this.selectedContentType === 'None' || this.selectedContentType === 'Text') {
+                this.resetFileData();
+            } else if (this.fileName || this.contentVersionId) {
+                this.handleDelete();
+            }
         }
     }
 
@@ -1768,6 +1796,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
     // ==========================================
 
     handleConfirm() {
+        if (!this.isTemplateClone && this.isEditBlocked) {
+            this.showToast(this.editBlockReason || 'This template cannot be edited at this time.', 'error');
+            return;
+        }
+
         const bodyFormat = this.validateVariableFormat(this.tempBody, this.selectedVariableType, true);
         if (!bodyFormat.isValid) {
             this.showToast(bodyFormat.errorMessage, 'error');
@@ -1805,6 +1838,11 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
 
     handleSubmit() {
         try {
+            if (!this.isTemplateClone && this.isEditBlocked) {
+                this.showToast(this.editBlockReason || 'This template cannot be edited at this time.', 'error');
+                return;
+            }
+
             if (this.isMarketingCategory && !this.isCheckboxChecked && this.visitWebsiteCount > 0) {
                 this.showToast('Please select check-box to report website clicks.', 'error');
                 return;
@@ -1827,6 +1865,7 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             };
 
             const template = {
+                sfRecordId: (this.isEditTemplate || this.edittemplateid) && !this.isTemplateClone ? this.edittemplateid : null,
                 templateName: this.templateName || null,
                 templateCategory: this.activeTab || null,
                 templateType: this.selectedOption || null,
@@ -1864,9 +1903,9 @@ export default class WaManageTemplatePage extends NavigationMixin(LightningEleme
             const serializedWrapper = JSON.stringify(template);
             const payload = JSON.stringify(buildPayload(template));
 
-            const isEditOperation = this.metaTemplateId && this.metaTemplateId !== 'DRAFT' && !this.isTemplateClone;
+            const isEditOperation = (this.isEditTemplate || (this.metaTemplateId && this.metaTemplateId !== 'DRAFT')) && !this.isTemplateClone;
             const submitPromise = isEditOperation
-                ? editWhatsappTemplate({ serializedWrapper, payloadWrapper: payload, templateId: this.metaTemplateId })
+                ? editWhatsappTemplate({ serializedWrapper, payloadWrapper: payload, templateId: this.metaTemplateId || this.edittemplateid, templateName: this.templateName })
                 : createWhatsappTemplate({ serializedWrapper, payloadWrapper: payload, templateName: this.templateName });
 
             submitPromise.then(result => {

@@ -8,7 +8,7 @@ import { subscribe, unsubscribe } from 'lightning/empApi';
 import getCombinedData from '@salesforce/apex/WAChatWindowController.getCombinedData';
 import createChat from '@salesforce/apex/WAChatWindowController.createChat';
 import createChatForAWSFiles from '@salesforce/apex/WAChatWindowController.createChatForAWSFiles';
-import uploadChatFile from '@salesforce/apex/WAChatWindowController.uploadChatFile';
+import deleteFile from '@salesforce/apex/WAChatWindowController.deleteFile';
 import updateReaction from '@salesforce/apex/WAChatWindowController.updateReaction';
 import sendWhatsappMessage from '@salesforce/apex/WAChatWindowController.sendWhatsappMessage';
 import updateStatus from '@salesforce/apex/WAChatWindowController.updateStatus';
@@ -59,6 +59,10 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
     @track s3;
     @track selectedFilesToUpload = [];
     @track selectedFileName;
+    @track uploadedFile = null;
+    @track awsUploadedKey = null;
+    @track awsFileUrl = null;
+    @track isDeletingFile = false;
     @track showLicenseError = false;
     @track phoneNumber = '';
     @track recordName = '';
@@ -195,8 +199,8 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
         }
 
         const isSameYear = date.getFullYear() === now.getFullYear();
-        const dateOptions = isSameYear 
-            ? { day: 'numeric', month: 'short' } 
+        const dateOptions = isSameYear
+            ? { day: 'numeric', month: 'short' }
             : { day: 'numeric', month: 'short', year: 'numeric' };
 
         const dateStr = date.toLocaleDateString([], dateOptions);
@@ -274,6 +278,29 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
 
     get uploadLabel() {
         return 'Upload ' + (this.uploadFileType || 'File');
+    }
+
+    get isUploadImage() {
+        return this.uploadFileType === 'Image';
+    }
+
+    get isUploadVideo() {
+        return this.uploadFileType === 'Video';
+    }
+
+    get isUploadAudio() {
+        return this.uploadFileType === 'Audio';
+    }
+
+    get isUploadDocument() {
+        return this.uploadFileType === 'Document';
+    }
+
+    get mediaTypeBadgeClass() {
+        if (this.uploadFileType === 'Image') return 'badge-image';
+        if (this.uploadFileType === 'Video') return 'badge-video';
+        if (this.uploadFileType === 'Audio') return 'badge-audio';
+        return 'badge-document';
     }
 
     get filteredTemplate() {
@@ -389,7 +416,7 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
 
     disconnectedCallback() {
         if (this.subscription) {
-            unsubscribe(this.subscription, () => {});
+            unsubscribe(this.subscription, () => { });
             this.subscription = null;
         }
     }
@@ -679,8 +706,8 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                 item.failedTooltip = 'Failed to send';
                 if (item.isFailed && item.Failed_Reason__c) {
                     try {
-                        const parsed = typeof item.Failed_Reason__c === 'string' 
-                            ? JSON.parse(item.Failed_Reason__c) 
+                        const parsed = typeof item.Failed_Reason__c === 'string'
+                            ? JSON.parse(item.Failed_Reason__c)
                             : item.Failed_Reason__c;
                         if (parsed?.error?.message) {
                             item.failedTooltip = parsed.error.message;
@@ -875,6 +902,14 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             this.templateSearchKey = null;
             this.audioPreview = false;
             this.audioURL = '';
+            if (this.isAWSEnabled && this.awsUploadedKey) {
+                this.deleteAWSFile(this.awsUploadedKey).catch(e => console.warn('Clean up AWS error on close:', e));
+                this.awsUploadedKey = null;
+                this.awsFileUrl = null;
+            } else if (!this.isAWSEnabled && this.uploadedFile) {
+                this.deleteSalesforceFile(this.uploadedFile).catch(e => console.warn('Clean up SF error on close:', e));
+                this.uploadedFile = null;
+            }
             this.selectedFileName = null;
             this.selectedFilesToUpload = [];
 
@@ -1187,75 +1222,18 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
     }
 
     handleUploadFinished(event) {
-        this.showSpinner = true;
         try {
-            if (!(event.detail.files.length > 0)) {
-                this.handleBackDropClick();
-                this.showSpinner = false;
+            const uploadedFiles = event.detail.files;
+            if (!uploadedFiles || uploadedFiles.length === 0) {
                 return;
             }
 
-            const file = event.detail.files[0];
-            let messageType = 'Document';
-            if (file.mimeType.includes('image/')) {
-                messageType = 'Image';
-            } else if (file.mimeType.includes('audio/')) {
-                messageType = 'Audio';
-            } else if (file.mimeType.includes('video/')) {
-                messageType = 'Video';
-            }
-
-            createChat({
-                chatData: {
-                    message: file.contentVersionId,
-                    templateId: this.selectedTemplate,
-                    messageType: messageType,
-                    recordId: this.recordId,
-                    replyToChatId: this.replyToMessage?.Id || null,
-                    phoneNumber: this.phoneNumber,
-                }
-            })
-            .then(chat => {
-                if (chat) {
-                    const norm = this.normalizeChat(chat);
-                    this.upsertChat(norm);
-                    this.processChats(true);
-
-                    const payload = this.createJSONBody(this.phoneNumber, messageType, this.replyToMessage?.Message_ID__c || null, {
-                        link: norm.Message__c,
-                        fileName: file.name || 'whatsapp file'
-                    });
-
-                    sendWhatsappMessage({ jsonData: payload, chatId: norm.Id, isReaction: false, reaction: null })
-                        .then(res => {
-                            if (res.chat) {
-                                const updated = this.normalizeChat(res.chat);
-                                const idx = this.chats.findIndex(c => c.Id === updated.Id);
-                                if (idx > -1) this.chats[idx] = updated;
-                            }
-                            this.replyToMessage = null;
-                            this.showSpinner = false;
-                            this.processChats(true);
-                        })
-                        .catch(err => {
-                            this.showSpinner = false;
-                            console.error('Error in sendWhatsappMessage:', err);
-                        });
-
-                    this.handleBackDropClick();
-                } else {
-                    this.showSpinner = false;
-                    this.showToast('Error', 'File could not be uploaded. Ensure size is under 5MB.', 'error');
-                }
-            })
-            .catch(err => {
-                this.showSpinner = false;
-                this.showToast('Error', 'Error uploading file.', 'error');
-                console.error(err);
-            });
+            const file = uploadedFiles[0];
+            this.uploadedFile = file;
+            this.selectedFileName = file.name;
         } catch (e) {
-            this.showSpinner = false;
-            console.error('Error in handleUploadFinished:::', e.message);
+            console.error('Error in handleUploadFinished:', e);
+            this.showToast('Error', 'Error processing uploaded file.', 'error');
         }
     }
 
@@ -1432,50 +1410,61 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                     phoneNumber: this.phoneNumber
                 }
             })
-            .then(chat => {
-                if (chat) {
-                    const norm = this.normalizeChat(chat);
-                    const tempIdx = this.chats.findIndex(c => c.Id === tempId);
-                    if (tempIdx > -1) {
-                        this.chats.splice(tempIdx, 1, norm);
-                    } else {
-                        this.upsertChat(norm);
-                    }
-                    this.processChats(true);
+                .then(chat => {
+                    if (chat) {
+                        const norm = this.normalizeChat(chat);
+                        const tempIdx = this.chats.findIndex(c => c.Id === tempId);
+                        if (tempIdx > -1) {
+                            this.chats.splice(tempIdx, 1, norm);
+                        } else {
+                            this.upsertChat(norm);
+                        }
+                        this.processChats(true);
 
-                    const textPayload = this.createJSONBody(this.phoneNumber, 'text', replyMessageId, {
-                        textBody: message
-                    });
-
-                    sendWhatsappMessage({ jsonData: textPayload, chatId: norm.Id, isReaction: false, reaction: null })
-                        .then(res => {
-                            if (res.chat) {
-                                const updated = this.normalizeChat(res.chat);
-                                const idx = this.chats.findIndex(c => c.Id === updated.Id);
-                                if (idx > -1) {
-                                    this.chats[idx].Message_Status__c = updated.Message_Status__c;
-                                    this.chats[idx].Message_ID__c = updated.Message_ID__c;
-                                }
-                            }
-                            this.processChats();
-                        })
-                        .catch(err => {
-                            console.error('Error in sendWhatsappMessage text:', err);
-                            const idx = this.chats.findIndex(c => c.Id === norm.Id);
-                            if (idx > -1) {
-                                this.chats[idx].Message_Status__c = 'failed';
-                                this.processChats();
-                            }
-                            this.showToast('Error', 'Message delivery failed.', 'error');
-                        })
-                        .finally(() => {
-                            this.isSendingMessage = false;
-                            setTimeout(() => {
-                                const ta = this.template.querySelector('.message-input');
-                                if (ta) ta.focus();
-                            }, 50);
+                        const textPayload = this.createJSONBody(this.phoneNumber, 'text', replyMessageId, {
+                            textBody: message
                         });
-                } else {
+
+                        sendWhatsappMessage({ jsonData: textPayload, chatId: norm.Id, isReaction: false, reaction: null })
+                            .then(res => {
+                                if (res.chat) {
+                                    const updated = this.normalizeChat(res.chat);
+                                    const idx = this.chats.findIndex(c => c.Id === updated.Id);
+                                    if (idx > -1) {
+                                        this.chats[idx].Message_Status__c = updated.Message_Status__c;
+                                        this.chats[idx].Message_ID__c = updated.Message_ID__c;
+                                    }
+                                }
+                                this.processChats();
+                            })
+                            .catch(err => {
+                                console.error('Error in sendWhatsappMessage text:', err);
+                                const idx = this.chats.findIndex(c => c.Id === norm.Id);
+                                if (idx > -1) {
+                                    this.chats[idx].Message_Status__c = 'failed';
+                                    this.processChats();
+                                }
+                                this.showToast('Error', 'Message delivery failed.', 'error');
+                            })
+                            .finally(() => {
+                                this.isSendingMessage = false;
+                                setTimeout(() => {
+                                    const ta = this.template.querySelector('.message-input');
+                                    if (ta) ta.focus();
+                                }, 50);
+                            });
+                    } else {
+                        this.isSendingMessage = false;
+                        const tempIdx = this.chats.findIndex(c => c.Id === tempId);
+                        if (tempIdx > -1) {
+                            this.chats[tempIdx].Message_Status__c = 'failed';
+                            this.processChats();
+                        }
+                        if (textarea) textarea.value = message;
+                        this.showToast('Error', 'Message could not be created.', 'error');
+                    }
+                })
+                .catch(e => {
                     this.isSendingMessage = false;
                     const tempIdx = this.chats.findIndex(c => c.Id === tempId);
                     if (tempIdx > -1) {
@@ -1483,20 +1472,9 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
                         this.processChats();
                     }
                     if (textarea) textarea.value = message;
-                    this.showToast('Error', 'Message could not be created.', 'error');
-                }
-            })
-            .catch(e => {
-                this.isSendingMessage = false;
-                const tempIdx = this.chats.findIndex(c => c.Id === tempId);
-                if (tempIdx > -1) {
-                    this.chats[tempIdx].Message_Status__c = 'failed';
-                    this.processChats();
-                }
-                if (textarea) textarea.value = message;
-                const msg = e?.body?.message === 'STORAGE_LIMIT_EXCEEDED' ? 'Storage Limit Exceeded.' : 'Message could not be sent.';
-                this.showToast('Error', msg, 'error');
-            });
+                    const msg = e?.body?.message === 'STORAGE_LIMIT_EXCEEDED' ? 'Storage Limit Exceeded.' : 'Message could not be sent.';
+                    this.showToast('Error', msg, 'error');
+                });
         } catch (e) {
             this.isSendingMessage = false;
             console.error('Error in handleSendMessage:::', e.message);
@@ -1527,12 +1505,9 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
     }
 
     get currentUploadLimitLabel() {
-        if (this.isAWSEnabled) {
-            if (this.uploadFileType === 'Image') return '5 MB';
-            if (this.uploadFileType === 'Video' || this.uploadFileType === 'Audio') return '16 MB';
-            return '100 MB';
-        }
-        return '4.5 MB (Salesforce storage limit)';
+        if (this.uploadFileType === 'Image') return '5 MB';
+        if (this.uploadFileType === 'Video' || this.uploadFileType === 'Audio') return '16 MB';
+        return '100 MB';
     }
 
     get currentUploadFormatsLabel() {
@@ -1543,28 +1518,51 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
         return this.acceptedFormats ? this.acceptedFormats.join(', ') : '';
     }
 
-    handleSelectedFiles(event) {
+    async handleSelectedFiles(event) {
         try {
             const file = event.target.files[0];
             if (file) {
                 const fileType = file.type;
                 const sizeMB = file.size / (1024 * 1024);
                 let maxSize = 100;
-                if (this.isAWSEnabled) {
-                    if (fileType.includes('image/')) maxSize = 5;
-                    else if (fileType.includes('video/') || fileType.includes('audio/')) maxSize = 16;
-                    else maxSize = 100;
-                } else {
-                    maxSize = 4.5;
-                }
+                if (fileType.includes('image/')) maxSize = 5;
+                else if (fileType.includes('video/') || fileType.includes('audio/')) maxSize = 16;
+                else maxSize = 100;
 
-                if (sizeMB <= maxSize) {
-                    this.selectedFilesToUpload = [file];
-                    this.selectedFileName = file.name;
-                } else {
+                if (sizeMB > maxSize) {
                     const storageName = this.isAWSEnabled ? 'AWS S3' : 'Salesforce Storage';
                     this.showToast('File Too Large', `${file.name} exceeds ${maxSize}MB limit for ${storageName}`, 'error');
                     event.target.value = '';
+                    return;
+                }
+
+                if (this.isAWSEnabled) {
+                    this.showSpinner = true;
+                    try {
+                        this.initializeAwsSdk(this.confData);
+                        const objKey = this.renameFileName(file.name);
+                        const bucketName = this.confData.S3_Bucket_Name__c || this.confData.MVEX__S3_Bucket_Name__c;
+                        const params = {
+                            Key: objKey,
+                            ContentType: file.type,
+                            Body: file,
+                            ACL: 'public-read'
+                        };
+                        await this.s3.upload(params).promise();
+                        this.awsUploadedKey = objKey;
+                        this.awsFileUrl = `https://${bucketName}.s3.amazonaws.com/${objKey}`;
+                        this.selectedFilesToUpload = [file];
+                        this.selectedFileName = file.name;
+                    } catch (uploadErr) {
+                        console.error('Error uploading file to AWS S3:', uploadErr);
+                        this.showToast('Error', 'Failed to upload file to AWS S3.', 'error');
+                        event.target.value = '';
+                    } finally {
+                        this.showSpinner = false;
+                    }
+                } else {
+                    this.selectedFilesToUpload = [file];
+                    this.selectedFileName = file.name;
                 }
             }
         } catch (e) {
@@ -1572,19 +1570,70 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
         }
     }
 
-    removeFile() {
-        this.selectedFileName = null;
-        this.selectedFilesToUpload = [];
-        const input = this.template.querySelector('input[type="file"]');
-        if (input) input.value = null;
+    async deleteAWSFile(fileKey) {
+        if (!fileKey) return;
+        try {
+            this.initializeAwsSdk(this.confData);
+            const bucketName = this.confData.S3_Bucket_Name__c || this.confData.MVEX__S3_Bucket_Name__c;
+            await this.s3.deleteObject({
+                Bucket: bucketName,
+                Key: fileKey
+            }).promise();
+        } catch (e) {
+            console.warn('Error deleting AWS file:', e);
+            throw e;
+        }
+    }
+
+    async deleteSalesforceFile(fileObj) {
+        if (!fileObj) return;
+        try {
+            const docId = fileObj.documentId || fileObj.contentVersionId;
+            if (docId) {
+                await deleteFile({ documentId: docId });
+            }
+        } catch (e) {
+            console.warn('Error deleting Salesforce file:', e);
+            throw e;
+        }
+    }
+
+    async removeFile() {
+        if (this.isDeletingFile) return;
+        this.isDeletingFile = true;
+        try {
+            if (this.isAWSEnabled && this.awsUploadedKey) {
+                await this.deleteAWSFile(this.awsUploadedKey);
+                this.showToast('Success', 'File removed successfully', 'success');
+            } else if (!this.isAWSEnabled && this.uploadedFile) {
+                await this.deleteSalesforceFile(this.uploadedFile);
+                this.showToast('Success', 'File removed successfully', 'success');
+            }
+        } catch (err) {
+            console.warn('Error deleting file:', err);
+            this.showToast('Error', 'Error deleting file.', 'error');
+        } finally {
+            this.selectedFileName = null;
+            this.selectedFilesToUpload = [];
+            this.uploadedFile = null;
+            this.awsUploadedKey = null;
+            this.awsFileUrl = null;
+            this.isDeletingFile = false;
+            const input = this.template.querySelector('input[type="file"]');
+            if (input) input.value = null;
+        }
     }
 
     async handleUploadClick() {
-        if (this.selectedFilesToUpload.length > 0) {
-            this.showSpinner = true;
-            if (this.isAWSEnabled) {
+        if (this.isDeletingFile) return;
+        if (this.isAWSEnabled) {
+            if (this.awsUploadedKey && this.awsFileUrl) {
+                await this.sendAWSFile();
+            } else if (this.selectedFilesToUpload.length > 0) {
                 await this.uploadToAWS();
-            } else {
+            }
+        } else {
+            if (this.uploadedFile) {
                 await this.uploadToSalesforce();
             }
         }
@@ -1593,81 +1642,140 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
     async uploadToSalesforce() {
         try {
             this.showSpinner = true;
-            const file = this.selectedFilesToUpload[0];
-            const reader = new FileReader();
+            const file = this.uploadedFile;
+            if (!file) {
+                this.showSpinner = false;
+                this.showToast('Error', 'Please select a file to upload.', 'error');
+                return;
+            }
 
-            reader.onload = async () => {
-                try {
-                    const base64Data = reader.result.split(',')[1];
-                    let messageType = 'Document';
-                    if (file.type.includes('image/')) messageType = 'Image';
-                    else if (file.type.includes('video/')) messageType = 'Video';
-                    else if (file.type.includes('audio/')) messageType = 'Audio';
+            const messageType = this.uploadFileType || 'Document';
+            const fileId = file.documentId || file.contentVersionId;
 
-                    const chat = await uploadChatFile({
-                        chatData: {
-                            base64Data: base64Data,
-                            fileName: file.name,
-                            mimeType: file.type,
-                            messageType: messageType,
-                            recordId: this.recordId,
-                            replyToChatId: this.replyToMessage?.Id || null,
-                            phoneNumber: this.phoneNumber
+            const chat = await createChat({
+                chatData: {
+                    message: fileId,
+                    templateId: this.selectedTemplate,
+                    messageType: messageType,
+                    recordId: this.recordId,
+                    replyToChatId: this.replyToMessage?.Id || null,
+                    phoneNumber: this.phoneNumber
+                }
+            });
+
+            if (chat) {
+                const norm = this.normalizeChat(chat);
+                this.upsertChat(norm);
+                this.processChats(true);
+
+                const payload = this.createJSONBody(this.phoneNumber, messageType, this.replyToMessage?.Message_ID__c || null, {
+                    link: norm.Message__c,
+                    fileName: file.name
+                });
+
+                sendWhatsappMessage({ jsonData: payload, chatId: norm.Id, isReaction: false, reaction: null })
+                    .then(res => {
+                        if (res.chat) {
+                            const updated = this.normalizeChat(res.chat);
+                            const idx = this.chats.findIndex(c => c.Id === updated.Id);
+                            if (idx > -1) {
+                                this.chats[idx].Message_Status__c = updated.Message_Status__c;
+                                this.chats[idx].Message_ID__c = updated.Message_ID__c;
+                                this.chats[idx].Failed_Reason__c = updated.Failed_Reason__c;
+                            }
                         }
+                        this.showSpinner = false;
+                        this.processChats(true);
+                    })
+                    .catch(err => {
+                        this.showSpinner = false;
+                        console.error('Error in sendWhatsappMessage Salesforce storage:', err);
                     });
 
-                    if (chat) {
-                        const norm = this.normalizeChat(chat);
-                        this.upsertChat(norm);
-                        this.processChats(true);
-
-                        const payload = this.createJSONBody(this.phoneNumber, messageType, this.replyToMessage?.Message_ID__c || null, {
-                            link: norm.Message__c,
-                            fileName: file.name
-                        });
-
-                        sendWhatsappMessage({ jsonData: payload, chatId: norm.Id, isReaction: false, reaction: null })
-                            .then(res => {
-                                if (res.chat) {
-                                    const updated = this.normalizeChat(res.chat);
-                                    const idx = this.chats.findIndex(c => c.Id === updated.Id);
-                                    if (idx > -1) {
-                                        this.chats[idx].Message_Status__c = updated.Message_Status__c;
-                                        this.chats[idx].Message_ID__c = updated.Message_ID__c;
-                                        this.chats[idx].Failed_Reason__c = updated.Failed_Reason__c;
-                                    }
-                                }
-                                this.showSpinner = false;
-                                this.processChats(true);
-                            })
-                            .catch(err => {
-                                this.showSpinner = false;
-                                console.error('Error in sendWhatsappMessage Salesforce storage:', err);
-                            });
-
-                        this.handleBackDropClick();
-                    } else {
-                        this.showSpinner = false;
-                        this.showToast('Error', 'Could not create chat record for Salesforce file.', 'error');
-                    }
-                } catch (e) {
-                    this.showSpinner = false;
-                    this.showToast('Error', e?.body?.message || 'Failed to upload file to Salesforce storage.', 'error');
-                    console.error('Error in uploadToSalesforce onload:', e);
-                }
-            };
-
-            reader.onerror = (err) => {
+                this.selectedFileName = null;
+                this.uploadedFile = null;
+                this.handleBackDropClick();
+            } else {
                 this.showSpinner = false;
-                this.showToast('Error', 'Failed to read file.', 'error');
-                console.error('FileReader error:', err);
-            };
+                this.showToast('Error', 'Could not create chat record for Salesforce file.', 'error');
+            }
+        } catch (e) {
+            this.showSpinner = false;
+            this.selectedFileName = null;
+            this.uploadedFile = null;
+            this.showToast('Error', e?.body?.message || e?.message || 'Failed to upload file to Salesforce storage.', 'error');
+            console.error('Error in uploadToSalesforce:', e);
+        }
+    }
 
-            reader.readAsDataURL(file);
+    async sendAWSFile() {
+        try {
+            this.showSpinner = true;
+            const file = this.selectedFilesToUpload.length > 0 ? this.selectedFilesToUpload[0] : null;
+            const objKey = this.awsUploadedKey;
+            const awsFileUrl = this.awsFileUrl;
+
+            let messageType = 'Document';
+            const fileType = file ? file.type : '';
+            if (fileType.includes('image/')) messageType = 'Image';
+            else if (fileType.includes('video/')) messageType = 'Video';
+            else if (fileType.includes('audio/')) messageType = 'Audio';
+            else if (this.uploadFileType) messageType = this.uploadFileType;
+
+            const chat = await createChatForAWSFiles({
+                chatData: {
+                    message: awsFileUrl,
+                    fileName: objKey,
+                    mimeType: fileType,
+                    messageType: messageType,
+                    recordId: this.recordId,
+                    replyToChatId: this.replyToMessage?.Id || null,
+                    phoneNumber: this.phoneNumber
+                }
+            });
+
+            if (chat) {
+                const norm = this.normalizeChat(chat);
+                this.upsertChat(norm);
+                this.processChats(true);
+
+                const payload = this.createJSONBody(this.phoneNumber, messageType, this.replyToMessage?.Message_ID__c || null, {
+                    link: awsFileUrl,
+                    fileName: objKey
+                });
+
+                sendWhatsappMessage({ jsonData: payload, chatId: norm.Id, isReaction: false, reaction: null })
+                    .then(res => {
+                        if (res.chat) {
+                            const updated = this.normalizeChat(res.chat);
+                            const idx = this.chats.findIndex(c => c.Id === updated.Id);
+                            if (idx > -1) {
+                                this.chats[idx].Message_Status__c = updated.Message_Status__c;
+                                this.chats[idx].Message_ID__c = updated.Message_ID__c;
+                            }
+                        }
+                        this.showSpinner = false;
+                        this.processChats(true);
+                    })
+                    .catch(err => {
+                        this.showSpinner = false;
+                        console.error('Error in sendWhatsappMessage AWS:', err);
+                    });
+
+                // Clear AWS keys before closing backdrop so it doesn't delete the sent file
+                this.awsUploadedKey = null;
+                this.awsFileUrl = null;
+                this.selectedFileName = null;
+                this.selectedFilesToUpload = [];
+                this.handleBackDropClick();
+            } else {
+                this.showSpinner = false;
+                this.showToast('Error', 'Could not create chat record for AWS file.', 'error');
+            }
         } catch (error) {
             this.showSpinner = false;
-            console.error('Error in uploadToSalesforce:', error);
-            this.showToast('Error', 'Salesforce storage upload failed.', 'error');
+            console.error('Error in sendAWSFile:', error);
+            this.showToast('Error', 'AWS upload failed.', 'error');
         }
     }
 
@@ -1689,63 +1797,9 @@ export default class WaChatWindow extends NavigationMixin(LightningElement) {
             const upload = this.s3.upload(params);
             await upload.promise();
 
-            const awsFileUrl = `https://${bucketName}.s3.amazonaws.com/${objKey}`;
-            let messageType = 'Document';
-            if (file.type.includes('image/')) messageType = 'Image';
-            else if (file.type.includes('video/')) messageType = 'Video';
-            else if (file.type.includes('audio/')) messageType = 'Audio';
-
-            createChatForAWSFiles({
-                chatData: {
-                    message: awsFileUrl,
-                    fileName: objKey,
-                    mimeType: file.type,
-                    messageType: messageType,
-                    recordId: this.recordId,
-                    replyToChatId: this.replyToMessage?.Id || null,
-                    phoneNumber: this.phoneNumber
-                }
-            })
-            .then(chat => {
-                if (chat) {
-                    const norm = this.normalizeChat(chat);
-                    this.upsertChat(norm);
-                    this.processChats(true);
-
-                    const payload = this.createJSONBody(this.phoneNumber, messageType, this.replyToMessage?.Message_ID__c || null, {
-                        link: awsFileUrl,
-                        fileName: objKey
-                    });
-
-                    sendWhatsappMessage({ jsonData: payload, chatId: norm.Id, isReaction: false, reaction: null })
-                        .then(res => {
-                            if (res.chat) {
-                                const updated = this.normalizeChat(res.chat);
-                                const idx = this.chats.findIndex(c => c.Id === updated.Id);
-                                if (idx > -1) {
-                                    this.chats[idx].Message_Status__c = updated.Message_Status__c;
-                                    this.chats[idx].Message_ID__c = updated.Message_ID__c;
-                                }
-                            }
-                            this.showSpinner = false;
-                            this.processChats(true);
-                        })
-                        .catch(err => {
-                            this.showSpinner = false;
-                            console.error('Error in sendWhatsappMessage AWS:', err);
-                        });
-
-                    this.handleBackDropClick();
-                } else {
-                    this.showSpinner = false;
-                    this.showToast('Error', 'Could not create chat record for AWS file.', 'error');
-                }
-            })
-            .catch(err => {
-                this.showSpinner = false;
-                this.showToast('Error', 'Upload failed.', 'error');
-                console.error(err);
-            });
+            this.awsUploadedKey = objKey;
+            this.awsFileUrl = `https://${bucketName}.s3.amazonaws.com/${objKey}`;
+            await this.sendAWSFile();
         } catch (error) {
             this.showSpinner = false;
             console.error('Error in uploadToAWS:', error);

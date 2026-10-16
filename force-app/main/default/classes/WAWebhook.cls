@@ -641,14 +641,16 @@ global without sharing class WAWebhook {
                                                 ErrorHandler.insertErrordata(null, 'WAWebhook', 'parseMessages', 'Message failed to send. Error details: ' + JSON.serialize(statusMap));
                                             }
                                         }
-                                        update waChat;
-                                        publishRefreshEvent('Chat', waChat.Phone__c);
+                                        Database.SaveResult chatSr = Database.update(waChat, false);
+                                        if (chatSr.isSuccess()) {
+                                            publishRefreshEvent('Chat', waChat.Phone__c);
+                                        }
                                     }
                                 }
                             }
 
                             String field = change.containsKey('field') ? String.valueOf(change.get('field')) : '';
-                            if (value.containsKey('event') || field == 'template_category_update' || field == 'message_template_status_update' || value.containsKey('message_template_id')) {
+                            if (field == 'template_category_update' || field == 'message_template_status_update' || value.containsKey('message_template_id') || value.containsKey('message_template_name') || value.containsKey('event')) {
                                 String event = value.containsKey('event') ? (String) value.get('event') : (field == 'template_category_update' ? 'CATEGORY_UPDATE' : null);
                                 String templateId = value.get('message_template_id') != null ? String.valueOf(value.get('message_template_id')) : null;
                                 updateWhatsAppTemplateStatus(templateId, event, value);
@@ -668,34 +670,96 @@ global without sharing class WAWebhook {
 
     public static void updateWhatsAppTemplateStatus(String templateId, String event, Map<String, Object> valueMap) {
         try {
-            String templateName = valueMap != null && valueMap.containsKey('message_template_name') && valueMap.get('message_template_name') != null
-                ? String.valueOf(valueMap.get('message_template_name'))
-                : null;
+            if (valueMap != null) {
+                if (String.isBlank(event)) {
+                    if (valueMap.containsKey('event') && valueMap.get('event') != null) {
+                        event = String.valueOf(valueMap.get('event'));
+                    } else if (valueMap.containsKey('status') && valueMap.get('status') != null) {
+                        event = String.valueOf(valueMap.get('status'));
+                    }
+                }
+                if (String.isBlank(templateId)) {
+                    if (valueMap.containsKey('message_template_id') && valueMap.get('message_template_id') != null) {
+                        templateId = String.valueOf(valueMap.get('message_template_id'));
+                    } else if (valueMap.containsKey('template_id') && valueMap.get('template_id') != null) {
+                        templateId = String.valueOf(valueMap.get('template_id'));
+                    } else if (valueMap.containsKey('id') && valueMap.get('id') != null) {
+                        templateId = String.valueOf(valueMap.get('id'));
+                    }
+                }
+            }
+
+            String templateName = null;
+            if (valueMap != null) {
+                if (valueMap.containsKey('message_template_name') && valueMap.get('message_template_name') != null) {
+                    templateName = String.valueOf(valueMap.get('message_template_name'));
+                } else if (valueMap.containsKey('template_name') && valueMap.get('template_name') != null) {
+                    templateName = String.valueOf(valueMap.get('template_name'));
+                } else if (valueMap.containsKey('name') && valueMap.get('name') != null) {
+                    templateName = String.valueOf(valueMap.get('name'));
+                }
+            }
+
+            Boolean isSalesforceId = false;
+            if (String.isNotBlank(templateId) && (templateId.length() == 15 || templateId.length() == 18)) {
+                try {
+                    Id sfId = (Id) templateId;
+                    if (sfId.getSObjectType() == WA_Template__c.SObjectType) {
+                        isSalesforceId = true;
+                    }
+                } catch (Exception idEx) {
+                    isSalesforceId = false;
+                }
+            }
 
             List<WA_Template__c> templates = new List<WA_Template__c>();
-            if (String.isNotBlank(templateId)) {
-                templates = [SELECT Id, Status__c, Previous_Status__c, Quality_Rating__c, Rejection_Reason__c, Last_Status_Update_Time__c, Template_Category__c, Template_Id__c 
-                             FROM WA_Template__c WHERE Template_Id__c = :templateId LIMIT 1];
+            if (isSalesforceId) {
+                try {
+                    Id sfId = (Id) templateId;
+                    templates = [SELECT Id, Status__c, Previous_Status__c, Quality_Rating__c, Rejection_Reason__c, Last_Status_Update_Time__c, Template_Category__c, Template_Id__c,
+                                        Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c 
+                                 FROM WA_Template__c WHERE Id = :sfId LIMIT 1];
+                } catch (Exception idEx) {
+                    // Not a valid Salesforce Id, proceed to query by Template_Id__c
+                }
+            }
+            if (templates.isEmpty() && String.isNotBlank(templateId)) {
+                templates = [SELECT Id, Status__c, Previous_Status__c, Quality_Rating__c, Rejection_Reason__c, Last_Status_Update_Time__c, Template_Category__c, Template_Id__c,
+                                    Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c 
+                             FROM WA_Template__c WHERE Template_Id__c = :templateId ORDER BY LastModifiedDate DESC LIMIT 1];
             }
             if (templates.isEmpty() && String.isNotBlank(templateName)) {
-                templates = [SELECT Id, Status__c, Previous_Status__c, Quality_Rating__c, Rejection_Reason__c, Last_Status_Update_Time__c, Template_Category__c, Template_Id__c 
-                             FROM WA_Template__c WHERE Template_Name__c = :templateName LIMIT 1];
+                templates = [SELECT Id, Status__c, Previous_Status__c, Quality_Rating__c, Rejection_Reason__c, Last_Status_Update_Time__c, Template_Category__c, Template_Id__c,
+                                    Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, Edit_Count_30_Days__c 
+                             FROM WA_Template__c WHERE Template_Name__c = :templateName ORDER BY LastModifiedDate DESC LIMIT 1];
             }
 
             if (!templates.isEmpty()) {
                 WA_Template__c waTemplate = templates[0];
+                String upperEvent = String.isNotBlank(event) ? event.toUpperCase() : '';
+
+                // If template was deleted in Meta, delete it in Salesforce if it still exists
+                if (upperEvent == 'DELETED') {
+                    if (WA_Template__c.sObjectType.getDescribe().isDeletable()) {
+                        Database.DeleteResult dr = Database.delete(waTemplate, false);
+                        if (dr.isSuccess()) {
+                            publishRefreshEvent('Template', null);
+                        }
+                    }
+                    return;
+                }
+
                 waTemplate.Last_Status_Update_Time__c = System.now();
 
-                if (String.isNotBlank(templateId) && String.isBlank(waTemplate.Template_Id__c)) {
+                if (String.isNotBlank(templateId) && !isSalesforceId && String.isBlank(waTemplate.Template_Id__c)) {
                     waTemplate.Template_Id__c = templateId;
                 }
 
-                String upperEvent = String.isNotBlank(event) ? event.toUpperCase() : '';
-                if (upperEvent == 'APPROVED') {
+                if (upperEvent == 'APPROVED' || upperEvent == 'ACTIVE') {
                     waTemplate.Previous_Status__c = waTemplate.Status__c;
                     waTemplate.Status__c = 'Active-Quality Pending';
                     waTemplate.Rejection_Reason__c = null;
-                } else if (upperEvent == 'PENDING' || upperEvent == 'IN_REVIEW') {
+                } else if (upperEvent == 'PENDING' || upperEvent == 'IN_REVIEW' || upperEvent == 'IN-REVIEW') {
                     waTemplate.Previous_Status__c = waTemplate.Status__c;
                     waTemplate.Status__c = 'In-Review';
                 } else if (upperEvent == 'REJECTED') {
@@ -750,9 +814,19 @@ global without sharing class WAWebhook {
                     }
                 }
 
-                update waTemplate;
-
-                publishRefreshEvent('Template', null);
+                Database.SaveResult sr = Database.update(waTemplate, false);
+                if (sr.isSuccess()) {
+                    publishRefreshEvent('Template', null);
+                } else {
+                    for (Database.Error err : sr.getErrors()) {
+                        StatusCode sc = err.getStatusCode();
+                        if (sc == StatusCode.INVALID_ID_FIELD || sc == StatusCode.ENTITY_IS_DELETED) {
+                            System.debug('WA_Template record no longer exists or was deleted in Salesforce: ' + waTemplate.Id);
+                        } else {
+                            ErrorHandler.insertErrordata(null, 'WAWebhook', 'updateWhatsAppTemplateStatus', 'Failed to update WA_Template ' + waTemplate.Id + ': ' + err.getMessage());
+                        }
+                    }
+                }
             } else {
                 System.debug('No WhatsApp Template found for Template Id: ' + templateId);
             }

@@ -29,11 +29,27 @@ public inherited sharing class WATemplateWrapper {
                 ? templateWrapper.templateName 
                 : (String) payloadMap.get('name');
 
-            // Find existing WA_Template__c by name or Meta template ID
-            List<WA_Template__c> existingTemplates = [SELECT Id, Name, Template_Name__c, Template_Id__c, Status__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, 
-                                                        Edit_Count_30_Days__c, Previous_Status__c, Quality_Rating__c, Last_Status_Update_Time__c FROM WA_Template__c 
-                                                        WHERE (Template_Name__c = :templateName AND Template_Name__c != null) OR (Template_Id__c = :metaTempId AND 
-                                                        Template_Id__c != null) WITH USER_MODE LIMIT 1];
+            // Find existing WA_Template__c by sfRecordId, name, or Meta template ID
+            List<WA_Template__c> existingTemplates = new List<WA_Template__c>();
+            if (String.isNotBlank(templateWrapper.sfRecordId)) {
+                existingTemplates = [SELECT Id, Name, Template_Name__c, Template_Id__c, Status__c, Previous_Status__c, Quality_Rating__c, 
+                                            Rejection_Reason__c, Last_Status_Update_Time__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, 
+                                            Edit_Count_30_Days__c, Template_Category__c, Language__c, Header_Type__c, Header_Body__c, 
+                                            File_Name__c, Image_Header_Handle__c, Template_Body__c, Footer_Body__c, Button_Body__c, 
+                                            Button_Label__c, Button_Type__c, Template_Miscellaneous_Data__c 
+                                     FROM WA_Template__c 
+                                     WHERE Id = :templateWrapper.sfRecordId LIMIT 1];
+            }
+            if (existingTemplates.isEmpty()) {
+                existingTemplates = [SELECT Id, Name, Template_Name__c, Template_Id__c, Status__c, Previous_Status__c, Quality_Rating__c, 
+                                            Rejection_Reason__c, Last_Status_Update_Time__c, Last_Meta_Edit_Time__c, Edit_Timestamps_JSON__c, 
+                                            Edit_Count_30_Days__c, Template_Category__c, Language__c, Header_Type__c, Header_Body__c, 
+                                            File_Name__c, Image_Header_Handle__c, Template_Body__c, Footer_Body__c, Button_Body__c, 
+                                            Button_Label__c, Button_Type__c, Template_Miscellaneous_Data__c 
+                                     FROM WA_Template__c 
+                                     WHERE (Template_Name__c = :templateName AND Template_Name__c != null) OR (Template_Id__c = :metaTempId AND 
+                                     Template_Id__c != null) LIMIT 1];
+            }
 
             WA_Template__c whatsAppTemplate;
             Boolean isExisting = !existingTemplates.isEmpty();
@@ -63,43 +79,41 @@ public inherited sharing class WATemplateWrapper {
                 whatsAppTemplate.Edit_Timestamps_JSON__c = JSON.serialize(activeTimestamps);
                 whatsAppTemplate.Edit_Count_30_Days__c = activeTimestamps.size();
                 whatsAppTemplate.Last_Status_Update_Time__c = System.now();
+                whatsAppTemplate.Status__c = 'In-Review';
             } else {
                 whatsAppTemplate = new WA_Template__c();
                 whatsAppTemplate.Quality_Rating__c = 'UNKNOWN';
                 whatsAppTemplate.Edit_Count_30_Days__c = 0;
                 whatsAppTemplate.Last_Status_Update_Time__c = System.now();
+                whatsAppTemplate.Status__c = 'In-Review';
             }
 
             // Populate WA_Template__c fields
             if (metaTempId != null) {
                 whatsAppTemplate.Template_Id__c = metaTempId;
             }
-            // Normalize Meta status to standard Salesforce Picklist values (e.g. In-Review instead of PENDING)
-            String normalizedStatus = 'In-Review';
-            if (String.isNotBlank(metaTemplateStatus)) {
-                String upperMeta = metaTemplateStatus.toUpperCase();
-                if (upperMeta == 'PENDING' || upperMeta == 'IN_REVIEW' || upperMeta == 'IN-REVIEW') {
-                    normalizedStatus = 'In-Review';
-                } else if (upperMeta == 'APPROVED') {
-                    normalizedStatus = 'Active-Quality Pending';
-                } else if (upperMeta == 'REJECTED') {
-                    normalizedStatus = 'Rejected';
-                } else if (upperMeta == 'DISABLED') {
-                    normalizedStatus = 'Disabled';
-                } else if (upperMeta == 'PAUSED') {
-                    normalizedStatus = 'Paused';
-                } else {
-                    normalizedStatus = metaTemplateStatus;
+
+            // Status handling: Existing edited template is ALWAYS In-Review
+            if (isExisting) {
+                whatsAppTemplate.Status__c = 'In-Review';
+            } else {
+                String normalizedStatus = 'In-Review';
+                if (String.isNotBlank(metaTemplateStatus)) {
+                    String upperMeta = metaTemplateStatus.toUpperCase();
+                    if (upperMeta == 'APPROVED') {
+                        normalizedStatus = 'Active-Quality Pending';
+                    } else if (upperMeta == 'REJECTED') {
+                        normalizedStatus = 'Rejected';
+                    } else if (upperMeta == 'DISABLED') {
+                        normalizedStatus = 'Disabled';
+                    } else if (upperMeta == 'PAUSED') {
+                        normalizedStatus = 'Paused';
+                    } else {
+                        normalizedStatus = 'In-Review';
+                    }
                 }
-            } else if (whatsAppTemplate.Status__c != null) {
-                String existingUpper = whatsAppTemplate.Status__c.toUpperCase();
-                if (existingUpper == 'PENDING' || existingUpper == 'IN_REVIEW' || existingUpper == 'IN-REVIEW') {
-                    normalizedStatus = 'In-Review';
-                } else {
-                    normalizedStatus = whatsAppTemplate.Status__c;
-                }
+                whatsAppTemplate.Status__c = normalizedStatus;
             }
-            whatsAppTemplate.Status__c = normalizedStatus;
             whatsAppTemplate.Template_Name__c = templateName;
             whatsAppTemplate.Template_Category__c = String.isNotBlank(templateWrapper.templateCategory) 
                 ? templateWrapper.templateCategory 
@@ -240,11 +254,15 @@ public inherited sharing class WATemplateWrapper {
                 whatsAppTemplate.Image_Header_Handle__c = templateWrapper.tempHeaderHandle;
             }
 
-            upsert as user whatsAppTemplate;
+            if (whatsAppTemplate.Id != null) {
+                update whatsAppTemplate;
+            } else {
+                insert whatsAppTemplate;
+            }
             templateId = whatsAppTemplate.Id;
 
             // Delete existing WA_Template_Variable__c records for this template
-            List<WA_Template_Variable__c> existingVars = [SELECT Id FROM WA_Template_Variable__c WHERE WA_Template__c = :templateId WITH USER_MODE];
+            List<WA_Template_Variable__c> existingVars = [SELECT Id FROM WA_Template_Variable__c WHERE WA_Template__c = :templateId];
 
             if (!existingVars.isEmpty() && WA_Template_Variable__c.sObjectType.getDescribe().isDeletable()) {
                 delete existingVars;
@@ -286,11 +304,12 @@ public inherited sharing class WATemplateWrapper {
             }
 
             if (!variableRecords.isEmpty() && WA_Template_Variable__c.sObjectType.getDescribe().isCreateable()) {
-                insert as user variableRecords;
+                insert variableRecords;
             }
 
         } catch (Exception e) {
-            ErrorHandler.insertErrorData(e, 'WATemplateWrapper', 'handleSuccessResponse', e.getMessage());
+            ErrorHandler.insertErrorData(e, 'WATemplateWrapper', 'handleSuccessResponse', e.getMessage() + '\n' + e.getStackTraceString());
+            System.debug('Error in handleSuccessResponse: ' + e.getMessage() + '\n' + e.getStackTraceString());
         }
         return templateId; 
     }
@@ -334,6 +353,7 @@ public inherited sharing class WATemplateWrapper {
     }
     
     public class TemplateWrapper {      
+        @AuraEnabled public String sfRecordId;
         @AuraEnabled public String templateName;
         @AuraEnabled public String templateCategory;
         @AuraEnabled public String templateType;

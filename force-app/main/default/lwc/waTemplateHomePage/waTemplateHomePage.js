@@ -290,9 +290,9 @@ export default class WaTemplateHomePage extends NavigationMixin(LightningElement
         this.updateShownData();
 
         if (action === 'Edit') {
-            const targetRecord = this.allRecords.find(r => r.Id === recordId);
+            const targetRecord = this.allRecords.find(r => r.Id === recordId || r.id === recordId);
             if (targetRecord && targetRecord.isEditDisabled) {
-                // Disabled button is not clickable; reason is displayed in hover title
+                this.showToast('Template Editing Restricted', targetRecord.editDisabledReason, 'warning');
                 return;
             }
 
